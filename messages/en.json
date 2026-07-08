@@ -1,0 +1,78 @@
+{
+  "app": {
+    "name": "CupPath",
+    "tagline": "World Cup opponent difficulty analysis"
+  },
+  "nav": {
+    "home": "Analysis",
+    "compare": "Compare",
+    "about": "About"
+  },
+  "rankingMode": {
+    "label": "Ranking mode",
+    "yearStart": "Year start",
+    "yearStartHint": "Nearest FIFA release on or before Jan 1, 2026",
+    "tournamentStart": "Tournament start",
+    "tournamentStartHint": "Nearest FIFA release on or before Jun 11, 2026",
+    "live": "Live",
+    "liveHint": "Updated hourly"
+  },
+  "teamSelector": {
+    "label": "Select team",
+    "placeholder": "Choose a country"
+  },
+  "summary": {
+    "avgDifficulty": "Avg opponent difficulty",
+    "avgRank": "Avg opponent rank",
+    "hardestPathRank": "Hardest path rank",
+    "status": "Status",
+    "active": "Active",
+    "eliminated": "Eliminated",
+    "nextOpponent": "Next opponent",
+    "noNextOpponent": "None",
+    "points": "pts",
+    "matchesPlayed": "Matches"
+  },
+  "pathTable": {
+    "title": "Tournament path",
+    "round": "Round",
+    "opponent": "Opponent",
+    "points": "Points",
+    "rank": "Rank",
+    "rankGap": "Rank gap",
+    "result": "Result",
+    "noData": "No ranking data",
+    "upcoming": "Upcoming"
+  },
+  "compare": {
+    "title": "Path difficulty comparison",
+    "subtitle": "Teams sorted by average opponent FIFA points (higher = harder path)",
+    "team": "Team",
+    "avgPoints": "Avg opp. points",
+    "avgRank": "Avg opp. rank",
+    "status": "Status",
+    "delta": "Delta vs selected",
+    "selectTeamHint": "Select a team on the Analysis page to see deltas"
+  },
+  "about": {
+    "title": "About CupPath",
+    "methodologyTitle": "Methodology",
+    "methodologyBody": "CupPath measures how difficult each team's World Cup path is using FIFA ranking points. Higher opponent points mean a harder match. Average path difficulty is the mean of opponent points across played and scheduled matches.",
+    "rankGapTitle": "Rank gap",
+    "rankGapBody": "Rank gap is opponent rank minus team rank. A negative gap means a harder opponent (they are ranked higher). A positive gap means an easier opponent.",
+    "dataTitle": "Data sources",
+    "dataBody": "Match data comes from openfootball/worldcup.json (2026). FIFA rankings come from the World Football Ranking API on RapidAPI, cached hourly in Vercel Blob.",
+    "rankingModesTitle": "Ranking modes",
+    "rankingModesBody": "Year-start and tournament-start modes use fixed snapshots. Live mode refreshes every hour during deployment."
+  },
+  "results": {
+    "W": "W",
+    "D": "D",
+    "L": "L"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "group": "Group {group}"
+  }
+}

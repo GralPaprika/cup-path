@@ -1,4 +1,4 @@
-import type { OpenFootballTeam, RankingMode, Team } from "@/lib/types";
+import type { OpenFootballTeam, RankingMode, RankingsSnapshot, Team } from "@/lib/types";
 import { getFifaFlagUrl } from "@/lib/data/flag-utils";
 import teamsData from "../../../data/worldcup/2026/worldcup.teams.json";
 
@@ -85,20 +85,25 @@ export function enrichTeam(team: Team, flagUrl?: string): Team {
   return { ...team, flagUrl };
 }
 
-export async function getAllTeamsEnriched(
-  mode?: RankingMode,
-): Promise<Team[]> {
-  const { getRankingsSnapshot } = await import("@/lib/data/rankings-store");
-  const snapshot = await getRankingsSnapshot(mode ?? "live");
+export function enrichTeamsFromSnapshot(
+  teamsList: Team[],
+  snapshot: RankingsSnapshot,
+): Team[] {
   const flagMap = new Map(
     snapshot.entries
       .filter((entry) => entry.flagUrl)
       .map((entry) => [entry.teamId, entry.flagUrl!]),
   );
 
-  return getAllTeams().map((team) =>
-    enrichTeam(team, flagMap.get(team.id)),
-  );
+  return teamsList.map((team) => enrichTeam(team, flagMap.get(team.id)));
+}
+
+export async function getAllTeamsEnriched(
+  mode?: RankingMode,
+): Promise<Team[]> {
+  const { getRankingsSnapshot } = await import("@/lib/data/rankings-store");
+  const snapshot = await getRankingsSnapshot(mode ?? "live");
+  return enrichTeamsFromSnapshot(getAllTeams(), snapshot);
 }
 
 export function applyFlagMapToTeams(

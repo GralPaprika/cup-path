@@ -1,15 +1,13 @@
-import type { RankingMode } from "../src/lib/types";
+import { RANKING_MODES } from "../src/lib/data/ranking-modes";
 import { getAllTeams } from "../src/lib/data/team-registry";
-import { getRankingsSnapshot } from "../src/lib/data/rankings-store";
-
-const MODES: RankingMode[] = ["yearStart", "tournamentStart", "live"];
+import { loadRankingsSnapshot } from "../src/lib/data/rankings-store";
 
 async function validateTeamMapping() {
   const teams = getAllTeams();
   let hasErrors = false;
 
-  for (const mode of MODES) {
-    const snapshot = await getRankingsSnapshot(mode);
+  for (const mode of RANKING_MODES) {
+    const snapshot = await loadRankingsSnapshot(mode);
     const rankedIds = new Set(snapshot.entries.map((entry) => entry.teamId));
     const missing = teams.filter((team) => !rankedIds.has(team.id));
 

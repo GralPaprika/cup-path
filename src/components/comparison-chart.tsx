@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { formatFifaPoints } from "@/lib/format";
 
 interface ComparisonChartProps {
   entries: ComparisonEntry[];
@@ -29,8 +30,8 @@ interface ComparisonChartProps {
 
 function formatDelta(value: number | null): string {
   if (value === null) return "—";
-  const rounded = Math.round(value);
-  return rounded > 0 ? `+${rounded}` : `${rounded}`;
+  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
+  return `${sign}${formatFifaPoints(Math.abs(value))}`;
 }
 
 export function ComparisonChart({
@@ -63,7 +64,7 @@ export function ComparisonChart({
                     <TeamLabel team={entry.team} showCode={false} flagSize="sm" />
                   </span>
                   <span className="font-mono font-medium">
-                    {Math.round(entry.avgOpponentPoints ?? 0)} pts
+                    {formatFifaPoints(entry.avgOpponentPoints)}
                   </span>
                 </div>
                 <div className="h-2.5 overflow-hidden rounded-full bg-emerald-100">
@@ -110,13 +111,11 @@ export function ComparisonChart({
                     <TeamLabel team={entry.team} showCode flagSize="sm" />
                   </TableCell>
                   <TableCell className="text-right font-mono">
-                    {entry.avgOpponentPoints !== null
-                      ? Math.round(entry.avgOpponentPoints).toLocaleString()
-                      : "—"}
+                    {formatFifaPoints(entry.avgOpponentPoints)}
                   </TableCell>
                   <TableCell className="text-right font-mono">
                     {entry.avgOpponentRank !== null
-                      ? Math.round(entry.avgOpponentRank)
+                      ? Math.round(entry.avgOpponentRank).toLocaleString()
                       : "—"}
                   </TableCell>
                   <TableCell>

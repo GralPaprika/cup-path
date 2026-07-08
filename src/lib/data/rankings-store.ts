@@ -1,3 +1,6 @@
+import { readFile, mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { unstable_cache } from "next/cache";
 import type {
   RankingEntry,
   RankingMode,
@@ -6,21 +9,31 @@ import type {
 } from "@/lib/types";
 import { getAllTeams, resolveTeam } from "@/lib/data/team-registry";
 import { getFifaFlagUrl } from "@/lib/data/flag-utils";
+import {
+  BLOB_PATHS,
+  RUNTIME_FILES,
+  rankingsCacheTag,
+} from "@/lib/data/rankings-paths";
 
 import liveSeed from "../../../data/rankings/seed-live.json";
-import yearStartSeed from "../../../data/rankings/seed-year-start.json";
-import tournamentStartSeed from "../../../data/rankings/seed-tournament-start.json";
+import januarySeed from "../../../data/rankings/seed-january.json";
+import aprilSeed from "../../../data/rankings/seed-april.json";
+import june11Seed from "../../../data/rankings/seed-june11.json";
 
-const BLOB_PATHS: Record<RankingMode, string> = {
-  live: "rankings/live.json",
-  yearStart: "rankings/snapshot-year-start.json",
-  tournamentStart: "rankings/snapshot-tournament-start.json",
-};
+const RUNTIME_DIR = path.join(process.cwd(), "data", "rankings", "runtime");
 
 const LOCAL_SEEDS: Record<RankingMode, RankingsSnapshot> = {
   live: liveSeed as RankingsSnapshot,
-  yearStart: yearStartSeed as RankingsSnapshot,
-  tournamentStart: tournamentStartSeed as RankingsSnapshot,
+  january: januarySeed as RankingsSnapshot,
+  april: aprilSeed as RankingsSnapshot,
+  june11: june11Seed as RankingsSnapshot,
+};
+
+const REVALIDATE_SECONDS: Record<RankingMode, number | false> = {
+  live: 3600,
+  january: false,
+  april: false,
+  june11: false,
 };
 
 function normalizeSnapshot(
@@ -30,7 +43,9 @@ function normalizeSnapshot(
   const entries: RankingEntry[] = [];
 
   for (const entry of snapshot.entries) {
-    const team = resolveTeam(entry.teamId) ?? getAllTeams().find((t) => t.id === entry.teamId);
+    const team =
+      resolveTeam(entry.teamId) ??
+      getAllTeams().find((t) => t.id === entry.teamId);
     if (!team) continue;
     entries.push({
       ...entry,
@@ -46,13 +61,13 @@ function normalizeSnapshot(
   };
 }
 
-async function readFromBlob(path: string): Promise<RankingsSnapshot | null> {
+async function readFromBlob(blobPath: string): Promise<RankingsSnapshot | null> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
 
   try {
     const { list } = await import("@vercel/blob");
-    const { blobs } = await list({ prefix: path, limit: 1 });
-    const blob = blobs.find((item) => item.pathname === path);
+    const { blobs } = await list({ prefix: blobPath, limit: 1 });
+    const blob = blobs.find((item) => item.pathname === blobPath);
     if (!blob) return null;
 
     const response = await fetch(blob.url, { next: { revalidate: 3600 } });
@@ -63,12 +78,58 @@ async function readFromBlob(path: string): Promise<RankingsSnapshot | null> {
   }
 }
 
-export async function getRankingsSnapshot(
+async function readRuntimeCache(
+  mode: RankingMode,
+): Promise<RankingsSnapshot | null> {
+  try {
+    const filePath = path.join(RUNTIME_DIR, RUNTIME_FILES[mode]);
+    const content = await readFile(filePath, "utf-8");
+    return JSON.parse(content) as RankingsSnapshot;
+  } catch {
+    return null;
+  }
+}
+
+/** Uncached read: Blob → local runtime cache → bundled seed. No network API calls. */
+export async function loadRankingsSnapshot(
   mode: RankingMode,
 ): Promise<RankingsSnapshot> {
   const blobData = await readFromBlob(BLOB_PATHS[mode]);
   if (blobData) return normalizeSnapshot(blobData, mode);
+
+  const runtimeData = await readRuntimeCache(mode);
+  if (runtimeData) return normalizeSnapshot(runtimeData, mode);
+
   return normalizeSnapshot(LOCAL_SEEDS[mode], mode);
+}
+
+export function getRankingsSnapshot(
+  mode: RankingMode,
+): Promise<RankingsSnapshot> {
+  // Local runtime files are updated by `npm run sync:rankings` without going
+  // through Next cache tags, so always read fresh data during development.
+  if (process.env.NODE_ENV === "development") {
+    return loadRankingsSnapshot(mode);
+  }
+
+  return unstable_cache(
+    () => loadRankingsSnapshot(mode),
+    ["rankings-snapshot", mode],
+    {
+      revalidate: REVALIDATE_SECONDS[mode],
+      tags: [rankingsCacheTag(mode)],
+    },
+  )();
+}
+
+export async function writeRuntimeSnapshot(
+  mode: RankingMode,
+  snapshot: RankingsSnapshot,
+): Promise<string> {
+  await mkdir(RUNTIME_DIR, { recursive: true });
+  const filePath = path.join(RUNTIME_DIR, RUNTIME_FILES[mode]);
+  await writeFile(filePath, JSON.stringify(snapshot, null, 2), "utf-8");
+  return filePath;
 }
 
 export async function saveRankingsSnapshot(
@@ -90,13 +151,15 @@ export async function saveRankingsSnapshot(
 
 export async function getRankingsMeta(): Promise<RankingsMeta> {
   const live = await getRankingsSnapshot("live");
-  const yearStart = await getRankingsSnapshot("yearStart");
-  const tournamentStart = await getRankingsSnapshot("tournamentStart");
+  const january = await getRankingsSnapshot("january");
+  const april = await getRankingsSnapshot("april");
+  const june11 = await getRankingsSnapshot("june11");
 
   return {
     liveLastUpdated: live.fetchedAt,
-    yearStartDate: yearStart.sourceDate,
-    tournamentStartDate: tournamentStart.sourceDate,
+    januaryDate: january.sourceDate,
+    aprilDate: april.sourceDate,
+    june11Date: june11.sourceDate,
   };
 }
 

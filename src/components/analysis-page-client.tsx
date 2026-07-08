@@ -8,6 +8,11 @@ import { TeamSelector } from "@/components/team-selector";
 import { SummaryCard } from "@/components/summary-card";
 import { PathTable } from "@/components/path-table";
 import { ComparisonChart } from "@/components/comparison-chart";
+import {
+  ComparisonChartSkeleton,
+  PathTableSkeleton,
+  SummaryCardSkeleton,
+} from "@/components/loading-skeletons";
 import { useTranslations } from "next-intl";
 
 interface AnalysisResponse {
@@ -17,7 +22,6 @@ interface AnalysisResponse {
 }
 
 export function AnalysisPageClient({ teams }: { teams: Team[] }) {
-  const t = useTranslations("common");
   const searchParams = useSearchParams();
   const initialTeam = searchParams.get("team")?.toUpperCase() ?? teams[0]?.id ?? "ARG";
   const initialMode = (searchParams.get("mode") as RankingMode) ?? "live";
@@ -28,6 +32,7 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
   const [data, setData] = useState<AnalysisResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("common");
 
   useEffect(() => {
     fetch(`/api/teams?mode=${mode}`)
@@ -80,11 +85,7 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
         </div>
 
         <div>
-          {loading && (
-            <div className="flex h-64 items-center justify-center rounded-2xl border bg-white/60">
-              <p className="animate-pulse text-muted-foreground">{t("loading")}</p>
-            </div>
-          )}
+          {loading && !error && <SummaryCardSkeleton />}
           {error && (
             <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
               {error}
@@ -98,6 +99,13 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
           )}
         </div>
       </div>
+
+      {loading && !error && (
+        <div className="space-y-8">
+          <PathTableSkeleton />
+          <ComparisonChartSkeleton showDelta />
+        </div>
+      )}
 
       {data && !loading && (
         <div className="space-y-8">

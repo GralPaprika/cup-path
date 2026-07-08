@@ -10,9 +10,10 @@ interface RankingModeToggleProps {
 }
 
 const MODES: { id: RankingMode; icon: string }[] = [
-  { id: "yearStart", icon: "📅" },
-  { id: "tournamentStart", icon: "🏟️" },
   { id: "live", icon: "⚡" },
+  { id: "june11", icon: "🏟️" },
+  { id: "april", icon: "🌱" },
+  { id: "january", icon: "📅" },
 ];
 
 export function RankingModeToggle({ value, onChange }: RankingModeToggleProps) {
@@ -23,7 +24,7 @@ export function RankingModeToggle({ value, onChange }: RankingModeToggleProps) {
       <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {t("label")}
       </p>
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-2">
         {MODES.map((mode) => (
           <button
             key={mode.id}
@@ -38,9 +39,6 @@ export function RankingModeToggle({ value, onChange }: RankingModeToggleProps) {
           >
             <span className="mb-1 block text-lg">{mode.icon}</span>
             <span className="block text-sm font-semibold">{t(mode.id)}</span>
-            <span className="mt-0.5 block text-xs text-muted-foreground">
-              {t(`${mode.id}Hint`)}
-            </span>
           </button>
         ))}
       </div>

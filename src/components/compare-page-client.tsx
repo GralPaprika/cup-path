@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import type { ComparisonEntry, RankingMode } from "@/lib/types";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { ComparisonChart } from "@/components/comparison-chart";
+import { CompareLoadingSkeleton } from "@/components/loading-skeletons";
 import { useTranslations } from "next-intl";
 
 export function ComparePageClient() {
@@ -58,10 +59,8 @@ export function ComparePageClient() {
       {!selectedTeamId && (
         <p className="text-sm text-muted-foreground">{compare("selectTeamHint")}</p>
       )}
-      {loading && (
-        <div className="flex h-40 items-center justify-center">
-          <p className="animate-pulse text-muted-foreground">{t("loading")}</p>
-        </div>
+      {loading && !error && (
+        <CompareLoadingSkeleton showDelta={Boolean(selectedTeamId)} />
       )}
       {error && (
         <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">

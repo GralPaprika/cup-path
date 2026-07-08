@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "sync:worldcup": "tsx scripts/sync-openfootball.ts",
+    "sync:rankings": "tsx scripts/sync-rankings.ts",
     "seed:rankings": "tsx scripts/seed-ranking-snapshots.ts",
     "validate:teams": "tsx scripts/validate-team-mapping.ts"
   },

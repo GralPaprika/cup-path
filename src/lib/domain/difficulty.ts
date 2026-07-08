@@ -1,17 +1,15 @@
 import type {
   MatchDifficulty,
   RankingEntry,
-  RankingMode,
   Team,
   TeamPathSummary,
 } from "@/lib/types";
-import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
 import {
   buildTeamPath,
   getNextOpponent,
   isTeamEliminated,
 } from "@/lib/domain/path-builder";
-import { enrichTeam, getTeamById } from "@/lib/data/team-registry";
+import { enrichTeam, getAllTeams, getTeamById } from "@/lib/data/team-registry";
 
 function average(values: number[]): number | null {
   if (values.length === 0) return null;
@@ -22,48 +20,48 @@ function withFlag(team: Team, entry?: RankingEntry): Team {
   return enrichTeam(team, entry?.flagUrl);
 }
 
-export async function analyzeTeamPath(
+export function buildTeamPathSummary(
   teamId: string,
-  mode: RankingMode,
-): Promise<TeamPathSummary | null> {
+  rankings: Map<string, RankingEntry>,
+): TeamPathSummary | null {
   const baseTeam = getTeamById(teamId);
   if (!baseTeam) return null;
 
-  const snapshot = await getRankingsSnapshot(mode);
-  const rankings = buildRankingsMap(snapshot);
   const teamRanking = rankings.get(teamId);
   const team = withFlag(baseTeam, teamRanking);
   const path = buildTeamPath(teamId);
 
-  const matches: MatchDifficulty[] = path.map(({ match, opponent, result, scoreLabel, isPlayed, isNext }) => {
-    const opponentRanking = rankings.get(opponent.id);
-    const opponentRank = opponentRanking?.rank ?? null;
-    const opponentPoints = opponentRanking?.points ?? null;
-    const teamRank = teamRanking?.rank ?? null;
-    const teamPoints = teamRanking?.points ?? null;
+  const matches: MatchDifficulty[] = path.map(
+    ({ match, opponent, result, scoreLabel, isPlayed, isNext }) => {
+      const opponentRanking = rankings.get(opponent.id);
+      const opponentRank = opponentRanking?.rank ?? null;
+      const opponentPoints = opponentRanking?.points ?? null;
+      const teamRank = teamRanking?.rank ?? null;
+      const teamPoints = teamRanking?.points ?? null;
 
-    return {
-      round: match.round,
-      date: match.date,
-      opponent: withFlag(opponent, opponentRanking),
-      opponentRank,
-      opponentPoints,
-      teamRank,
-      teamPoints,
-      rankGap:
-        opponentRank !== null && teamRank !== null
-          ? opponentRank - teamRank
-          : null,
-      pointsGap:
-        opponentPoints !== null && teamPoints !== null
-          ? opponentPoints - teamPoints
-          : null,
-      result,
-      scoreLabel,
-      isNext,
-      isPlayed,
-    };
-  });
+      return {
+        round: match.round,
+        date: match.date,
+        opponent: withFlag(opponent, opponentRanking),
+        opponentRank,
+        opponentPoints,
+        teamRank,
+        teamPoints,
+        rankGap:
+          opponentRank !== null && teamRank !== null
+            ? opponentRank - teamRank
+            : null,
+        pointsGap:
+          opponentPoints !== null && teamPoints !== null
+            ? opponentPoints - teamPoints
+            : null,
+        result,
+        scoreLabel,
+        isNext,
+        isPlayed,
+      };
+    },
+  );
 
   const opponentPoints = matches
     .map((match) => match.opponentPoints)
@@ -77,6 +75,8 @@ export async function analyzeTeamPath(
 
   return {
     team,
+    teamRank: teamRanking?.rank ?? null,
+    teamPoints: teamRanking?.points ?? null,
     matches,
     avgOpponentPoints: average(opponentPoints),
     avgOpponentRank: average(opponentRanks),
@@ -89,31 +89,18 @@ export async function analyzeTeamPath(
   };
 }
 
-export async function analyzeAllTeams(
-  mode: RankingMode,
-  selectedTeamId?: string,
-): Promise<TeamPathSummary[]> {
-  const { getAllTeams } = await import("@/lib/data/team-registry");
-  const teams = getAllTeams();
-  const summaries: TeamPathSummary[] = [];
-
-  for (const team of teams) {
-    const summary = await analyzeTeamPath(team.id, mode);
-    if (summary) summaries.push(summary);
-  }
+export function buildAllTeamSummaries(
+  rankings: Map<string, RankingEntry>,
+): TeamPathSummary[] {
+  const summaries = getAllTeams()
+    .map((team) => buildTeamPathSummary(team.id, rankings))
+    .filter((summary): summary is TeamPathSummary => summary !== null);
 
   summaries.sort((a, b) => {
     const aPoints = a.avgOpponentPoints ?? 0;
     const bPoints = b.avgOpponentPoints ?? 0;
     return bPoints - aPoints;
   });
-
-  if (selectedTeamId) {
-    const selected = summaries.find((s) => s.team.id === selectedTeamId);
-    if (selected) {
-      return summaries.map((summary) => summary);
-    }
-  }
 
   return summaries;
 }
@@ -122,13 +109,7 @@ export function getHardestPathRank(
   summaries: TeamPathSummary[],
   teamId: string,
 ): number | null {
-  const sorted = [...summaries].sort((a, b) => {
-    const aPoints = a.avgOpponentPoints ?? -Infinity;
-    const bPoints = b.avgOpponentPoints ?? -Infinity;
-    return bPoints - aPoints;
-  });
-
-  const index = sorted.findIndex((summary) => summary.team.id === teamId);
+  const index = summaries.findIndex((summary) => summary.team.id === teamId);
   return index >= 0 ? index + 1 : null;
 }
 

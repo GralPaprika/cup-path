@@ -1,31 +1,29 @@
 import {
   fetchLiveRankings,
-  fetchNearestRankingOnOrBefore,
-  SNAPSHOT_DATES,
+  fetchSnapshotRankings,
 } from "../src/lib/data/rankings-client";
-import { saveRankingsSnapshot } from "../src/lib/data/rankings-store";
+import { SNAPSHOT_DATES, SNAPSHOT_MODES } from "../src/lib/data/ranking-modes";
+import {
+  saveRankingsSnapshot,
+  writeRuntimeSnapshot,
+} from "../src/lib/data/rankings-store";
 
 async function seedSnapshots() {
-  console.log("Seeding year-start snapshot...");
-  const yearStart = await fetchNearestRankingOnOrBefore(SNAPSHOT_DATES.yearStart);
-  await saveRankingsSnapshot("yearStart", {
-    ...yearStart,
-    mode: "snapshot",
-    sourceDate: SNAPSHOT_DATES.yearStart,
-  });
-
-  console.log("Seeding tournament-start snapshot...");
-  const tournamentStart = await fetchNearestRankingOnOrBefore(
-    SNAPSHOT_DATES.tournamentStart,
-  );
-  await saveRankingsSnapshot("tournamentStart", {
-    ...tournamentStart,
-    mode: "snapshot",
-    sourceDate: SNAPSHOT_DATES.tournamentStart,
-  });
+  for (const mode of SNAPSHOT_MODES) {
+    console.log(`Seeding ${mode} snapshot...`);
+    const snapshot = await fetchSnapshotRankings(mode);
+    const payload = {
+      ...snapshot,
+      mode: "snapshot" as const,
+      sourceDate: SNAPSHOT_DATES[mode],
+    };
+    await writeRuntimeSnapshot(mode, payload);
+    await saveRankingsSnapshot(mode, payload);
+  }
 
   console.log("Seeding live snapshot...");
   const live = await fetchLiveRankings();
+  await writeRuntimeSnapshot("live", live);
   await saveRankingsSnapshot("live", live);
 
   console.log("All ranking snapshots seeded.");

@@ -1,6 +1,10 @@
 import type { RankingEntry, RankingsSnapshot } from "@/lib/types";
 import { getAllTeams, resolveTeam } from "@/lib/data/team-registry";
 import {
+  SNAPSHOT_DATES,
+  type SnapshotMode,
+} from "@/lib/data/ranking-modes";
+import {
   getFifaFlagUrl,
   parseApiSourceDate,
   parseFifaCode,
@@ -9,7 +13,10 @@ import {
 
 const API_HOST =
   process.env.RAPIDAPI_HOST ?? "world-football-ranking.p.rapidapi.com";
-const API_KEY = process.env.RAPIDAPI_KEY;
+
+function getApiKey(): string | undefined {
+  return process.env.RAPIDAPI_KEY;
+}
 
 interface RawRankingRow extends Record<string, unknown> {
   rank?: number;
@@ -25,6 +32,11 @@ interface RawRankingRow extends Record<string, unknown> {
   teamName?: string;
   name?: string;
   flag?: string;
+}
+
+interface HistoricalRankingRelease {
+  id: string;
+  date: string;
 }
 
 function parseRank(row: RawRankingRow): number {
@@ -51,9 +63,7 @@ function extractRows(payload: unknown): RawRankingRow[] {
 
   const data = payload as Record<string, unknown>;
 
-  // World Football Ranking API shape: { type, date, ranking: [...] }
   if (Array.isArray(data.ranking)) return data.ranking as RawRankingRow[];
-
   if (Array.isArray(data)) return data as RawRankingRow[];
   if (Array.isArray(data.rankings)) return data.rankings as RawRankingRow[];
   if (Array.isArray(data.data)) return data.data as RawRankingRow[];
@@ -61,6 +71,12 @@ function extractRows(payload: unknown): RawRankingRow[] {
   if (Array.isArray(data.teams)) return data.teams as RawRankingRow[];
 
   return [];
+}
+
+function parseReleaseDateLabel(label: string): string | undefined {
+  const parsed = new Date(label.replace(/,/g, "").trim());
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString().slice(0, 10);
 }
 
 export function normalizeApiResponse(
@@ -105,16 +121,18 @@ export function normalizeApiResponse(
 }
 
 async function rapidApiFetch(path: string): Promise<unknown> {
-  if (!API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     throw new Error("RAPIDAPI_KEY is not configured");
   }
 
   const response = await fetch(`https://${API_HOST}${path}`, {
     headers: {
-      "x-rapidapi-key": API_KEY,
+      "x-rapidapi-key": apiKey,
       "x-rapidapi-host": API_HOST,
     },
     cache: "no-store",
+    signal: AbortSignal.timeout(8000),
   });
 
   if (!response.ok) {
@@ -125,60 +143,72 @@ async function rapidApiFetch(path: string): Promise<unknown> {
   return response.json();
 }
 
-export async function fetchLiveRankings(): Promise<RankingsSnapshot> {
-  const candidates = ["/rankings", "/rankings/current", "/"];
+let historicalReleasesCache: HistoricalRankingRelease[] | undefined;
 
-  for (const path of candidates) {
-    try {
-      const payload = await rapidApiFetch(path);
-      const snapshot = normalizeApiResponse(
-        payload,
-        new Date().toISOString().slice(0, 10),
-      );
-      if (snapshot.entries.length > 0) return snapshot;
-    } catch {
-      continue;
-    }
+async function fetchHistoricalReleases(): Promise<HistoricalRankingRelease[]> {
+  if (historicalReleasesCache) return historicalReleasesCache;
+
+  const payload = await rapidApiFetch("/historical-rankings.php");
+  if (!Array.isArray(payload)) {
+    throw new Error("Unexpected historical-rankings response shape");
   }
 
-  throw new Error("Unable to fetch live rankings from RapidAPI");
+  historicalReleasesCache = payload.filter(
+    (item): item is HistoricalRankingRelease =>
+      !!item &&
+      typeof item === "object" &&
+      typeof (item as HistoricalRankingRelease).id === "string" &&
+      typeof (item as HistoricalRankingRelease).date === "string",
+  );
+
+  return historicalReleasesCache;
+}
+
+async function resolveHistoricalRankingId(
+  targetDate: string,
+): Promise<HistoricalRankingRelease> {
+  const releases = await fetchHistoricalReleases();
+  const match = releases.find(
+    (release) => parseReleaseDateLabel(release.date) === targetDate,
+  );
+
+  if (!match) {
+    throw new Error(`No historical ranking release found for ${targetDate}`);
+  }
+
+  return match;
+}
+
+export async function fetchLiveRankings(): Promise<RankingsSnapshot> {
+  const payload = await rapidApiFetch("/current-ranking.php?type=live");
+  const snapshot = normalizeApiResponse(
+    payload,
+    new Date().toISOString().slice(0, 10),
+  );
+  if (snapshot.entries.length === 0) {
+    throw new Error("Unable to fetch live rankings from RapidAPI");
+  }
+  return snapshot;
 }
 
 export async function fetchRankingsByDate(
   targetDate: string,
 ): Promise<RankingsSnapshot> {
-  const candidates = [
-    `/rankings?date=${targetDate}`,
-    `/rankings/historical?date=${targetDate}`,
-    `/rankings/by-date?date=${targetDate}`,
-    `/rankings/${targetDate}`,
-    `/rankings?date=${targetDate.slice(0, 10)}`,
-  ];
-
-  for (const path of candidates) {
-    try {
-      const payload = await rapidApiFetch(path);
-      const snapshot = normalizeApiResponse(payload, targetDate);
-      if (snapshot.entries.length > 0) return snapshot;
-    } catch {
-      continue;
-    }
+  const release = await resolveHistoricalRankingId(targetDate);
+  const payload = await rapidApiFetch(
+    `/ranking-by-date.php?id=${encodeURIComponent(release.id)}`,
+  );
+  const snapshot = normalizeApiResponse(payload, targetDate);
+  if (snapshot.entries.length === 0) {
+    throw new Error(`Unable to fetch rankings for ${targetDate}`);
   }
-
-  throw new Error(`Unable to fetch rankings for ${targetDate}`);
+  return snapshot;
 }
 
-export async function fetchNearestRankingOnOrBefore(
-  targetDate: string,
+export async function fetchSnapshotRankings(
+  mode: SnapshotMode,
 ): Promise<RankingsSnapshot> {
-  try {
-    return await fetchRankingsByDate(targetDate);
-  } catch {
-    return fetchLiveRankings();
-  }
+  return fetchRankingsByDate(SNAPSHOT_DATES[mode]);
 }
 
-export const SNAPSHOT_DATES = {
-  yearStart: "2026-01-01",
-  tournamentStart: "2026-06-11",
-} as const;
+export { SNAPSHOT_DATES };

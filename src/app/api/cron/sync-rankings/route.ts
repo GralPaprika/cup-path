@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import {
   fetchLiveRankings,
-  fetchNearestRankingOnOrBefore,
-  SNAPSHOT_DATES,
+  fetchSnapshotRankings,
 } from "@/lib/data/rankings-client";
+import { rankingsCacheTag } from "@/lib/data/rankings-paths";
+import {
+  SNAPSHOT_DATES,
+  SNAPSHOT_MODES,
+} from "@/lib/data/ranking-modes";
 import { saveRankingsSnapshot } from "@/lib/data/rankings-store";
 
 function isAuthorized(request: NextRequest): boolean {
@@ -22,6 +27,7 @@ export async function GET(request: NextRequest) {
   try {
     const live = await fetchLiveRankings();
     await saveRankingsSnapshot("live", live);
+    revalidateTag(rankingsCacheTag("live"), "max");
 
     return NextResponse.json({
       ok: true,
@@ -49,33 +55,25 @@ export async function POST(request: NextRequest) {
 
   try {
     if (action === "seed-snapshots") {
-      const yearStart = await fetchNearestRankingOnOrBefore(
-        SNAPSHOT_DATES.yearStart,
-      );
-      const tournamentStart = await fetchNearestRankingOnOrBefore(
-        SNAPSHOT_DATES.tournamentStart,
-      );
+      const results: Record<string, number> = {};
 
-      await saveRankingsSnapshot("yearStart", {
-        ...yearStart,
-        mode: "snapshot",
-        sourceDate: SNAPSHOT_DATES.yearStart,
-      });
-      await saveRankingsSnapshot("tournamentStart", {
-        ...tournamentStart,
-        mode: "snapshot",
-        sourceDate: SNAPSHOT_DATES.tournamentStart,
-      });
+      for (const mode of SNAPSHOT_MODES) {
+        const snapshot = await fetchSnapshotRankings(mode);
+        await saveRankingsSnapshot(mode, {
+          ...snapshot,
+          mode: "snapshot",
+          sourceDate: SNAPSHOT_DATES[mode],
+        });
+        revalidateTag(rankingsCacheTag(mode), "max");
+        results[mode] = snapshot.entries.length;
+      }
 
-      return NextResponse.json({
-        ok: true,
-        yearStart: yearStart.entries.length,
-        tournamentStart: tournamentStart.entries.length,
-      });
+      return NextResponse.json({ ok: true, ...results });
     }
 
     const live = await fetchLiveRankings();
     await saveRankingsSnapshot("live", live);
+    revalidateTag(rankingsCacheTag("live"), "max");
 
     return NextResponse.json({
       ok: true,

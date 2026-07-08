@@ -1,55 +1,343 @@
 {
   "mode": "live",
-  "fetchedAt": "2026-07-07T00:00:00.000Z",
-  "sourceDate": "2026-07-07",
+  "fetchedAt": "2026-07-08T04:59:23.658Z",
+  "sourceDate": "2026-07-08",
   "entries": [
-    { "teamId": "ARG", "rank": 1, "points": 1885 },
-    { "teamId": "FRA", "rank": 2, "points": 1852 },
-    { "teamId": "ESP", "rank": 3, "points": 1848 },
-    { "teamId": "ENG", "rank": 4, "points": 1835 },
-    { "teamId": "BRA", "rank": 5, "points": 1828 },
-    { "teamId": "POR", "rank": 6, "points": 1815 },
-    { "teamId": "NED", "rank": 7, "points": 1802 },
-    { "teamId": "GER", "rank": 8, "points": 1790 },
-    { "teamId": "URU", "rank": 9, "points": 1778 },
-    { "teamId": "COL", "rank": 10, "points": 1765 },
-    { "teamId": "BEL", "rank": 11, "points": 1758 },
-    { "teamId": "CRO", "rank": 12, "points": 1745 },
-    { "teamId": "MAR", "rank": 13, "points": 1738 },
-    { "teamId": "MEX", "rank": 14, "points": 1725 },
-    { "teamId": "SUI", "rank": 15, "points": 1718 },
-    { "teamId": "USA", "rank": 16, "points": 1705 },
-    { "teamId": "JPN", "rank": 17, "points": 1698 },
-    { "teamId": "SEN", "rank": 18, "points": 1688 },
-    { "teamId": "IRN", "rank": 19, "points": 1675 },
-    { "teamId": "KOR", "rank": 20, "points": 1668 },
-    { "teamId": "AUT", "rank": 21, "points": 1658 },
-    { "teamId": "NOR", "rank": 22, "points": 1650 },
-    { "teamId": "AUS", "rank": 23, "points": 1642 },
-    { "teamId": "ECU", "rank": 24, "points": 1635 },
-    { "teamId": "CAN", "rank": 25, "points": 1628 },
-    { "teamId": "PAN", "rank": 26, "points": 1615 },
-    { "teamId": "EGY", "rank": 27, "points": 1608 },
-    { "teamId": "ALG", "rank": 28, "points": 1600 },
-    { "teamId": "SCO", "rank": 29, "points": 1592 },
-    { "teamId": "PAR", "rank": 30, "points": 1585 },
-    { "teamId": "TUN", "rank": 31, "points": 1578 },
-    { "teamId": "CIV", "rank": 32, "points": 1570 },
-    { "teamId": "SWE", "rank": 33, "points": 1562 },
-    { "teamId": "RSA", "rank": 34, "points": 1555 },
-    { "teamId": "CZE", "rank": 35, "points": 1548 },
-    { "teamId": "TUR", "rank": 36, "points": 1540 },
-    { "teamId": "UZB", "rank": 37, "points": 1532 },
-    { "teamId": "BIH", "rank": 38, "points": 1525 },
-    { "teamId": "IRQ", "rank": 39, "points": 1518 },
-    { "teamId": "QAT", "rank": 40, "points": 1510 },
-    { "teamId": "KSA", "rank": 41, "points": 1502 },
-    { "teamId": "JOR", "rank": 42, "points": 1495 },
-    { "teamId": "CPV", "rank": 43, "points": 1488 },
-    { "teamId": "GHA", "rank": 44, "points": 1480 },
-    { "teamId": "NZL", "rank": 45, "points": 1472 },
-    { "teamId": "HAI", "rank": 46, "points": 1465 },
-    { "teamId": "CUW", "rank": 47, "points": 1458 },
-    { "teamId": "COD", "rank": 48, "points": 1450 }
+    {
+      "teamId": "FRA",
+      "rank": 1,
+      "points": 1925.861276,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/FRA",
+      "previousRank": 3
+    },
+    {
+      "teamId": "ARG",
+      "rank": 2,
+      "points": 1925.148536,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/ARG",
+      "previousRank": 1
+    },
+    {
+      "teamId": "ESP",
+      "rank": 3,
+      "points": 1912.339223,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/ESP",
+      "previousRank": 2
+    },
+    {
+      "teamId": "ENG",
+      "rank": 4,
+      "points": 1871.385083,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/ENG",
+      "previousRank": 4
+    },
+    {
+      "teamId": "BRA",
+      "rank": 5,
+      "points": 1804.923169,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/BRA",
+      "previousRank": 6
+    },
+    {
+      "teamId": "MAR",
+      "rank": 6,
+      "points": 1803.987631,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/MAR",
+      "previousRank": 7
+    },
+    {
+      "teamId": "POR",
+      "rank": 7,
+      "points": 1787.854725,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/POR",
+      "previousRank": 5
+    },
+    {
+      "teamId": "BEL",
+      "rank": 8,
+      "points": 1778.355242,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/BEL",
+      "previousRank": 9
+    },
+    {
+      "teamId": "NED",
+      "rank": 9,
+      "points": 1775.54224,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/NED",
+      "previousRank": 8
+    },
+    {
+      "teamId": "MEX",
+      "rank": 10,
+      "points": 1754.296853,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/MEX",
+      "previousRank": 14
+    },
+    {
+      "teamId": "COL",
+      "rank": 11,
+      "points": 1739.894762,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/COL",
+      "previousRank": 13
+    },
+    {
+      "teamId": "GER",
+      "rank": 12,
+      "points": 1726.218839,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/GER",
+      "previousRank": 10
+    },
+    {
+      "teamId": "CRO",
+      "rank": 13,
+      "points": 1723.050142,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/CRO",
+      "previousRank": 11
+    },
+    {
+      "teamId": "SUI",
+      "rank": 14,
+      "points": 1710.884769,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/SUI",
+      "previousRank": 19
+    },
+    {
+      "teamId": "USA",
+      "rank": 16,
+      "points": 1690.330436,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/USA",
+      "previousRank": 17
+    },
+    {
+      "teamId": "JPN",
+      "rank": 17,
+      "points": 1673.67653,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/JPN",
+      "previousRank": 18
+    },
+    {
+      "teamId": "SEN",
+      "rank": 18,
+      "points": 1653.42859,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/SEN",
+      "previousRank": 15
+    },
+    {
+      "teamId": "NOR",
+      "rank": 19,
+      "points": 1651.286867,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/NOR",
+      "previousRank": 31
+    },
+    {
+      "teamId": "URU",
+      "rank": 20,
+      "points": 1634.703834,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/URU",
+      "previousRank": 16
+    },
+    {
+      "teamId": "IRN",
+      "rank": 22,
+      "points": 1609.845145,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/IRN",
+      "previousRank": 20
+    },
+    {
+      "teamId": "AUT",
+      "rank": 23,
+      "points": 1598.822839,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/AUT",
+      "previousRank": 24
+    },
+    {
+      "teamId": "EGY",
+      "rank": 24,
+      "points": 1597.044332,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/EGY",
+      "previousRank": 29
+    },
+    {
+      "teamId": "ECU",
+      "rank": 25,
+      "points": 1592.588692,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/ECU",
+      "previousRank": 23
+    },
+    {
+      "teamId": "TUR",
+      "rank": 27,
+      "points": 1582.54473,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/TUR",
+      "previousRank": 22
+    },
+    {
+      "teamId": "AUS",
+      "rank": 28,
+      "points": 1581.5092,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/AUS",
+      "previousRank": 27
+    },
+    {
+      "teamId": "ALG",
+      "rank": 29,
+      "points": 1576.802787,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/ALG",
+      "previousRank": 28
+    },
+    {
+      "teamId": "CAN",
+      "rank": 30,
+      "points": 1571.34137,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/CAN",
+      "previousRank": 30
+    },
+    {
+      "teamId": "CIV",
+      "rank": 31,
+      "points": 1565.474493,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/CIV",
+      "previousRank": 33
+    },
+    {
+      "teamId": "KOR",
+      "rank": 32,
+      "points": 1558.719499,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/KOR",
+      "previousRank": 25
+    },
+    {
+      "teamId": "PAR",
+      "rank": 34,
+      "points": 1542.476023,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/PAR",
+      "previousRank": 41
+    },
+    {
+      "teamId": "SWE",
+      "rank": 37,
+      "points": 1525.578992,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/SWE",
+      "previousRank": 38
+    },
+    {
+      "teamId": "COD",
+      "rank": 41,
+      "points": 1495.476517,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/COD",
+      "previousRank": 46
+    },
+    {
+      "teamId": "SCO",
+      "rank": 42,
+      "points": 1491.223887,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/SCO",
+      "previousRank": 42
+    },
+    {
+      "teamId": "PAN",
+      "rank": 44,
+      "points": 1478.411496,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/PAN",
+      "previousRank": 34
+    },
+    {
+      "teamId": "CZE",
+      "rank": 48,
+      "points": 1467.260216,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/CZE",
+      "previousRank": 40
+    },
+    {
+      "teamId": "RSA",
+      "rank": 54,
+      "points": 1451.241881,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/RSA",
+      "previousRank": 60
+    },
+    {
+      "teamId": "TUN",
+      "rank": 57,
+      "points": 1426.583954,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/TUN",
+      "previousRank": 45
+    },
+    {
+      "teamId": "KSA",
+      "rank": 58,
+      "points": 1425.515277,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/KSA",
+      "previousRank": 61
+    },
+    {
+      "teamId": "QAT",
+      "rank": 59,
+      "points": 1411.063729,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/QAT",
+      "previousRank": 56
+    },
+    {
+      "teamId": "UZB",
+      "rank": 60,
+      "points": 1409.729608,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/UZB",
+      "previousRank": 50
+    },
+    {
+      "teamId": "BIH",
+      "rank": 61,
+      "points": 1408.930486,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/BIH",
+      "previousRank": 64
+    },
+    {
+      "teamId": "IRQ",
+      "rank": 63,
+      "points": 1404.172801,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/IRQ",
+      "previousRank": 57
+    },
+    {
+      "teamId": "CPV",
+      "rank": 64,
+      "points": 1402.966144,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/CPV",
+      "previousRank": 67
+    },
+    {
+      "teamId": "GHA",
+      "rank": 65,
+      "points": 1387.000731,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/GHA",
+      "previousRank": 73
+    },
+    {
+      "teamId": "JOR",
+      "rank": 73,
+      "points": 1350.411893,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/JOR",
+      "previousRank": 63
+    },
+    {
+      "teamId": "CUW",
+      "rank": 82,
+      "points": 1285.644403,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/CUW",
+      "previousRank": 82
+    },
+    {
+      "teamId": "NZL",
+      "rank": 86,
+      "points": 1269.801509,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/NZL",
+      "previousRank": 85
+    },
+    {
+      "teamId": "HAI",
+      "rank": 88,
+      "points": 1264.578423,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/HAI",
+      "previousRank": 83
+    }
   ]
 }

@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatFifaPoints } from "@/lib/format";
 
 interface PathTableProps {
   matches: MatchDifficulty[];
@@ -76,7 +77,9 @@ export function PathTable({ matches }: PathTableProps) {
                   <TeamLabel team={match.opponent} showCode flagSize="sm" />
                 </TableCell>
                 <TableCell className="text-right font-mono">
-                  {match.opponentPoints?.toLocaleString() ?? t("noData")}
+                  {match.opponentPoints !== null
+                    ? formatFifaPoints(match.opponentPoints)
+                    : t("noData")}
                 </TableCell>
                 <TableCell className="text-right font-mono">
                   #{match.opponentRank ?? t("noData")}

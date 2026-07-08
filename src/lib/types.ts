@@ -1,4 +1,4 @@
-export type RankingMode = "yearStart" | "tournamentStart" | "live";
+export type RankingMode = "live" | "june11" | "april" | "january";
 
 export type MatchResult = "W" | "D" | "L" | null;
 
@@ -28,8 +28,9 @@ export interface RankingsSnapshot {
 
 export interface RankingsMeta {
   liveLastUpdated: string | null;
-  yearStartDate: string | null;
-  tournamentStartDate: string | null;
+  januaryDate: string | null;
+  aprilDate: string | null;
+  june11Date: string | null;
 }
 
 export interface OpenFootballScore {
@@ -83,6 +84,8 @@ export interface MatchDifficulty {
 
 export interface TeamPathSummary {
   team: Team;
+  teamRank: number | null;
+  teamPoints: number | null;
   matches: MatchDifficulty[];
   avgOpponentPoints: number | null;
   avgOpponentRank: number | null;

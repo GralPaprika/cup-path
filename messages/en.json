@@ -10,18 +10,22 @@
   },
   "rankingMode": {
     "label": "Ranking mode",
-    "yearStart": "Year start",
-    "yearStartHint": "Nearest FIFA release on or before Jan 1, 2026",
-    "tournamentStart": "Tournament start",
-    "tournamentStartHint": "Nearest FIFA release on or before Jun 11, 2026",
     "live": "Live",
-    "liveHint": "Updated hourly"
+    "june11": "11 June",
+    "april": "1 April",
+    "january": "19 January"
   },
   "teamSelector": {
     "label": "Select team",
     "placeholder": "Choose a country"
   },
   "summary": {
+    "teamProfile": "Team profile",
+    "pathAnalysis": "Path analysis",
+    "fifaRank": "FIFA rank",
+    "fifaPoints": "FIFA points",
+    "worldCupGroup": "World Cup group",
+    "confederation": "Confederation",
     "avgDifficulty": "Avg opponent difficulty",
     "avgRank": "Avg opponent rank",
     "hardestPathRank": "Hardest path rank",
@@ -63,7 +67,7 @@
     "dataTitle": "Data sources",
     "dataBody": "Match data comes from openfootball/worldcup.json (2026). FIFA rankings come from the World Football Ranking API on RapidAPI, cached hourly in Vercel Blob.",
     "rankingModesTitle": "Ranking modes",
-    "rankingModesBody": "Year-start and tournament-start modes use fixed snapshots. Live mode refreshes every hour during deployment."
+    "rankingModesBody": "Ranking snapshots match FIFA release dates: 19 January, 1 April, and 11 June 2026. Live mode uses the current FIFA ranking and refreshes hourly in production."
   },
   "results": {
     "W": "W",

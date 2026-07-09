@@ -110,7 +110,7 @@
     "stagesTitle": "Stage filters",
     "stagesBody": "Count matches from lets you choose which rounds feed the averages—group only, through the final, or anything in between. The furthest round selected defines the comparison cohort for the # rank.\n\nOn Compare, Show teams narrows the table to sides that reached at least that round. You cannot show teams eliminated before the furthest round in your averages, because they never played those matches. Your ranking-mode choice is remembered when you switch between Analysis and Compare.",
     "dataTitle": "Data sources",
-    "dataBody": "Match data comes from openfootball/worldcup.json (2026). FIFA rankings come from the World Football Ranking API on RapidAPI, cached hourly in Vercel Blob.",
+    "dataBody": "Match data comes from openfootball/worldcup.json (2026), stored in Vercel Blob and refreshed twice daily—scores, results, and next opponents update from there. FIFA rankings come from the World Football Ranking API on RapidAPI, also in Blob: live rankings hourly, historical snapshots twice daily.",
     "rankingModesTitle": "Ranking modes",
     "rankingModesBody": "19 November 2025 is the ranking FIFA used to seed the World Cup draw. On that date each nation was assigned to a pot before groups were drawn, so this snapshot answers how strong your opponents looked on paper before the tournament started.\n\nWe also offer snapshots from 19 January, 1 April, and 11 June 2026—useful for tracking how opponent strength looked at different points in the cycle—and Live mode, which uses the current FIFA ranking and refreshes hourly in production."
   },

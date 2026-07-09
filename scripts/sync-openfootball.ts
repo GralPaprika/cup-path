@@ -1,29 +1,41 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fetchWorldCupBundleFromSource } from "../src/lib/data/worldcup-fetch";
+import {
+  WORLDCUP_RUNTIME_FILE,
+} from "../src/lib/data/worldcup-paths";
 
-const BASE_URL =
-  "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026";
-
-const FILES = [
-  "worldcup.json",
-  "worldcup.teams.json",
-  "worldcup.groups.json",
-] as const;
+const OUT_DIR = path.join(process.cwd(), "data", "worldcup", "2026");
+const RUNTIME_DIR = path.join(process.cwd(), "data", "worldcup", "runtime");
 
 async function syncOpenFootball() {
-  const outDir = path.join(process.cwd(), "data", "worldcup", "2026");
-  await mkdir(outDir, { recursive: true });
+  const bundle = await fetchWorldCupBundleFromSource();
 
-  for (const file of FILES) {
-    const response = await fetch(`${BASE_URL}/${file}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${file}: ${response.status}`);
-    }
-    const data = await response.text();
-    await writeFile(path.join(outDir, file), data, "utf-8");
-    console.log(`Synced ${file}`);
-  }
+  await mkdir(OUT_DIR, { recursive: true });
+  await writeFile(
+    path.join(OUT_DIR, "worldcup.json"),
+    JSON.stringify({ name: bundle.name, matches: bundle.matches }, null, 2),
+    "utf-8",
+  );
+  await writeFile(
+    path.join(OUT_DIR, "worldcup.teams.json"),
+    JSON.stringify(bundle.teams, null, 2),
+    "utf-8",
+  );
+  await writeFile(
+    path.join(OUT_DIR, "worldcup.groups.json"),
+    JSON.stringify(bundle.groups, null, 2),
+    "utf-8",
+  );
 
+  await mkdir(RUNTIME_DIR, { recursive: true });
+  const runtimePath = path.join(RUNTIME_DIR, WORLDCUP_RUNTIME_FILE);
+  await writeFile(runtimePath, JSON.stringify(bundle, null, 2), "utf-8");
+
+  console.log("Synced worldcup.json");
+  console.log("Synced worldcup.teams.json");
+  console.log("Synced worldcup.groups.json");
+  console.log(`Wrote runtime bundle: ${runtimePath}`);
   console.log("Openfootball 2026 data synced successfully.");
 }
 

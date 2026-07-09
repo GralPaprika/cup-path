@@ -110,7 +110,7 @@
     "stagesTitle": "Filtros por fase",
     "stagesBody": "Contar partidos desde te permite elegir qué rondas alimentan los promedios —solo grupos, hasta la final, o cualquier punto intermedio. La fase más avanzada seleccionada define el grupo de comparación para el #.\n\nEn Comparar, Mostrar equipos reduce la tabla a selecciones que llegaron al menos a esa ronda. No puedes mostrar equipos eliminados antes de la fase más avanzada en tus promedios, porque nunca jugaron esos partidos. El modo de ranking que elijas se recuerda al cambiar entre Análisis y Comparar.",
     "dataTitle": "Fuentes de datos",
-    "dataBody": "Los partidos provienen de openfootball/worldcup.json (2026). Los rankings FIFA vienen de la API World Football Ranking en RapidAPI, con caché horaria en Vercel Blob.",
+    "dataBody": "Los partidos provienen de openfootball/worldcup.json (2026), almacenados en Vercel Blob y actualizados dos veces al día — resultados, marcadores y próximo rival se leen desde ahí. Los rankings FIFA vienen de la API World Football Ranking en RapidAPI, también en Blob: en vivo cada hora e instantáneas históricas dos veces al día.",
     "rankingModesTitle": "Modos de ranking",
     "rankingModesBody": "El 19 de noviembre de 2025 es el ranking que FIFA usó para sortear el Mundial. Ese día cada selección fue asignada a un bombo antes de armar los grupos, así que esta instantánea responde qué tan fuertes parecían tus rivales sobre el papel antes de que empezara el torneo.\n\nTambién ofrecemos instantáneas del 19 de enero, 1 de abril y 11 de junio de 2026 —útiles para ver cómo evolucionó la fuerza de los rivales— y el modo En vivo, que usa el ranking FIFA actual y se actualiza cada hora en producción."
   },

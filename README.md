@@ -49,7 +49,7 @@ npm run sync:rankings
 |---|---|
 | `RAPIDAPI_KEY` | World Football Ranking API key |
 | `RAPIDAPI_HOST` | Defaults to `world-football-ranking.p.rapidapi.com` |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob store for cached rankings |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob store for cached rankings and match data |
 | `CRON_SECRET` | Protects cron API routes |
 
 See [`.env.example`](.env.example).
@@ -65,20 +65,32 @@ See [`.env.example`](.env.example).
 ## Architecture
 
 ```
-openfootball JSON ──► Next.js app ◄── Vercel Blob (cached rankings)
-                            ▲
-RapidAPI rankings ──► Cron (hourly) ──┘
+openfootball JSON ──► Vercel Cron (twice daily) ──► Vercel Blob (match data)
+RapidAPI rankings ──► Vercel Cron (hourly + twice daily) ──► Vercel Blob (rankings)
+                              │
+                              ▼
+                        Next.js app
 ```
+
+**Data refresh (production, via Vercel cron)**
+
+| Data | Schedule | Cron route |
+|---|---|---|
+| Live FIFA rankings | Hourly | `/api/cron/sync-rankings` |
+| Historical ranking snapshots | Twice daily (06:00 & 18:00 UTC) | `/api/cron/sync-scheduled` |
+| Match results, fixtures, teams | Twice daily (06:00 & 18:00 UTC) | `/api/cron/sync-scheduled` |
+
+Bundled JSON in `data/` is the fallback when Blob is empty or unavailable.
 
 **Ranking modes**
 
-| Mode | FIFA release date | Role |
-|---|---|---|
-| `november19` | 19 November 2025 | Pot-draw cutoff (groups seeded from this ranking) |
-| `january` | 19 January 2026 | Early-year snapshot |
-| `april` | 1 April 2026 | Pre-tournament snapshot |
-| `june11` | 11 June 2026 | Tournament-start snapshot |
-| `live` | Current | Hourly via Vercel cron |
+| Mode | FIFA release date | Role | Refresh |
+|---|---|---|---|
+| `november19` | 19 November 2025 | Pot-draw cutoff (groups seeded from this ranking) | Twice daily (06:00 & 18:00 UTC) |
+| `january` | 19 January 2026 | Early-year snapshot | Twice daily |
+| `april` | 1 April 2026 | Pre-tournament snapshot | Twice daily |
+| `june11` | 11 June 2026 | Tournament-start snapshot | Twice daily |
+| `live` | Current | Current FIFA ranking | Hourly |
 
 Legacy URL params `yearStart` and `tournamentStart` map to `january` and `june11`.
 
@@ -101,7 +113,7 @@ Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailabl
 │   └── lib/
 │       ├── data/           # Team registry, rankings client/store, flags
 │       └── domain/         # Path builder, standings, difficulty logic
-└── vercel.json             # Hourly cron configuration
+└── vercel.json             # Vercel cron: live hourly, all else twice daily
 ```
 
 ## API routes
@@ -111,15 +123,18 @@ Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailabl
 | `GET /api/teams?mode=live` | World Cup teams with flags |
 | `GET /api/analysis?team=ENG&mode=live` | Full path analysis for one team |
 | `GET /api/comparison?mode=live` | All-team difficulty leaderboard |
-| `GET /api/cron/sync-rankings` | Refresh live rankings in Blob (cron) |
+| `GET /api/cron/sync-rankings` | Refresh live rankings in Blob (hourly cron) |
+| `GET /api/cron/sync-scheduled` | Refresh historical snapshots + match data in Blob (twice-daily cron) |
+| `GET /api/cron/sync-rankings?action=snapshots` | Refresh snapshots only (manual) |
+| `GET /api/cron/sync-worldcup` | Refresh match data only (manual) |
 
 ## Deployment (Vercel)
 
 1. Import the repository on Vercel
 2. Enable **Vercel Blob** in project storage settings
 3. Set environment variables from `.env.example`
-4. Deploy — hourly cron refreshes live rankings via `/api/cron/sync-rankings`
-5. Seed fixed snapshots once: `npm run seed:rankings` or `POST /api/cron/sync-rankings?action=seed-snapshots`
+4. Deploy — Vercel cron refreshes **live rankings** hourly and **snapshots + match data** twice daily (06:00 & 18:00 UTC)
+5. Seed Blob on first deploy: `npm run seed:rankings` and `POST /api/cron/sync-scheduled` (with `CRON_SECRET`)
 6. Run `npm run validate:teams` to confirm all 48 teams map correctly
 
 ## Tech stack

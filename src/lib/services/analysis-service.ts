@@ -9,6 +9,7 @@ import {
 import { DEFAULT_PATH_STAGES, getFurthestStage } from "@/lib/domain/match-stages";
 import { getTeamMaxStageReached, getTeamsAtStage } from "@/lib/domain/team-stages";
 import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
+import { ensureWorldCupData } from "@/lib/data/worldcup-store";
 
 export interface TeamAnalysisResult {
   summary: TeamPathSummary;
@@ -23,6 +24,7 @@ export async function getTeamAnalysis(
   mode: RankingMode,
   stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
 ): Promise<TeamAnalysisResult | null> {
+  await ensureWorldCupData();
   const snapshot = await getRankingsSnapshot(mode);
   const rankings = buildRankingsMap(snapshot);
   const summary = buildTeamPathSummary(teamId, rankings);
@@ -61,6 +63,7 @@ export async function getComparisonAnalysis(
   stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
   teamRound: PathStage = "group",
 ): Promise<ComparisonAnalysisResult> {
+  await ensureWorldCupData();
   const snapshot = await getRankingsSnapshot(mode);
   const rankings = buildRankingsMap(snapshot);
   let summaries = buildAllTeamSummaries(rankings);

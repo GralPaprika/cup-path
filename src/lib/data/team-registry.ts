@@ -1,6 +1,6 @@
 import type { OpenFootballTeam, RankingMode, RankingsSnapshot, Team } from "@/lib/types";
 import { getFifaFlagUrl } from "@/lib/data/flag-utils";
-import teamsData from "../../../data/worldcup/2026/worldcup.teams.json";
+import bundledTeams from "../../../data/worldcup/2026/worldcup.teams.json";
 
 const EXTRA_ALIASES: Record<string, string[]> = {
   USA: ["United States", "US", "United States of America"],
@@ -50,17 +50,28 @@ function buildTeam(raw: OpenFootballTeam): Team {
   };
 }
 
-const teams: Team[] = (teamsData as OpenFootballTeam[]).map(buildTeam);
+let teams: Team[] = [];
+let byId = new Map<string, Team>();
+let byAlias = new Map<string, Team>();
 
-const byId = new Map<string, Team>();
-const byAlias = new Map<string, Team>();
+function rebuildLookupMaps(nextTeams: Team[]): void {
+  teams = nextTeams;
+  byId = new Map<string, Team>();
+  byAlias = new Map<string, Team>();
 
-for (const team of teams) {
-  byId.set(team.id, team);
-  for (const alias of team.aliases) {
-    byAlias.set(normalizeName(alias), team);
+  for (const team of teams) {
+    byId.set(team.id, team);
+    for (const alias of team.aliases) {
+      byAlias.set(normalizeName(alias), team);
+    }
   }
 }
+
+export function initializeTeamRegistry(rawTeams: OpenFootballTeam[]): void {
+  rebuildLookupMaps(rawTeams.map(buildTeam));
+}
+
+initializeTeamRegistry(bundledTeams as OpenFootballTeam[]);
 
 export function getAllTeams(): Team[] {
   return [...teams].sort((a, b) => a.displayName.localeCompare(b.displayName));
@@ -101,6 +112,9 @@ export function enrichTeamsFromSnapshot(
 export async function getAllTeamsEnriched(
   mode?: RankingMode,
 ): Promise<Team[]> {
+  const { ensureWorldCupData } = await import("@/lib/data/worldcup-store");
+  await ensureWorldCupData();
+
   const { getRankingsSnapshot } = await import("@/lib/data/rankings-store");
   const snapshot = await getRankingsSnapshot(mode ?? "live");
   return enrichTeamsFromSnapshot(getAllTeams(), snapshot);

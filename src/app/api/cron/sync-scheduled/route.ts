@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { syncWorldCupData } from "@/lib/services/worldcup-sync-service";
+import { syncScheduledData } from "@/lib/services/scheduled-sync-service";
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const result = await syncWorldCupData();
+    const result = await syncScheduledData();
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
     return NextResponse.json(

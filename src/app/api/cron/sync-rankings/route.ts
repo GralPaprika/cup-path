@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 import {
-  fetchLiveRankings,
-  fetchSnapshotRankings,
-} from "@/lib/data/rankings-client";
-import { rankingsCacheTag } from "@/lib/data/rankings-paths";
-import {
-  SNAPSHOT_DATES,
-  SNAPSHOT_MODES,
-} from "@/lib/data/ranking-modes";
-import { saveRankingsSnapshot } from "@/lib/data/rankings-store";
+  syncLiveRankings,
+  syncSnapshotRankings,
+} from "@/lib/services/rankings-sync-service";
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
@@ -19,22 +12,31 @@ function isAuthorized(request: NextRequest): boolean {
   return authHeader === `Bearer ${secret}`;
 }
 
+function syncAction(request: NextRequest): "live" | "snapshots" {
+  const action = request.nextUrl.searchParams.get("action");
+  if (action === "snapshots" || action === "seed-snapshots") {
+    return "snapshots";
+  }
+  return "live";
+}
+
+async function runSync(request: NextRequest) {
+  if (syncAction(request) === "snapshots") {
+    const result = await syncSnapshotRankings();
+    return NextResponse.json({ ok: true, ...result });
+  }
+
+  const result = await syncLiveRankings();
+  return NextResponse.json({ ok: true, ...result });
+}
+
 export async function GET(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const live = await fetchLiveRankings();
-    await saveRankingsSnapshot("live", live);
-    revalidateTag(rankingsCacheTag("live"), "max");
-
-    return NextResponse.json({
-      ok: true,
-      mode: "live",
-      entries: live.entries.length,
-      fetchedAt: live.fetchedAt,
-    });
+    return await runSync(request);
   } catch (error) {
     return NextResponse.json(
       {
@@ -51,35 +53,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const action = request.nextUrl.searchParams.get("action");
-
   try {
-    if (action === "seed-snapshots") {
-      const results: Record<string, number> = {};
-
-      for (const mode of SNAPSHOT_MODES) {
-        const snapshot = await fetchSnapshotRankings(mode);
-        await saveRankingsSnapshot(mode, {
-          ...snapshot,
-          mode: "snapshot",
-          sourceDate: SNAPSHOT_DATES[mode],
-        });
-        revalidateTag(rankingsCacheTag(mode), "max");
-        results[mode] = snapshot.entries.length;
-      }
-
-      return NextResponse.json({ ok: true, ...results });
-    }
-
-    const live = await fetchLiveRankings();
-    await saveRankingsSnapshot("live", live);
-    revalidateTag(rankingsCacheTag("live"), "max");
-
-    return NextResponse.json({
-      ok: true,
-      entries: live.entries.length,
-      fetchedAt: live.fetchedAt,
-    });
+    return await runSync(request);
   } catch (error) {
     return NextResponse.json(
       {

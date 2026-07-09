@@ -17,10 +17,13 @@ export interface SyncWorldCupResult {
 
 export async function syncWorldCupData(): Promise<SyncWorldCupResult> {
   const bundle = await fetchWorldCupBundleFromSource();
-  await writeRuntimeWorldCupBundle(bundle);
 
-  if (hasBlobStorage()) {
+  if (process.env.VERCEL !== "1") {
+    await writeRuntimeWorldCupBundle(bundle);
+  } else if (hasBlobStorage()) {
     await saveWorldCupBundle(bundle);
+  } else {
+    throw new Error("Blob storage is required to sync worldcup data on Vercel");
   }
 
   revalidateTag(worldcupCacheTag(), "max");

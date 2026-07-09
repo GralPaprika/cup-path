@@ -2,6 +2,7 @@ import "server-only";
 
 import { revalidateTag } from "next/cache";
 import { fetchWorldCupBundleFromSource } from "@/lib/data/worldcup-fetch";
+import { hasBlobStorage } from "@/lib/data/blob-config";
 import {
   saveWorldCupBundle,
   writeRuntimeWorldCupBundle,
@@ -18,7 +19,7 @@ export async function syncWorldCupData(): Promise<SyncWorldCupResult> {
   const bundle = await fetchWorldCupBundleFromSource();
   await writeRuntimeWorldCupBundle(bundle);
 
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (hasBlobStorage()) {
     await saveWorldCupBundle(bundle);
   }
 

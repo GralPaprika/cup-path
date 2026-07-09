@@ -12,6 +12,11 @@ import {
 } from "@/lib/data/worldcup-paths";
 import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
 import { initializeTeamRegistry } from "@/lib/data/team-registry";
+import {
+  getBlobAccess,
+  hasBlobStorage,
+  readJsonBlob,
+} from "@/lib/data/blob-config";
 
 import bundledWorldcup from "../../../data/worldcup/2026/worldcup.json";
 import bundledTeams from "../../../data/worldcup/2026/worldcup.teams.json";
@@ -33,20 +38,7 @@ function applyBundle(bundle: WorldCupBundle): void {
 }
 
 async function readFromBlob(): Promise<WorldCupBundle | null> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
-
-  try {
-    const { list } = await import("@vercel/blob");
-    const { blobs } = await list({ prefix: WORLDCUP_BLOB_PATH, limit: 1 });
-    const blob = blobs.find((item) => item.pathname === WORLDCUP_BLOB_PATH);
-    if (!blob) return null;
-
-    const response = await fetch(blob.url, { next: { revalidate: 3600 } });
-    if (!response.ok) return null;
-    return (await response.json()) as WorldCupBundle;
-  } catch {
-    return null;
-  }
+  return readJsonBlob<WorldCupBundle>(WORLDCUP_BLOB_PATH);
 }
 
 async function readRuntimeCache(): Promise<WorldCupBundle | null> {
@@ -102,13 +94,15 @@ export async function writeRuntimeWorldCupBundle(
 }
 
 export async function saveWorldCupBundle(bundle: WorldCupBundle): Promise<void> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    throw new Error("BLOB_READ_WRITE_TOKEN is required to save worldcup data");
+  if (!hasBlobStorage()) {
+    throw new Error(
+      "Blob storage is not configured (BLOB_STORE_ID or BLOB_READ_WRITE_TOKEN)",
+    );
   }
 
   const { put } = await import("@vercel/blob");
   await put(WORLDCUP_BLOB_PATH, JSON.stringify(bundle, null, 2), {
-    access: "public",
+    access: getBlobAccess(),
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "application/json",

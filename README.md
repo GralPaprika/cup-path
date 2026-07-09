@@ -49,7 +49,8 @@ npm run sync:rankings
 |---|---|
 | `RAPIDAPI_KEY` | World Football Ranking API key |
 | `RAPIDAPI_HOST` | Defaults to `world-football-ranking.p.rapidapi.com` |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob store for cached rankings and match data |
+| `BLOB_STORE_ID` | Auto-set when Blob store is linked to the project (OIDC auth on Vercel) |
+| `BLOB_READ_WRITE_TOKEN` | Optional — for local/scripts outside Vercel only |
 | `CRON_SECRET` | Protects cron API routes |
 
 See [`.env.example`](.env.example).

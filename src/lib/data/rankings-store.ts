@@ -16,6 +16,11 @@ import {
   RUNTIME_FILES,
   rankingsCacheTag,
 } from "@/lib/data/rankings-paths";
+import {
+  getBlobAccess,
+  hasBlobStorage,
+  readJsonBlob,
+} from "@/lib/data/blob-config";
 
 import liveSeed from "../../../data/rankings/seed-live.json";
 import januarySeed from "../../../data/rankings/seed-january.json";
@@ -67,20 +72,7 @@ function normalizeSnapshot(
 }
 
 async function readFromBlob(blobPath: string): Promise<RankingsSnapshot | null> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
-
-  try {
-    const { list } = await import("@vercel/blob");
-    const { blobs } = await list({ prefix: blobPath, limit: 1 });
-    const blob = blobs.find((item) => item.pathname === blobPath);
-    if (!blob) return null;
-
-    const response = await fetch(blob.url, { next: { revalidate: 3600 } });
-    if (!response.ok) return null;
-    return (await response.json()) as RankingsSnapshot;
-  } catch {
-    return null;
-  }
+  return readJsonBlob<RankingsSnapshot>(blobPath);
 }
 
 async function readRuntimeCache(
@@ -141,13 +133,15 @@ export async function saveRankingsSnapshot(
   mode: RankingMode,
   snapshot: RankingsSnapshot,
 ): Promise<void> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    throw new Error("BLOB_READ_WRITE_TOKEN is required to save rankings");
+  if (!hasBlobStorage()) {
+    throw new Error(
+      "Blob storage is not configured (BLOB_STORE_ID or BLOB_READ_WRITE_TOKEN)",
+    );
   }
 
   const { put } = await import("@vercel/blob");
   await put(BLOB_PATHS[mode], JSON.stringify(snapshot, null, 2), {
-    access: "public",
+    access: getBlobAccess(),
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "application/json",

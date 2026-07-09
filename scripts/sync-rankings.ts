@@ -14,6 +14,7 @@ import {
   saveRankingsSnapshot,
   writeRuntimeSnapshot,
 } from "../src/lib/data/rankings-store";
+import { hasBlobStorage } from "../src/lib/data/blob-config";
 
 import januarySeed from "../data/rankings/seed-january.json";
 import aprilSeed from "../data/rankings/seed-april.json";
@@ -53,7 +54,7 @@ async function persistSnapshot(
   const filePath = await writeRuntimeSnapshot(mode, snapshot);
   console.log(`  Wrote runtime cache: ${filePath}`);
 
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (hasBlobStorage()) {
     await saveRankingsSnapshot(mode, snapshot);
     console.log("  Uploaded to Vercel Blob.");
   }
@@ -95,9 +96,9 @@ async function syncRankings() {
   await persistSnapshot("live", live);
 
   console.log("\nRankings synced.");
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!hasBlobStorage()) {
     console.log(
-      "Tip: set BLOB_READ_WRITE_TOKEN to also upload snapshots to Vercel Blob.",
+      "Tip: set BLOB_STORE_ID (Vercel linked store) or BLOB_READ_WRITE_TOKEN to upload snapshots to Blob.",
     );
   }
 }

@@ -14,7 +14,8 @@
     "live": "Live",
     "june11": "11 June",
     "april": "1 April",
-    "january": "19 January"
+    "january": "19 January",
+    "november19": "19 November 2025"
   },
   "teamSelector": {
     "label": "Select team",
@@ -101,13 +102,17 @@
   "about": {
     "title": "About CupPath",
     "methodologyTitle": "Methodology",
-    "methodologyBody": "CupPath measures how difficult each team's World Cup path is using FIFA ranking points. Higher opponent points mean a harder match. Average path difficulty is the mean of opponent points across played and scheduled matches.",
+    "methodologyBody": "CupPath measures how difficult each team's World Cup path is using FIFA ranking points. Higher opponent points mean a harder match. Average path difficulty is the mean of opponent points across the rounds you choose to include.\n\nA team is marked Eliminated after a knockout loss (including extra time and penalties) or when it fails to advance from the group stage (top two per group plus the eight best third-place teams).",
+    "comparisonTitle": "Why eliminated teams are not ranked together",
+    "comparisonBody": "The # column on Compare—and the hardest-path rank on Analysis—only compare teams that reached the same stage of the tournament as the rounds included in your averages.\n\nThat is intentional. A side knocked out in the group played three group matches. A quarter-finalist may have played five or more, often against stronger opposition. Mixing those paths into one leaderboard would compare incomparable averages.\n\nEliminated teams still appear in the comparison table with their averages from the matches they actually played, marked as Eliminated. They simply do not receive a # rank unless they belong to the cohort at your selected stage—for example, if you only count group-stage matches, all 48 teams are comparable again.",
     "rankGapTitle": "Rank gap",
     "rankGapBody": "Rank gap is opponent rank minus team rank. A negative gap means a harder opponent (they are ranked higher). A positive gap means an easier opponent.",
+    "stagesTitle": "Stage filters",
+    "stagesBody": "Count matches from lets you choose which rounds feed the averages—group only, through the final, or anything in between. The furthest round selected defines the comparison cohort for the # rank.\n\nOn Compare, Show teams narrows the table to sides that reached at least that round. You cannot show teams eliminated before the furthest round in your averages, because they never played those matches. Your ranking-mode choice is remembered when you switch between Analysis and Compare.",
     "dataTitle": "Data sources",
     "dataBody": "Match data comes from openfootball/worldcup.json (2026). FIFA rankings come from the World Football Ranking API on RapidAPI, cached hourly in Vercel Blob.",
     "rankingModesTitle": "Ranking modes",
-    "rankingModesBody": "Ranking snapshots match FIFA release dates: 19 January, 1 April, and 11 June 2026. Live mode uses the current FIFA ranking and refreshes hourly in production."
+    "rankingModesBody": "19 November 2025 is the ranking FIFA used to seed the World Cup draw. On that date each nation was assigned to a pot before groups were drawn, so this snapshot answers how strong your opponents looked on paper before the tournament started.\n\nWe also offer snapshots from 19 January, 1 April, and 11 June 2026—useful for tracking how opponent strength looked at different points in the cycle—and Live mode, which uses the current FIFA ranking and refreshes hourly in production."
   },
   "results": {
     "W": "W",

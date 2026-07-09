@@ -11,9 +11,11 @@ export default async function AboutPage() {
 
   const sections = [
     { title: t("methodologyTitle"), body: t("methodologyBody") },
+    { title: t("comparisonTitle"), body: t("comparisonBody") },
     { title: t("rankGapTitle"), body: t("rankGapBody") },
-    { title: t("dataTitle"), body: t("dataBody") },
+    { title: t("stagesTitle"), body: t("stagesBody") },
     { title: t("rankingModesTitle"), body: t("rankingModesBody") },
+    { title: t("dataTitle"), body: t("dataBody") },
   ];
 
   return (
@@ -27,7 +29,11 @@ export default async function AboutPage() {
             <CardTitle className="text-hermes-800">{section.title}</CardTitle>
           </CardHeader>
           <CardContent className="pt-4">
-            <p className="leading-7 text-muted-foreground">{section.body}</p>
+            <div className="space-y-4 leading-7 text-muted-foreground">
+              {section.body.split("\n\n").map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
           </CardContent>
         </Card>
       ))}

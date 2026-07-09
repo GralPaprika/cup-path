@@ -18,11 +18,13 @@ import {
 import januarySeed from "../data/rankings/seed-january.json";
 import aprilSeed from "../data/rankings/seed-april.json";
 import june11Seed from "../data/rankings/seed-june11.json";
+import november19Seed from "../data/rankings/seed-november19.json";
 
 const SEED_FALLBACKS: Record<SnapshotMode, RankingsSnapshot> = {
   january: januarySeed as RankingsSnapshot,
   april: aprilSeed as RankingsSnapshot,
   june11: june11Seed as RankingsSnapshot,
+  november19: november19Seed as RankingsSnapshot,
 };
 
 function loadEnvFile(fileName: string): void {

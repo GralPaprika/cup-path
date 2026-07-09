@@ -5,6 +5,7 @@ export const BLOB_PATHS: Record<RankingMode, string> = {
   january: "rankings/snapshot-january.json",
   april: "rankings/snapshot-april.json",
   june11: "rankings/snapshot-june11.json",
+  november19: "rankings/snapshot-november19.json",
 };
 
 export const RUNTIME_FILES: Record<RankingMode, string> = {
@@ -12,6 +13,7 @@ export const RUNTIME_FILES: Record<RankingMode, string> = {
   january: "january.json",
   april: "april.json",
   june11: "june11.json",
+  november19: "november19.json",
 };
 
 export function rankingsCacheTag(mode: RankingMode): string {

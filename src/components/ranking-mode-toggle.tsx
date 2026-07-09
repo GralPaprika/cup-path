@@ -10,7 +10,13 @@ interface RankingModeToggleProps {
   variant?: "grid" | "compact";
 }
 
-const MODES: RankingMode[] = ["live", "june11", "april", "january"];
+const MODES: RankingMode[] = [
+  "live",
+  "june11",
+  "april",
+  "january",
+  "november19",
+];
 
 export function RankingModeToggle({
   value,

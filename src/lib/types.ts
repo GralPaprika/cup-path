@@ -1,4 +1,9 @@
-export type RankingMode = "live" | "june11" | "april" | "january";
+export type RankingMode =
+  | "live"
+  | "june11"
+  | "april"
+  | "january"
+  | "november19";
 
 export type PathStage = "group" | "r32" | "r16" | "qf" | "sf" | "final";
 
@@ -33,6 +38,7 @@ export interface RankingsMeta {
   januaryDate: string | null;
   aprilDate: string | null;
   june11Date: string | null;
+  november19Date: string | null;
 }
 
 export interface OpenFootballScore {

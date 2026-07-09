@@ -21,6 +21,7 @@ import liveSeed from "../../../data/rankings/seed-live.json";
 import januarySeed from "../../../data/rankings/seed-january.json";
 import aprilSeed from "../../../data/rankings/seed-april.json";
 import june11Seed from "../../../data/rankings/seed-june11.json";
+import november19Seed from "../../../data/rankings/seed-november19.json";
 
 const RUNTIME_DIR = path.join(process.cwd(), "data", "rankings", "runtime");
 
@@ -29,6 +30,7 @@ const LOCAL_SEEDS: Record<RankingMode, RankingsSnapshot> = {
   january: januarySeed as RankingsSnapshot,
   april: aprilSeed as RankingsSnapshot,
   june11: june11Seed as RankingsSnapshot,
+  november19: november19Seed as RankingsSnapshot,
 };
 
 const REVALIDATE_SECONDS: Record<RankingMode, number | false> = {
@@ -36,6 +38,7 @@ const REVALIDATE_SECONDS: Record<RankingMode, number | false> = {
   january: false,
   april: false,
   june11: false,
+  november19: false,
 };
 
 function normalizeSnapshot(
@@ -156,12 +159,14 @@ export async function getRankingsMeta(): Promise<RankingsMeta> {
   const january = await getRankingsSnapshot("january");
   const april = await getRankingsSnapshot("april");
   const june11 = await getRankingsSnapshot("june11");
+  const november19 = await getRankingsSnapshot("november19");
 
   return {
     liveLastUpdated: live.fetchedAt,
     januaryDate: january.sourceDate,
     aprilDate: april.sourceDate,
     june11Date: june11.sourceDate,
+    november19Date: november19.sourceDate,
   };
 }
 

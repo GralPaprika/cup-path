@@ -14,7 +14,8 @@
     "live": "En vivo",
     "june11": "11 de junio",
     "april": "1 de abril",
-    "january": "19 de enero"
+    "january": "19 de enero",
+    "november19": "19 de noviembre de 2025"
   },
   "teamSelector": {
     "label": "Seleccionar equipo",
@@ -101,13 +102,17 @@
   "about": {
     "title": "Acerca de CupPath",
     "methodologyTitle": "Metodología",
-    "methodologyBody": "CupPath mide qué tan difícil es el camino de cada equipo en el Mundial usando los puntos del ranking FIFA. Más puntos del rival significan un partido más duro. La dificultad media del camino es el promedio de puntos del rival en partidos jugados y programados.",
+    "methodologyBody": "CupPath mide qué tan difícil es el camino de cada equipo en el Mundial usando los puntos del ranking FIFA. Más puntos del rival significan un partido más duro. La dificultad media del camino es el promedio de puntos del rival en las fases que elijas incluir.\n\nUn equipo aparece como Eliminado tras una derrota en eliminatoria (incluida prórroga y penaltis) o cuando no avanza de la fase de grupos (dos primeros por grupo más los ocho mejores terceros).",
+    "comparisonTitle": "Por qué no se comparan juntos los equipos eliminados",
+    "comparisonBody": "La columna # en Comparar —y el ranking de camino más duro en Análisis— solo comparan equipos que llegaron a la misma fase del torneo que las rondas incluidas en tus promedios.\n\nEs deliberado. Un equipo eliminado en grupos jugó tres partidos de fase. Un cuartofinalista puede haber jugado cinco o más, a menudo contra rivales más fuertes. Mezclar esos caminos en una sola tabla compararía promedios que no son equivalentes.\n\nLos eliminados siguen apareciendo en la tabla con sus promedios de los partidos que sí jugaron, marcados como Eliminado. Simplemente no reciben un # salvo que pertenezcan al grupo comparable en la fase seleccionada —por ejemplo, si solo cuentas la fase de grupos, los 48 equipos vuelven a ser comparables.",
     "rankGapTitle": "Diferencia de ranking",
     "rankGapBody": "La diferencia de ranking es el ranking del rival menos el del equipo. Una diferencia negativa indica un rival más difícil (mejor posicionado). Una positiva indica un rival más accesible.",
+    "stagesTitle": "Filtros por fase",
+    "stagesBody": "Contar partidos desde te permite elegir qué rondas alimentan los promedios —solo grupos, hasta la final, o cualquier punto intermedio. La fase más avanzada seleccionada define el grupo de comparación para el #.\n\nEn Comparar, Mostrar equipos reduce la tabla a selecciones que llegaron al menos a esa ronda. No puedes mostrar equipos eliminados antes de la fase más avanzada en tus promedios, porque nunca jugaron esos partidos. El modo de ranking que elijas se recuerda al cambiar entre Análisis y Comparar.",
     "dataTitle": "Fuentes de datos",
     "dataBody": "Los partidos provienen de openfootball/worldcup.json (2026). Los rankings FIFA vienen de la API World Football Ranking en RapidAPI, con caché horaria en Vercel Blob.",
     "rankingModesTitle": "Modos de ranking",
-    "rankingModesBody": "Las instantáneas coinciden con fechas de publicación FIFA: 19 de enero, 1 de abril y 11 de junio de 2026. El modo en vivo usa el ranking FIFA actual y se actualiza cada hora en producción."
+    "rankingModesBody": "El 19 de noviembre de 2025 es el ranking que FIFA usó para sortear el Mundial. Ese día cada selección fue asignada a un bombo antes de armar los grupos, así que esta instantánea responde qué tan fuertes parecían tus rivales sobre el papel antes de que empezara el torneo.\n\nTambién ofrecemos instantáneas del 19 de enero, 1 de abril y 11 de junio de 2026 —útiles para ver cómo evolucionó la fuerza de los rivales— y el modo En vivo, que usa el ranking FIFA actual y se actualiza cada hora en producción."
   },
   "results": {
     "W": "G",

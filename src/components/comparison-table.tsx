@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import type { ComparisonEntry, PathStage, RankingMode } from "@/lib/types";
 import { useTranslations } from "next-intl";
-import { TeamFlag } from "@/components/team-flag";
+import { TeamFlag, TeamLabel } from "@/components/team-flag";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -89,8 +89,8 @@ function SortButton({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition-colors",
         active
-          ? "bg-emerald-100 text-emerald-900"
-          : "text-muted-foreground hover:bg-muted/70 hover:text-emerald-900",
+          ? "bg-hermes-50 text-hermes-800"
+          : "text-muted-foreground hover:bg-muted/70 hover:text-hermes-800",
       )}
     >
       {children}
@@ -192,8 +192,8 @@ export function ComparisonTable({
                     key={entry.team.id}
                     className={cn(
                       "transition-colors",
-                      isSelected && "bg-amber-50/80 font-medium",
-                      linkToAnalysis && "cursor-pointer hover:bg-emerald-50/60",
+                      isSelected && "bg-pitch-50/80 font-medium",
+                      linkToAnalysis && "cursor-pointer hover:bg-hermes-50/60",
                     )}
                     onClick={
                       linkToAnalysis
@@ -222,17 +222,12 @@ export function ComparisonTable({
                       {entry.rankAmongTeams ?? "—"}
                     </TableCell>
                     <TableCell className="w-[1%] whitespace-nowrap px-4 py-3">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <TeamFlag team={entry.team} size="sm" />
-                        <div className="min-w-0 leading-tight">
-                          <div className="truncate font-medium">
-                            {entry.team.displayName}
-                          </div>
-                          <div className="mt-0.5 font-mono text-xs text-muted-foreground">
-                            {entry.team.id}
-                          </div>
-                        </div>
-                      </div>
+                      <TeamLabel
+                        team={entry.team}
+                        showCode
+                        flagSize="sm"
+                        nameClassName="truncate font-medium"
+                      />
                     </TableCell>
                     <TableCell className="w-[1%] whitespace-nowrap px-4 py-3 text-right font-mono tabular-nums">
                       {formatFifaPoints(entry.avgOpponentPoints)}
@@ -251,7 +246,7 @@ export function ComparisonTable({
                         className={cn(
                           "min-w-[5.5rem] justify-center",
                           !entry.isEliminated &&
-                            "bg-emerald-600 text-white hover:bg-emerald-600",
+                            "bg-pitch-500 text-white hover:bg-pitch-500",
                         )}
                       >
                         {entry.isEliminated
@@ -291,9 +286,9 @@ export function ComparisonTable({
   }
 
   return (
-    <Card className="border-emerald-200/60 shadow-sm">
-      <CardHeader className="border-b bg-emerald-50/50">
-        <CardTitle className="text-emerald-950">{t("title")}</CardTitle>
+    <Card className="border-hermes-100/60 shadow-sm">
+      <CardHeader className="border-b bg-hermes-50/50">
+        <CardTitle className="text-hermes-900">{t("title")}</CardTitle>
         <CardDescription>{subtitle}</CardDescription>
       </CardHeader>
       <CardContent className="pt-6">{table}</CardContent>

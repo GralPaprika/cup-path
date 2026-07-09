@@ -34,8 +34,8 @@ function formatGap(value: number | null): string {
 
 function gapColor(value: number | null): string {
   if (value === null) return "";
-  if (value < 0) return "text-red-600 font-semibold";
-  if (value > 10) return "text-emerald-600 font-semibold";
+  if (value < 0) return "text-torch-600 font-semibold";
+  if (value > 10) return "text-pitch-500 font-semibold";
   return "";
 }
 
@@ -56,9 +56,9 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
   }
 
   return (
-    <Card className="border-emerald-200/60 shadow-sm">
-      <CardHeader className="border-b bg-emerald-50/50">
-        <CardTitle className="text-emerald-950">{t("title")}</CardTitle>
+    <Card className="border-hermes-100/60 shadow-sm">
+      <CardHeader className="border-b bg-hermes-50/50">
+        <CardTitle className="text-hermes-900">{t("title")}</CardTitle>
       </CardHeader>
       <CardContent className="overflow-x-auto p-0">
         <Table>
@@ -80,7 +80,7 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
               <TableRow
                 key={`${match.date}-${match.opponent.id}-${match.round}`}
                 className={cn(
-                  match.isNext && included && "bg-amber-50/80",
+                  match.isNext && included && "bg-pitch-50/80",
                   !included && "opacity-40",
                 )}
               >
@@ -108,14 +108,14 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
                       variant={resultVariant(match.result)}
                       className={
                         match.result === "W"
-                          ? "bg-emerald-600 text-white hover:bg-emerald-600"
+                          ? "bg-pitch-500 text-white hover:bg-pitch-500"
                           : undefined
                       }
                     >
                       {results(match.result)} {match.scoreLabel}
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="border-amber-400 text-amber-700">
+                    <Badge variant="outline" className="border-pitch-400 text-pitch-700">
                       {match.isNext ? `→ ${t("upcoming")}` : t("upcoming")}
                     </Badge>
                   )}

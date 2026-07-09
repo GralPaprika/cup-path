@@ -1,4 +1,8 @@
+"use client";
+
 import type { Team } from "@/lib/types";
+import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
+import { useTranslations } from "next-intl";
 
 interface TeamFlagProps {
   team: Pick<Team, "id" | "flagUrl" | "displayName">;
@@ -38,6 +42,9 @@ export function TeamLabel({
   className = "",
   nameClassName = "",
 }: TeamLabelProps) {
+  const teamNames = useTranslations("teams");
+  const displayName = getTeamDisplayName(teamNames, team);
+
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <TeamFlag team={team} size={flagSize} />
@@ -46,7 +53,7 @@ export function TeamLabel({
           {team.id}
         </span>
       )}
-      <span className={nameClassName}>{team.displayName}</span>
+      <span className={nameClassName}>{displayName}</span>
     </span>
   );
 }

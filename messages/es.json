@@ -1,0 +1,124 @@
+{
+  "app": {
+    "name": "CupPath",
+    "tagline": "Análisis de dificultad de rivales en el Mundial"
+  },
+  "nav": {
+    "home": "Análisis",
+    "compare": "Comparar",
+    "about": "Acerca de",
+    "language": "Idioma"
+  },
+  "rankingMode": {
+    "label": "Modo de ranking",
+    "live": "En vivo",
+    "june11": "11 de junio",
+    "april": "1 de abril",
+    "january": "19 de enero"
+  },
+  "teamSelector": {
+    "label": "Seleccionar equipo",
+    "placeholder": "Elige un país",
+    "searchPlaceholder": "Buscar por nombre o código FIFA…",
+    "noResults": "Ningún equipo coincide con tu búsqueda"
+  },
+  "summary": {
+    "teamProfile": "Perfil del equipo",
+    "pathAnalysis": "Análisis del camino",
+    "fifaRank": "Ranking FIFA",
+    "fifaPoints": "Puntos FIFA",
+    "worldCupGroup": "Grupo del Mundial",
+    "confederation": "Confederación",
+    "avgDifficulty": "Dificultad media del rival",
+    "avgRank": "Ranking medio del rival",
+    "hardestPathRank": "Ranking de camino más duro",
+    "hardestPathRankOf": "#{rank} / {total}",
+    "hardestPathRankCohort": "Entre equipos en {stage}",
+    "status": "Estado",
+    "active": "Activo",
+    "eliminated": "Eliminado",
+    "nextOpponent": "Próximo rival",
+    "noNextOpponent": "Ninguno",
+    "points": "pts",
+    "matchesPlayed": "Partidos",
+    "averagesFrom": "promedios de {count} partidos"
+  },
+  "analysis": {
+    "title": "Análisis del camino en el Mundial",
+    "subtitle": "Mide qué tan difícil es el camino de un equipo hacia la final, según los puntos FIFA de cada rival enfrentado.",
+    "rankingSnapshot": "Instantánea del ranking FIFA"
+  },
+  "pathTable": {
+    "title": "Camino en el torneo",
+    "round": "Fase",
+    "opponent": "Rival",
+    "points": "Puntos",
+    "rank": "Ranking",
+    "rankGap": "Dif. de ranking",
+    "result": "Resultado",
+    "noData": "Sin datos de ranking",
+    "upcoming": "Próximo"
+  },
+  "compare": {
+    "title": "Comparación de dificultad del camino",
+    "subtitle": "Ordena equipos por fuerza del rival. El # compara pares en la fase más avanzada incluida en los promedios.",
+    "rankingSnapshot": "Instantánea del ranking FIFA",
+    "subtitleByPoints": "Ordenado por puntos FIFA medios del rival (más alto = camino más duro)",
+    "subtitleByRank": "Ordenado por ranking FIFA medio del rival (más bajo = camino más duro)",
+    "rankCohortHint": "El # rankea entre {count} equipos en {stage} o más",
+    "team": "Equipo",
+    "avgPoints": "Pts. medios riv.",
+    "avgRank": "Ranking med. riv.",
+    "status": "Estado",
+    "delta": "Delta vs seleccionado",
+    "noTeams": "Ningún equipo llegó a esta fase con los datos actuales del torneo.",
+    "selectTeamHint": "Selecciona un equipo en Análisis para ver deltas",
+    "teamRound": {
+      "label": "Mostrar equipos",
+      "hint": "No se pueden mostrar equipos eliminados antes de la fase más avanzada en los promedios",
+      "teamCount": "{count} equipos",
+      "loadingCount": "…",
+      "groupShort": "Todos",
+      "round32Short": "Diec.",
+      "round16Short": "Oct.",
+      "quarterFinalShort": "CF",
+      "semiFinalShort": "SF",
+      "finalShort": "Final"
+    },
+    "stages": {
+      "label": "Incluir fases",
+      "includeLabel": "Contar partidos desde",
+      "includeHint": "Qué fases aportan a los promedios",
+      "selectAll": "Seleccionar todo",
+      "groupStage": "Grupos",
+      "round32": "Dieciseisavos",
+      "round16": "Octavos",
+      "quarterFinal": "Cuartos",
+      "semiFinal": "Semifinal",
+      "final": "Final"
+    }
+  },
+  "about": {
+    "title": "Acerca de CupPath",
+    "methodologyTitle": "Metodología",
+    "methodologyBody": "CupPath mide qué tan difícil es el camino de cada equipo en el Mundial usando los puntos del ranking FIFA. Más puntos del rival significan un partido más duro. La dificultad media del camino es el promedio de puntos del rival en partidos jugados y programados.",
+    "rankGapTitle": "Diferencia de ranking",
+    "rankGapBody": "La diferencia de ranking es el ranking del rival menos el del equipo. Una diferencia negativa indica un rival más difícil (mejor posicionado). Una positiva indica un rival más accesible.",
+    "dataTitle": "Fuentes de datos",
+    "dataBody": "Los partidos provienen de openfootball/worldcup.json (2026). Los rankings FIFA vienen de la API World Football Ranking en RapidAPI, con caché horaria en Vercel Blob.",
+    "rankingModesTitle": "Modos de ranking",
+    "rankingModesBody": "Las instantáneas coinciden con fechas de publicación FIFA: 19 de enero, 1 de abril y 11 de junio de 2026. El modo en vivo usa el ranking FIFA actual y se actualiza cada hora en producción."
+  },
+  "results": {
+    "W": "G",
+    "D": "E",
+    "L": "P"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Algo salió mal",
+    "group": "Grupo {group}",
+    "localeEs": "Español",
+    "localeEn": "English"
+  }
+}

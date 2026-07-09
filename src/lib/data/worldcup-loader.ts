@@ -31,6 +31,12 @@ export function getMatchWinner(match: OpenFootballMatch): string | null {
 
   const [home, away] = match.score.ft;
   if (home === away) {
+    if (match.score.et) {
+      const [etHome, etAway] = match.score.et;
+      if (etHome !== etAway) {
+        return etHome > etAway ? match.team1 : match.team2;
+      }
+    }
     if (match.score.p) {
       const [pHome, pAway] = match.score.p;
       return pHome > pAway ? match.team1 : match.team2;

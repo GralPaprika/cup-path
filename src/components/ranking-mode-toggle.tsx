@@ -10,12 +10,7 @@ interface RankingModeToggleProps {
   variant?: "grid" | "compact";
 }
 
-const MODES: { id: RankingMode; icon: string }[] = [
-  { id: "live", icon: "⚡" },
-  { id: "june11", icon: "🏟️" },
-  { id: "april", icon: "🌱" },
-  { id: "january", icon: "📅" },
-];
+const MODES: RankingMode[] = ["live", "june11", "april", "january"];
 
 export function RankingModeToggle({
   value,
@@ -29,18 +24,17 @@ export function RankingModeToggle({
       <div className="flex flex-wrap gap-1.5 rounded-xl border bg-white p-1 shadow-sm">
         {MODES.map((mode) => (
           <button
-            key={mode.id}
+            key={mode}
             type="button"
-            onClick={() => onChange(mode.id)}
+            onClick={() => onChange(mode)}
             className={cn(
-              "inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all sm:flex-none",
-              value === mode.id
-                ? "bg-emerald-600 text-white shadow-sm"
-                : "text-muted-foreground hover:bg-emerald-50 hover:text-emerald-900",
+              "inline-flex flex-1 items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-all sm:flex-none",
+              value === mode
+                ? "bg-pitch-500 text-white shadow-sm"
+                : "text-muted-foreground hover:bg-hermes-50 hover:text-hermes-800",
             )}
           >
-            <span className="text-base leading-none">{mode.icon}</span>
-            <span>{t(mode.id)}</span>
+            {t(mode)}
           </button>
         ))}
       </div>
@@ -55,18 +49,17 @@ export function RankingModeToggle({
       <div className="grid gap-2 sm:grid-cols-2">
         {MODES.map((mode) => (
           <button
-            key={mode.id}
+            key={mode}
             type="button"
-            onClick={() => onChange(mode.id)}
+            onClick={() => onChange(mode)}
             className={cn(
               "rounded-xl border p-3 text-left transition-all",
-              value === mode.id
-                ? "border-emerald-600 bg-emerald-50 shadow-sm ring-1 ring-emerald-600/20"
-                : "border-border bg-card hover:border-emerald-300 hover:bg-emerald-50/50",
+              value === mode
+                ? "border-pitch-500 bg-hermes-50 shadow-sm ring-1 ring-pitch-500/20"
+                : "border-border bg-card hover:border-hermes-200 hover:bg-hermes-50/50",
             )}
           >
-            <span className="mb-1 block text-lg">{mode.icon}</span>
-            <span className="block text-sm font-semibold">{t(mode.id)}</span>
+            <span className="block text-sm font-semibold">{t(mode)}</span>
           </button>
         ))}
       </div>

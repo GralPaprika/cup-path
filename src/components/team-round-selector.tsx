@@ -42,7 +42,7 @@ export function TeamRoundSelector({
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{t("hint")}</p>
         </div>
-        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+        <span className="rounded-full bg-hermes-50 px-3 py-1 text-xs font-semibold text-hermes-700">
           {teamCount != null
             ? t("teamCount", { count: teamCount })
             : t("loadingCount")}
@@ -67,9 +67,9 @@ export function TeamRoundSelector({
                   "cursor-not-allowed text-muted-foreground/40 opacity-50",
                 !disabled &&
                   (active
-                    ? "bg-emerald-600 text-white shadow-md"
+                    ? "bg-pitch-500 text-white shadow-md"
                     : isPast
-                      ? "text-emerald-800 hover:bg-emerald-50"
+                      ? "text-hermes-700 hover:bg-hermes-50"
                       : "text-muted-foreground hover:bg-muted/50"),
               )}
             >

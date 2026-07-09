@@ -35,14 +35,14 @@ function StatBlock({
     <div
       className={
         highlight
-          ? "rounded-xl bg-emerald-950 p-4 text-white"
+          ? "rounded-xl bg-hermes-500 p-4 text-white shadow-sm"
           : "rounded-xl border bg-muted/40 p-4"
       }
     >
       <p
         className={
           highlight
-            ? "text-xs font-medium uppercase tracking-wide text-emerald-200"
+            ? "text-xs font-medium uppercase tracking-wide text-hermes-100"
             : "text-xs font-medium uppercase tracking-wide text-muted-foreground"
         }
       >
@@ -93,8 +93,8 @@ export function SummaryCard({
     !includedStages || includedStages.size === PATH_STAGES.length;
 
   return (
-    <Card className="overflow-hidden border-emerald-200/60 shadow-lg shadow-emerald-950/5">
-      <CardHeader className="border-b bg-gradient-to-r from-emerald-50 to-white pb-4">
+    <Card className="overflow-hidden border-hermes-100/60 shadow-lg shadow-hermes-900/5">
+      <CardHeader className="border-b bg-gradient-to-r from-hermes-50 to-white pb-4">
         <CardTitle className="text-2xl">
           <TeamLabel
             team={summary.team}
@@ -169,18 +169,18 @@ export function SummaryCard({
                   className={
                     summary.isEliminated
                       ? ""
-                      : "bg-emerald-600 text-white hover:bg-emerald-600"
+                      : "bg-pitch-500 text-white hover:bg-pitch-500"
                   }
                 >
                   {summary.isEliminated ? t("eliminated") : t("active")}
                 </Badge>
               </div>
             </div>
-            <div className="rounded-xl border border-dashed border-emerald-300 bg-emerald-50/50 p-4 sm:col-span-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-emerald-800/70">
+            <div className="rounded-xl border border-dashed border-hermes-200 bg-hermes-50/50 p-4 sm:col-span-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-hermes-700/70">
                 {t("nextOpponent")}
               </p>
-              <p className="mt-2 text-lg font-semibold text-emerald-950">
+              <p className="mt-2 text-lg font-semibold text-hermes-900">
                 {summary.nextOpponent ? (
                   <TeamLabel team={summary.nextOpponent} showCode flagSize="md" />
                 ) : (

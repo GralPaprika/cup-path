@@ -6,7 +6,7 @@ function StatBlockSkeleton({ highlight = false }: { highlight?: boolean }) {
     <div
       className={
         highlight
-          ? "rounded-xl bg-emerald-950/10 p-4"
+          ? "rounded-xl bg-hermes-900/10 p-4"
           : "rounded-xl border bg-muted/40 p-4"
       }
     >
@@ -18,8 +18,8 @@ function StatBlockSkeleton({ highlight = false }: { highlight?: boolean }) {
 
 export function SummaryCardSkeleton() {
   return (
-    <Card className="overflow-hidden border-emerald-200/60 shadow-lg shadow-emerald-950/5">
-      <CardHeader className="border-b bg-gradient-to-r from-emerald-50 to-white pb-4">
+    <Card className="overflow-hidden border-hermes-100/60 shadow-lg shadow-hermes-900/5">
+      <CardHeader className="border-b bg-gradient-to-r from-hermes-50 to-white pb-4">
         <div className="flex items-center gap-3">
           <Skeleton className="size-10 rounded-full" />
           <div className="space-y-2">
@@ -44,7 +44,7 @@ export function SummaryCardSkeleton() {
             <StatBlockSkeleton />
             <StatBlockSkeleton />
             <StatBlockSkeleton />
-            <div className="rounded-xl border border-dashed border-emerald-300 bg-emerald-50/50 p-4 sm:col-span-2">
+            <div className="rounded-xl border border-dashed border-hermes-200 bg-hermes-50/50 p-4 sm:col-span-2">
               <Skeleton className="h-3 w-28" />
               <Skeleton className="mt-3 h-6 w-40" />
             </div>
@@ -57,8 +57,8 @@ export function SummaryCardSkeleton() {
 
 export function PathTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <Card className="border-emerald-200/60 shadow-sm">
-      <CardHeader className="border-b bg-emerald-50/50">
+    <Card className="border-hermes-100/60 shadow-sm">
+      <CardHeader className="border-b bg-hermes-50/50">
         <Skeleton className="h-6 w-40" />
       </CardHeader>
       <CardContent className="space-y-3 p-4">
@@ -96,8 +96,8 @@ export function ComparisonTableSkeleton({
   showDelta?: boolean;
 }) {
   return (
-    <Card className="border-emerald-200/60 shadow-sm">
-      <CardHeader className="border-b bg-emerald-50/50">
+    <Card className="border-hermes-100/60 shadow-sm">
+      <CardHeader className="border-b bg-hermes-50/50">
         <Skeleton className="h-6 w-56" />
         <Skeleton className="mt-2 h-4 w-80 max-w-full" />
       </CardHeader>
@@ -181,7 +181,7 @@ export function CompareLoadingSkeleton({
 export function PageShellSkeleton() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8">
-      <section className="rounded-2xl border border-emerald-200/60 bg-white/80 p-6 shadow-sm backdrop-blur sm:p-8">
+      <section className="rounded-2xl border border-hermes-100/60 bg-white/80 p-6 shadow-sm backdrop-blur sm:p-8">
         <Skeleton className="h-10 w-80 max-w-full" />
         <Skeleton className="mt-3 h-5 w-96 max-w-full" />
       </section>

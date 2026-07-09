@@ -65,7 +65,7 @@ export function PathStageFilters({
             <button
               type="button"
               onClick={selectAll}
-              className="text-xs font-medium text-emerald-700 hover:text-emerald-900"
+              className="text-xs font-medium text-hermes-600 hover:text-hermes-800"
             >
               {t("selectAll")}
             </button>
@@ -90,7 +90,7 @@ export function PathStageFilters({
                   : "cursor-pointer",
                 !disabled &&
                   (checked
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-950"
+                    ? "border-hermes-200 bg-hermes-50 text-hermes-900"
                     : "border-border bg-background text-muted-foreground hover:bg-muted/40"),
               )}
             >
@@ -99,7 +99,7 @@ export function PathStageFilters({
                 checked={checked}
                 disabled={disabled}
                 onChange={() => toggleStage(stage)}
-                className="size-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="size-4 rounded border-hermes-200 text-pitch-500 focus:ring-pitch-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
               {t(STAGE_LABEL_KEYS[stage])}
             </label>

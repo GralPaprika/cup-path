@@ -3,7 +3,8 @@ export function hasBlobStorage(): boolean {
 }
 
 export function getBlobAccess(): "private" | "public" {
-  return process.env.BLOB_STORE_ID ? "private" : "public";
+  if (process.env.BLOB_ACCESS === "private") return "private";
+  return "public";
 }
 
 export async function readJsonBlob<T>(pathname: string): Promise<T | null> {

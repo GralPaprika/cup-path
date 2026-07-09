@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import type { ComparisonEntry, RankingMode } from "@/lib/types";
+import type { ComparisonEntry, PathStage, RankingMode } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import { TeamFlag } from "@/components/team-flag";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,15 @@ import { formatFifaPoints } from "@/lib/format";
 
 export type ComparisonSortKey = "points" | "rank";
 
+const COHORT_STAGE_KEYS: Record<PathStage, string> = {
+  group: "groupStage",
+  r32: "round32",
+  r16: "round16",
+  qf: "quarterFinal",
+  sf: "semiFinal",
+  final: "final",
+};
+
 interface ComparisonTableProps {
   entries: ComparisonEntry[];
   mode: RankingMode;
@@ -35,6 +44,8 @@ interface ComparisonTableProps {
   sortable?: boolean;
   linkToAnalysis?: boolean;
   embedded?: boolean;
+  cohortStage?: PathStage;
+  cohortSize?: number;
 }
 
 function formatDelta(value: number | null): string {
@@ -101,9 +112,12 @@ export function ComparisonTable({
   sortable = true,
   linkToAnalysis = true,
   embedded = false,
+  cohortStage,
+  cohortSize,
 }: ComparisonTableProps) {
   const router = useRouter();
   const t = useTranslations("compare");
+  const stageLabels = useTranslations("compare.stages");
   const summary = useTranslations("summary");
   const [sortKey, setSortKey] = useState<ComparisonSortKey>("points");
 
@@ -114,6 +128,14 @@ export function ComparisonTable({
 
   const subtitle =
     sortKey === "points" ? t("subtitleByPoints") : t("subtitleByRank");
+
+  const cohortHint =
+    cohortStage && cohortSize
+      ? t("rankCohortHint", {
+          count: cohortSize,
+          stage: stageLabels(COHORT_STAGE_KEYS[cohortStage]),
+        })
+      : null;
 
   const table = (
     <div className={cn("overflow-x-auto", !embedded && "rounded-xl border")}>
@@ -161,7 +183,7 @@ export function ComparisonTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedEntries.map((entry, index) => {
+              {sortedEntries.map((entry) => {
                 const isSelected = entry.team.id === selectedTeamId;
                 const analysisHref = `/?team=${entry.team.id}&mode=${mode}`;
 
@@ -197,7 +219,7 @@ export function ComparisonTable({
                     }
                   >
                     <TableCell className="w-[1%] whitespace-nowrap px-4 py-3 text-center font-mono text-muted-foreground">
-                      {index + 1}
+                      {entry.rankAmongTeams ?? "—"}
                     </TableCell>
                     <TableCell className="w-[1%] whitespace-nowrap px-4 py-3">
                       <div className="flex min-w-0 items-center gap-3">
@@ -253,7 +275,10 @@ export function ComparisonTable({
   if (embedded) {
     return (
       <div className="px-4 pb-4 sm:px-6 sm:pb-6">
-        <p className="mb-4 text-sm text-muted-foreground">{subtitle}</p>
+        <div className="mb-4 space-y-1 text-sm text-muted-foreground">
+          <p>{subtitle}</p>
+          {cohortHint && <p>{cohortHint}</p>}
+        </div>
         {entries.length === 0 ? (
           <p className="py-12 text-center text-sm text-muted-foreground">
             {t("noTeams")}

@@ -183,6 +183,7 @@ export function buildComparison(
   summaries: TeamPathSummary[],
   selectedTeamId?: string,
   stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
+  cohortTeamIds?: Set<string>,
 ) {
   const entries = summaries.map((summary) => {
     const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
@@ -198,19 +199,31 @@ export function buildComparison(
     };
   });
 
-  entries.sort((a, b) => {
-    const aPoints = a.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
-    const bPoints = b.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
-    return bPoints - aPoints;
-  });
+  const cohort =
+    cohortTeamIds ??
+    new Set(entries.map((entry) => entry.team.id));
+
+  const cohortRanked = [...entries]
+    .filter((entry) => cohort.has(entry.team.id))
+    .sort((a, b) => {
+      const aPoints = a.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
+      const bPoints = b.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
+      return bPoints - aPoints;
+    });
+
+  const rankByTeamId = new Map(
+    cohortRanked.map((entry, index) => [entry.team.id, index + 1]),
+  );
 
   const selectedAvg =
-    entries.find((entry) => entry.team.id === selectedTeamId)?.avgOpponentPoints ??
-    null;
+    selectedTeamId && cohort.has(selectedTeamId)
+      ? entries.find((entry) => entry.team.id === selectedTeamId)
+          ?.avgOpponentPoints ?? null
+      : null;
 
-  return entries.map((entry, index) => ({
+  return entries.map((entry) => ({
     ...entry,
-    rankAmongTeams: index + 1,
+    rankAmongTeams: rankByTeamId.get(entry.team.id) ?? null,
     deltaVsSelected:
       selectedAvg !== null && entry.avgOpponentPoints !== null
         ? entry.avgOpponentPoints - selectedAvg

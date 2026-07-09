@@ -58,10 +58,11 @@
   },
   "compare": {
     "title": "Path difficulty comparison",
-    "subtitle": "Rank teams by opponent strength. Filter which rounds count toward averages and which teams are shown.",
+    "subtitle": "Rank teams by opponent strength. # ranks peers at the furthest round included in averages.",
     "rankingSnapshot": "FIFA ranking snapshot",
     "subtitleByPoints": "Sorted by average opponent FIFA points (higher = harder path)",
     "subtitleByRank": "Sorted by average opponent FIFA rank (lower = harder path)",
+    "rankCohortHint": "# ranks among {count} teams at {stage} or beyond",
     "team": "Team",
     "avgPoints": "Avg opp. points",
     "avgRank": "Avg opp. rank",
@@ -71,7 +72,7 @@
     "selectTeamHint": "Select a team on the Analysis page to see deltas",
     "teamRound": {
       "label": "Show teams",
-      "hint": "Only teams that reached this round or beyond",
+      "hint": "Cannot show teams eliminated before the furthest round in averages",
       "teamCount": "{count} teams",
       "loadingCount": "…",
       "groupShort": "All",

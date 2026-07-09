@@ -48,20 +48,44 @@ export async function getTeamAnalysis(
   };
 }
 
+export interface ComparisonAnalysisResult {
+  comparison: ComparisonEntry[];
+  cohortStage: PathStage;
+  cohortSize: number;
+  maxStageReached?: PathStage;
+}
+
 export async function getComparisonAnalysis(
   mode: RankingMode,
   selectedTeamId?: string,
-  stages?: Set<PathStage>,
+  stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
   teamRound: PathStage = "group",
-): Promise<ComparisonEntry[]> {
+): Promise<ComparisonAnalysisResult> {
   const snapshot = await getRankingsSnapshot(mode);
   const rankings = buildRankingsMap(snapshot);
   let summaries = buildAllTeamSummaries(rankings);
+
+  const cohortStage = getFurthestStage(stages);
+  const cohortTeamIds = getTeamsAtStage(cohortStage);
 
   if (teamRound !== "group") {
     const teamIds = getTeamsAtStage(teamRound);
     summaries = summaries.filter((summary) => teamIds.has(summary.team.id));
   }
 
-  return buildComparison(summaries, selectedTeamId, stages);
+  const comparison = buildComparison(
+    summaries,
+    selectedTeamId,
+    stages,
+    cohortTeamIds,
+  );
+
+  return {
+    comparison,
+    cohortStage,
+    cohortSize: cohortTeamIds.size,
+    maxStageReached: selectedTeamId
+      ? getTeamMaxStageReached(selectedTeamId)
+      : undefined,
+  };
 }

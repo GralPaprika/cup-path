@@ -76,3 +76,21 @@ export function parseTeamRound(value: string | null): PathStage {
   }
   return "group";
 }
+
+export function ensureTeamRoundAtLeast(
+  teamRound: PathStage,
+  minRound: PathStage,
+): PathStage {
+  return stageIndex(teamRound) < stageIndex(minRound) ? minRound : teamRound;
+}
+
+export function syncTeamRoundToStages(
+  teamRound: PathStage,
+  stages: Set<PathStage>,
+): PathStage {
+  const furthest = getFurthestStage(stages);
+  if (stageIndex(teamRound) > stageIndex(furthest)) {
+    return furthest;
+  }
+  return ensureTeamRoundAtLeast(teamRound, furthest);
+}

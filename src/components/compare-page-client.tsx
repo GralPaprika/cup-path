@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ComparisonEntry, PathStage, RankingMode } from "@/lib/types";
-import { parsePathStages, parseTeamRound } from "@/lib/domain/match-stages";
+import {
+  clampPathStages,
+  getFurthestStage,
+  isStageWithinReach,
+  parsePathStages,
+  parseTeamRound,
+  syncTeamRoundToStages,
+} from "@/lib/domain/match-stages";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import {
   PathStageFilters,
@@ -21,12 +28,18 @@ export function ComparePageClient() {
   const selectedTeamId = searchParams.get("team")?.toUpperCase();
   const initialMode = (searchParams.get("mode") as RankingMode) ?? "live";
   const initialStages = parsePathStages(searchParams.get("stages"));
-  const initialTeamRound = parseTeamRound(searchParams.get("teamRound"));
+  const initialTeamRound = syncTeamRoundToStages(
+    parseTeamRound(searchParams.get("teamRound")),
+    initialStages,
+  );
 
   const [mode, setMode] = useState<RankingMode>(initialMode);
   const [stages, setStages] = useState<Set<PathStage>>(initialStages);
   const [teamRound, setTeamRound] = useState<PathStage>(initialTeamRound);
   const [entries, setEntries] = useState<ComparisonEntry[]>([]);
+  const [cohortStage, setCohortStage] = useState<PathStage>("group");
+  const [cohortSize, setCohortSize] = useState(48);
+  const [maxStageReached, setMaxStageReached] = useState<PathStage | undefined>();
   const [teamCounts, setTeamCounts] = useState<Record<PathStage, number> | null>(
     null,
   );
@@ -50,9 +63,31 @@ export function ComparePageClient() {
       const json = (await response.json()) as {
         comparison: ComparisonEntry[];
         teamCounts: Record<PathStage, number>;
+        cohortStage: PathStage;
+        cohortSize: number;
+        maxStageReached?: PathStage;
+        teamRound: PathStage;
       };
+
+      if (
+        json.maxStageReached &&
+        [...stages].some((stage) => !isStageWithinReach(stage, json.maxStageReached!))
+      ) {
+        setStages(clampPathStages(stages, json.maxStageReached));
+        return;
+      }
+
+      const syncedTeamRound = syncTeamRoundToStages(json.teamRound, stages);
+      if (syncedTeamRound !== teamRound || json.teamRound !== syncedTeamRound) {
+        setTeamRound(syncedTeamRound);
+        return;
+      }
+
       setEntries(json.comparison);
       setTeamCounts(json.teamCounts);
+      setCohortStage(json.cohortStage);
+      setCohortSize(json.cohortSize);
+      setMaxStageReached(json.maxStageReached);
     } catch {
       setError(t("error"));
     } finally {
@@ -60,9 +95,24 @@ export function ComparePageClient() {
     }
   }, [mode, selectedTeamId, stages, teamRound, t]);
 
+  function handleStagesChange(next: Set<PathStage>) {
+    setStages(next);
+    setTeamRound((current) => syncTeamRoundToStages(current, next));
+  }
+
+  function handleTeamRoundChange(next: PathStage) {
+    setTeamRound(syncTeamRoundToStages(next, stages));
+  }
+
+  const minTeamRound = getFurthestStage(stages);
+
   useEffect(() => {
     loadComparison();
   }, [loadComparison]);
+
+  useEffect(() => {
+    setMaxStageReached(undefined);
+  }, [selectedTeamId]);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -92,12 +142,17 @@ export function ComparePageClient() {
             <section className="rounded-xl border border-emerald-100 bg-white/90 p-4 shadow-sm">
               <TeamRoundSelector
                 value={teamRound}
-                onChange={setTeamRound}
+                onChange={handleTeamRoundChange}
                 teamCount={teamCounts?.[teamRound]}
+                minStage={minTeamRound}
               />
             </section>
             <section className="rounded-xl border border-emerald-100 bg-white/90 p-4 shadow-sm">
-              <PathStageFilters value={stages} onChange={setStages} />
+              <PathStageFilters
+                value={stages}
+                onChange={handleStagesChange}
+                maxStageReached={maxStageReached}
+              />
             </section>
           </div>
 
@@ -125,6 +180,8 @@ export function ComparePageClient() {
             mode={mode}
             selectedTeamId={selectedTeamId}
             showDelta={Boolean(selectedTeamId)}
+            cohortStage={cohortStage}
+            cohortSize={cohortSize}
             embedded
           />
         )}

@@ -1,7 +1,11 @@
 "use client";
 
 import type { PathStage } from "@/lib/types";
-import { PATH_STAGES } from "@/lib/domain/match-stages";
+import {
+  isStageWithinReach,
+  PATH_STAGES,
+  stageIndex,
+} from "@/lib/domain/match-stages";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +13,7 @@ interface TeamRoundSelectorProps {
   value: PathStage;
   onChange: (stage: PathStage) => void;
   teamCount?: number;
+  minStage?: PathStage;
 }
 
 const SHORT_LABEL_KEYS: Record<PathStage, string> = {
@@ -24,6 +29,7 @@ export function TeamRoundSelector({
   value,
   onChange,
   teamCount,
+  minStage = "group",
 }: TeamRoundSelectorProps) {
   const t = useTranslations("compare.teamRound");
 
@@ -46,20 +52,25 @@ export function TeamRoundSelector({
       <div className="relative flex rounded-xl border bg-white p-1 shadow-sm">
         {PATH_STAGES.map((stage, index) => {
           const active = value === stage;
-          const isPast = PATH_STAGES.indexOf(value) >= index;
+          const isPast = stageIndex(value) >= index;
+          const disabled = !isStageWithinReach(stage, minStage);
 
           return (
             <button
               key={stage}
               type="button"
+              disabled={disabled}
               onClick={() => onChange(stage)}
               className={cn(
                 "relative z-10 flex-1 rounded-lg px-1.5 py-2.5 text-center text-[11px] font-semibold transition-all sm:px-2 sm:text-xs",
-                active
-                  ? "bg-emerald-600 text-white shadow-md"
-                  : isPast
-                    ? "text-emerald-800 hover:bg-emerald-50"
-                    : "text-muted-foreground hover:bg-muted/50",
+                disabled &&
+                  "cursor-not-allowed text-muted-foreground/40 opacity-50",
+                !disabled &&
+                  (active
+                    ? "bg-emerald-600 text-white shadow-md"
+                    : isPast
+                      ? "text-emerald-800 hover:bg-emerald-50"
+                      : "text-muted-foreground hover:bg-muted/50"),
               )}
             >
               {t(SHORT_LABEL_KEYS[stage])}

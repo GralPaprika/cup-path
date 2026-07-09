@@ -102,7 +102,7 @@ export interface ComparisonEntry {
   avgOpponentPoints: number | null;
   avgOpponentRank: number | null;
   isEliminated: boolean;
-  rankAmongTeams: number;
+  rankAmongTeams: number | null;
   deltaVsSelected: number | null;
 }
 

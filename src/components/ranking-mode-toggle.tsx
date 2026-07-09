@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 interface RankingModeToggleProps {
   value: RankingMode;
   onChange: (mode: RankingMode) => void;
+  variant?: "grid" | "compact";
 }
 
 const MODES: { id: RankingMode; icon: string }[] = [
@@ -16,8 +17,35 @@ const MODES: { id: RankingMode; icon: string }[] = [
   { id: "january", icon: "📅" },
 ];
 
-export function RankingModeToggle({ value, onChange }: RankingModeToggleProps) {
+export function RankingModeToggle({
+  value,
+  onChange,
+  variant = "grid",
+}: RankingModeToggleProps) {
   const t = useTranslations("rankingMode");
+
+  if (variant === "compact") {
+    return (
+      <div className="flex flex-wrap gap-1.5 rounded-xl border bg-white p-1 shadow-sm">
+        {MODES.map((mode) => (
+          <button
+            key={mode.id}
+            type="button"
+            onClick={() => onChange(mode.id)}
+            className={cn(
+              "inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all sm:flex-none",
+              value === mode.id
+                ? "bg-emerald-600 text-white shadow-sm"
+                : "text-muted-foreground hover:bg-emerald-50 hover:text-emerald-900",
+            )}
+          >
+            <span className="text-base leading-none">{mode.icon}</span>
+            <span>{t(mode.id)}</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

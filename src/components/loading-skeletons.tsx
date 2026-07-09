@@ -88,7 +88,7 @@ export function PathTableSkeleton({ rows = 5 }: { rows?: number }) {
   );
 }
 
-export function ComparisonChartSkeleton({
+export function ComparisonTableSkeleton({
   rows = 12,
   showDelta = false,
 }: {
@@ -101,21 +101,7 @@ export function ComparisonChartSkeleton({
         <Skeleton className="h-6 w-56" />
         <Skeleton className="mt-2 h-4 w-80 max-w-full" />
       </CardHeader>
-      <CardContent className="space-y-6 pt-6">
-        <div className="hidden space-y-4 lg:block">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex justify-between">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="size-5 rounded-full" />
-                  <Skeleton className="h-4 w-28" />
-                </div>
-                <Skeleton className="h-4 w-16" />
-              </div>
-              <Skeleton className="h-2.5 w-full rounded-full" />
-            </div>
-          ))}
-        </div>
+      <CardContent className="pt-6">
         <div className="space-y-3 rounded-xl border p-4">
           <div
             className={`grid gap-3 border-b pb-3 ${showDelta ? "grid-cols-6" : "grid-cols-5"}`}
@@ -146,12 +132,50 @@ export function ComparisonChartSkeleton({
   );
 }
 
+/** @deprecated Use ComparisonTableSkeleton */
+export const ComparisonChartSkeleton = ComparisonTableSkeleton;
+
 export function CompareLoadingSkeleton({
   showDelta = false,
+  embedded = false,
 }: {
   showDelta?: boolean;
+  embedded?: boolean;
 }) {
-  return <ComparisonChartSkeleton rows={48} showDelta={showDelta} />;
+  if (embedded) {
+    return (
+      <div className="space-y-4 px-4 py-2 sm:px-6">
+        <div className="h-4 w-64 animate-pulse rounded bg-muted" />
+        <div className="space-y-3 rounded-xl border p-4">
+          <div
+            className={`grid gap-3 border-b pb-3 ${showDelta ? "grid-cols-6" : "grid-cols-5"}`}
+          >
+            {Array.from({ length: showDelta ? 6 : 5 }).map((_, index) => (
+              <Skeleton key={index} className="h-4 w-full" />
+            ))}
+          </div>
+          {Array.from({ length: 10 }).map((_, row) => (
+            <div
+              key={row}
+              className={`grid items-center gap-3 ${showDelta ? "grid-cols-6" : "grid-cols-5"}`}
+            >
+              <Skeleton className="h-4 w-6" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="size-5 rounded-full" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <Skeleton className="ml-auto h-4 w-12" />
+              <Skeleton className="ml-auto h-4 w-8" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+              {showDelta && <Skeleton className="ml-auto h-4 w-10" />}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return <ComparisonTableSkeleton rows={48} showDelta={showDelta} />;
 }
 
 export function PageShellSkeleton() {

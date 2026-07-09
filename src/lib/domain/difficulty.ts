@@ -1,5 +1,7 @@
 import type {
+  ComparisonEntry,
   MatchDifficulty,
+  PathStage,
   RankingEntry,
   Team,
   TeamPathSummary,
@@ -9,6 +11,7 @@ import {
   getNextOpponent,
   isTeamEliminated,
 } from "@/lib/domain/path-builder";
+import { getMatchStage, DEFAULT_PATH_STAGES, getFurthestStage, PATH_STAGES } from "@/lib/domain/match-stages";
 import { enrichTeam, getAllTeams, getTeamById } from "@/lib/data/team-registry";
 
 function average(values: number[]): number | null {
@@ -18,6 +21,29 @@ function average(values: number[]): number | null {
 
 function withFlag(team: Team, entry?: RankingEntry): Team {
   return enrichTeam(team, entry?.flagUrl);
+}
+
+export function computeFilteredAverages(
+  matches: MatchDifficulty[],
+  stages: Set<PathStage>,
+): { avgOpponentPoints: number | null; avgOpponentRank: number | null } {
+  const filtered = matches.filter((match) => {
+    const stage = getMatchStage(match.round);
+    return stage !== null && stages.has(stage);
+  });
+
+  const opponentPoints = filtered
+    .map((match) => match.opponentPoints)
+    .filter((value): value is number => value !== null);
+
+  const opponentRanks = filtered
+    .map((match) => match.opponentRank)
+    .filter((value): value is number => value !== null);
+
+  return {
+    avgOpponentPoints: average(opponentPoints),
+    avgOpponentRank: average(opponentRanks),
+  };
 }
 
 export function buildTeamPathSummary(
@@ -105,31 +131,89 @@ export function buildAllTeamSummaries(
   return summaries;
 }
 
+export interface HardestPathRankResult {
+  rank: number | null;
+  cohortSize: number;
+  cohortStage: PathStage;
+}
+
 export function getHardestPathRank(
   summaries: TeamPathSummary[],
   teamId: string,
-): number | null {
-  const index = summaries.findIndex((summary) => summary.team.id === teamId);
-  return index >= 0 ? index + 1 : null;
+  stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
+  cohortTeamIds: Set<string>,
+): HardestPathRankResult {
+  const cohortStage = getFurthestStage(stages);
+  const ranked = summaries
+    .filter((summary) => cohortTeamIds.has(summary.team.id))
+    .map((summary) => ({
+      teamId: summary.team.id,
+      avg:
+        computeFilteredAverages(summary.matches, stages).avgOpponentPoints ??
+        Number.NEGATIVE_INFINITY,
+    }))
+    .sort((a, b) => b.avg - a.avg);
+
+  const index = ranked.findIndex((entry) => entry.teamId === teamId);
+
+  return {
+    rank: index >= 0 ? index + 1 : null,
+    cohortSize: cohortTeamIds.size,
+    cohortStage,
+  };
+}
+
+export function applyStageFilterToSummary(
+  summary: TeamPathSummary,
+  stages: Set<PathStage>,
+): TeamPathSummary {
+  const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
+    summary.matches,
+    stages,
+  );
+
+  return {
+    ...summary,
+    avgOpponentPoints,
+    avgOpponentRank,
+  };
 }
 
 export function buildComparison(
   summaries: TeamPathSummary[],
   selectedTeamId?: string,
+  stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
 ) {
+  const entries = summaries.map((summary) => {
+    const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
+      summary.matches,
+      stages,
+    );
+
+    return {
+      team: summary.team,
+      avgOpponentPoints,
+      avgOpponentRank,
+      isEliminated: summary.isEliminated,
+    };
+  });
+
+  entries.sort((a, b) => {
+    const aPoints = a.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
+    const bPoints = b.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
+    return bPoints - aPoints;
+  });
+
   const selectedAvg =
-    summaries.find((s) => s.team.id === selectedTeamId)?.avgOpponentPoints ??
+    entries.find((entry) => entry.team.id === selectedTeamId)?.avgOpponentPoints ??
     null;
 
-  return summaries.map((summary, index) => ({
-    team: summary.team,
-    avgOpponentPoints: summary.avgOpponentPoints,
-    avgOpponentRank: summary.avgOpponentRank,
-    isEliminated: summary.isEliminated,
+  return entries.map((entry, index) => ({
+    ...entry,
     rankAmongTeams: index + 1,
     deltaVsSelected:
-      selectedAvg !== null && summary.avgOpponentPoints !== null
-        ? summary.avgOpponentPoints - selectedAvg
+      selectedAvg !== null && entry.avgOpponentPoints !== null
+        ? entry.avgOpponentPoints - selectedAvg
         : null,
   }));
 }

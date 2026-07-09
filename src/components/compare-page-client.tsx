@@ -2,9 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { ComparisonEntry, RankingMode } from "@/lib/types";
+import type { ComparisonEntry, PathStage, RankingMode } from "@/lib/types";
+import { parsePathStages, parseTeamRound } from "@/lib/domain/match-stages";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
-import { ComparisonChart } from "@/components/comparison-chart";
+import {
+  PathStageFilters,
+  serializePathStages,
+} from "@/components/path-stage-filters";
+import { TeamRoundSelector } from "@/components/team-round-selector";
+import { ComparisonTable } from "@/components/comparison-table";
 import { CompareLoadingSkeleton } from "@/components/loading-skeletons";
 import { useTranslations } from "next-intl";
 
@@ -14,9 +20,16 @@ export function ComparePageClient() {
   const searchParams = useSearchParams();
   const selectedTeamId = searchParams.get("team")?.toUpperCase();
   const initialMode = (searchParams.get("mode") as RankingMode) ?? "live";
+  const initialStages = parsePathStages(searchParams.get("stages"));
+  const initialTeamRound = parseTeamRound(searchParams.get("teamRound"));
 
   const [mode, setMode] = useState<RankingMode>(initialMode);
+  const [stages, setStages] = useState<Set<PathStage>>(initialStages);
+  const [teamRound, setTeamRound] = useState<PathStage>(initialTeamRound);
   const [entries, setEntries] = useState<ComparisonEntry[]>([]);
+  const [teamCounts, setTeamCounts] = useState<Record<PathStage, number> | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,55 +38,97 @@ export function ComparePageClient() {
     setError(null);
 
     try {
-      const params = new URLSearchParams({ mode });
+      const params = new URLSearchParams({
+        mode,
+        stages: serializePathStages(stages),
+        teamRound,
+      });
       if (selectedTeamId) params.set("team", selectedTeamId);
 
       const response = await fetch(`/api/comparison?${params.toString()}`);
       if (!response.ok) throw new Error("Failed to load comparison");
-      const json = (await response.json()) as { comparison: ComparisonEntry[] };
+      const json = (await response.json()) as {
+        comparison: ComparisonEntry[];
+        teamCounts: Record<PathStage, number>;
+      };
       setEntries(json.comparison);
+      setTeamCounts(json.teamCounts);
     } catch {
       setError(t("error"));
     } finally {
       setLoading(false);
     }
-  }, [mode, selectedTeamId, t]);
+  }, [mode, selectedTeamId, stages, teamRound, t]);
 
   useEffect(() => {
     loadComparison();
   }, [loadComparison]);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8">
-      <section className="rounded-2xl border border-emerald-200/60 bg-white/80 p-6 shadow-sm backdrop-blur">
-        <h1 className="text-3xl font-bold tracking-tight text-emerald-950">
-          {compare("title")}
-        </h1>
-        <p className="mt-2 text-muted-foreground">{compare("subtitle")}</p>
-      </section>
-
-      <div className="rounded-2xl border bg-white/80 p-5 shadow-sm backdrop-blur">
-        <RankingModeToggle value={mode} onChange={setMode} />
-      </div>
-
-      {!selectedTeamId && (
-        <p className="text-sm text-muted-foreground">{compare("selectTeamHint")}</p>
-      )}
-      {loading && !error && (
-        <CompareLoadingSkeleton showDelta={Boolean(selectedTeamId)} />
-      )}
-      {error && (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
-          {error}
+    <div className="mx-auto w-full max-w-6xl px-4 py-8">
+      <div className="overflow-hidden rounded-2xl border border-emerald-200/70 bg-white shadow-lg shadow-emerald-950/5">
+        <div className="border-b bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 px-6 py-6 text-white">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {compare("title")}
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-emerald-100/90 sm:text-base">
+            {compare("subtitle")}
+          </p>
         </div>
-      )}
-      {!loading && !error && (
-        <ComparisonChart
-          entries={entries}
-          selectedTeamId={selectedTeamId}
-          showDelta={Boolean(selectedTeamId)}
-        />
-      )}
+
+        <div className="space-y-6 border-b bg-gradient-to-b from-emerald-50/80 to-white px-4 py-5 sm:px-6">
+          <section className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {compare("rankingSnapshot")}
+            </p>
+            <RankingModeToggle
+              value={mode}
+              onChange={setMode}
+              variant="compact"
+            />
+          </section>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <section className="rounded-xl border border-emerald-100 bg-white/90 p-4 shadow-sm">
+              <TeamRoundSelector
+                value={teamRound}
+                onChange={setTeamRound}
+                teamCount={teamCounts?.[teamRound]}
+              />
+            </section>
+            <section className="rounded-xl border border-emerald-100 bg-white/90 p-4 shadow-sm">
+              <PathStageFilters value={stages} onChange={setStages} />
+            </section>
+          </div>
+
+          {!selectedTeamId && (
+            <p className="text-sm text-muted-foreground">
+              {compare("selectTeamHint")}
+            </p>
+          )}
+        </div>
+
+        {loading && !error && (
+          <CompareLoadingSkeleton
+            embedded
+            showDelta={Boolean(selectedTeamId)}
+          />
+        )}
+        {error && (
+          <div className="m-4 rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-destructive sm:m-6">
+            {error}
+          </div>
+        )}
+        {!loading && !error && (
+          <ComparisonTable
+            entries={entries}
+            mode={mode}
+            selectedTeamId={selectedTeamId}
+            showDelta={Boolean(selectedTeamId)}
+            embedded
+          />
+        )}
+      </div>
     </div>
   );
 }

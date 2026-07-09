@@ -1,5 +1,7 @@
 export type RankingMode = "live" | "june11" | "april" | "january";
 
+export type PathStage = "group" | "r32" | "r16" | "qf" | "sf" | "final";
+
 export type MatchResult = "W" | "D" | "L" | null;
 
 export interface Team {

@@ -29,13 +29,21 @@
     "avgDifficulty": "Avg opponent difficulty",
     "avgRank": "Avg opponent rank",
     "hardestPathRank": "Hardest path rank",
+    "hardestPathRankOf": "#{rank} / {total}",
+    "hardestPathRankCohort": "Among {stage} teams",
     "status": "Status",
     "active": "Active",
     "eliminated": "Eliminated",
     "nextOpponent": "Next opponent",
     "noNextOpponent": "None",
     "points": "pts",
-    "matchesPlayed": "Matches"
+    "matchesPlayed": "Matches",
+    "averagesFrom": "averages from {count} matches"
+  },
+  "analysis": {
+    "title": "World Cup path analysis",
+    "subtitle": "See how tough a team's road to the final is, based on FIFA ranking points of every opponent faced.",
+    "rankingSnapshot": "FIFA ranking snapshot"
   },
   "pathTable": {
     "title": "Tournament path",
@@ -50,13 +58,41 @@
   },
   "compare": {
     "title": "Path difficulty comparison",
-    "subtitle": "Teams sorted by average opponent FIFA points (higher = harder path)",
+    "subtitle": "Rank teams by opponent strength. Filter which rounds count toward averages and which teams are shown.",
+    "rankingSnapshot": "FIFA ranking snapshot",
+    "subtitleByPoints": "Sorted by average opponent FIFA points (higher = harder path)",
+    "subtitleByRank": "Sorted by average opponent FIFA rank (lower = harder path)",
     "team": "Team",
     "avgPoints": "Avg opp. points",
     "avgRank": "Avg opp. rank",
     "status": "Status",
     "delta": "Delta vs selected",
-    "selectTeamHint": "Select a team on the Analysis page to see deltas"
+    "noTeams": "No teams reached this round with the current tournament data.",
+    "selectTeamHint": "Select a team on the Analysis page to see deltas",
+    "teamRound": {
+      "label": "Show teams",
+      "hint": "Only teams that reached this round or beyond",
+      "teamCount": "{count} teams",
+      "loadingCount": "…",
+      "groupShort": "All",
+      "round32Short": "R32",
+      "round16Short": "R16",
+      "quarterFinalShort": "QF",
+      "semiFinalShort": "SF",
+      "finalShort": "Final"
+    },
+    "stages": {
+      "label": "Include rounds",
+      "includeLabel": "Count matches from",
+      "includeHint": "Which rounds contribute to the averages",
+      "selectAll": "Select all",
+      "groupStage": "Group",
+      "round32": "Round of 32",
+      "round16": "Round of 16",
+      "quarterFinal": "Quarter-final",
+      "semiFinal": "Semi-final",
+      "final": "Final"
+    }
   },
   "about": {
     "title": "About CupPath",

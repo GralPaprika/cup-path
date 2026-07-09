@@ -1,21 +1,27 @@
-import type { ComparisonEntry, RankingMode, TeamPathSummary } from "@/lib/types";
+import type { ComparisonEntry, PathStage, RankingMode, TeamPathSummary } from "@/lib/types";
 import {
+  applyStageFilterToSummary,
   buildAllTeamSummaries,
   buildComparison,
   buildTeamPathSummary,
   getHardestPathRank,
 } from "@/lib/domain/difficulty";
+import { DEFAULT_PATH_STAGES, getFurthestStage } from "@/lib/domain/match-stages";
+import { getTeamMaxStageReached, getTeamsAtStage } from "@/lib/domain/team-stages";
 import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
 
 export interface TeamAnalysisResult {
   summary: TeamPathSummary;
   hardestPathRank: number | null;
-  comparison: ComparisonEntry[];
+  cohortSize: number;
+  cohortStage: PathStage;
+  maxStageReached: PathStage;
 }
 
 export async function getTeamAnalysis(
   teamId: string,
   mode: RankingMode,
+  stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
 ): Promise<TeamAnalysisResult | null> {
   const snapshot = await getRankingsSnapshot(mode);
   const rankings = buildRankingsMap(snapshot);
@@ -24,20 +30,38 @@ export async function getTeamAnalysis(
   if (!summary) return null;
 
   const allSummaries = buildAllTeamSummaries(rankings);
+  const cohortStage = getFurthestStage(stages);
+  const cohortTeamIds = getTeamsAtStage(cohortStage);
+  const { rank, cohortSize } = getHardestPathRank(
+    allSummaries,
+    teamId,
+    stages,
+    cohortTeamIds,
+  );
 
   return {
-    summary,
-    hardestPathRank: getHardestPathRank(allSummaries, teamId),
-    comparison: buildComparison(allSummaries, teamId),
+    summary: applyStageFilterToSummary(summary, stages),
+    hardestPathRank: rank,
+    cohortSize,
+    cohortStage,
+    maxStageReached: getTeamMaxStageReached(teamId),
   };
 }
 
 export async function getComparisonAnalysis(
   mode: RankingMode,
   selectedTeamId?: string,
+  stages?: Set<PathStage>,
+  teamRound: PathStage = "group",
 ): Promise<ComparisonEntry[]> {
   const snapshot = await getRankingsSnapshot(mode);
   const rankings = buildRankingsMap(snapshot);
-  const summaries = buildAllTeamSummaries(rankings);
-  return buildComparison(summaries, selectedTeamId);
+  let summaries = buildAllTeamSummaries(rankings);
+
+  if (teamRound !== "group") {
+    const teamIds = getTeamsAtStage(teamRound);
+    summaries = summaries.filter((summary) => teamIds.has(summary.team.id));
+  }
+
+  return buildComparison(summaries, selectedTeamId, stages);
 }

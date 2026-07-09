@@ -1,6 +1,7 @@
 "use client";
 
-import type { MatchDifficulty } from "@/lib/types";
+import type { MatchDifficulty, PathStage } from "@/lib/types";
+import { getMatchStage } from "@/lib/domain/match-stages";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
 import { Badge } from "@/components/ui/badge";
@@ -19,9 +20,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatFifaPoints } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 interface PathTableProps {
   matches: MatchDifficulty[];
+  includedStages?: Set<PathStage>;
 }
 
 function formatGap(value: number | null): string {
@@ -42,9 +45,15 @@ function resultVariant(result: MatchDifficulty["result"]) {
   return "secondary" as const;
 }
 
-export function PathTable({ matches }: PathTableProps) {
+export function PathTable({ matches, includedStages }: PathTableProps) {
   const t = useTranslations("pathTable");
   const results = useTranslations("results");
+
+  function isIncluded(match: MatchDifficulty): boolean {
+    if (!includedStages) return true;
+    const stage = getMatchStage(match.round);
+    return stage !== null && includedStages.has(stage);
+  }
 
   return (
     <Card className="border-emerald-200/60 shadow-sm">
@@ -64,10 +73,16 @@ export function PathTable({ matches }: PathTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {matches.map((match) => (
+            {matches.map((match) => {
+              const included = isIncluded(match);
+
+              return (
               <TableRow
                 key={`${match.date}-${match.opponent.id}-${match.round}`}
-                className={match.isNext ? "bg-amber-50/80" : undefined}
+                className={cn(
+                  match.isNext && included && "bg-amber-50/80",
+                  !included && "opacity-40",
+                )}
               >
                 <TableCell>
                   <div className="font-medium">{match.round}</div>
@@ -106,7 +121,8 @@ export function PathTable({ matches }: PathTableProps) {
                   )}
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>

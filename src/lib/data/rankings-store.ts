@@ -1,3 +1,5 @@
+import "server-only";
+
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { unstable_cache } from "next/cache";

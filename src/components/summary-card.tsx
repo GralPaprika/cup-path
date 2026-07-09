@@ -1,6 +1,7 @@
 "use client";
 
-import type { TeamPathSummary } from "@/lib/types";
+import type { PathStage, TeamPathSummary } from "@/lib/types";
+import { getMatchStage, PATH_STAGES } from "@/lib/domain/match-stages";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,9 @@ import { formatFifaPoints, formatWholeNumber } from "@/lib/format";
 interface SummaryCardProps {
   summary: TeamPathSummary;
   hardestPathRank: number | null;
+  cohortSize: number;
+  cohortStage: PathStage;
+  includedStages?: Set<PathStage>;
 }
 
 function StatBlock({
@@ -51,6 +55,15 @@ function StatBlock({
   );
 }
 
+const COHORT_STAGE_KEYS: Record<PathStage, string> = {
+  group: "groupStage",
+  r32: "round32",
+  r16: "round16",
+  qf: "quarterFinal",
+  sf: "semiFinal",
+  final: "final",
+};
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -59,8 +72,25 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function SummaryCard({ summary, hardestPathRank }: SummaryCardProps) {
+export function SummaryCard({
+  summary,
+  hardestPathRank,
+  cohortSize,
+  cohortStage,
+  includedStages,
+}: SummaryCardProps) {
   const t = useTranslations("summary");
+  const stages = useTranslations("compare.stages");
+
+  const includedMatches = includedStages
+    ? summary.matches.filter((match) => {
+        const stage = getMatchStage(match.round);
+        return stage !== null && includedStages.has(stage);
+      })
+    : summary.matches;
+
+  const allStagesSelected =
+    !includedStages || includedStages.size === PATH_STAGES.length;
 
   return (
     <Card className="overflow-hidden border-emerald-200/60 shadow-lg shadow-emerald-950/5">
@@ -75,6 +105,12 @@ export function SummaryCard({ summary, hardestPathRank }: SummaryCardProps) {
         </CardTitle>
         <CardDescription>
           {t("matchesPlayed")}: {summary.playedCount}/{summary.totalCount}
+          {!allStagesSelected && (
+            <span className="text-muted-foreground">
+              {" "}
+              · {t("averagesFrom", { count: includedMatches.length })}
+            </span>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 p-4">
@@ -99,10 +135,26 @@ export function SummaryCard({ summary, hardestPathRank }: SummaryCardProps) {
               value={formatFifaPoints(summary.avgOpponentPoints)}
               highlight
             />
-            <StatBlock
-              label={t("hardestPathRank")}
-              value={hardestPathRank ? `#${hardestPathRank} / 48` : "—"}
-            />
+            <div className="rounded-xl border bg-muted/40 p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {t("hardestPathRank")}
+              </p>
+              <p className="mt-1 text-2xl font-bold">
+                {hardestPathRank
+                  ? t("hardestPathRankOf", {
+                      rank: hardestPathRank,
+                      total: cohortSize,
+                    })
+                  : "—"}
+              </p>
+              {hardestPathRank && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("hardestPathRankCohort", {
+                    stage: stages(COHORT_STAGE_KEYS[cohortStage]),
+                  })}
+                </p>
+              )}
+            </div>
             <StatBlock
               label={t("avgRank")}
               value={formatWholeNumber(summary.avgOpponentRank)}

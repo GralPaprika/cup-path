@@ -72,14 +72,16 @@ RapidAPI rankings ──► Vercel Cron ──► Vercel Blob (rankings)
                         Next.js app
 ```
 
-**Data refresh (production, via Vercel cron)**
+**Data refresh (production)**
 
-| Plan | Schedule | Cron route | What syncs |
-|---|---|---|---|
-| **Hobby (default)** | Once daily (12:00 UTC) | `/api/cron/sync-scheduled` | Live rankings + snapshots + match data |
-| **Pro** | Customize `vercel.json` | e.g. hourly `/api/cron/sync-rankings` | More frequent live updates |
+| Method | Schedule | Route |
+|---|---|---|
+| **Vercel cron (Hobby)** | Once daily — add in Project → Settings → Cron Jobs | `GET /api/cron/sync-scheduled` |
+| **Manual** | Anytime | `POST /api/cron/sync-scheduled` with `Authorization: Bearer CRON_SECRET` |
 
-Manual sync routes (any plan): `/api/cron/sync-rankings`, `/api/cron/sync-worldcup`, `/api/cron/sync-scheduled`
+`vercel.json` has no crons (avoids Hobby plan deploy errors). After deploy, add one cron in the Vercel dashboard: path `/api/cron/sync-scheduled`, schedule `0 12 * * *` (daily at 12:00 UTC). That syncs live rankings, snapshots, and match data.
+
+**Pro plan:** you can add hourly `/api/cron/sync-rankings` in the dashboard too.
 
 Bundled JSON in `data/` is the fallback when Blob is empty or unavailable.
 
@@ -134,7 +136,8 @@ Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailabl
 1. Import the repository on Vercel
 2. Enable **Vercel Blob** in project storage settings
 3. Set environment variables from `.env.example`
-4. Deploy — on **Hobby**, one daily cron syncs everything at 12:00 UTC. **Pro** can add hourly crons in `vercel.json`.
+4. Deploy (no crons in `vercel.json` — safe on Hobby)
+5. **Settings → Cron Jobs → Add:** path `/api/cron/sync-scheduled`, schedule `0 12 * * *` (daily)
 5. Seed Blob on first deploy: `npm run seed:rankings` and `POST /api/cron/sync-scheduled` (with `CRON_SECRET`)
 6. Run `npm run validate:teams` to confirm all 48 teams map correctly
 

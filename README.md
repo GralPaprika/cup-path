@@ -77,12 +77,12 @@ RapidAPI rankings ──► Vercel Cron ──► Vercel Blob (rankings)
 
 | Method | Schedule | Route |
 |---|---|---|
-| **Vercel cron (Hobby)** | Once daily — add in Project → Settings → Cron Jobs | `GET /api/cron/sync-scheduled` |
+| **Vercel cron (Hobby)** | Once daily at 12:00 UTC (`vercel.json`) | `GET /api/cron/sync-scheduled` |
 | **Manual** | Anytime | `POST /api/cron/sync-scheduled` with `Authorization: Bearer CRON_SECRET` |
 
-`vercel.json` has no crons (avoids Hobby plan deploy errors). After deploy, add one cron in the Vercel dashboard: path `/api/cron/sync-scheduled`, schedule `0 12 * * *` (daily at 12:00 UTC). That syncs live rankings, snapshots, and match data.
+`vercel.json` defines one daily cron (Hobby limit: once per day). It syncs live rankings, snapshots, and match data. View or trigger it under **Settings → Cron Jobs** after production deploy.
 
-**Pro plan:** you can add hourly `/api/cron/sync-rankings` in the dashboard too.
+**Pro plan:** add more crons in `vercel.json` (e.g. hourly `/api/cron/sync-rankings`).
 
 Bundled JSON in `data/` is the fallback when Blob is empty or unavailable.
 
@@ -137,10 +137,10 @@ Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailabl
 1. Import the repository on Vercel
 2. Enable **Vercel Blob** in project storage settings
 3. Set environment variables from `.env.example`
-4. Deploy (no crons in `vercel.json` — safe on Hobby)
-5. **Settings → Cron Jobs → Add:** path `/api/cron/sync-scheduled`, schedule `0 12 * * *` (daily)
-5. Seed Blob on first deploy: `npm run seed:rankings` and `POST /api/cron/sync-scheduled` (with `CRON_SECRET`)
-6. Run `npm run validate:teams` to confirm all 48 teams map correctly
+4. Deploy (`vercel.json` registers the daily cron on production)
+5. Confirm under **Settings → Cron Jobs** that `/api/cron/sync-scheduled` is listed
+6. Seed Blob on first deploy: `npm run seed:rankings` and `POST /api/cron/sync-scheduled` (with `CRON_SECRET`)
+7. Run `npm run validate:teams` to confirm all 48 teams map correctly
 
 ## Tech stack
 

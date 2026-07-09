@@ -65,8 +65,8 @@ See [`.env.example`](.env.example).
 ## Architecture
 
 ```
-openfootball JSON ──► Vercel Cron (twice daily) ──► Vercel Blob (match data)
-RapidAPI rankings ──► Vercel Cron (hourly + twice daily) ──► Vercel Blob (rankings)
+openfootball JSON ──► Vercel Cron ──► Vercel Blob (match data)
+RapidAPI rankings ──► Vercel Cron ──► Vercel Blob (rankings)
                               │
                               ▼
                         Next.js app
@@ -74,11 +74,12 @@ RapidAPI rankings ──► Vercel Cron (hourly + twice daily) ──► Vercel 
 
 **Data refresh (production, via Vercel cron)**
 
-| Data | Schedule | Cron route |
-|---|---|---|
-| Live FIFA rankings | Hourly | `/api/cron/sync-rankings` |
-| Historical ranking snapshots | Twice daily (06:00 & 18:00 UTC) | `/api/cron/sync-scheduled` |
-| Match results, fixtures, teams | Twice daily (06:00 & 18:00 UTC) | `/api/cron/sync-scheduled` |
+| Plan | Schedule | Cron route | What syncs |
+|---|---|---|---|
+| **Hobby (default)** | Once daily (12:00 UTC) | `/api/cron/sync-scheduled` | Live rankings + snapshots + match data |
+| **Pro** | Customize `vercel.json` | e.g. hourly `/api/cron/sync-rankings` | More frequent live updates |
+
+Manual sync routes (any plan): `/api/cron/sync-rankings`, `/api/cron/sync-worldcup`, `/api/cron/sync-scheduled`
 
 Bundled JSON in `data/` is the fallback when Blob is empty or unavailable.
 
@@ -86,11 +87,11 @@ Bundled JSON in `data/` is the fallback when Blob is empty or unavailable.
 
 | Mode | FIFA release date | Role | Refresh |
 |---|---|---|---|
-| `november19` | 19 November 2025 | Pot-draw cutoff (groups seeded from this ranking) | Twice daily (06:00 & 18:00 UTC) |
-| `january` | 19 January 2026 | Early-year snapshot | Twice daily |
-| `april` | 1 April 2026 | Pre-tournament snapshot | Twice daily |
-| `june11` | 11 June 2026 | Tournament-start snapshot | Twice daily |
-| `live` | Current | Current FIFA ranking | Hourly |
+| `november19` | 19 November 2025 | Pot-draw cutoff (groups seeded from this ranking) | Daily (cron) |
+| `january` | 19 January 2026 | Early-year snapshot | Daily (cron) |
+| `april` | 1 April 2026 | Pre-tournament snapshot | Daily (cron) |
+| `june11` | 11 June 2026 | Tournament-start snapshot | Daily (cron) |
+| `live` | Current | Current FIFA ranking | Daily on Hobby; hourly on Pro if configured |
 
 Legacy URL params `yearStart` and `tournamentStart` map to `january` and `june11`.
 
@@ -113,7 +114,7 @@ Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailabl
 │   └── lib/
 │       ├── data/           # Team registry, rankings client/store, flags
 │       └── domain/         # Path builder, standings, difficulty logic
-└── vercel.json             # Vercel cron: live hourly, all else twice daily
+└── vercel.json             # Vercel cron (once daily on Hobby)
 ```
 
 ## API routes
@@ -123,8 +124,8 @@ Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailabl
 | `GET /api/teams?mode=live` | World Cup teams with flags |
 | `GET /api/analysis?team=ENG&mode=live` | Full path analysis for one team |
 | `GET /api/comparison?mode=live` | All-team difficulty leaderboard |
-| `GET /api/cron/sync-rankings` | Refresh live rankings in Blob (hourly cron) |
-| `GET /api/cron/sync-scheduled` | Refresh historical snapshots + match data in Blob (twice-daily cron) |
+| `GET /api/cron/sync-scheduled` | Refresh all data in Blob (daily cron on Hobby) |
+| `GET /api/cron/sync-rankings` | Refresh live rankings only (manual, or Pro cron) |
 | `GET /api/cron/sync-rankings?action=snapshots` | Refresh snapshots only (manual) |
 | `GET /api/cron/sync-worldcup` | Refresh match data only (manual) |
 
@@ -133,7 +134,7 @@ Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailabl
 1. Import the repository on Vercel
 2. Enable **Vercel Blob** in project storage settings
 3. Set environment variables from `.env.example`
-4. Deploy — Vercel cron refreshes **live rankings** hourly and **snapshots + match data** twice daily (06:00 & 18:00 UTC)
+4. Deploy — on **Hobby**, one daily cron syncs everything at 12:00 UTC. **Pro** can add hourly crons in `vercel.json`.
 5. Seed Blob on first deploy: `npm run seed:rankings` and `POST /api/cron/sync-scheduled` (with `CRON_SECRET`)
 6. Run `npm run validate:teams` to confirm all 48 teams map correctly
 

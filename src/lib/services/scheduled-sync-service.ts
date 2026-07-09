@@ -7,12 +7,13 @@ import {
 import { syncWorldCupData } from "@/lib/services/worldcup-sync-service";
 
 export async function syncScheduledData() {
-  const [snapshots, worldcup] = await Promise.all([
+  const [snapshots, worldcup, live] = await Promise.all([
     syncSnapshotRankings(),
     syncWorldCupData(),
+    syncLiveRankings(),
   ]);
 
-  return { snapshots, worldcup };
+  return { snapshots, worldcup, live };
 }
 
 export { syncLiveRankings };

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { PathStage, Team, TeamPathSummary } from "@/lib/types";
+import type { AvgPointsContext, PathStage, Team, TeamPathSummary } from "@/lib/types";
 import type { CohortOrderingCorrelation } from "@/lib/domain/rank-correlation";
 import type { PathOpponentStats } from "@/lib/domain/path-opponent-stats";
 import {
@@ -28,6 +28,7 @@ import { useTranslations } from "next-intl";
 
 interface AnalysisResponse {
   summary: TeamPathSummary;
+  avgPointsContext: AvgPointsContext | null;
   hardestPathRank: number | null;
   hardestPathRankByAvgRank: number | null;
   cohortSize: number;
@@ -166,6 +167,7 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
               ) : (
                 <SummaryCard
                   summary={data.summary}
+                  avgPointsContext={data.avgPointsContext}
                   hardestPathRank={data.hardestPathRank}
                   hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
                   cohortSize={data.cohortSize}

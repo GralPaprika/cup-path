@@ -4,6 +4,10 @@ import type { ComparisonEntry, PathStage, Team } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import { TeamSelector } from "@/components/team-selector";
 import { TeamLabel } from "@/components/team-flag";
+import {
+  AvgPointsContextFootnote,
+  AvgPointsContextHint,
+} from "@/components/avg-points-context";
 import { Badge } from "@/components/ui/badge";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -57,33 +61,43 @@ function StatRow({
   valueA,
   valueB,
   delta,
+  hintA,
+  hintB,
   valueClassName,
 }: {
   label: string;
   valueA: string;
   valueB: string;
   delta: string | null;
+  hintA?: React.ReactNode;
+  hintB?: React.ReactNode;
   valueClassName?: string;
 }) {
   return (
     <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)] items-center gap-3 border-b border-white/6 px-4 py-3 last:border-b-0">
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p
-        className={cn(
-          "text-right font-mono text-sm font-semibold tabular-nums text-white",
-          valueClassName,
-        )}
-      >
-        {valueA}
-      </p>
-      <p
-        className={cn(
-          "text-right font-mono text-sm font-semibold tabular-nums text-white",
-          valueClassName,
-        )}
-      >
-        {valueB}
-      </p>
+      <div className="text-right">
+        <p
+          className={cn(
+            "font-mono text-sm font-semibold tabular-nums text-white",
+            valueClassName,
+          )}
+        >
+          {valueA}
+        </p>
+        {hintA}
+      </div>
+      <div className="text-right">
+        <p
+          className={cn(
+            "font-mono text-sm font-semibold tabular-nums text-white",
+            valueClassName,
+          )}
+        >
+          {valueB}
+        </p>
+        {hintB}
+      </div>
       <p className="text-right font-mono text-xs tabular-nums text-muted-foreground">
         {delta ?? "—"}
       </p>
@@ -196,6 +210,8 @@ export function TeamHeadToHeadPanel({
             valueA={formatFifaPoints(entryA.avgOpponentPoints)}
             valueB={formatFifaPoints(entryB.avgOpponentPoints)}
             delta={pointsDelta}
+            hintA={<AvgPointsContextHint context={entryA.avgPointsContext} />}
+            hintB={<AvgPointsContextHint context={entryB.avgPointsContext} />}
             valueClassName="text-wc-orange"
           />
           <StatRow
@@ -295,6 +311,10 @@ export function TeamHeadToHeadPanel({
         (teamAId || teamBId) &&
         !(teamAId && teamBId && teamAId === teamBId) && (
         <p className="text-sm text-muted-foreground">{t("pickBoth")}</p>
+      )}
+
+      {showComparison && (entryA?.avgPointsContext || entryB?.avgPointsContext) && (
+        <AvgPointsContextFootnote />
       )}
 
       {showComparison && (

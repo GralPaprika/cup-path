@@ -13,6 +13,7 @@ import {
 } from "@/lib/domain/path-builder";
 import { getMatchStage, DEFAULT_PATH_STAGES, getFurthestStage, PATH_STAGES } from "@/lib/domain/match-stages";
 import { enrichTeam, getAllTeams, getTeamById } from "@/lib/data/team-registry";
+import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
 
 function average(values: number[]): number | null {
   if (values.length === 0) return null;
@@ -202,6 +203,7 @@ export function buildComparison(
   selectedTeamId?: string,
   stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
   cohortTeamIds?: Set<string>,
+  rankings?: Map<string, RankingEntry>,
 ) {
   const entries = summaries.map((summary) => {
     const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
@@ -241,6 +243,11 @@ export function buildComparison(
 
   return entries.map((entry) => ({
     ...entry,
+    avgPointsContext: rankings
+      ? buildAvgPointsContext(entry.avgOpponentPoints, rankings.values(), {
+          excludeTeamId: entry.team.id,
+        })
+      : null,
     rankAmongTeams: rankByTeamId.get(entry.team.id) ?? null,
     deltaVsSelected:
       selectedAvg !== null && entry.avgOpponentPoints !== null

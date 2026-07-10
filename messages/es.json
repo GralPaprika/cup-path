@@ -24,6 +24,12 @@
     "searchPlaceholder": "Buscar por nombre o código FIFA…",
     "noResults": "Ningún equipo coincide con tu búsqueda"
   },
+  "pointsAnchor": {
+    "harderThan": "Más duro que el {percent}% de equipos",
+    "comparable": "{team} ({points})",
+    "footnotePercentile": "El percentil compara tus puntos medios del rival con cada selección de la instantánea FIFA actual (promedio más alto = camino más duro).",
+    "footnoteAnchor": "El equipo ≈ es la selección más cercana por puntos — referencia del promedio, no tu lista real de rivales."
+  },
   "summary": {
     "teamProfile": "Perfil del equipo",
     "pathAnalysis": "Análisis del camino",

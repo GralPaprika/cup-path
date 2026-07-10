@@ -1,16 +1,21 @@
 "use client";
 
-import type { PathStage, TeamPathSummary } from "@/lib/types";
+import type { AvgPointsContext, PathStage, TeamPathSummary } from "@/lib/types";
 import { getMatchStage, PATH_STAGES } from "@/lib/domain/match-stages";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
 import { DifficultyGauge } from "@/components/difficulty-gauge";
+import {
+  AvgPointsContextFootnote,
+  AvgPointsContextHint,
+} from "@/components/avg-points-context";
 import { Badge } from "@/components/ui/badge";
 import { formatFifaPoints, formatWholeNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface SummaryCardProps {
   summary: TeamPathSummary;
+  avgPointsContext?: AvgPointsContext | null;
   hardestPathRank: number | null;
   hardestPathRankByAvgRank?: number | null;
   cohortSize: number;
@@ -30,11 +35,13 @@ const COHORT_STAGE_KEYS: Record<PathStage, string> = {
 function StatTile({
   label,
   value,
+  hint,
   className,
   valueClassName,
 }: {
   label: string;
   value: string;
+  hint?: React.ReactNode;
   className?: string;
   valueClassName?: string;
 }) {
@@ -51,12 +58,14 @@ function StatTile({
       >
         {value}
       </p>
+      {hint}
     </div>
   );
 }
 
 export function SummaryCard({
   summary,
+  avgPointsContext,
   hardestPathRank,
   hardestPathRankByAvgRank,
   cohortSize,
@@ -130,6 +139,9 @@ export function SummaryCard({
           <StatTile
             label={t("avgDifficulty")}
             value={formatFifaPoints(summary.avgOpponentPoints)}
+            hint={
+              <AvgPointsContextHint context={avgPointsContext} align="left" />
+            }
             valueClassName="tabular-nums text-wc-orange"
           />
           <StatTile
@@ -198,6 +210,12 @@ export function SummaryCard({
           </div>
         </div>
       </div>
+
+      {avgPointsContext && (
+        <div className="border-t border-white/8 px-5 py-4 sm:px-6">
+          <AvgPointsContextFootnote />
+        </div>
+      )}
     </div>
   );
 }

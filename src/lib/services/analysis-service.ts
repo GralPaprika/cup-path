@@ -2,9 +2,11 @@ import type {
   ComparisonEntry,
   GroupComparisonCard,
   PathStage,
+  AvgPointsContext,
   RankingMode,
   TeamPathSummary,
 } from "@/lib/types";
+import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
 import {
   applyStageFilterToSummary,
   buildAllTeamSummaries,
@@ -34,6 +36,7 @@ export interface TeamAnalysisAdvanced {
 
 export interface TeamAnalysisResult {
   summary: TeamPathSummary;
+  avgPointsContext: AvgPointsContext | null;
   hardestPathRank: number | null;
   hardestPathRankByAvgRank: number | null;
   cohortSize: number;
@@ -75,6 +78,11 @@ export async function getTeamAnalysis(
 
   return {
     summary: filteredSummary,
+    avgPointsContext: buildAvgPointsContext(
+      filteredSummary.avgOpponentPoints,
+      rankings.values(),
+      { excludeTeamId: teamId },
+    ),
     hardestPathRank: rank,
     hardestPathRankByAvgRank: rankByAvgRank,
     cohortSize,
@@ -128,6 +136,7 @@ export async function getComparisonAnalysis(
     selectedTeamId,
     stages,
     cohortTeamIds,
+    rankings,
   );
 
   return {
@@ -152,6 +161,7 @@ export async function getGroupsAnalysis(
     undefined,
     new Set(DEFAULT_PATH_STAGES),
     getTeamsAtStage("group"),
+    rankings,
   );
   const groups = buildGroupComparisonCards(comparison, rankings, "group");
 

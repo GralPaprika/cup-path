@@ -24,6 +24,12 @@
     "searchPlaceholder": "Search by name or FIFA code…",
     "noResults": "No teams match your search"
   },
+  "pointsAnchor": {
+    "harderThan": "Harder than {percent}% of teams",
+    "comparable": "{team} ({points})",
+    "footnotePercentile": "Percentile compares your average opponent points to every nation in the current FIFA ranking snapshot (higher average = harder path).",
+    "footnoteAnchor": "The ≈ team is the closest single-country match by points — shorthand for the average, not your actual opponent list."
+  },
   "summary": {
     "teamProfile": "Team profile",
     "pathAnalysis": "Path analysis",

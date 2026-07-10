@@ -105,10 +105,24 @@ export interface TeamPathSummary {
   totalCount: number;
 }
 
+export interface PointsAnchor {
+  team: Team;
+  points: number;
+  rank: number;
+  gap: number;
+}
+
+export interface AvgPointsContext {
+  percentile: number;
+  poolSize: number;
+  anchor: PointsAnchor | null;
+}
+
 export interface ComparisonEntry {
   team: Team;
   avgOpponentPoints: number | null;
   avgOpponentRank: number | null;
+  avgPointsContext: AvgPointsContext | null;
   isEliminated: boolean;
   rankAmongTeams: number | null;
   deltaVsSelected: number | null;

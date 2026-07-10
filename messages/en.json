@@ -121,11 +121,30 @@
     "groupAvgPosition": "Avg position",
     "groupAvgFifaPoints": "Avg FIFA points",
     "groupPos": "Pos",
+    "groupPts": "Pts",
+    "groupGd": "GD",
+    "goalsFor": "GF",
+    "goalsAgainst": "GA",
     "team": "Team",
+    "detailTitle": "Group {group} analysis",
+    "detailSubtitle": "Standings and FIFA strength for the selected group",
+    "statsTitle": "Group statistics",
+    "fifaRankStats": "FIFA ranking",
+    "fifaPointsStats": "FIFA points",
+    "statsNote": "Statistics use all teams in the group with available FIFA data. Variance and standard deviation use the population formulas (n = 4).",
     "legend": {
       "first": "1st place",
       "second": "2nd place",
       "bestThird": "Best 3rd place"
+    },
+    "stats": {
+      "sampleSize": "n = {count} teams",
+      "mean": "Mean",
+      "median": "Median",
+      "variance": "Variance",
+      "stdDev": "Std. dev.",
+      "min": "Min",
+      "max": "Max"
     }
   },
   "about": {

@@ -5,6 +5,8 @@ export type RankingMode =
   | "january"
   | "november19";
 
+import type { NumericStats } from "@/lib/domain/group-stats";
+
 export type PathStage = "group" | "r32" | "r16" | "qf" | "sf" | "final";
 
 export type MatchResult = "W" | "D" | "L" | null;
@@ -135,7 +137,11 @@ export interface GroupComparisonCard {
   isComplete: boolean;
   avgFifaRank: number | null;
   avgFifaPoints: number | null;
+  fifaRankStats: NumericStats;
+  fifaPointsStats: NumericStats;
 }
+
+export type { NumericStats } from "@/lib/domain/group-stats";
 
 export interface GroupStanding {
   teamId: string;

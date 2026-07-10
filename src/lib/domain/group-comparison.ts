@@ -12,6 +12,7 @@ import {
   computeGroupStandings,
   getAdvancingTeamIds,
 } from "@/lib/domain/group-standings";
+import { computeNumericStats } from "@/lib/domain/group-stats";
 import { getGroupNames } from "@/lib/domain/path-builder";
 import { getTeamsAtStage } from "@/lib/domain/team-stages";
 
@@ -102,6 +103,8 @@ export function buildGroupComparisonCards(
       isComplete,
       avgFifaRank: average(fifaRankValues),
       avgFifaPoints: average(fifaPointValues),
+      fifaRankStats: computeNumericStats(fifaRankValues),
+      fifaPointsStats: computeNumericStats(fifaPointValues),
     };
   });
 }

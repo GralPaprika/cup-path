@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { formatFifaPoints } from "@/lib/format";
+import { formatFifaPoints, formatStatValue } from "@/lib/format";
 
 const QUALIFICATION_ROW_STYLES: Record<
   Exclude<GroupQualificationStatus, null>,
@@ -64,8 +64,8 @@ export function GroupDetailPanel({
         </p>
       </header>
 
-      <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <div className="overflow-hidden [&_[data-slot=table-container]]:overflow-x-auto">
+      <div className="flex flex-col gap-6 p-5">
+        <div className="overflow-x-auto [&_[data-slot=table-container]]:overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="border-white/6 hover:bg-transparent">
@@ -88,10 +88,19 @@ export function GroupDetailPanel({
                   {t("goalsAgainst")}
                 </TableHead>
                 <TableHead className="px-3 text-right text-xs text-muted-foreground">
+                  {summary("fifaPoints")}
+                </TableHead>
+                <TableHead className="px-3 text-right text-xs text-muted-foreground">
                   {summary("fifaRank")}
                 </TableHead>
                 <TableHead className="px-3 text-right text-xs text-muted-foreground">
-                  {summary("fifaPoints")}
+                  {t("pathAvgPoints")}
+                </TableHead>
+                <TableHead className="px-3 text-right text-xs text-muted-foreground">
+                  {t("pathAvgRank")}
+                </TableHead>
+                <TableHead className="px-3 text-center text-xs text-muted-foreground">
+                  {t("pathRank")}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -156,11 +165,22 @@ export function GroupDetailPanel({
                         entry.standing.ga,
                       )}
                     </TableCell>
+                    <TableCell className="whitespace-nowrap px-3 py-2.5 text-right font-mono text-sm tabular-nums text-wc-orange">
+                      {formatFifaPoints(entry.fifaPoints)}
+                    </TableCell>
                     <TableCell className="whitespace-nowrap px-3 py-2.5 text-right font-mono text-sm tabular-nums text-white">
                       {entry.fifaRank ?? "—"}
                     </TableCell>
                     <TableCell className="whitespace-nowrap px-3 py-2.5 text-right font-mono text-sm tabular-nums text-wc-orange">
-                      {formatFifaPoints(entry.fifaPoints)}
+                      {formatFifaPoints(entry.avgOpponentPoints)}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap px-3 py-2.5 text-right font-mono text-sm tabular-nums text-white">
+                      {entry.avgOpponentRank !== null
+                        ? formatStatValue(entry.avgOpponentRank, 1)
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap px-3 py-2.5 text-center font-mono text-sm tabular-nums text-muted-foreground">
+                      {entry.rankAmongTeams ?? "—"}
                     </TableCell>
                   </TableRow>
                 );
@@ -169,27 +189,30 @@ export function GroupDetailPanel({
           </Table>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 border-t border-white/8 pt-6">
           <div>
             <h4 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
               {t("statsTitle")}
             </h4>
-            <div className="space-y-4">
-              <StatsBlock
-                title={t("fifaRankStats")}
-                stats={group.fifaRankStats}
-                isRank
-              />
+            <div className="grid gap-4 sm:grid-cols-2">
               <StatsBlock
                 title={t("fifaPointsStats")}
                 stats={group.fifaPointsStats}
                 isRank={false}
+              />
+              <StatsBlock
+                title={t("fifaRankStats")}
+                stats={group.fifaRankStats}
+                isRank
               />
             </div>
           </div>
 
           <p className="text-xs leading-relaxed text-muted-foreground">
             {t("statsNote")}
+          </p>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {t("pathStatsNote")}
           </p>
         </div>
       </div>

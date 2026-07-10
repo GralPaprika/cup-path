@@ -166,6 +166,27 @@
       "stdDev": "Desv. est.",
       "min": "Mín",
       "max": "Máx"
+    },
+    "pathAvgPoints": "Pts. medios camino",
+    "pathAvgRank": "Ranking medio camino",
+    "pathRank": "Camino #",
+    "pathStatsNote": "Las columnas de camino usan promedios de rivales en fase de grupos a lo largo del torneo. Camino # ordena los 48 equipos por puntos medios del rival.",
+    "groupStrengthRankOf": "#{rank} / {total} más fuerte por pts",
+    "groupStrengthRankAlt": "#{rank} / {total} por ranking medio",
+    "advanced": {
+      "title": "Comparación de fuerza de grupos",
+      "subtitle": "Qué tan parecido es el orden de los 12 grupos por puntos FIFA medios frente a ranking FIFA medio.",
+      "groupOrderingTitle": "Orden de grupos más fuertes",
+      "groupOrderingHint": "Entre los {count} grupos, comparando ordenamientos por puntos FIFA medios del grupo (más alto = más fuerte) y ranking FIFA medio del grupo (más bajo = más fuerte).",
+      "spearmanRho": "Spearman ρ",
+      "kendallTau": "Kendall τ",
+      "selectedRankByPoints": "Grupo {group} por pts",
+      "selectedRankByAvgRank": "Grupo {group} por ranking medio",
+      "rankValue": "#{rank} / {total}",
+      "groupOrderingIntro": "Cada grupo se puntúa por la fuerza FIFA media de sus cuatro equipos. El puesto 1 es el grupo más fuerte en esa escala.",
+      "spearmanBody": "Spearman ρ mide qué tan parecido es el orden de los grupos por puntos medios frente a ranking medio. 1 significa orden idéntico; 0 significa sin relación; valores cercanos a 1 indican que ambos métodos coinciden en qué grupos son más fuertes.",
+      "kendallBody": "Kendall τ cuenta los acuerdos por pares entre los dos ordenamientos de grupos. τ = 1 significa que todos los pares coinciden; τ = 0 significa acuerdo mixto.",
+      "footnotePrimary": "Las tarjetas de grupo muestran el puesto de fuerza de cada uno. La dificultad de camino por equipo está en la tabla de detalle y en Análisis."
     }
   },
   "about": {

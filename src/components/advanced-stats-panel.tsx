@@ -88,26 +88,6 @@ export function AdvancedStatsPanel({
 
       <div className="space-y-6 px-5 py-5">
         <section>
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-            {t("opponentDistributionTitle")}
-          </h3>
-          <div className="grid gap-4 lg:grid-cols-2">
-            <StatsBlock
-              title={t("opponentPointsStats")}
-              stats={pathStats.opponentPointsStats}
-              isRank={false}
-              variant="compact"
-            />
-            <StatsBlock
-              title={t("opponentRankStats")}
-              stats={pathStats.opponentRankStats}
-              isRank
-              variant="compact"
-            />
-          </div>
-        </section>
-
-        <section>
           <h3 className="mb-1 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
             {t("cohortOrderingTitle")}
           </h3>
@@ -117,7 +97,7 @@ export function AdvancedStatsPanel({
               stage: stageLabel,
             })}
           </p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
             <CorrelationTile
               label={t("spearmanRho")}
               value={formatCorrelation(cohortCorrelation.spearmanRho)}
@@ -144,6 +124,26 @@ export function AdvancedStatsPanel({
                     })
                   : "—"
               }
+            />
+          </div>
+        </section>
+
+        <section>
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+            {t("opponentDistributionTitle")}
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <StatsBlock
+              title={t("opponentPointsStats")}
+              stats={pathStats.opponentPointsStats}
+              isRank={false}
+              variant="compact"
+            />
+            <StatsBlock
+              title={t("opponentRankStats")}
+              stats={pathStats.opponentRankStats}
+              isRank
+              variant="compact"
             />
           </div>
         </section>

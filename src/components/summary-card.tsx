@@ -117,25 +117,31 @@ export function SummaryCard({
       <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(17.5rem,1fr)_auto_minmax(14rem,1fr)] lg:items-center lg:gap-8">
         <div className="grid min-w-[17.5rem] grid-cols-[minmax(0,0.85fr)_minmax(0,1.25fr)] gap-3 sm:min-w-[19rem]">
           <StatTile
-            label={t("fifaRank")}
-            value={formatWholeNumber(summary.teamRank)}
+            label={t("fifaPoints")}
+            value={formatFifaPoints(summary.teamPoints)}
             valueClassName="tabular-nums"
           />
           <StatTile
-            label={t("fifaPoints")}
-            value={formatFifaPoints(summary.teamPoints)}
+            label={t("fifaRank")}
+            value={formatWholeNumber(summary.teamRank)}
             className="px-5"
             valueClassName="tabular-nums"
           />
           <StatTile
+            label={t("avgDifficulty")}
+            value={formatFifaPoints(summary.avgOpponentPoints)}
+            valueClassName="tabular-nums text-wc-orange"
+          />
+          <StatTile
             label={t("avgRank")}
             value={formatWholeNumber(summary.avgOpponentRank)}
+            className="px-5"
             valueClassName="tabular-nums"
           />
           <StatTile
             label={t("status")}
             value={summary.isEliminated ? t("eliminated") : t("active")}
-            className="px-5"
+            className="col-span-2"
             valueClassName={
               summary.isEliminated ? "text-wc-red" : "text-wc-green"
             }

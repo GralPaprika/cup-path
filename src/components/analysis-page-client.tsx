@@ -173,6 +173,14 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
                   includedStages={stages}
                 />
               )}
+              {loading ? (
+                <PathTableSkeleton />
+              ) : (
+                <PathTable
+                  matches={data.summary.matches}
+                  includedStages={stages}
+                />
+              )}
               <AdvancedStatsPanel
                 pathStats={data.advanced.pathStats}
                 cohortCorrelation={data.advanced.cohortCorrelation}
@@ -183,14 +191,6 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
                 open={advancedOpen}
                 onOpenChange={setAdvancedOpen}
               />
-              {loading ? (
-                <PathTableSkeleton />
-              ) : (
-                <PathTable
-                  matches={data.summary.matches}
-                  includedStages={stages}
-                />
-              )}
             </>
           )}
         </div>

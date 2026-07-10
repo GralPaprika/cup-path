@@ -22,6 +22,7 @@ export function GroupsPageClient() {
   const [selectedGroupLetter, setSelectedGroupLetter] = useState("A");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const userPickedGroup = useRef(false);
 
   const loadGroups = useCallback(async () => {
@@ -101,19 +102,23 @@ export function GroupsPageClient() {
       </div>
 
       <div className="glass-panel p-5 sm:p-6">
-        {loading && !error && <ComparisonGroupsSkeleton />}
+        {loading && groupCards.length === 0 && !error && (
+          <ComparisonGroupsSkeleton />
+        )}
         {error && (
           <div className="rounded-xl border border-wc-red/30 bg-wc-red/10 p-6 text-wc-red">
             {error}
           </div>
         )}
-        {!loading && !error && (
+        {groupCards.length > 0 && (
           <GroupsView
             groups={groupCards}
             mode={mode}
             selectedGroupLetter={selectedGroupLetter}
             onSelectGroup={handleSelectGroup}
             selectedTeamId={selectedTeamId ?? undefined}
+            advancedOpen={advancedOpen}
+            onAdvancedOpenChange={setAdvancedOpen}
           />
         )}
       </div>

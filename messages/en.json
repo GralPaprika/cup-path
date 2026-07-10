@@ -166,6 +166,27 @@
       "stdDev": "Std. dev.",
       "min": "Min",
       "max": "Max"
+    },
+    "pathAvgPoints": "Path avg pts",
+    "pathAvgRank": "Path avg rank",
+    "pathRank": "Path #",
+    "pathStatsNote": "Path columns use group-stage opponent averages across the full tournament path. Path # ranks all 48 teams by average opponent points.",
+    "groupStrengthRankOf": "#{rank} / {total} strongest by pts",
+    "groupStrengthRankAlt": "#{rank} / {total} by avg rank",
+    "advanced": {
+      "title": "Group strength comparison",
+      "subtitle": "How similarly the 12 groups rank by average FIFA points versus average FIFA rank.",
+      "groupOrderingTitle": "Strongest-group ordering",
+      "groupOrderingHint": "Across all {count} groups, comparing orderings by average group FIFA points (higher = stronger) and average group FIFA rank (lower = stronger).",
+      "spearmanRho": "Spearman ρ",
+      "kendallTau": "Kendall τ",
+      "selectedRankByPoints": "Group {group} by pts",
+      "selectedRankByAvgRank": "Group {group} by avg rank",
+      "rankValue": "#{rank} / {total}",
+      "groupOrderingIntro": "Each group is scored by the average FIFA strength of its four teams. Rank 1 is the strongest group on that scale.",
+      "spearmanBody": "Spearman ρ measures how similarly groups are ordered by average points versus average rank. 1 means identical order; 0 means unrelated; values near 1 mean both methods agree on which groups are strongest.",
+      "kendallBody": "Kendall τ counts pairwise agreement between the two group orderings. τ = 1 means every pair of groups ranks the same way under both metrics; τ = 0 means mixed agreement.",
+      "footnotePrimary": "Group cards show each group's strength rank. Path difficulty per team is in the detail table and on Analysis."
     }
   },
   "about": {

@@ -69,6 +69,9 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
               <TableHead className="text-muted-foreground">{t("round")}</TableHead>
               <TableHead className="text-muted-foreground">{t("opponent")}</TableHead>
               <TableHead className="text-right text-muted-foreground">
+                {t("points")}
+              </TableHead>
+              <TableHead className="text-right text-muted-foreground">
                 {t("rank")}
               </TableHead>
               <TableHead className="text-right text-muted-foreground">
@@ -102,15 +105,13 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
                   <TableCell>
                     <TeamLabel team={match.opponent} showCode flagSize="sm" />
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="font-mono text-sm text-white">
-                      #{match.opponentRank ?? "—"}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {match.opponentPoints !== null
-                        ? formatFifaPoints(match.opponentPoints)
-                        : t("noData")}
-                    </div>
+                  <TableCell className="text-right font-mono text-sm text-wc-orange">
+                    {match.opponentPoints !== null
+                      ? formatFifaPoints(match.opponentPoints)
+                      : t("noData")}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-sm text-white">
+                    {match.opponentRank !== null ? `#${match.opponentRank}` : "—"}
                   </TableCell>
                   <TableCell
                     className={cn("text-right font-mono text-sm", gapColor(match.rankGap))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type {
   GroupComparisonCard,
@@ -8,6 +8,11 @@ import type {
   RankingMode,
 } from "@/lib/types";
 import { GroupDetailPanel } from "@/components/group-detail-panel";
+import { GroupsAdvancedPanel } from "@/components/groups-advanced-panel";
+import {
+  computeGroupStrengthOrdering,
+  getGroupStrengthRank,
+} from "@/lib/domain/group-strength-ordering";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
 import {
@@ -45,6 +50,8 @@ interface GroupsViewProps {
   selectedGroupLetter: string;
   onSelectGroup: (groupLetter: string) => void;
   selectedTeamId?: string;
+  advancedOpen: boolean;
+  onAdvancedOpenChange: (open: boolean) => void;
 }
 
 export function GroupsView({
@@ -53,12 +60,19 @@ export function GroupsView({
   selectedGroupLetter,
   onSelectGroup,
   selectedTeamId,
+  advancedOpen,
+  onAdvancedOpenChange,
 }: GroupsViewProps) {
   const router = useRouter();
   const t = useTranslations("groups");
   const summary = useTranslations("summary");
   const common = useTranslations("common");
   const selectedGroupRef = useRef<HTMLDivElement>(null);
+
+  const groupOrdering = useMemo(
+    () => computeGroupStrengthOrdering(groups),
+    [groups],
+  );
 
   const selectedGroup = groups.find(
     (group) => group.groupLetter === selectedGroupLetter,
@@ -105,10 +119,18 @@ export function GroupsView({
         </div>
       )}
 
+      <GroupsAdvancedPanel
+        groups={groups}
+        selectedGroupLetter={selectedGroupLetter}
+        open={advancedOpen}
+        onOpenChange={onAdvancedOpenChange}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {groups.map((group) => {
           const isSelected = group.groupLetter === selectedGroupLetter;
           const isTeamGroup = group.groupLetter === teamGroupLetter;
+          const strengthRank = getGroupStrengthRank(groupOrdering, group.groupLetter);
 
           return (
             <article
@@ -124,40 +146,60 @@ export function GroupsView({
               <button
                 type="button"
                 onClick={() => onSelectGroup(group.groupLetter)}
-                className="flex w-full items-start justify-between gap-2 border-b border-white/8 px-4 py-3 text-left transition-colors hover:bg-white/4"
+                className="flex w-full flex-col border-b border-white/8 px-4 py-3 text-left transition-colors hover:bg-white/4"
               >
-                <div>
-                  <h3 className="font-semibold text-white">
-                    {common("group", { group: group.groupLetter })}
-                  </h3>
-                  {group.isComplete && (
-                    <p className="text-xs text-muted-foreground">
-                      {t("groupComplete")}
-                    </p>
-                  )}
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h3 className="font-semibold text-white">
+                      {common("group", { group: group.groupLetter })}
+                    </h3>
+                    {group.isComplete && (
+                      <p className="text-xs text-muted-foreground">
+                        {t("groupComplete")}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:gap-4">
+                    {group.avgFifaPoints !== null && (
+                      <div className="text-right">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                          {t("groupAvgFifaPoints")}
+                        </p>
+                        <p className="font-mono text-sm font-semibold tabular-nums text-wc-orange">
+                          {formatFifaPoints(group.avgFifaPoints)}
+                        </p>
+                      </div>
+                    )}
+                    {group.avgFifaRank !== null && (
+                      <div className="text-right">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                          {t("groupAvgPosition")}
+                        </p>
+                        <p className="font-mono text-sm font-semibold tabular-nums text-white">
+                          {formatStatValue(group.avgFifaRank, 1)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:gap-4">
-                  {group.avgFifaRank !== null && (
-                    <div className="text-right">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        {t("groupAvgPosition")}
-                      </p>
-                      <p className="font-mono text-sm font-semibold tabular-nums text-white">
-                        {formatStatValue(group.avgFifaRank, 1)}
-                      </p>
-                    </div>
-                  )}
-                  {group.avgFifaPoints !== null && (
-                    <div className="text-right">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        {t("groupAvgFifaPoints")}
-                      </p>
-                      <p className="font-mono text-sm font-semibold tabular-nums text-wc-orange">
-                        {formatFifaPoints(group.avgFifaPoints)}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                {(strengthRank.byPoints !== null ||
+                  strengthRank.byAvgRank !== null) && (
+                  <p className="mt-2 text-right text-[10px] text-muted-foreground">
+                    {strengthRank.byPoints !== null &&
+                      t("groupStrengthRankOf", {
+                        rank: strengthRank.byPoints,
+                        total: groupOrdering.groupCount,
+                      })}
+                    {strengthRank.byPoints !== null &&
+                      strengthRank.byAvgRank !== null &&
+                      " · "}
+                    {strengthRank.byAvgRank !== null &&
+                      t("groupStrengthRankAlt", {
+                        rank: strengthRank.byAvgRank,
+                        total: groupOrdering.groupCount,
+                      })}
+                  </p>
+                )}
               </button>
 
               <div className="overflow-hidden [&_[data-slot=table-container]]:overflow-hidden">
@@ -170,11 +212,11 @@ export function GroupsView({
                       <TableHead className="w-[46%] px-3 text-[10px] text-muted-foreground">
                         {t("team")}
                       </TableHead>
-                      <TableHead className="w-[16%] px-3 text-right text-[10px] text-muted-foreground">
-                        {summary("fifaRank")}
-                      </TableHead>
                       <TableHead className="w-[28%] px-3 text-right text-[10px] text-muted-foreground">
                         {summary("fifaPoints")}
+                      </TableHead>
+                      <TableHead className="w-[16%] px-3 text-right text-[10px] text-muted-foreground">
+                        {summary("fifaRank")}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -222,11 +264,11 @@ export function GroupsView({
                               nameClassName="text-sm font-medium text-white"
                             />
                           </TableCell>
-                          <TableCell className="whitespace-nowrap px-3 py-2 text-right font-mono text-sm tabular-nums text-white">
-                            {entry.fifaRank ?? "—"}
+                          <TableCell className="whitespace-nowrap px-3 py-2 text-right font-mono text-sm tabular-nums text-wc-orange">
+                            {formatFifaPoints(entry.fifaPoints)}
                           </TableCell>
                           <TableCell className="whitespace-nowrap px-3 py-2 text-right font-mono text-sm tabular-nums text-white">
-                            {formatFifaPoints(entry.fifaPoints)}
+                            {entry.fifaRank ?? "—"}
                           </TableCell>
                         </TableRow>
                       );

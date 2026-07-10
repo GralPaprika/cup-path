@@ -42,7 +42,7 @@ export function LocaleSwitcher() {
       <SelectTrigger
         size="sm"
         aria-label={nav("language")}
-        className="h-7 min-w-14 border-white/25 bg-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-white shadow-none hover:bg-white/15 focus-visible:border-white/40 focus-visible:ring-white/20 data-placeholder:text-white/70 [&_svg]:text-white/70"
+        className="h-8 min-w-14 border-white/15 bg-white/5 px-2 text-[11px] font-semibold uppercase tracking-wide text-white shadow-none hover:bg-white/10 focus-visible:border-wc-sky/40 focus-visible:ring-wc-sky/20 data-placeholder:text-white/70 [&_svg]:text-white/70"
       >
         <SelectValue>{locale.toUpperCase()}</SelectValue>
       </SelectTrigger>

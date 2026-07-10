@@ -47,112 +47,96 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Brand palette */
-  --color-hermes-50: #eef0f9;
-  --color-hermes-100: #cdd4ec;
-  --color-hermes-200: #9aa8d9;
-  --color-hermes-300: #677cc6;
-  --color-hermes-400: #3f56a8;
-  --color-hermes-500: #2a398d;
-  --color-hermes-600: #232f75;
-  --color-hermes-700: #1c255d;
-  --color-hermes-800: #151b45;
-  --color-hermes-900: #0e112d;
-  --color-hermes-950: #090b1f;
+  /* FIFA World Cup 2026 official palette */
+  --color-wc-maroon: #5c1a1a;
+  --color-wc-red: #e31937;
+  --color-wc-orange: #ff6b00;
+  --color-wc-peach: #ffb4a2;
+  --color-wc-purple: #7b2cbf;
+  --color-wc-lavender: #c77dff;
+  --color-wc-orchid: #d946ef;
+  --color-wc-pink: #ff006e;
+  --color-wc-navy: #0a1628;
+  --color-wc-royal: #2563eb;
+  --color-wc-sky: #38bdf8;
+  --color-wc-turquoise: #2dd4bf;
+  --color-wc-forest: #14532d;
+  --color-wc-green: #22c55e;
+  --color-wc-lime: #84cc16;
+  --color-wc-yellow: #facc15;
 
-  --color-pitch-50: #eef8ee;
-  --color-pitch-100: #d4ecd4;
-  --color-pitch-200: #a8daa7;
-  --color-pitch-300: #7dc87b;
-  --color-pitch-400: #58bb56;
-  --color-pitch-500: #3cac3b;
-  --color-pitch-600: #30902f;
-  --color-pitch-700: #257225;
-  --color-pitch-800: #1a541a;
-  --color-pitch-900: #103610;
+  /* Semantic aliases (legacy compat) */
+  --color-hermes-50: #e8edf8;
+  --color-hermes-100: #c5d0ec;
+  --color-hermes-200: #8fa8d4;
+  --color-hermes-300: #5a7fbb;
+  --color-hermes-400: #3b5fa0;
+  --color-hermes-500: #2563eb;
+  --color-hermes-600: #1e4fc4;
+  --color-hermes-700: #183d9a;
+  --color-hermes-800: #122c70;
+  --color-hermes-900: #0c1b46;
+  --color-hermes-950: #070f2a;
 
-  --color-torch-50: #fdeced;
-  --color-torch-100: #f9c5c7;
-  --color-torch-500: #e61d25;
+  --color-pitch-50: #ecfdf3;
+  --color-pitch-100: #d1fae0;
+  --color-pitch-200: #a7f3c7;
+  --color-pitch-300: #6ee7a8;
+  --color-pitch-400: #34d37a;
+  --color-pitch-500: #22c55e;
+  --color-pitch-600: #16a34a;
+  --color-pitch-700: #15803d;
+  --color-pitch-800: #166534;
+  --color-pitch-900: #14532d;
+
+  --color-torch-50: #fef2f2;
+  --color-torch-100: #fee2e2;
+  --color-torch-500: #e31937;
   --color-torch-600: #c4181f;
   --color-torch-700: #a21319;
 
-  --color-mist: #d1d4d1;
-  --color-mist-50: #f4f5f4;
-  --color-mist-100: #e8e9e8;
+  --color-mist: #94a3b8;
+  --color-mist-50: #f1f5f9;
+  --color-mist-100: #e2e8f0;
 
-  --color-heather: #474a4a;
-  --color-heather-50: #f3f3f3;
-  --color-heather-100: #e2e3e3;
+  --color-heather: #cbd5e1;
+  --color-heather-50: #f8fafc;
+  --color-heather-100: #f1f5f9;
 }
 
 :root {
-  --background: #f7f8fb;
-  --foreground: #474a4a;
-  --card: #ffffff;
-  --card-foreground: #474a4a;
-  --popover: #ffffff;
-  --popover-foreground: #474a4a;
-  --primary: #2a398d;
-  --primary-foreground: #ffffff;
-  --secondary: #eef0f9;
-  --secondary-foreground: #2a398d;
-  --muted: #f4f5f4;
-  --muted-foreground: #6b6e6e;
-  --accent: #eef8ee;
-  --accent-foreground: #257225;
-  --destructive: #e61d25;
-  --border: #d1d4d1;
-  --input: #e8e9e8;
-  --ring: #3cac3b;
-  --chart-1: #3cac3b;
-  --chart-2: #2a398d;
-  --chart-3: #e61d25;
-  --chart-4: #474a4a;
-  --chart-5: #d1d4d1;
-  --radius: 0.75rem;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #474a4a;
-  --sidebar-primary: #2a398d;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef0f9;
-  --sidebar-accent-foreground: #2a398d;
-  --sidebar-border: #d1d4d1;
-  --sidebar-ring: #3cac3b;
-}
-
-.dark {
-  --background: #0e112d;
-  --foreground: #f4f5f4;
-  --card: #151b45;
-  --card-foreground: #f4f5f4;
-  --popover: #151b45;
-  --popover-foreground: #f4f5f4;
-  --primary: #677cc6;
-  --primary-foreground: #ffffff;
-  --secondary: #1c255d;
-  --secondary-foreground: #cdd4ec;
-  --muted: #1c255d;
-  --muted-foreground: #9aa8d9;
-  --accent: #257225;
-  --accent-foreground: #d4ecd4;
-  --destructive: #e61d25;
-  --border: #232f75;
-  --input: #232f75;
-  --ring: #3cac3b;
-  --chart-1: #3cac3b;
-  --chart-2: #677cc6;
-  --chart-3: #e61d25;
-  --chart-4: #d1d4d1;
-  --chart-5: #474a4a;
-  --sidebar: #151b45;
-  --sidebar-foreground: #f4f5f4;
-  --sidebar-primary: #677cc6;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1c255d;
-  --sidebar-accent-foreground: #cdd4ec;
-  --sidebar-border: #232f75;
-  --sidebar-ring: #3cac3b;
+  --background: #050810;
+  --foreground: #f1f5f9;
+  --card: rgba(15, 23, 42, 0.65);
+  --card-foreground: #f1f5f9;
+  --popover: #0f172a;
+  --popover-foreground: #f1f5f9;
+  --primary: #38bdf8;
+  --primary-foreground: #050810;
+  --secondary: rgba(37, 99, 235, 0.15);
+  --secondary-foreground: #93c5fd;
+  --muted: rgba(30, 41, 59, 0.8);
+  --muted-foreground: #94a3b8;
+  --accent: rgba(34, 197, 94, 0.12);
+  --accent-foreground: #86efac;
+  --destructive: #e31937;
+  --border: rgba(148, 163, 184, 0.12);
+  --input: rgba(148, 163, 184, 0.15);
+  --ring: #38bdf8;
+  --chart-1: #22c55e;
+  --chart-2: #38bdf8;
+  --chart-3: #e31937;
+  --chart-4: #ff6b00;
+  --chart-5: #c77dff;
+  --radius: 0.875rem;
+  --sidebar: #0a1628;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #38bdf8;
+  --sidebar-primary-foreground: #050810;
+  --sidebar-accent: rgba(37, 99, 235, 0.2);
+  --sidebar-accent-foreground: #93c5fd;
+  --sidebar-border: rgba(148, 163, 184, 0.12);
+  --sidebar-ring: #38bdf8;
 }
 
 @layer base {
@@ -170,5 +154,28 @@
   h3,
   h4 {
     @apply font-semibold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply rounded-2xl border border-white/10 bg-white/5 shadow-xl shadow-black/20 backdrop-blur-xl;
+  }
+
+  .glass-panel-subtle {
+    @apply rounded-xl border border-white/8 bg-white/[0.03] backdrop-blur-md;
+  }
+
+  .wc-mesh-bg {
+    background-color: #050810;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(123, 44, 191, 0.18), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 0%, rgba(37, 99, 235, 0.15), transparent),
+      radial-gradient(ellipse 50% 30% at 50% 100%, rgba(34, 197, 94, 0.08), transparent),
+      radial-gradient(ellipse 40% 25% at 90% 80%, rgba(255, 107, 0, 0.06), transparent);
+  }
+
+  .wc-text-gradient {
+    @apply bg-gradient-to-r from-wc-sky via-wc-lavender to-wc-pink bg-clip-text text-transparent;
   }
 }

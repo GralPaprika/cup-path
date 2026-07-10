@@ -37,15 +37,12 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${plusJakarta.variable} ${geistMono.variable} h-full`}
+      className={`${plusJakarta.variable} ${geistMono.variable} dark h-full`}
     >
       <body className="min-h-full bg-background font-sans text-foreground antialiased">
         <NextIntlClientProvider messages={messages}>
           <div className="relative flex min-h-screen flex-col">
-            <div
-              aria-hidden
-              className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-hermes-100/50 via-background to-background"
-            />
+            <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wc-mesh-bg" />
             <SiteHeader />
             <main className="flex-1">{children}</main>
           </div>

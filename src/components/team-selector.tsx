@@ -9,6 +9,7 @@ import {
 } from "@/lib/i18n/team-display-name";
 import { useTranslations } from "next-intl";
 import { TeamFlag } from "@/components/team-flag";
+import { PickerLabel } from "@/components/picker-list";
 import { cn } from "@/lib/utils";
 
 interface TeamSelectorProps {
@@ -75,9 +76,7 @@ export function TeamSelector({ teams, value, onChange }: TeamSelectorProps) {
 
   return (
     <div className="space-y-3" ref={containerRef}>
-      <label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        {t("label")}
-      </label>
+      <PickerLabel>{t("label")}</PickerLabel>
 
       <div className="relative">
         <button
@@ -85,7 +84,7 @@ export function TeamSelector({ teams, value, onChange }: TeamSelectorProps) {
           onClick={() => setOpen((current) => !current)}
           aria-expanded={open}
           aria-haspopup="listbox"
-          className="flex h-12 w-full items-center justify-between gap-3 rounded-xl border border-hermes-100 bg-white px-3 text-left text-base shadow-sm transition-colors hover:border-hermes-200 focus-visible:border-hermes-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hermes-200/60"
+          className="flex h-12 w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-3 text-left text-base transition-colors hover:border-white/15 hover:bg-white/8 focus-visible:border-wc-sky/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wc-sky/30"
         >
           {selected ? (
             <span className="flex min-w-0 items-center gap-2">
@@ -93,7 +92,7 @@ export function TeamSelector({ teams, value, onChange }: TeamSelectorProps) {
               <span className="shrink-0 font-mono text-xs font-semibold tracking-wide text-muted-foreground">
                 {selected.id}
               </span>
-              <span className="truncate font-medium text-heather">
+              <span className="truncate font-medium text-white">
                 {selectedName}
               </span>
             </span>
@@ -109,8 +108,8 @@ export function TeamSelector({ teams, value, onChange }: TeamSelectorProps) {
         </button>
 
         {open && (
-          <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-hermes-100 bg-white shadow-lg">
-            <div className="border-b border-hermes-50 p-2">
+          <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-white/10 bg-wc-navy/95 shadow-xl backdrop-blur-xl">
+            <div className="border-b border-white/8 p-2">
               <div className="relative">
                 <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -119,14 +118,14 @@ export function TeamSelector({ teams, value, onChange }: TeamSelectorProps) {
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder={t("searchPlaceholder")}
-                  className="h-9 w-full rounded-lg border border-hermes-100 bg-mist-50/60 pr-3 pl-8 text-sm text-heather outline-none placeholder:text-muted-foreground focus:border-hermes-200 focus:ring-2 focus:ring-hermes-100"
+                  className="h-9 w-full rounded-lg border border-white/10 bg-white/5 pr-3 pl-8 text-sm text-white outline-none placeholder:text-muted-foreground focus:border-wc-sky/40 focus:ring-1 focus:ring-wc-sky/30"
                 />
               </div>
             </div>
 
             <ul
               role="listbox"
-              className="max-h-64 overflow-y-auto p-1"
+              className="max-h-64 overflow-y-auto p-1 [scrollbar-color:rgba(255,255,255,0.2)_transparent] [scrollbar-width:thin]"
               aria-label={t("label")}
             >
               {filteredTeams.length === 0 ? (
@@ -147,8 +146,8 @@ export function TeamSelector({ teams, value, onChange }: TeamSelectorProps) {
                         className={cn(
                           "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
                           active
-                            ? "bg-hermes-50 text-hermes-800"
-                            : "text-heather hover:bg-mist-50",
+                            ? "bg-white/12 text-white"
+                            : "text-white/80 hover:bg-white/6",
                         )}
                       >
                         <TeamFlag team={team} size="sm" />

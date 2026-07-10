@@ -104,69 +104,68 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
   }, [teamId, mode, stages]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <div className="overflow-hidden rounded-2xl border border-hermes-100/70 bg-white shadow-lg shadow-hermes-900/5">
-        <div className="border-b bg-gradient-to-br from-hermes-600 via-hermes-500 to-hermes-700 px-6 py-6 text-white">
-          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            {analysis("title")}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-hermes-50/90 sm:text-base">
-            {analysis("subtitle")}
-          </p>
-        </div>
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-white sm:text-3xl">
+          {analysis("title")}
+        </h1>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground sm:text-base">
+          {analysis("subtitle")}
+        </p>
+      </header>
 
-        <div className="space-y-6 border-b bg-gradient-to-b from-hermes-50/80 to-white px-4 py-5 sm:px-6">
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {analysis("rankingSnapshot")}
-            </p>
+      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+        <aside className="glass-panel h-fit space-y-6 p-5 lg:sticky lg:top-20">
+          <section>
+            <TeamSelector teams={teamList} value={teamId} onChange={setTeamId} />
+          </section>
+
+          <section>
             <RankingModeToggle
               value={mode}
               onChange={setMode}
-              variant="compact"
+              variant="sidebar"
             />
           </section>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <section className="rounded-xl border border-hermes-50 bg-white/90 p-4 shadow-sm">
-              <TeamSelector teams={teamList} value={teamId} onChange={setTeamId} />
-            </section>
-            <section className="rounded-xl border border-hermes-50 bg-white/90 p-4 shadow-sm">
-              <PathStageFilters
-                value={stages}
-                onChange={setStages}
-                maxStageReached={maxStageReached}
-              />
-            </section>
-          </div>
-        </div>
+          <section>
+            <PathStageFilters
+              value={stages}
+              onChange={setStages}
+              maxStageReached={maxStageReached}
+              variant="picker"
+            />
+          </section>
+        </aside>
 
-        {loading && !error && (
-          <div className="space-y-6 p-4 sm:p-6">
-            <SummaryCardSkeleton />
-            <PathTableSkeleton />
-          </div>
-        )}
-        {error && (
-          <div className="m-4 rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-destructive sm:m-6">
-            {error}
-          </div>
-        )}
-        {data && !loading && (
-          <div className="space-y-6 p-4 sm:p-6">
-            <SummaryCard
-              summary={data.summary}
-              hardestPathRank={data.hardestPathRank}
-              cohortSize={data.cohortSize}
-              cohortStage={data.cohortStage}
-              includedStages={stages}
-            />
-            <PathTable
-              matches={data.summary.matches}
-              includedStages={stages}
-            />
-          </div>
-        )}
+        <div className="space-y-6">
+          {loading && !error && (
+            <>
+              <SummaryCardSkeleton />
+              <PathTableSkeleton />
+            </>
+          )}
+          {error && (
+            <div className="glass-panel border-wc-red/30 p-6 text-wc-red">
+              {error}
+            </div>
+          )}
+          {data && !loading && (
+            <>
+              <SummaryCard
+                summary={data.summary}
+                hardestPathRank={data.hardestPathRank}
+                cohortSize={data.cohortSize}
+                cohortStage={data.cohortStage}
+                includedStages={stages}
+              />
+              <PathTable
+                matches={data.summary.matches}
+                includedStages={stages}
+              />
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

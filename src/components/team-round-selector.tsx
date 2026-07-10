@@ -37,19 +37,19 @@ export function TeamRoundSelector({
     <div className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             {t("label")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{t("hint")}</p>
         </div>
-        <span className="rounded-full bg-hermes-50 px-3 py-1 text-xs font-semibold text-hermes-700">
+        <span className="rounded-full border border-wc-sky/30 bg-wc-sky/10 px-3 py-1 text-xs font-semibold text-wc-sky">
           {teamCount != null
             ? t("teamCount", { count: teamCount })
             : t("loadingCount")}
         </span>
       </div>
 
-      <div className="relative flex rounded-xl border bg-white p-1 shadow-sm">
+      <div className="relative flex rounded-xl border border-white/10 bg-white/5 p-1">
         {PATH_STAGES.map((stage, index) => {
           const active = value === stage;
           const isPast = stageIndex(value) >= index;
@@ -67,10 +67,10 @@ export function TeamRoundSelector({
                   "cursor-not-allowed text-muted-foreground/40 opacity-50",
                 !disabled &&
                   (active
-                    ? "bg-pitch-500 text-white shadow-md"
+                    ? "bg-wc-sky/20 text-wc-sky shadow-sm ring-1 ring-wc-sky/30"
                     : isPast
-                      ? "text-hermes-700 hover:bg-hermes-50"
-                      : "text-muted-foreground hover:bg-muted/50"),
+                      ? "text-white/70 hover:bg-white/6"
+                      : "text-muted-foreground hover:bg-white/6"),
               )}
             >
               {t(SHORT_LABEL_KEYS[stage])}

@@ -69,9 +69,16 @@
     "rankCohortHint": "# ranks among {count} teams at {stage} or beyond",
     "team": "Team",
     "avgPoints": "Avg opp. points",
+    "pathDifficulty": "Path difficulty",
+    "avgOpponentPoints": "Avg opp. points",
+    "group": "Group",
+    "confederation": "Confederation",
     "avgRank": "Avg opp. rank",
     "status": "Status",
     "delta": "Delta vs selected",
+    "searchPlaceholder": "Search team…",
+    "noSearchResults": "No teams match your search",
+    "showingCount": "Showing {shown} of {total} teams",
     "noTeams": "No teams reached this round with the current tournament data.",
     "selectTeamHint": "Select a team on the Analysis page to see deltas",
     "teamRound": {
@@ -92,11 +99,17 @@
       "includeHint": "Which rounds contribute to the averages",
       "selectAll": "Select all",
       "groupStage": "Group",
+      "groupStageShort": "Grp",
       "round32": "Round of 32",
+      "round32Short": "R32",
       "round16": "Round of 16",
+      "round16Short": "R16",
       "quarterFinal": "Quarter-final",
+      "quarterFinalShort": "QF",
       "semiFinal": "Semi-final",
-      "final": "Final"
+      "semiFinalShort": "SF",
+      "final": "Final",
+      "finalShort": "F"
     }
   },
   "about": {

@@ -69,9 +69,16 @@
     "rankCohortHint": "El # rankea entre {count} equipos en {stage} o más",
     "team": "Equipo",
     "avgPoints": "Pts. medios riv.",
+    "pathDifficulty": "Dificultad de camino",
+    "avgOpponentPoints": "Pts. medios riv.",
+    "group": "Grupo",
+    "confederation": "Confederación",
     "avgRank": "Ranking med. riv.",
     "status": "Estado",
     "delta": "Delta vs seleccionado",
+    "searchPlaceholder": "Buscar equipo…",
+    "noSearchResults": "Ningún equipo coincide con tu búsqueda",
+    "showingCount": "Mostrando {shown} de {total} equipos",
     "noTeams": "Ningún equipo llegó a esta fase con los datos actuales del torneo.",
     "selectTeamHint": "Selecciona un equipo en Análisis para ver deltas",
     "teamRound": {
@@ -92,11 +99,17 @@
       "includeHint": "Qué fases aportan a los promedios",
       "selectAll": "Seleccionar todo",
       "groupStage": "Grupos",
+      "groupStageShort": "Grp",
       "round32": "Dieciseisavos",
+      "round32Short": "Diec.",
       "round16": "Octavos",
+      "round16Short": "Oct.",
       "quarterFinal": "Cuartos",
+      "quarterFinalShort": "CF",
       "semiFinal": "Semifinal",
-      "final": "Final"
+      "semiFinalShort": "SF",
+      "final": "Final",
+      "finalShort": "F"
     }
   },
   "about": {

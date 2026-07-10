@@ -125,62 +125,54 @@ export function ComparePageClient() {
   }, [mode, stages, teamRound, selectedTeamId]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <div className="overflow-hidden rounded-2xl border border-hermes-100/70 bg-white shadow-lg shadow-hermes-900/5">
-        <div className="border-b bg-gradient-to-br from-hermes-600 via-hermes-500 to-hermes-700 px-6 py-6 text-white">
-          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            {compare("title")}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-hermes-50/90 sm:text-base">
-            {compare("subtitle")}
-          </p>
-        </div>
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-white sm:text-3xl">
+          {compare("title")}
+        </h1>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground sm:text-base">
+          {compare("subtitle")}
+        </p>
+      </header>
 
-        <div className="space-y-6 border-b bg-gradient-to-b from-hermes-50/80 to-white px-4 py-5 sm:px-6">
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {compare("rankingSnapshot")}
-            </p>
-            <RankingModeToggle
-              value={mode}
-              onChange={setMode}
-              variant="compact"
+      <div className="glass-panel mb-6 space-y-6 p-5 sm:p-6">
+        <section className="space-y-3">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {compare("rankingSnapshot")}
+          </p>
+          <RankingModeToggle value={mode} onChange={setMode} variant="compact" />
+        </section>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section>
+            <TeamRoundSelector
+              value={teamRound}
+              onChange={handleTeamRoundChange}
+              teamCount={teamCounts?.[teamRound]}
+              minStage={minTeamRound}
             />
           </section>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <section className="rounded-xl border border-hermes-50 bg-white/90 p-4 shadow-sm">
-              <TeamRoundSelector
-                value={teamRound}
-                onChange={handleTeamRoundChange}
-                teamCount={teamCounts?.[teamRound]}
-                minStage={minTeamRound}
-              />
-            </section>
-            <section className="rounded-xl border border-hermes-50 bg-white/90 p-4 shadow-sm">
-              <PathStageFilters
-                value={stages}
-                onChange={handleStagesChange}
-                maxStageReached={maxStageReached}
-              />
-            </section>
-          </div>
-
-          {!selectedTeamId && (
-            <p className="text-sm text-muted-foreground">
-              {compare("selectTeamHint")}
-            </p>
-          )}
+          <section>
+            <PathStageFilters
+              value={stages}
+              onChange={handleStagesChange}
+              maxStageReached={maxStageReached}
+              variant="toggles"
+            />
+          </section>
         </div>
 
+        {!selectedTeamId && (
+          <p className="text-sm text-muted-foreground">{compare("selectTeamHint")}</p>
+        )}
+      </div>
+
+      <div className="glass-panel p-5 sm:p-6">
         {loading && !error && (
-          <CompareLoadingSkeleton
-            embedded
-            showDelta={Boolean(selectedTeamId)}
-          />
+          <CompareLoadingSkeleton embedded showDelta={Boolean(selectedTeamId)} />
         )}
         {error && (
-          <div className="m-4 rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-destructive sm:m-6">
+          <div className="rounded-xl border border-wc-red/30 bg-wc-red/10 p-6 text-wc-red">
             {error}
           </div>
         )}

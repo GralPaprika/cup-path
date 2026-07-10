@@ -1,90 +1,74 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-function StatBlockSkeleton({ highlight = false }: { highlight?: boolean }) {
+function StatBlockSkeleton() {
   return (
-    <div
-      className={
-        highlight
-          ? "rounded-xl bg-hermes-900/10 p-4"
-          : "rounded-xl border bg-muted/40 p-4"
-      }
-    >
-      <Skeleton className="h-3 w-20" />
-      <Skeleton className="mt-3 h-8 w-24" />
+    <div className="glass-panel-subtle px-4 py-3">
+      <Skeleton className="h-3 w-20 bg-white/10" />
+      <Skeleton className="mt-3 h-7 w-16 bg-white/10" />
     </div>
   );
 }
 
 export function SummaryCardSkeleton() {
   return (
-    <Card className="overflow-hidden border-hermes-100/60 shadow-lg shadow-hermes-900/5">
-      <CardHeader className="border-b bg-gradient-to-r from-hermes-50 to-white pb-4">
+    <div className="glass-panel overflow-hidden">
+      <div className="border-b border-white/8 px-5 py-5">
         <div className="flex items-center gap-3">
-          <Skeleton className="size-10 rounded-full" />
+          <Skeleton className="size-10 rounded-full bg-white/10" />
           <div className="space-y-2">
-            <Skeleton className="h-7 w-48" />
-            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-7 w-48 bg-white/10" />
+            <Skeleton className="h-4 w-28 bg-white/10" />
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6 p-4">
-        <div className="space-y-3">
-          <Skeleton className="h-3 w-24" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <StatBlockSkeleton key={index} />
-            ))}
-          </div>
+      </div>
+      <div className="grid gap-4 p-5 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:p-6">
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <StatBlockSkeleton key={index} />
+          ))}
         </div>
-        <div className="space-y-3">
-          <Skeleton className="h-3 w-24" />
-          <div className="grid gap-3 sm:grid-cols-2">
-            <StatBlockSkeleton highlight />
-            <StatBlockSkeleton />
-            <StatBlockSkeleton />
-            <StatBlockSkeleton />
-            <div className="rounded-xl border border-dashed border-hermes-200 bg-hermes-50/50 p-4 sm:col-span-2">
-              <Skeleton className="h-3 w-28" />
-              <Skeleton className="mt-3 h-6 w-40" />
-            </div>
-          </div>
+        <div className="flex flex-col items-center gap-2 px-4">
+          <Skeleton className="h-[140px] w-[240px] rounded-full bg-white/10" />
+          <Skeleton className="h-4 w-32 bg-white/10" />
         </div>
-      </CardContent>
-    </Card>
+        <div className="glass-panel-subtle px-5 py-4">
+          <Skeleton className="h-3 w-28 bg-white/10" />
+          <Skeleton className="mt-3 h-8 w-40 bg-white/10" />
+        </div>
+      </div>
+    </div>
   );
 }
 
 export function PathTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <Card className="border-hermes-100/60 shadow-sm">
-      <CardHeader className="border-b bg-hermes-50/50">
-        <Skeleton className="h-6 w-40" />
-      </CardHeader>
-      <CardContent className="space-y-3 p-4">
-        <div className="grid grid-cols-6 gap-3 border-b pb-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-4 w-full" />
+    <div className="glass-panel overflow-hidden">
+      <div className="border-b border-white/8 px-5 py-4">
+        <Skeleton className="h-6 w-40 bg-white/10" />
+      </div>
+      <div className="space-y-3 p-4">
+        <div className="grid grid-cols-5 gap-3 border-b border-white/8 pb-3">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-4 w-full bg-white/10" />
           ))}
         </div>
         {Array.from({ length: rows }).map((_, row) => (
-          <div key={row} className="grid grid-cols-6 items-center gap-3 py-1">
+          <div key={row} className="grid grid-cols-5 items-center gap-3 py-1">
             <div className="space-y-1">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-4 w-20 bg-white/10" />
+              <Skeleton className="h-3 w-16 bg-white/10" />
             </div>
             <div className="flex items-center gap-2">
-              <Skeleton className="size-6 rounded-full" />
-              <Skeleton className="h-4 w-16" />
+              <Skeleton className="size-6 rounded-full bg-white/10" />
+              <Skeleton className="h-4 w-16 bg-white/10" />
             </div>
-            <Skeleton className="ml-auto h-4 w-12" />
-            <Skeleton className="ml-auto h-4 w-8" />
-            <Skeleton className="ml-auto h-4 w-8" />
-            <Skeleton className="ml-auto h-6 w-14 rounded-full" />
+            <Skeleton className="ml-auto h-4 w-12 bg-white/10" />
+            <Skeleton className="ml-auto h-4 w-8 bg-white/10" />
+            <Skeleton className="ml-auto h-6 w-14 rounded-full bg-white/10" />
           </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -95,40 +79,43 @@ export function ComparisonTableSkeleton({
   rows?: number;
   showDelta?: boolean;
 }) {
+  const cols = showDelta ? 7 : 6;
   return (
-    <Card className="border-hermes-100/60 shadow-sm">
-      <CardHeader className="border-b bg-hermes-50/50">
-        <Skeleton className="h-6 w-56" />
-        <Skeleton className="mt-2 h-4 w-80 max-w-full" />
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="space-y-3 rounded-xl border p-4">
-          <div
-            className={`grid gap-3 border-b pb-3 ${showDelta ? "grid-cols-6" : "grid-cols-5"}`}
-          >
-            {Array.from({ length: showDelta ? 6 : 5 }).map((_, index) => (
-              <Skeleton key={index} className="h-4 w-full" />
-            ))}
-          </div>
-          {Array.from({ length: rows }).map((_, row) => (
-            <div
-              key={row}
-              className={`grid items-center gap-3 ${showDelta ? "grid-cols-6" : "grid-cols-5"}`}
-            >
-              <Skeleton className="h-4 w-6" />
-              <div className="flex items-center gap-2">
-                <Skeleton className="size-5 rounded-full" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-              <Skeleton className="ml-auto h-4 w-12" />
-              <Skeleton className="ml-auto h-4 w-8" />
-              <Skeleton className="h-6 w-16 rounded-full" />
-              {showDelta && <Skeleton className="ml-auto h-4 w-10" />}
-            </div>
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-64 bg-white/10" />
+        <Skeleton className="h-9 w-48 bg-white/10" />
+      </div>
+      <div className="space-y-3">
+        <div
+          className="grid gap-3 border-b border-white/8 pb-3"
+          style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+        >
+          {Array.from({ length: cols }).map((_, index) => (
+            <Skeleton key={index} className="h-4 w-full bg-white/10" />
           ))}
         </div>
-      </CardContent>
-    </Card>
+        {Array.from({ length: rows }).map((_, row) => (
+          <div
+            key={row}
+            className="grid items-center gap-3"
+            style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+          >
+            <Skeleton className="h-4 w-6 bg-white/10" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="size-5 rounded-full bg-white/10" />
+              <Skeleton className="h-4 w-24 bg-white/10" />
+            </div>
+            <Skeleton className="h-4 w-8 bg-white/10" />
+            <Skeleton className="h-4 w-16 bg-white/10" />
+            <Skeleton className="ml-auto h-4 w-12 bg-white/10" />
+            <Skeleton className="ml-auto h-4 w-8 bg-white/10" />
+            <Skeleton className="h-6 w-16 rounded-full bg-white/10" />
+            {showDelta && <Skeleton className="ml-auto h-4 w-10 bg-white/10" />}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -143,36 +130,7 @@ export function CompareLoadingSkeleton({
   embedded?: boolean;
 }) {
   if (embedded) {
-    return (
-      <div className="space-y-4 px-4 py-2 sm:px-6">
-        <div className="h-4 w-64 animate-pulse rounded bg-muted" />
-        <div className="space-y-3 rounded-xl border p-4">
-          <div
-            className={`grid gap-3 border-b pb-3 ${showDelta ? "grid-cols-6" : "grid-cols-5"}`}
-          >
-            {Array.from({ length: showDelta ? 6 : 5 }).map((_, index) => (
-              <Skeleton key={index} className="h-4 w-full" />
-            ))}
-          </div>
-          {Array.from({ length: 10 }).map((_, row) => (
-            <div
-              key={row}
-              className={`grid items-center gap-3 ${showDelta ? "grid-cols-6" : "grid-cols-5"}`}
-            >
-              <Skeleton className="h-4 w-6" />
-              <div className="flex items-center gap-2">
-                <Skeleton className="size-5 rounded-full" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-              <Skeleton className="ml-auto h-4 w-12" />
-              <Skeleton className="ml-auto h-4 w-8" />
-              <Skeleton className="h-6 w-16 rounded-full" />
-              {showDelta && <Skeleton className="ml-auto h-4 w-10" />}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <ComparisonTableSkeleton rows={12} showDelta={showDelta} />;
   }
 
   return <ComparisonTableSkeleton rows={48} showDelta={showDelta} />;
@@ -180,21 +138,20 @@ export function CompareLoadingSkeleton({
 
 export function PageShellSkeleton() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8">
-      <section className="rounded-2xl border border-hermes-100/60 bg-white/80 p-6 shadow-sm backdrop-blur sm:p-8">
-        <Skeleton className="h-10 w-80 max-w-full" />
-        <Skeleton className="mt-3 h-5 w-96 max-w-full" />
-      </section>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,340px)_1fr]">
-        <div className="space-y-6 rounded-2xl border bg-white/80 p-5 shadow-sm backdrop-blur">
-          <Skeleton className="h-4 w-24" />
-          <div className="grid gap-2 sm:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <Skeleton key={index} className="h-16 w-full rounded-xl" />
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6">
+      <div className="space-y-2">
+        <Skeleton className="h-9 w-72 bg-white/10" />
+        <Skeleton className="h-5 w-96 max-w-full bg-white/10" />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+        <div className="glass-panel space-y-6 p-5">
+          <Skeleton className="h-4 w-24 bg-white/10" />
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Skeleton key={index} className="h-10 w-full rounded-lg bg-white/10" />
             ))}
           </div>
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-10 w-full rounded-md" />
+          <Skeleton className="h-12 w-full rounded-xl bg-white/10" />
         </div>
         <SummaryCardSkeleton />
       </div>

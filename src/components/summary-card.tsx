@@ -4,15 +4,10 @@ import type { PathStage, TeamPathSummary } from "@/lib/types";
 import { getMatchStage, PATH_STAGES } from "@/lib/domain/match-stages";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
+import { DifficultyGauge } from "@/components/difficulty-gauge";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { formatFifaPoints, formatWholeNumber } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 interface SummaryCardProps {
   summary: TeamPathSummary;
@@ -20,39 +15,6 @@ interface SummaryCardProps {
   cohortSize: number;
   cohortStage: PathStage;
   includedStages?: Set<PathStage>;
-}
-
-function StatBlock({
-  label,
-  value,
-  highlight = false,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div
-      className={
-        highlight
-          ? "rounded-xl bg-hermes-500 p-4 text-white shadow-sm"
-          : "rounded-xl border bg-muted/40 p-4"
-      }
-    >
-      <p
-        className={
-          highlight
-            ? "text-xs font-medium uppercase tracking-wide text-hermes-100"
-            : "text-xs font-medium uppercase tracking-wide text-muted-foreground"
-        }
-      >
-        {label}
-      </p>
-      <p className={highlight ? "mt-1 text-3xl font-bold" : "mt-1 text-2xl font-bold"}>
-        {value}
-      </p>
-    </div>
-  );
 }
 
 const COHORT_STAGE_KEYS: Record<PathStage, string> = {
@@ -64,11 +26,31 @@ const COHORT_STAGE_KEYS: Record<PathStage, string> = {
   final: "final",
 };
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function StatTile({
+  label,
+  value,
+  className,
+  valueClassName,
+}: {
+  label: string;
+  value: string;
+  className?: string;
+  valueClassName?: string;
+}) {
   return (
-    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-      {children}
-    </p>
+    <div className={cn("glass-panel-subtle px-4 py-3", className)}>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-1 text-xl font-bold leading-tight text-white",
+          valueClassName,
+        )}
+      >
+        {value}
+      </p>
+    </div>
   );
 }
 
@@ -81,6 +63,7 @@ export function SummaryCard({
 }: SummaryCardProps) {
   const t = useTranslations("summary");
   const stages = useTranslations("compare.stages");
+  const common = useTranslations("common");
 
   const includedMatches = includedStages
     ? summary.matches.filter((match) => {
@@ -93,104 +76,107 @@ export function SummaryCard({
     !includedStages || includedStages.size === PATH_STAGES.length;
 
   return (
-    <Card className="overflow-hidden border-hermes-100/60 shadow-lg shadow-hermes-900/5">
-      <CardHeader className="border-b bg-gradient-to-r from-hermes-50 to-white pb-4">
-        <CardTitle className="text-2xl">
+    <div className="glass-panel">
+      <div className="border-b border-white/8 px-5 py-5 sm:px-6">
+        <div className="flex flex-wrap items-center gap-4">
           <TeamLabel
             team={summary.team}
             showCode
             flagSize="lg"
-            nameClassName="text-2xl font-bold"
+            nameClassName="text-xl font-bold text-white sm:text-2xl"
           />
-        </CardTitle>
-        <CardDescription>
+          <Badge
+            variant="outline"
+            className="border-wc-sky/30 bg-wc-sky/10 text-wc-sky"
+          >
+            {common("group", { group: summary.team.group })}
+          </Badge>
+          <Badge
+            variant="outline"
+            className="border-white/15 bg-white/5 text-muted-foreground"
+          >
+            {summary.team.confederation}
+          </Badge>
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">
           {t("matchesPlayed")}: {summary.playedCount}/{summary.totalCount}
           {!allStagesSelected && (
-            <span className="text-muted-foreground">
-              {" "}
-              · {t("averagesFrom", { count: includedMatches.length })}
-            </span>
+            <span> · {t("averagesFrom", { count: includedMatches.length })}</span>
           )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6 p-4">
-        <div className="space-y-3">
-          <SectionLabel>{t("teamProfile")}</SectionLabel>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatBlock label={t("fifaRank")} value={formatWholeNumber(summary.teamRank)} />
-            <StatBlock
-              label={t("fifaPoints")}
-              value={formatFifaPoints(summary.teamPoints)}
-            />
-            <StatBlock label={t("worldCupGroup")} value={summary.team.group} />
-            <StatBlock label={t("confederation")} value={summary.team.confederation} />
-          </div>
+        </p>
+      </div>
+
+      <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(17.5rem,1fr)_auto_minmax(14rem,1fr)] lg:items-center lg:gap-8">
+        <div className="grid min-w-[17.5rem] grid-cols-[minmax(0,0.85fr)_minmax(0,1.25fr)] gap-3 sm:min-w-[19rem]">
+          <StatTile
+            label={t("fifaRank")}
+            value={formatWholeNumber(summary.teamRank)}
+            valueClassName="tabular-nums"
+          />
+          <StatTile
+            label={t("fifaPoints")}
+            value={formatFifaPoints(summary.teamPoints)}
+            className="px-5"
+            valueClassName="tabular-nums"
+          />
+          <StatTile
+            label={t("avgRank")}
+            value={formatWholeNumber(summary.avgOpponentRank)}
+            valueClassName="tabular-nums"
+          />
+          <StatTile
+            label={t("status")}
+            value={summary.isEliminated ? t("eliminated") : t("active")}
+            className="px-5"
+            valueClassName={
+              summary.isEliminated ? "text-wc-red" : "text-wc-green"
+            }
+          />
         </div>
 
-        <div className="space-y-3">
-          <SectionLabel>{t("pathAnalysis")}</SectionLabel>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <StatBlock
-              label={t("avgDifficulty")}
-              value={formatFifaPoints(summary.avgOpponentPoints)}
-              highlight
-            />
-            <div className="rounded-xl border bg-muted/40 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {t("hardestPathRank")}
+        <div className="order-first flex min-w-0 flex-col items-center justify-center lg:order-none lg:min-w-[320px]">
+          <DifficultyGauge
+            value={summary.avgOpponentPoints}
+            hardestPathRank={hardestPathRank}
+            cohortSize={cohortSize}
+            label={t("avgDifficulty")}
+            rankTitle={hardestPathRank ? t("hardestPathRank") : undefined}
+            rankValue={
+              hardestPathRank
+                ? t("hardestPathRankOf", {
+                    rank: hardestPathRank,
+                    total: cohortSize,
+                  })
+                : undefined
+            }
+            rankMeta={
+              hardestPathRank
+                ? stages(COHORT_STAGE_KEYS[cohortStage])
+                : undefined
+            }
+          />
+        </div>
+
+        <div className="glass-panel-subtle flex min-h-[9.5rem] flex-col justify-center px-6 py-5 sm:px-7 sm:py-6">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {t("nextOpponent")}
+          </p>
+          <div className="mt-2">
+            {summary.nextOpponent ? (
+              <TeamLabel
+                team={summary.nextOpponent}
+                showCode
+                flagSize="md"
+                nameClassName="text-lg font-semibold text-white"
+              />
+            ) : (
+              <p className="text-2xl font-bold text-white/40">
+                {t("noNextOpponent")}
               </p>
-              <p className="mt-1 text-2xl font-bold">
-                {hardestPathRank
-                  ? t("hardestPathRankOf", {
-                      rank: hardestPathRank,
-                      total: cohortSize,
-                    })
-                  : "—"}
-              </p>
-              {hardestPathRank && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {t("hardestPathRankCohort", {
-                    stage: stages(COHORT_STAGE_KEYS[cohortStage]),
-                  })}
-                </p>
-              )}
-            </div>
-            <StatBlock
-              label={t("avgRank")}
-              value={formatWholeNumber(summary.avgOpponentRank)}
-            />
-            <div className="rounded-xl border bg-muted/40 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {t("status")}
-              </p>
-              <div className="mt-2">
-                <Badge
-                  variant={summary.isEliminated ? "destructive" : "default"}
-                  className={
-                    summary.isEliminated
-                      ? ""
-                      : "bg-pitch-500 text-white hover:bg-pitch-500"
-                  }
-                >
-                  {summary.isEliminated ? t("eliminated") : t("active")}
-                </Badge>
-              </div>
-            </div>
-            <div className="rounded-xl border border-dashed border-hermes-200 bg-hermes-50/50 p-4 sm:col-span-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-hermes-700/70">
-                {t("nextOpponent")}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-hermes-900">
-                {summary.nextOpponent ? (
-                  <TeamLabel team={summary.nextOpponent} showCode flagSize="md" />
-                ) : (
-                  <span className="text-muted-foreground">{t("noNextOpponent")}</span>
-                )}
-              </p>
-            </div>
+            )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

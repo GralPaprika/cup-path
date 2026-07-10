@@ -34,6 +34,7 @@ interface ComparisonTableProps {
   entries: ComparisonEntry[];
   mode: RankingMode;
   selectedTeamId?: string;
+  compareTeamIds?: string[];
   showDelta?: boolean;
   sortable?: boolean;
   linkToAnalysis?: boolean;
@@ -102,6 +103,7 @@ export function ComparisonTable({
   entries,
   mode,
   selectedTeamId,
+  compareTeamIds,
   showDelta = false,
   sortable = true,
   linkToAnalysis = true,
@@ -202,7 +204,9 @@ export function ComparisonTable({
         </TableHeader>
         <TableBody>
           {filteredEntries.map((entry) => {
-            const isSelected = entry.team.id === selectedTeamId;
+            const isSelected =
+              entry.team.id === selectedTeamId ||
+              compareTeamIds?.includes(entry.team.id);
             const analysisHref = `/?team=${entry.team.id}&mode=${mode}`;
 
             return (

@@ -16,9 +16,17 @@ interface TeamSelectorProps {
   teams: Team[];
   value: string;
   onChange: (teamId: string) => void;
+  label?: string;
+  placeholder?: string;
 }
 
-export function TeamSelector({ teams, value, onChange }: TeamSelectorProps) {
+export function TeamSelector({
+  teams,
+  value,
+  onChange,
+  label,
+  placeholder,
+}: TeamSelectorProps) {
   const t = useTranslations("teamSelector");
   const teamNames = useTranslations("teams");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,7 +84,7 @@ export function TeamSelector({ teams, value, onChange }: TeamSelectorProps) {
 
   return (
     <div className="space-y-3" ref={containerRef}>
-      <PickerLabel>{t("label")}</PickerLabel>
+      <PickerLabel>{label ?? t("label")}</PickerLabel>
 
       <div className="relative">
         <button
@@ -97,7 +105,9 @@ export function TeamSelector({ teams, value, onChange }: TeamSelectorProps) {
               </span>
             </span>
           ) : (
-            <span className="text-muted-foreground">{t("placeholder")}</span>
+            <span className="text-muted-foreground">
+              {placeholder ?? t("placeholder")}
+            </span>
           )}
           <ChevronDown
             className={cn(

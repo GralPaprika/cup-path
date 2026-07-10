@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { ComparisonEntry, PathStage } from "@/lib/types";
+import type { ComparisonEntry, PathStage, Team } from "@/lib/types";
 import {
   clampPathStages,
   getFurthestStage,
@@ -18,6 +18,7 @@ import {
 } from "@/components/path-stage-filters";
 import { TeamRoundSelector } from "@/components/team-round-selector";
 import { ComparisonTable } from "@/components/comparison-table";
+import { TeamHeadToHeadPanel } from "@/components/team-head-to-head-panel";
 import { CompareLoadingSkeleton } from "@/components/loading-skeletons";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
 import { useTranslations } from "next-intl";
@@ -26,7 +27,8 @@ export function ComparePageClient() {
   const t = useTranslations("common");
   const compare = useTranslations("compare");
   const searchParams = useSearchParams();
-  const selectedTeamId = searchParams.get("team")?.toUpperCase();
+  const initialTeamA = searchParams.get("team")?.toUpperCase() ?? "";
+  const initialTeamB = searchParams.get("vs")?.toUpperCase() ?? "";
   const initialStages = parsePathStages(searchParams.get("stages"));
   const initialTeamRound = syncTeamRoundToStages(
     parseTeamRound(searchParams.get("teamRound")),
@@ -36,6 +38,9 @@ export function ComparePageClient() {
   const [mode, setMode] = useSyncedRankingMode(searchParams);
   const [stages, setStages] = useState<Set<PathStage>>(initialStages);
   const [teamRound, setTeamRound] = useState<PathStage>(initialTeamRound);
+  const [teamAId, setTeamAId] = useState(initialTeamA);
+  const [teamBId, setTeamBId] = useState(initialTeamB);
+  const [teamList, setTeamList] = useState<Team[]>([]);
   const [entries, setEntries] = useState<ComparisonEntry[]>([]);
   const [cohortStage, setCohortStage] = useState<PathStage>("group");
   const [cohortSize, setCohortSize] = useState(48);
@@ -45,6 +50,13 @@ export function ComparePageClient() {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/teams?mode=${mode}`)
+      .then((res) => res.json())
+      .then((json: { teams: Team[] }) => setTeamList(json.teams))
+      .catch(() => setTeamList([]));
+  }, [mode]);
 
   const loadComparison = useCallback(async () => {
     setLoading(true);
@@ -56,7 +68,6 @@ export function ComparePageClient() {
         stages: serializePathStages(stages),
         teamRound,
       });
-      if (selectedTeamId) params.set("team", selectedTeamId);
 
       const response = await fetch(`/api/comparison?${params.toString()}`);
       if (!response.ok) throw new Error("Failed to load comparison");
@@ -93,7 +104,7 @@ export function ComparePageClient() {
     } finally {
       setLoading(false);
     }
-  }, [mode, selectedTeamId, stages, teamRound, t]);
+  }, [mode, stages, teamRound, t]);
 
   function handleStagesChange(next: Set<PathStage>) {
     setStages(next);
@@ -112,7 +123,7 @@ export function ComparePageClient() {
 
   useEffect(() => {
     setMaxStageReached(undefined);
-  }, [selectedTeamId]);
+  }, [teamAId, teamBId]);
 
   useEffect(() => {
     const params = new URLSearchParams({
@@ -120,9 +131,10 @@ export function ComparePageClient() {
       stages: serializePathStages(stages),
       teamRound,
     });
-    if (selectedTeamId) params.set("team", selectedTeamId);
+    if (teamAId) params.set("team", teamAId);
+    if (teamBId) params.set("vs", teamBId);
     window.history.replaceState(null, "", `/compare?${params.toString()}`);
-  }, [mode, stages, teamRound, selectedTeamId]);
+  }, [mode, stages, teamRound, teamAId, teamBId]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
@@ -161,31 +173,39 @@ export function ComparePageClient() {
             />
           </section>
         </div>
-
-        {!selectedTeamId && (
-          <p className="text-sm text-muted-foreground">{compare("selectTeamHint")}</p>
-        )}
       </div>
 
       <div className="glass-panel p-5 sm:p-6">
-        {loading && !error && (
-          <CompareLoadingSkeleton embedded showDelta={Boolean(selectedTeamId)} />
-        )}
         {error && (
           <div className="rounded-xl border border-wc-red/30 bg-wc-red/10 p-6 text-wc-red">
             {error}
           </div>
         )}
-        {!loading && !error && (
-          <ComparisonTable
-            entries={entries}
-            mode={mode}
-            selectedTeamId={selectedTeamId}
-            showDelta={Boolean(selectedTeamId)}
-            cohortStage={cohortStage}
-            cohortSize={cohortSize}
-            embedded
-          />
+        {!error && (
+          <>
+            <TeamHeadToHeadPanel
+              teams={teamList}
+              entries={entries}
+              teamAId={teamAId}
+              teamBId={teamBId}
+              onTeamAChange={setTeamAId}
+              onTeamBChange={setTeamBId}
+              cohortStage={cohortStage}
+              cohortSize={cohortSize}
+            />
+            {loading ? (
+              <CompareLoadingSkeleton embedded showDelta={false} />
+            ) : (
+              <ComparisonTable
+                entries={entries}
+                mode={mode}
+                compareTeamIds={[teamAId, teamBId].filter(Boolean)}
+                cohortStage={cohortStage}
+                cohortSize={cohortSize}
+                embedded
+              />
+            )}
+          </>
         )}
       </div>
     </div>

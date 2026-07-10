@@ -35,6 +35,7 @@
     "avgRank": "Avg opponent rank",
     "hardestPathRank": "Hardest path rank",
     "hardestPathRankOf": "#{rank} / {total}",
+    "hardestPathRankAltByAvgRank": "#{rank} by avg rank",
     "hardestPathRankCohort": "Among {stage} teams",
     "status": "Status",
     "active": "Active",
@@ -48,7 +49,27 @@
   "analysis": {
     "title": "World Cup path analysis",
     "subtitle": "See how tough a team's road to the final is, based on FIFA ranking points of every opponent faced.",
-    "rankingSnapshot": "FIFA ranking snapshot"
+    "rankingSnapshot": "FIFA ranking snapshot",
+    "advanced": {
+      "title": "Advanced statistics",
+      "subtitle": "Deeper opponent distribution and cohort ordering metrics for statistical comparison.",
+      "opponentDistributionTitle": "Opponent distribution",
+      "opponentPointsStats": "Opponent FIFA points",
+      "opponentRankStats": "Opponent FIFA rank",
+      "cohortOrderingTitle": "Cohort ordering agreement",
+      "cohortOrderingHint": "Across {count} comparable teams at {stage} or beyond, how closely do points-based and rank-based path orderings match?",
+      "spearmanRho": "Spearman ρ",
+      "kendallTau": "Kendall τ",
+      "rankByPoints": "Rank by avg points",
+      "rankByAvgRank": "Rank by avg rank",
+      "rankValue": "#{rank} / {total}",
+      "footnoteOpponentStats": "Opponent distribution stats use population variance over the matches included in your stage filter (n is shown in each block).",
+      "correlationSectionTitle": "Understanding Spearman ρ and Kendall τ",
+      "spearmanBody": "Spearman ρ (rho) measures how similarly teams are ordered when ranked by average opponent points versus average opponent rank. A value of 1 means both methods produce the exact same ranking — the hardest paths are the same either way. A value of 0 means the two orderings are unrelated: knowing a team's position by points tells you nothing about their position by rank. Values near 1 (typical here) mean the two metrics mostly agree, with only small swaps among similar paths.",
+      "kendallBody": "Kendall τ (tau) answers the same question from a different angle: it counts pairwise agreements between the two orderings. For every pair of teams, do points and rank agree on which path is harder? τ = 1 means every pair agrees; τ = 0 means agreement and disagreement balance out. It is especially useful when several teams have similar averages and ties are common.",
+      "correlationWhyItMatters": "Why this matters: CupPath uses points as the primary difficulty metric because FIFA points capture real strength gaps. Rank is ordinal — each position step counts equally. These coefficients show how much the alternate rank-based view diverges from the points-based one. When ρ and τ stay high, both stories align; when they dip, a few teams may shift position depending on which metric you prefer.",
+      "footnotePrimary": "Primary path difficulty and the gauge still use average opponent FIFA points."
+    }
   },
   "pathTable": {
     "title": "Tournament path",
@@ -151,6 +172,8 @@
     "title": "About CupPath",
     "methodologyTitle": "Methodology",
     "methodologyBody": "CupPath measures how difficult each team's World Cup path is using FIFA ranking points. Higher opponent points mean a harder match. Average path difficulty is the mean of opponent points across the rounds you choose to include.\n\nA team is marked Eliminated after a knockout loss (including extra time and penalties) or when it fails to advance from the group stage (top two per group plus the eight best third-place teams).",
+    "pointsVsRankTitle": "Points vs. average rank",
+    "pointsVsRankBody": "CupPath ranks path difficulty by average opponent FIFA points (higher = harder). We also show average opponent FIFA rank (lower = harder) for context.\n\nThe two orderings can differ slightly. FIFA points are a continuous strength measure; rank is an ordinal position where every step counts the same. A path with one elite opponent may rank higher by points than by average rank, because that opponent's points gap is larger than their rank number suggests.\n\nThe # column on Compare and the hardest-path rank on Analysis use points. On Compare you can sort the table by average rank to see the alternate ordering.",
     "comparisonTitle": "Why eliminated teams are not ranked together",
     "comparisonBody": "The # column on Compare—and the hardest-path rank on Analysis—only compare teams that reached the same stage of the tournament as the rounds included in your averages.\n\nThat is intentional. A side knocked out in the group played three group matches. A quarter-finalist may have played five or more, often against stronger opposition. Mixing those paths into one leaderboard would compare incomparable averages.\n\nEliminated teams still appear in the comparison table with their averages from the matches they actually played, marked as Eliminated. They simply do not receive a # rank unless they belong to the cohort at your selected stage—for example, if you only count group-stage matches, all 48 teams are comparable again.",
     "rankGapTitle": "Rank gap",

@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 interface SummaryCardProps {
   summary: TeamPathSummary;
   hardestPathRank: number | null;
+  hardestPathRankByAvgRank?: number | null;
   cohortSize: number;
   cohortStage: PathStage;
   includedStages?: Set<PathStage>;
@@ -57,6 +58,7 @@ function StatTile({
 export function SummaryCard({
   summary,
   hardestPathRank,
+  hardestPathRankByAvgRank,
   cohortSize,
   cohortStage,
   includedStages,
@@ -74,6 +76,12 @@ export function SummaryCard({
 
   const allStagesSelected =
     !includedStages || includedStages.size === PATH_STAGES.length;
+
+  const showAltRankByAvgRank =
+    hardestPathRank !== null &&
+    hardestPathRankByAvgRank !== null &&
+    hardestPathRankByAvgRank !== undefined &&
+    hardestPathRankByAvgRank !== hardestPathRank;
 
   return (
     <div className="glass-panel">
@@ -152,6 +160,13 @@ export function SummaryCard({
             rankMeta={
               hardestPathRank
                 ? stages(COHORT_STAGE_KEYS[cohortStage])
+                : undefined
+            }
+            rankAltNote={
+              showAltRankByAvgRank
+                ? t("hardestPathRankAltByAvgRank", {
+                    rank: hardestPathRankByAvgRank,
+                  })
                 : undefined
             }
           />

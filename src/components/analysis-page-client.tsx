@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { PathStage, Team, TeamPathSummary } from "@/lib/types";
+import type { CohortOrderingCorrelation } from "@/lib/domain/rank-correlation";
+import type { PathOpponentStats } from "@/lib/domain/path-opponent-stats";
 import {
   clampPathStages,
   isStageWithinReach,
@@ -15,6 +17,7 @@ import {
   serializePathStages,
 } from "@/components/path-stage-filters";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import { AdvancedStatsPanel } from "@/components/advanced-stats-panel";
 import { SummaryCard } from "@/components/summary-card";
 import { PathTable } from "@/components/path-table";
 import {
@@ -26,9 +29,14 @@ import { useTranslations } from "next-intl";
 interface AnalysisResponse {
   summary: TeamPathSummary;
   hardestPathRank: number | null;
+  hardestPathRankByAvgRank: number | null;
   cohortSize: number;
   cohortStage: PathStage;
   maxStageReached: PathStage;
+  advanced: {
+    pathStats: PathOpponentStats;
+    cohortCorrelation: CohortOrderingCorrelation;
+  };
 }
 
 function stagesNeedClamp(stages: Set<PathStage>, maxStage: PathStage): boolean {
@@ -50,6 +58,7 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
   const [maxStageReached, setMaxStageReached] = useState<PathStage | undefined>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
     fetch(`/api/teams?mode=${mode}`)
@@ -139,7 +148,7 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
         </aside>
 
         <div className="space-y-6">
-          {loading && !error && (
+          {loading && !data && !error && (
             <>
               <SummaryCardSkeleton />
               <PathTableSkeleton />
@@ -150,19 +159,38 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
               {error}
             </div>
           )}
-          {data && !loading && (
+          {data && (
             <>
-              <SummaryCard
-                summary={data.summary}
+              {loading ? (
+                <SummaryCardSkeleton />
+              ) : (
+                <SummaryCard
+                  summary={data.summary}
+                  hardestPathRank={data.hardestPathRank}
+                  hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
+                  cohortSize={data.cohortSize}
+                  cohortStage={data.cohortStage}
+                  includedStages={stages}
+                />
+              )}
+              <AdvancedStatsPanel
+                pathStats={data.advanced.pathStats}
+                cohortCorrelation={data.advanced.cohortCorrelation}
                 hardestPathRank={data.hardestPathRank}
+                hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
                 cohortSize={data.cohortSize}
                 cohortStage={data.cohortStage}
-                includedStages={stages}
+                open={advancedOpen}
+                onOpenChange={setAdvancedOpen}
               />
-              <PathTable
-                matches={data.summary.matches}
-                includedStages={stages}
-              />
+              {loading ? (
+                <PathTableSkeleton />
+              ) : (
+                <PathTable
+                  matches={data.summary.matches}
+                  includedStages={stages}
+                />
+              )}
             </>
           )}
         </div>

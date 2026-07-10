@@ -12,6 +12,7 @@ interface DifficultyGaugeProps {
   rankTitle?: string;
   rankValue?: string;
   rankMeta?: string;
+  rankAltNote?: string;
   className?: string;
 }
 
@@ -40,6 +41,7 @@ export function DifficultyGauge({
   rankTitle,
   rankValue,
   rankMeta,
+  rankAltNote,
   className,
 }: DifficultyGaugeProps) {
   const uid = useId().replace(/:/g, "");
@@ -131,7 +133,7 @@ export function DifficultyGauge({
           {rankTitle && (
             <p className="text-[10px] text-slate-400">{rankTitle}</p>
           )}
-          {(rankValue || rankMeta) && (
+          {(rankValue || rankMeta || rankAltNote) && (
             <p className="text-sm font-bold text-[#f0a070]">
               {rankValue}
               {rankValue && rankMeta && (
@@ -142,6 +144,11 @@ export function DifficultyGauge({
                   {rankMeta}
                 </span>
               )}
+            </p>
+          )}
+          {rankAltNote && (
+            <p className="text-[10px] font-medium text-slate-500">
+              {rankAltNote}
             </p>
           )}
         </div>

@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import type {
   GroupComparisonCard,
   GroupQualificationStatus,
-  NumericStats,
   RankingMode,
 } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
+import { StatsBlock } from "@/components/stats-block";
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { formatFifaPoints, formatStatValue } from "@/lib/format";
+import { formatFifaPoints } from "@/lib/format";
 
 const QUALIFICATION_ROW_STYLES: Record<
   Exclude<GroupQualificationStatus, null>,
@@ -42,66 +42,6 @@ interface GroupDetailPanelProps {
   group: GroupComparisonCard;
   mode: RankingMode;
   selectedTeamId?: string;
-}
-
-function StatsBlock({
-  title,
-  stats,
-  rankDecimals = 1,
-  isRank,
-}: {
-  title: string;
-  stats: NumericStats;
-  rankDecimals?: number;
-  isRank: boolean;
-}) {
-  const t = useTranslations("groups.stats");
-
-  const formatValue = (value: number | null) => {
-    if (value === null) return "—";
-    if (isRank) return formatStatValue(value, rankDecimals);
-    return formatFifaPoints(value);
-  };
-
-  const formatSpreadValue = (value: number | null) => {
-    if (value === null) return "—";
-    return isRank
-      ? formatStatValue(value, rankDecimals)
-      : formatStatValue(value, 2);
-  };
-
-  const rows: Array<{ key: string; value: string }> = [
-    { key: "mean", value: formatValue(stats.mean) },
-    { key: "median", value: formatValue(stats.median) },
-    { key: "stdDev", value: formatSpreadValue(stats.stdDev) },
-    { key: "variance", value: formatSpreadValue(stats.variance) },
-    { key: "min", value: formatValue(stats.min) },
-    { key: "max", value: formatValue(stats.max) },
-  ];
-
-  return (
-    <div className="glass-panel-subtle overflow-hidden">
-      <div className="border-b border-white/8 px-4 py-3">
-        <h4 className="text-sm font-semibold text-white">{title}</h4>
-        <p className="text-xs text-muted-foreground">
-          {t("sampleSize", { count: stats.count })}
-        </p>
-      </div>
-      <dl className="divide-y divide-white/6">
-        {rows.map((row) => (
-          <div
-            key={row.key}
-            className="flex items-center justify-between gap-3 px-4 py-2.5"
-          >
-            <dt className="text-sm text-muted-foreground">{t(row.key)}</dt>
-            <dd className="font-mono text-sm font-medium tabular-nums text-white">
-              {row.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
 }
 
 export function GroupDetailPanel({

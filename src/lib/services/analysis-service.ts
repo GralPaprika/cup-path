@@ -13,17 +13,33 @@ import {
   getHardestPathRank,
 } from "@/lib/domain/difficulty";
 import { buildGroupComparisonCards } from "@/lib/domain/group-comparison";
+import {
+  collectCohortDifficultyValues,
+  computePathOpponentStats,
+  type PathOpponentStats,
+} from "@/lib/domain/path-opponent-stats";
+import {
+  computeCohortOrderingCorrelation,
+  type CohortOrderingCorrelation,
+} from "@/lib/domain/rank-correlation";
 import { DEFAULT_PATH_STAGES, getFurthestStage } from "@/lib/domain/match-stages";
 import { getTeamMaxStageReached, getTeamsAtStage } from "@/lib/domain/team-stages";
 import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
 import { ensureWorldCupData } from "@/lib/data/worldcup-store";
 
+export interface TeamAnalysisAdvanced {
+  pathStats: PathOpponentStats;
+  cohortCorrelation: CohortOrderingCorrelation;
+}
+
 export interface TeamAnalysisResult {
   summary: TeamPathSummary;
   hardestPathRank: number | null;
+  hardestPathRankByAvgRank: number | null;
   cohortSize: number;
   cohortStage: PathStage;
   maxStageReached: PathStage;
+  advanced: TeamAnalysisAdvanced;
 }
 
 export async function getTeamAnalysis(
@@ -41,19 +57,36 @@ export async function getTeamAnalysis(
   const allSummaries = buildAllTeamSummaries(rankings);
   const cohortStage = getFurthestStage(stages);
   const cohortTeamIds = getTeamsAtStage(cohortStage);
-  const { rank, cohortSize } = getHardestPathRank(
+  const { rank, rankByAvgRank, cohortSize } = getHardestPathRank(
     allSummaries,
     teamId,
     stages,
     cohortTeamIds,
   );
 
+  const filteredSummary = applyStageFilterToSummary(summary, stages);
+  const cohortSummaries = allSummaries.filter((entry) =>
+    cohortTeamIds.has(entry.team.id),
+  );
+  const { pointsValues, rankValues } = collectCohortDifficultyValues(
+    cohortSummaries,
+    stages,
+  );
+
   return {
-    summary: applyStageFilterToSummary(summary, stages),
+    summary: filteredSummary,
     hardestPathRank: rank,
+    hardestPathRankByAvgRank: rankByAvgRank,
     cohortSize,
     cohortStage,
     maxStageReached: getTeamMaxStageReached(teamId),
+    advanced: {
+      pathStats: computePathOpponentStats(summary.matches, stages),
+      cohortCorrelation: computeCohortOrderingCorrelation(
+        pointsValues,
+        rankValues,
+      ),
+    },
   };
 }
 

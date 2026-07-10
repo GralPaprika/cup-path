@@ -35,6 +35,7 @@
     "avgRank": "Ranking medio del rival",
     "hardestPathRank": "Ranking de camino más duro",
     "hardestPathRankOf": "#{rank} / {total}",
+    "hardestPathRankAltByAvgRank": "#{rank} por ranking medio",
     "hardestPathRankCohort": "Entre equipos en {stage}",
     "status": "Estado",
     "active": "Activo",
@@ -48,7 +49,27 @@
   "analysis": {
     "title": "Análisis del camino en el Mundial",
     "subtitle": "Mide qué tan difícil es el camino de un equipo hacia la final, según los puntos FIFA de cada rival enfrentado.",
-    "rankingSnapshot": "Instantánea del ranking FIFA"
+    "rankingSnapshot": "Instantánea del ranking FIFA",
+    "advanced": {
+      "title": "Estadísticas avanzadas",
+      "subtitle": "Distribución más detallada de rivales y métricas de concordancia del grupo comparable.",
+      "opponentDistributionTitle": "Distribución de rivales",
+      "opponentPointsStats": "Puntos FIFA del rival",
+      "opponentRankStats": "Ranking FIFA del rival",
+      "cohortOrderingTitle": "Concordancia del orden del grupo",
+      "cohortOrderingHint": "Entre {count} equipos comparables en {stage} o más, ¿qué tan parecidos son los ordenamientos por puntos y por ranking medio?",
+      "spearmanRho": "Spearman ρ",
+      "kendallTau": "Kendall τ",
+      "rankByPoints": "Puesto por pts. medios",
+      "rankByAvgRank": "Puesto por ranking medio",
+      "rankValue": "#{rank} / {total}",
+      "footnoteOpponentStats": "Las estadísticas de distribución de rivales usan varianza poblacional sobre los partidos incluidos en tu filtro de fases (n aparece en cada bloque).",
+      "correlationSectionTitle": "Entender Spearman ρ y Kendall τ",
+      "spearmanBody": "Spearman ρ (rho) mide qué tan parecido es el orden de los equipos al clasificarlos por puntos medios del rival frente a ranking medio del rival. Un valor de 1 significa que ambos métodos producen exactamente el mismo orden: los caminos más duros son los mismos en ambos casos. Un valor de 0 significa que los dos ordenamientos no están relacionados: saber el puesto de un equipo por puntos no dice nada sobre su puesto por ranking. Valores cercanos a 1 (lo habitual aquí) indican que las dos métricas coinciden en general, con solo pequeños cambios entre caminos similares.",
+      "kendallBody": "Kendall τ (tau) responde la misma pregunta desde otro ángulo: cuenta los acuerdos por pares entre los dos ordenamientos. Para cada par de equipos, ¿coinciden puntos y ranking en cuál camino es más duro? τ = 1 significa que todos los pares coinciden; τ = 0 significa que acuerdos y desacuerdos se equilibran. Es especialmente útil cuando varios equipos tienen promedios parecidos y hay empates.",
+      "correlationWhyItMatters": "Por qué importa: CupPath usa los puntos como métrica principal de dificultad porque los puntos FIFA reflejan brechas reales de fuerza. El ranking es ordinal: cada escalón cuenta igual. Estos coeficientes muestran cuánto se aparta la vista alternativa por ranking de la basada en puntos. Cuando ρ y τ se mantienen altos, ambas lecturas coinciden; cuando bajan, algunos equipos pueden cambiar de puesto según la métrica que prefieras.",
+      "footnotePrimary": "La dificultad principal del camino y el medidor siguen usando el promedio de puntos FIFA del rival."
+    }
   },
   "pathTable": {
     "title": "Camino en el torneo",
@@ -151,6 +172,8 @@
     "title": "Acerca de CupPath",
     "methodologyTitle": "Metodología",
     "methodologyBody": "CupPath mide qué tan difícil es el camino de cada equipo en el Mundial usando los puntos del ranking FIFA. Más puntos del rival significan un partido más duro. La dificultad media del camino es el promedio de puntos del rival en las fases que elijas incluir.\n\nUn equipo aparece como Eliminado tras una derrota en eliminatoria (incluida prórroga y penaltis) o cuando no avanza de la fase de grupos (dos primeros por grupo más los ocho mejores terceros).",
+    "pointsVsRankTitle": "Puntos vs. ranking medio",
+    "pointsVsRankBody": "CupPath ordena la dificultad del camino por el promedio de puntos FIFA del rival (más alto = más duro). También mostramos el ranking FIFA medio del rival (más bajo = más duro) como referencia.\n\nLos dos ordenamientos pueden diferir ligeramente. Los puntos FIFA miden la fuerza de forma continua; el ranking es una posición ordinal donde cada escalón cuenta igual. Un camino con un rival de élite puede quedar más alto por puntos que por ranking medio, porque la brecha en puntos de ese rival es mayor de lo que sugiere su número de posición.\n\nLa columna # en Comparar y el ranking de camino más duro en Análisis usan puntos. En Comparar puedes ordenar la tabla por ranking medio para ver el orden alternativo.",
     "comparisonTitle": "Por qué no se comparan juntos los equipos eliminados",
     "comparisonBody": "La columna # en Comparar —y el ranking de camino más duro en Análisis— solo comparan equipos que llegaron a la misma fase del torneo que las rondas incluidas en tus promedios.\n\nEs deliberado. Un equipo eliminado en grupos jugó tres partidos de fase. Un cuartofinalista puede haber jugado cinco o más, a menudo contra rivales más fuertes. Mezclar esos caminos en una sola tabla compararía promedios que no son equivalentes.\n\nLos eliminados siguen apareciendo en la tabla con sus promedios de los partidos que sí jugaron, marcados como Eliminado. Simplemente no reciben un # salvo que pertenezcan al grupo comparable en la fase seleccionada —por ejemplo, si solo cuentas la fase de grupos, los 48 equipos vuelven a ser comparables.",
     "rankGapTitle": "Diferencia de ranking",

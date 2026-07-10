@@ -5,6 +5,7 @@ export default async function AboutPage() {
 
   const sections = [
     { title: t("methodologyTitle"), body: t("methodologyBody") },
+    { title: t("pointsVsRankTitle"), body: t("pointsVsRankBody") },
     { title: t("comparisonTitle"), body: t("comparisonBody") },
     { title: t("rankGapTitle"), body: t("rankGapBody") },
     { title: t("stagesTitle"), body: t("stagesBody") },

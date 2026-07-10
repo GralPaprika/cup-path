@@ -133,6 +133,7 @@ export function buildAllTeamSummaries(
 
 export interface HardestPathRankResult {
   rank: number | null;
+  rankByAvgRank: number | null;
   cohortSize: number;
   cohortStage: PathStage;
 }
@@ -144,20 +145,37 @@ export function getHardestPathRank(
   cohortTeamIds: Set<string>,
 ): HardestPathRankResult {
   const cohortStage = getFurthestStage(stages);
-  const ranked = summaries
+  const cohortEntries = summaries
     .filter((summary) => cohortTeamIds.has(summary.team.id))
-    .map((summary) => ({
-      teamId: summary.team.id,
-      avg:
-        computeFilteredAverages(summary.matches, stages).avgOpponentPoints ??
-        Number.NEGATIVE_INFINITY,
-    }))
-    .sort((a, b) => b.avg - a.avg);
+    .map((summary) => {
+      const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
+        summary.matches,
+        stages,
+      );
 
-  const index = ranked.findIndex((entry) => entry.teamId === teamId);
+      return {
+        teamId: summary.team.id,
+        avgOpponentPoints:
+          avgOpponentPoints ?? Number.NEGATIVE_INFINITY,
+        avgOpponentRank: avgOpponentRank ?? Number.POSITIVE_INFINITY,
+      };
+    });
+
+  const rankedByPoints = [...cohortEntries].sort(
+    (a, b) => b.avgOpponentPoints - a.avgOpponentPoints,
+  );
+  const rankedByRank = [...cohortEntries].sort(
+    (a, b) => a.avgOpponentRank - b.avgOpponentRank,
+  );
+
+  const pointsIndex = rankedByPoints.findIndex(
+    (entry) => entry.teamId === teamId,
+  );
+  const rankIndex = rankedByRank.findIndex((entry) => entry.teamId === teamId);
 
   return {
-    rank: index >= 0 ? index + 1 : null,
+    rank: pointsIndex >= 0 ? pointsIndex + 1 : null,
+    rankByAvgRank: rankIndex >= 0 ? rankIndex + 1 : null,
     cohortSize: cohortTeamIds.size,
     cohortStage,
   };

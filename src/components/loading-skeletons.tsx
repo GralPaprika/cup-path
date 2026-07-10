@@ -122,6 +122,37 @@ export function ComparisonTableSkeleton({
 /** @deprecated Use ComparisonTableSkeleton */
 export const ComparisonChartSkeleton = ComparisonTableSkeleton;
 
+export function ComparisonGroupsSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-4 w-80 max-w-full bg-white/10" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 12 }).map((_, index) => (
+          <div
+            key={index}
+            className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]"
+          >
+            <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
+              <Skeleton className="h-5 w-20 bg-white/10" />
+              <Skeleton className="h-5 w-24 bg-white/10" />
+            </div>
+            <div className="space-y-3 p-3">
+              {Array.from({ length: 4 }).map((__, row) => (
+                <div key={row} className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4 bg-white/10" />
+                  <Skeleton className="size-5 rounded-full bg-white/10" />
+                  <Skeleton className="h-4 flex-1 bg-white/10" />
+                  <Skeleton className="h-4 w-8 bg-white/10" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function CompareLoadingSkeleton({
   showDelta = false,
   embedded = false,

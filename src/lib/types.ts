@@ -112,6 +112,31 @@ export interface ComparisonEntry {
   deltaVsSelected: number | null;
 }
 
+export type GroupQualificationStatus = "first" | "second" | "bestThird" | null;
+
+export interface GroupComparisonTeamEntry {
+  team: Team;
+  standing: GroupStanding;
+  fifaRank: number | null;
+  fifaPoints: number | null;
+  avgOpponentPoints: number | null;
+  avgOpponentRank: number | null;
+  isEliminated: boolean;
+  rankAmongTeams: number | null;
+  isAdvancingThird: boolean;
+  isFilteredOut: boolean;
+  qualificationStatus: GroupQualificationStatus;
+}
+
+export interface GroupComparisonCard {
+  groupName: string;
+  groupLetter: string;
+  teams: GroupComparisonTeamEntry[];
+  isComplete: boolean;
+  avgFifaRank: number | null;
+  avgFifaPoints: number | null;
+}
+
 export interface GroupStanding {
   teamId: string;
   played: number;

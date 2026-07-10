@@ -5,6 +5,7 @@
   },
   "nav": {
     "home": "Análisis",
+    "groups": "Grupos",
     "compare": "Comparar",
     "about": "Acerca de",
     "language": "Idioma"
@@ -112,6 +113,21 @@
       "finalShort": "F"
     }
   },
+  "groups": {
+    "title": "Grupos del Mundial",
+    "subtitle": "Los 48 equipos en sus grupos del sorteo con ranking FIFA y posiciones",
+    "rankingSnapshot": "Instantánea del ranking FIFA",
+    "groupComplete": "Grupo completo",
+    "groupAvgPosition": "Posición media",
+    "groupAvgFifaPoints": "Pts. FIFA medios",
+    "groupPos": "Pos",
+    "team": "Equipo",
+    "legend": {
+      "first": "1.º puesto",
+      "second": "2.º puesto",
+      "bestThird": "Mejor 3.º"
+    }
+  },
   "about": {
     "title": "Acerca de CupPath",
     "methodologyTitle": "Metodología",
@@ -121,7 +137,7 @@
     "rankGapTitle": "Diferencia de ranking",
     "rankGapBody": "La diferencia de ranking es el ranking del rival menos el del equipo. Una diferencia negativa indica un rival más difícil (mejor posicionado). Una positiva indica un rival más accesible.",
     "stagesTitle": "Filtros por fase",
-    "stagesBody": "Contar partidos desde te permite elegir qué rondas alimentan los promedios —solo grupos, hasta la final, o cualquier punto intermedio. La fase más avanzada seleccionada define el grupo de comparación para el #.\n\nEn Comparar, Mostrar equipos reduce la tabla a selecciones que llegaron al menos a esa ronda. No puedes mostrar equipos eliminados antes de la fase más avanzada en tus promedios, porque nunca jugaron esos partidos. El modo de ranking que elijas se recuerda al cambiar entre Análisis y Comparar.",
+    "stagesBody": "Contar partidos desde te permite elegir qué rondas alimentan los promedios —solo grupos, hasta la final, o cualquier punto intermedio. La fase más avanzada seleccionada define el grupo de comparación para el #.\n\nEn Comparar, Mostrar equipos reduce la tabla a selecciones que llegaron al menos a esa ronda. No puedes mostrar equipos eliminados antes de la fase más avanzada en tus promedios, porque nunca jugaron esos partidos. El modo de ranking que elijas se recuerda al cambiar entre Análisis, Grupos y Comparar.",
     "dataTitle": "Fuentes de datos",
     "dataBody": "Los partidos provienen de openfootball/worldcup.json (2026), almacenados en Vercel Blob y actualizados dos veces al día — resultados, marcadores y próximo rival se leen desde ahí. Los rankings FIFA vienen de la API World Football Ranking en RapidAPI, también en Blob: en vivo cada hora e instantáneas históricas dos veces al día.",
     "rankingModesTitle": "Modos de ranking",

@@ -1,4 +1,10 @@
-import type { ComparisonEntry, PathStage, RankingMode, TeamPathSummary } from "@/lib/types";
+import type {
+  ComparisonEntry,
+  GroupComparisonCard,
+  PathStage,
+  RankingMode,
+  TeamPathSummary,
+} from "@/lib/types";
 import {
   applyStageFilterToSummary,
   buildAllTeamSummaries,
@@ -6,6 +12,7 @@ import {
   buildTeamPathSummary,
   getHardestPathRank,
 } from "@/lib/domain/difficulty";
+import { buildGroupComparisonCards } from "@/lib/domain/group-comparison";
 import { DEFAULT_PATH_STAGES, getFurthestStage } from "@/lib/domain/match-stages";
 import { getTeamMaxStageReached, getTeamsAtStage } from "@/lib/domain/team-stages";
 import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
@@ -57,6 +64,10 @@ export interface ComparisonAnalysisResult {
   maxStageReached?: PathStage;
 }
 
+export interface GroupsAnalysisResult {
+  groups: GroupComparisonCard[];
+}
+
 export async function getComparisonAnalysis(
   mode: RankingMode,
   selectedTeamId?: string,
@@ -66,18 +77,21 @@ export async function getComparisonAnalysis(
   await ensureWorldCupData();
   const snapshot = await getRankingsSnapshot(mode);
   const rankings = buildRankingsMap(snapshot);
-  let summaries = buildAllTeamSummaries(rankings);
+  const allSummaries = buildAllTeamSummaries(rankings);
 
   const cohortStage = getFurthestStage(stages);
   const cohortTeamIds = getTeamsAtStage(cohortStage);
 
+  let filteredSummaries = allSummaries;
   if (teamRound !== "group") {
     const teamIds = getTeamsAtStage(teamRound);
-    summaries = summaries.filter((summary) => teamIds.has(summary.team.id));
+    filteredSummaries = allSummaries.filter((summary) =>
+      teamIds.has(summary.team.id),
+    );
   }
 
   const comparison = buildComparison(
-    summaries,
+    filteredSummaries,
     selectedTeamId,
     stages,
     cohortTeamIds,
@@ -91,4 +105,22 @@ export async function getComparisonAnalysis(
       ? getTeamMaxStageReached(selectedTeamId)
       : undefined,
   };
+}
+
+export async function getGroupsAnalysis(
+  mode: RankingMode,
+): Promise<GroupsAnalysisResult> {
+  await ensureWorldCupData();
+  const snapshot = await getRankingsSnapshot(mode);
+  const rankings = buildRankingsMap(snapshot);
+  const allSummaries = buildAllTeamSummaries(rankings);
+  const comparison = buildComparison(
+    allSummaries,
+    undefined,
+    new Set(DEFAULT_PATH_STAGES),
+    getTeamsAtStage("group"),
+  );
+  const groups = buildGroupComparisonCards(comparison, rankings, "group");
+
+  return { groups };
 }

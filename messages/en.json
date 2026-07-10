@@ -5,6 +5,7 @@
   },
   "nav": {
     "home": "Analysis",
+    "groups": "Groups",
     "compare": "Compare",
     "about": "About",
     "language": "Language"
@@ -112,6 +113,21 @@
       "finalShort": "F"
     }
   },
+  "groups": {
+    "title": "World Cup groups",
+    "subtitle": "All 48 teams in their draw groups with FIFA ranking and group standings",
+    "rankingSnapshot": "FIFA ranking snapshot",
+    "groupComplete": "Group complete",
+    "groupAvgPosition": "Avg position",
+    "groupAvgFifaPoints": "Avg FIFA points",
+    "groupPos": "Pos",
+    "team": "Team",
+    "legend": {
+      "first": "1st place",
+      "second": "2nd place",
+      "bestThird": "Best 3rd place"
+    }
+  },
   "about": {
     "title": "About CupPath",
     "methodologyTitle": "Methodology",
@@ -121,7 +137,7 @@
     "rankGapTitle": "Rank gap",
     "rankGapBody": "Rank gap is opponent rank minus team rank. A negative gap means a harder opponent (they are ranked higher). A positive gap means an easier opponent.",
     "stagesTitle": "Stage filters",
-    "stagesBody": "Count matches from lets you choose which rounds feed the averages—group only, through the final, or anything in between. The furthest round selected defines the comparison cohort for the # rank.\n\nOn Compare, Show teams narrows the table to sides that reached at least that round. You cannot show teams eliminated before the furthest round in your averages, because they never played those matches. Your ranking-mode choice is remembered when you switch between Analysis and Compare.",
+    "stagesBody": "Count matches from lets you choose which rounds feed the averages—group only, through the final, or anything in between. The furthest round selected defines the comparison cohort for the # rank.\n\nOn Compare, Show teams narrows the table to sides that reached at least that round. You cannot show teams eliminated before the furthest round in your averages, because they never played those matches. Your ranking-mode choice is remembered when you switch between Analysis, Groups, and Compare.",
     "dataTitle": "Data sources",
     "dataBody": "Match data comes from openfootball/worldcup.json (2026), stored in Vercel Blob and refreshed twice daily—scores, results, and next opponents update from there. FIFA rankings come from the World Football Ranking API on RapidAPI, also in Blob: live rankings hourly, historical snapshots twice daily.",
     "rankingModesTitle": "Ranking modes",

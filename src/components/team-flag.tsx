@@ -46,14 +46,14 @@ export function TeamLabel({
   const displayName = getTeamDisplayName(teamNames, team);
 
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
+    <span className={`inline-flex min-w-0 max-w-full items-center gap-2 ${className}`}>
       <TeamFlag team={team} size={flagSize} />
       {showCode && (
-        <span className="font-mono text-xs font-semibold tracking-wide text-muted-foreground">
+        <span className="shrink-0 font-mono text-xs font-semibold tracking-wide text-muted-foreground">
           {team.id}
         </span>
       )}
-      <span className={nameClassName}>{displayName}</span>
+      <span className={`min-w-0 truncate ${nameClassName}`}>{displayName}</span>
     </span>
   );
 }

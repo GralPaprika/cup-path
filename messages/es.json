@@ -7,6 +7,7 @@
     "home": "Análisis",
     "groups": "Grupos",
     "compare": "Comparar",
+    "simulate": "Simular",
     "about": "Acerca de",
     "language": "Idioma"
   },
@@ -241,5 +242,36 @@
     "group": "Grupo {group}",
     "localeEs": "Español",
     "localeEn": "English"
+  },
+  "simulate": {
+    "title": "Simulación de camino",
+    "subtitle": "Elige ganadores alternativos en el cuadro para ver cómo cambiaría la dificultad del camino. Cada lado muestra su casilla (ej. 1J · Argentina vs 2H · Cabo Verde).",
+    "rankingSnapshot": "Instantánea del ranking FIFA",
+    "pathComparison": "Comparación de dificultad",
+    "actualPath": "Camino actual",
+    "simulatedPath": "Camino simulado",
+    "reset": "Restablecer simulación",
+    "harderBy": "El camino simulado es {gap} más duro por puntos medios del rival.",
+    "easierBy": "El camino simulado es {gap} más fácil por puntos medios del rival.",
+    "knockoutBracket": "Cuadro eliminatorio",
+    "bracketHint": "Toca un equipo para simular que gana ese partido. Las casillas naranjas muestran de dónde viene cada lado en el sorteo.",
+    "bracket": {
+      "vs": "vs",
+      "simulated": "Simulado",
+      "pickWinner": "Toca un equipo para simular su victoria en este partido."
+    },
+    "pathChanges": "Cambios de rival en el camino",
+    "pathChangeRound": "Fase",
+    "pathChangeActual": "Rival actual",
+    "pathChangeSimulated": "Rival simulado",
+    "noPathChanges": "La simulación cambia el cuadro pero aún no los rivales de este equipo.",
+    "groupFinishes": "Clasificación de grupos",
+    "groupFinishesHint": "Intercambia posiciones dentro de un grupo para simular otra clasificación. Los mejores terceros se resaltan.",
+    "groupLabel": "Grupo {letter}",
+    "groups": {
+      "bestThird": "Mejor 3.º",
+      "moveUp": "Subir",
+      "moveDown": "Bajar"
+    }
   }
 }

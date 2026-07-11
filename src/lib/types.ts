@@ -62,6 +62,86 @@ export interface OpenFootballMatch {
   ground?: string;
 }
 
+export type BracketSlotKind =
+  | "groupPosition"
+  | "thirdAssigned"
+  | "winner"
+  | "loser";
+
+export interface BracketSlotSpec {
+  kind: BracketSlotKind;
+  group?: string;
+  position?: 1 | 2 | 3;
+  matchNum?: number;
+  eligibleGroups?: string[];
+}
+
+export interface BracketTemplateMatch {
+  num: number;
+  round: string;
+  home: BracketSlotSpec;
+  away: BracketSlotSpec;
+}
+
+export interface ResolvedMatchSide {
+  slotLabel: string;
+  slotKind: BracketSlotKind;
+  group?: string;
+  position?: 1 | 2 | 3;
+  sourceMatchNum?: number;
+  eligibleGroups?: string[];
+  teamId: string | null;
+}
+
+export interface ResolvedBracketMatch {
+  num: number;
+  round: string;
+  date: string;
+  ground?: string;
+  home: ResolvedMatchSide;
+  away: ResolvedMatchSide;
+  winnerTeamId: string | null;
+  isPlayed: boolean;
+  scoreLabel: string | null;
+}
+
+export interface SimulationScenario {
+  knockoutWinners?: Record<number, string>;
+  slotOverrides?: Record<string, string>;
+  groupFinishes?: Record<string, [string, string, string]>;
+}
+
+export interface PathDiffRow {
+  round: string;
+  date: string;
+  actualOpponentId: string | null;
+  simulatedOpponentId: string | null;
+  opponentChanged: boolean;
+}
+
+export interface GroupFinishCard {
+  groupLetter: string;
+  positions: Array<{
+    position: 1 | 2 | 3;
+    teamId: string;
+  }>;
+  thirdQualifies: boolean;
+}
+
+export interface SimulationResult {
+  teamId: string;
+  actualSummary: TeamPathSummary;
+  simulatedSummary: TeamPathSummary;
+  actualAvgPointsContext: AvgPointsContext | null;
+  simulatedAvgPointsContext: AvgPointsContext | null;
+  bracket: ResolvedBracketMatch[];
+  changedMatchNums: number[];
+  pathDiff: PathDiffRow[];
+  baselineGroupFinishes: Record<string, [string, string, string]>;
+  groupCards: GroupFinishCard[];
+  focusTeamMatchNums: number[];
+}
+
 export interface OpenFootballTeam {
   name: string;
   name_normalised?: string;

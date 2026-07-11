@@ -7,6 +7,7 @@
     "home": "Analysis",
     "groups": "Groups",
     "compare": "Compare",
+    "simulate": "Simulate",
     "about": "About",
     "language": "Language"
   },
@@ -241,5 +242,36 @@
     "group": "Group {group}",
     "localeEs": "Español",
     "localeEn": "English"
+  },
+  "simulate": {
+    "title": "Path simulation",
+    "subtitle": "Pick alternate knockout winners to see how a team's path difficulty would change. Each side shows its bracket slot (e.g. 1J · Argentina vs 2H · Cape Verde).",
+    "rankingSnapshot": "FIFA ranking snapshot",
+    "pathComparison": "Path difficulty comparison",
+    "actualPath": "Actual path",
+    "simulatedPath": "Simulated path",
+    "reset": "Reset simulation",
+    "harderBy": "Simulated path is {gap} harder by average opponent points.",
+    "easierBy": "Simulated path is {gap} easier by average opponent points.",
+    "knockoutBracket": "Knockout bracket",
+    "bracketHint": "Tap a team to set them as the winner for that match. Orange slots show where each side comes from in the draw.",
+    "bracket": {
+      "vs": "vs",
+      "simulated": "Simulated",
+      "pickWinner": "Tap a team to simulate them winning this match."
+    },
+    "pathChanges": "Opponent changes on focus path",
+    "pathChangeRound": "Round",
+    "pathChangeActual": "Actual opponent",
+    "pathChangeSimulated": "Simulated opponent",
+    "noPathChanges": "Simulation changes the bracket but not this team's opponents yet.",
+    "groupFinishes": "Group finishes",
+    "groupFinishesHint": "Swap positions within a group to simulate different standings. Best third-place teams are highlighted.",
+    "groupLabel": "Group {letter}",
+    "groups": {
+      "bestThird": "Best 3rd",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
+    }
   }
 }

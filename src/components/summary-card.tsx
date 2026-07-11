@@ -10,7 +10,7 @@ import {
   AvgPointsContextHint,
 } from "@/components/avg-points-context";
 import { Badge } from "@/components/ui/badge";
-import { formatFifaPoints, formatWholeNumber } from "@/lib/format";
+import { formatFifaPoints, formatStatValue, formatWholeNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface SummaryCardProps {
@@ -146,7 +146,7 @@ export function SummaryCard({
           />
           <StatTile
             label={t("avgRank")}
-            value={formatWholeNumber(summary.avgOpponentRank)}
+            value={formatStatValue(summary.avgOpponentRank, 1)}
             className="px-5"
             valueClassName="tabular-nums"
           />

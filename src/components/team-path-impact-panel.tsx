@@ -4,6 +4,7 @@ import type {
   AvgPointsContext,
   PathDiffRow,
   PathDifficultyRank,
+  PathStage,
   Team,
   TeamPathSummary,
 } from "@/lib/types";
@@ -35,8 +36,18 @@ interface TeamPathImpactPanelProps {
     simulated: PathDifficultyRank;
     comparison: PathDifficultyRank | null;
   };
+  pathRankCohortStage: PathStage;
   hasOverrides: boolean;
 }
+
+const COHORT_STAGE_KEYS: Record<PathStage, string> = {
+  group: "groupStage",
+  r32: "round32",
+  r16: "round16",
+  qf: "quarterFinal",
+  sf: "semiFinal",
+  final: "final",
+};
 
 function formatPointsDelta(
   baseline: number | null,
@@ -193,10 +204,12 @@ export function TeamPathImpactPanel({
   onComparisonTeamChange,
   pathDiff,
   pathRanks,
+  pathRankCohortStage,
   hasOverrides,
 }: TeamPathImpactPanelProps) {
   const t = useTranslations("simulate");
   const summary = useTranslations("summary");
+  const compare = useTranslations("compare");
   const stages = useTranslations("compare.stages");
   const teamNames = useTranslations("teams");
   const changedRows = pathDiff.filter((row) => row.opponentChanged);
@@ -424,6 +437,14 @@ export function TeamPathImpactPanel({
 
       <p className="text-xs text-muted-foreground">
         {showComparison ? t("pathCompareFootnoteWithComparison") : t("pathCompareFootnote")}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {t("averagesIncludeScheduled")}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {compare("headToHead.rankCohortNote", {
+          stage: stages(COHORT_STAGE_KEYS[pathRankCohortStage]),
+        })}
       </p>
 
       {pointsDelta !== null && hasOverrides && pointsDelta !== 0 && (

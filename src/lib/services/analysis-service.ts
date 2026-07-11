@@ -142,7 +142,9 @@ export async function getComparisonAnalysis(
   return {
     comparison,
     cohortStage,
-    cohortSize: cohortTeamIds.size,
+    cohortSize: filteredSummaries.filter((summary) =>
+      cohortTeamIds.has(summary.team.id),
+    ).length,
     maxStageReached: selectedTeamId
       ? getTeamMaxStageReached(selectedTeamId)
       : undefined,

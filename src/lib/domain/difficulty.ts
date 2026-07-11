@@ -1,5 +1,4 @@
 import type {
-  ComparisonEntry,
   MatchDifficulty,
   PathDifficultyRank,
   PathStage,
@@ -12,26 +11,40 @@ import {
   getNextOpponent,
   isTeamEliminated,
 } from "@/lib/domain/path-builder";
-import { getMatchStage, DEFAULT_PATH_STAGES, getFurthestStage, PATH_STAGES } from "@/lib/domain/match-stages";
+import {
+  getMatchStage,
+  DEFAULT_PATH_STAGES,
+  getFurthestStage,
+  PATH_STAGES,
+} from "@/lib/domain/match-stages";
+import { computeMean } from "@/lib/domain/group-stats";
+import {
+  buildCompetitionRankMap,
+  rankTeamInCohort,
+} from "@/lib/domain/path-ranking";
 import { enrichTeam, getAllTeams, getTeamById } from "@/lib/data/team-registry";
 import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
 
-function average(values: number[]): number | null {
-  if (values.length === 0) return null;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
+const ALL_PATH_STAGES = new Set(PATH_STAGES);
 
 function withFlag(team: Team, entry?: RankingEntry): Team {
   return enrichTeam(team, entry?.flagUrl);
 }
 
+export interface FilteredAverageOptions {
+  playedOnly?: boolean;
+}
+
 export function computeFilteredAverages(
   matches: MatchDifficulty[],
   stages: Set<PathStage>,
+  options: FilteredAverageOptions = {},
 ): { avgOpponentPoints: number | null; avgOpponentRank: number | null } {
   const filtered = matches.filter((match) => {
     const stage = getMatchStage(match.round);
-    return stage !== null && stages.has(stage);
+    if (stage === null || !stages.has(stage)) return false;
+    if (options.playedOnly && !match.isPlayed) return false;
+    return true;
   });
 
   const opponentPoints = filtered
@@ -43,9 +56,49 @@ export function computeFilteredAverages(
     .filter((value): value is number => value !== null);
 
   return {
-    avgOpponentPoints: average(opponentPoints),
-    avgOpponentRank: average(opponentRanks),
+    avgOpponentPoints: computeMean(opponentPoints),
+    avgOpponentRank: computeMean(opponentRanks),
   };
+}
+
+interface CohortMetricEntry {
+  teamId: string;
+  avgOpponentPoints: number;
+  avgOpponentRank: number;
+}
+
+function buildCohortMetricEntries(
+  allSummaries: TeamPathSummary[],
+  teamId: string,
+  pathSummary: TeamPathSummary | undefined,
+  stages: Set<PathStage>,
+  cohortTeamIds: Set<string>,
+  options: FilteredAverageOptions = {},
+): CohortMetricEntry[] {
+  const summaryByTeamId = new Map(
+    allSummaries.map((summary) => [summary.team.id, summary]),
+  );
+
+  return [...cohortTeamIds]
+    .map((id) => {
+      const summary =
+        id === teamId && pathSummary ? pathSummary : summaryByTeamId.get(id);
+      if (!summary) return null;
+
+      const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
+        summary.matches,
+        stages,
+        options,
+      );
+
+      return {
+        teamId: id,
+        avgOpponentPoints:
+          avgOpponentPoints ?? Number.NEGATIVE_INFINITY,
+        avgOpponentRank: avgOpponentRank ?? Number.POSITIVE_INFINITY,
+      };
+    })
+    .filter((entry): entry is CohortMetricEntry => entry !== null);
 }
 
 export function buildTeamPathSummary(
@@ -91,13 +144,10 @@ export function buildTeamPathSummary(
     },
   );
 
-  const opponentPoints = matches
-    .map((match) => match.opponentPoints)
-    .filter((value): value is number => value !== null);
-
-  const opponentRanks = matches
-    .map((match) => match.opponentRank)
-    .filter((value): value is number => value !== null);
+  const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
+    matches,
+    ALL_PATH_STAGES,
+  );
 
   const nextOpponent = getNextOpponent(teamId);
 
@@ -106,8 +156,8 @@ export function buildTeamPathSummary(
     teamRank: teamRanking?.rank ?? null,
     teamPoints: teamRanking?.points ?? null,
     matches,
-    avgOpponentPoints: average(opponentPoints),
-    avgOpponentRank: average(opponentRanks),
+    avgOpponentPoints,
+    avgOpponentRank,
     isEliminated: isTeamEliminated(teamId),
     nextOpponent: nextOpponent
       ? withFlag(nextOpponent, rankings.get(nextOpponent.id))
@@ -125,8 +175,8 @@ export function buildAllTeamSummaries(
     .filter((summary): summary is TeamPathSummary => summary !== null);
 
   summaries.sort((a, b) => {
-    const aPoints = a.avgOpponentPoints ?? 0;
-    const bPoints = b.avgOpponentPoints ?? 0;
+    const aPoints = a.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
+    const bPoints = b.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
     return bPoints - aPoints;
   });
 
@@ -146,43 +196,29 @@ export function getPathDifficultyRank(
   pathSummary: TeamPathSummary,
   stages: Set<PathStage>,
   cohortTeamIds: Set<string>,
+  options: FilteredAverageOptions = {},
 ): PathDifficultyRank {
-  const summaryByTeamId = new Map(
-    allSummaries.map((summary) => [summary.team.id, summary]),
+  const cohortEntries = buildCohortMetricEntries(
+    allSummaries,
+    teamId,
+    pathSummary,
+    stages,
+    cohortTeamIds,
+    options,
   );
 
-  const cohortEntries = [...cohortTeamIds]
-    .map((id) => {
-      const summary = id === teamId ? pathSummary : summaryByTeamId.get(id);
-      if (!summary) return null;
-
-      const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
-        summary.matches,
-        stages,
-      );
-
-      return {
-        teamId: id,
-        avgOpponentPoints:
-          avgOpponentPoints ?? Number.NEGATIVE_INFINITY,
-        avgOpponentRank: avgOpponentRank ?? Number.POSITIVE_INFINITY,
-      };
-    })
-    .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
-
-  const rankedByPoints = [...cohortEntries].sort(
-    (a, b) => b.avgOpponentPoints - a.avgOpponentPoints,
-  );
-  const rankedByRank = [...cohortEntries].sort(
-    (a, b) => a.avgOpponentRank - b.avgOpponentRank,
-  );
-
-  const pointsIndex = rankedByPoints.findIndex((entry) => entry.teamId === teamId);
-  const rankIndex = rankedByRank.findIndex((entry) => entry.teamId === teamId);
+  const pointsEntries = cohortEntries.map((entry) => ({
+    teamId: entry.teamId,
+    value: entry.avgOpponentPoints,
+  }));
+  const rankEntries = cohortEntries.map((entry) => ({
+    teamId: entry.teamId,
+    value: entry.avgOpponentRank,
+  }));
 
   return {
-    rankByPoints: pointsIndex >= 0 ? pointsIndex + 1 : null,
-    rankByAvgRank: rankIndex >= 0 ? rankIndex + 1 : null,
+    rankByPoints: rankTeamInCohort(pointsEntries, teamId, true),
+    rankByAvgRank: rankTeamInCohort(rankEntries, teamId, false),
     cohortSize: cohortEntries.length,
   };
 }
@@ -192,40 +228,33 @@ export function getHardestPathRank(
   teamId: string,
   stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
   cohortTeamIds: Set<string>,
+  options: FilteredAverageOptions = {},
 ): HardestPathRankResult {
   const cohortStage = getFurthestStage(stages);
-  const cohortEntries = summaries
-    .filter((summary) => cohortTeamIds.has(summary.team.id))
-    .map((summary) => {
-      const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
-        summary.matches,
-        stages,
-      );
+  const focusSummary = summaries.find((summary) => summary.team.id === teamId);
 
-      return {
-        teamId: summary.team.id,
-        avgOpponentPoints:
-          avgOpponentPoints ?? Number.NEGATIVE_INFINITY,
-        avgOpponentRank: avgOpponentRank ?? Number.POSITIVE_INFINITY,
-      };
-    });
-
-  const rankedByPoints = [...cohortEntries].sort(
-    (a, b) => b.avgOpponentPoints - a.avgOpponentPoints,
-  );
-  const rankedByRank = [...cohortEntries].sort(
-    (a, b) => a.avgOpponentRank - b.avgOpponentRank,
+  const cohortEntries = buildCohortMetricEntries(
+    summaries,
+    teamId,
+    focusSummary,
+    stages,
+    cohortTeamIds,
+    options,
   );
 
-  const pointsIndex = rankedByPoints.findIndex(
-    (entry) => entry.teamId === teamId,
-  );
-  const rankIndex = rankedByRank.findIndex((entry) => entry.teamId === teamId);
+  const pointsEntries = cohortEntries.map((entry) => ({
+    teamId: entry.teamId,
+    value: entry.avgOpponentPoints,
+  }));
+  const rankEntries = cohortEntries.map((entry) => ({
+    teamId: entry.teamId,
+    value: entry.avgOpponentRank,
+  }));
 
   return {
-    rank: pointsIndex >= 0 ? pointsIndex + 1 : null,
-    rankByAvgRank: rankIndex >= 0 ? rankIndex + 1 : null,
-    cohortSize: cohortTeamIds.size,
+    rank: rankTeamInCohort(pointsEntries, teamId, true),
+    rankByAvgRank: rankTeamInCohort(rankEntries, teamId, false),
+    cohortSize: cohortEntries.length,
     cohortStage,
   };
 }
@@ -233,10 +262,12 @@ export function getHardestPathRank(
 export function applyStageFilterToSummary(
   summary: TeamPathSummary,
   stages: Set<PathStage>,
+  options: FilteredAverageOptions = {},
 ): TeamPathSummary {
   const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
     summary.matches,
     stages,
+    options,
   );
 
   return {
@@ -252,11 +283,13 @@ export function buildComparison(
   stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
   cohortTeamIds?: Set<string>,
   rankings?: Map<string, RankingEntry>,
+  options: FilteredAverageOptions = {},
 ) {
   const entries = summaries.map((summary) => {
     const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
       summary.matches,
       stages,
+      options,
     );
 
     return {
@@ -271,17 +304,14 @@ export function buildComparison(
     cohortTeamIds ??
     new Set(entries.map((entry) => entry.team.id));
 
-  const cohortRanked = [...entries]
+  const cohortPointsEntries = entries
     .filter((entry) => cohort.has(entry.team.id))
-    .sort((a, b) => {
-      const aPoints = a.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
-      const bPoints = b.avgOpponentPoints ?? Number.NEGATIVE_INFINITY;
-      return bPoints - aPoints;
-    });
+    .map((entry) => ({
+      teamId: entry.team.id,
+      value: entry.avgOpponentPoints ?? Number.NEGATIVE_INFINITY,
+    }));
 
-  const rankByTeamId = new Map(
-    cohortRanked.map((entry, index) => [entry.team.id, index + 1]),
-  );
+  const rankByTeamId = buildCompetitionRankMap(cohortPointsEntries, true);
 
   const selectedAvg =
     selectedTeamId && cohort.has(selectedTeamId)

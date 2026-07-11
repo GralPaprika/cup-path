@@ -17,7 +17,8 @@ import {
   getPathDifficultyRank,
 } from "@/lib/domain/difficulty";
 import { computePathDiff } from "@/lib/domain/path-diff";
-import { PATH_STAGES } from "@/lib/domain/match-stages";
+import { getFurthestStage, PATH_STAGES } from "@/lib/domain/match-stages";
+import { getTeamsAtStage } from "@/lib/domain/team-stages";
 import {
   buildBestThirdRanking,
   buildGroupFinishCards,
@@ -172,7 +173,8 @@ export async function getSimulationAnalysis(
 
   const allSummaries = buildAllTeamSummaries(rankings);
   const pathRankStages = new Set(PATH_STAGES);
-  const cohortTeamIds = new Set(allSummaries.map((summary) => summary.team.id));
+  const pathRankCohortStage = getFurthestStage(pathRankStages);
+  const cohortTeamIds = getTeamsAtStage(pathRankCohortStage);
   const pathRanks = {
     actual: getPathDifficultyRank(
       allSummaries,
@@ -229,6 +231,7 @@ export async function getSimulationAnalysis(
     canPickAllStrongestWinners,
     canPickSimulatedStrongestWinners,
     pathRanks,
+    pathRankCohortStage,
     pathDiff: computePathDiff(
       actualSummary.matches,
       simulatedSummary.matches,

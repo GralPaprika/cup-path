@@ -12,13 +12,12 @@ import {
   computeGroupStandings,
   getAdvancingTeamIds,
 } from "@/lib/domain/group-standings";
-import { computeNumericStats } from "@/lib/domain/group-stats";
+import { computeNumericStats, computeMean } from "@/lib/domain/group-stats";
 import { getGroupNames } from "@/lib/domain/path-builder";
 import { getTeamsAtStage } from "@/lib/domain/team-stages";
 
 function average(values: number[]): number | null {
-  if (values.length === 0) return null;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
+  return computeMean(values);
 }
 
 function getQualificationStatus(

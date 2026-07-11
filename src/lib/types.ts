@@ -166,6 +166,7 @@ export interface SimulationResult {
     simulated: PathDifficultyRank;
     comparison: PathDifficultyRank | null;
   };
+  pathRankCohortStage: PathStage;
   pathDiff: PathDiffRow[];
   baselineGroupFinishes: Record<string, [string, string, string, string]>;
   groupCards: GroupFinishCard[];

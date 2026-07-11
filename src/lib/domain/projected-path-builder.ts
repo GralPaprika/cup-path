@@ -9,13 +9,11 @@ import type {
 import { enrichTeam, getTeamById } from "@/lib/data/team-registry";
 import { isKnockoutRound } from "@/lib/data/worldcup-loader";
 import { resolveBracket, type ResolveBracketOptions } from "@/lib/domain/bracket-resolver";
-import { getMatchStage } from "@/lib/domain/match-stages";
+import { computeFilteredAverages } from "@/lib/domain/difficulty";
+import { getMatchStage, PATH_STAGES } from "@/lib/domain/match-stages";
 import { buildTeamPath } from "@/lib/domain/path-builder";
 
-function average(values: number[]): number | null {
-  if (values.length === 0) return null;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
+const ALL_PATH_STAGES = new Set(PATH_STAGES);
 
 function withFlag(team: Team, entry?: RankingEntry): Team {
   return enrichTeam(team, entry?.flagUrl);
@@ -116,7 +114,7 @@ export function buildProjectedTeamPathSummary(
     if (isPlayed && bracketMatch.winnerTeamId) {
       result = bracketMatch.winnerTeamId === teamId ? "W" : "L";
     } else if (overridden && bracketMatch.winnerTeamId) {
-      result = null;
+      result = bracketMatch.winnerTeamId === teamId ? "W" : "L";
       scoreLabel = null;
     }
 
@@ -142,7 +140,7 @@ export function buildProjectedTeamPathSummary(
   for (const match of matches) {
     truncated.push(match);
     const stage = getMatchStage(match.round);
-    if (stage && stage !== "group" && match.isPlayed && match.result === "L") {
+    if (stage && stage !== "group" && match.result === "L") {
       eliminated = true;
       break;
     }
@@ -154,12 +152,10 @@ export function buildProjectedTeamPathSummary(
     finalMatches[nextIndex] = { ...finalMatches[nextIndex], isNext: true };
   }
 
-  const opponentPoints = finalMatches
-    .map((match) => match.opponentPoints)
-    .filter((value): value is number => value !== null);
-  const opponentRanks = finalMatches
-    .map((match) => match.opponentRank)
-    .filter((value): value is number => value !== null);
+  const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
+    finalMatches,
+    ALL_PATH_STAGES,
+  );
 
   const nextMatch = finalMatches.find((match) => match.isNext);
 
@@ -168,8 +164,8 @@ export function buildProjectedTeamPathSummary(
     teamRank: teamRanking?.rank ?? null,
     teamPoints: teamRanking?.points ?? null,
     matches: finalMatches,
-    avgOpponentPoints: average(opponentPoints),
-    avgOpponentRank: average(opponentRanks),
+    avgOpponentPoints,
+    avgOpponentRank,
     isEliminated: eliminated,
     nextOpponent: nextMatch?.opponent ?? null,
     playedCount: finalMatches.filter((match) => match.isPlayed).length,

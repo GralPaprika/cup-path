@@ -18,11 +18,16 @@ const EMPTY_STATS: NumericStats = {
   max: null,
 };
 
+export function computeMean(values: number[]): number | null {
+  if (values.length === 0) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
 export function computeNumericStats(values: number[]): NumericStats {
   const count = values.length;
   if (count === 0) return EMPTY_STATS;
 
-  const mean = values.reduce((sum, value) => sum + value, 0) / count;
+  const mean = computeMean(values)!;
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(count / 2);
   const median =

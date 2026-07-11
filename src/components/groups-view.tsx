@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
 import type {
   GroupComparisonCard,
   GroupQualificationStatus,
-  RankingMode,
 } from "@/lib/types";
 import { GroupDetailPanel } from "@/components/group-detail-panel";
 import { GroupsAdvancedPanel } from "@/components/groups-advanced-panel";
@@ -46,7 +44,6 @@ const QUALIFICATION_LEGEND_STYLES: Record<
 
 interface GroupsViewProps {
   groups: GroupComparisonCard[];
-  mode: RankingMode;
   selectedGroupLetter: string;
   onSelectGroup: (groupLetter: string) => void;
   selectedTeamId?: string;
@@ -56,14 +53,12 @@ interface GroupsViewProps {
 
 export function GroupsView({
   groups,
-  mode,
   selectedGroupLetter,
   onSelectGroup,
   selectedTeamId,
   advancedOpen,
   onAdvancedOpenChange,
 }: GroupsViewProps) {
-  const router = useRouter();
   const t = useTranslations("groups");
   const summary = useTranslations("summary");
   const common = useTranslations("common");
@@ -114,7 +109,6 @@ export function GroupsView({
           <GroupDetailPanel
             group={selectedGroup}
             allGroups={groups}
-            mode={mode}
             selectedTeamId={selectedTeamId}
           />
         </div>
@@ -125,6 +119,7 @@ export function GroupsView({
         selectedGroupLetter={selectedGroupLetter}
         open={advancedOpen}
         onOpenChange={onAdvancedOpenChange}
+        onSelectGroup={onSelectGroup}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -224,34 +219,18 @@ export function GroupsView({
                   <TableBody>
                     {group.teams.map((entry) => {
                       const isTeamSelected = entry.team.id === selectedTeamId;
-                      const analysisHref = `/?team=${entry.team.id}&mode=${mode}`;
 
                       return (
                         <TableRow
                           key={entry.team.id}
                           className={cn(
-                            "cursor-pointer border-white/6 transition-colors",
+                            "border-white/6",
                             entry.qualificationStatus &&
                               QUALIFICATION_ROW_STYLES[
                                 entry.qualificationStatus
                               ],
-                            !entry.qualificationStatus && "hover:bg-white/4",
                             isTeamSelected && "ring-1 ring-inset ring-wc-sky/50",
                           )}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            router.push(analysisHref);
-                          }}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" || event.key === " ") {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              router.push(analysisHref);
-                            }
-                          }}
-                          tabIndex={0}
-                          role="link"
-                          aria-label={`${entry.team.displayName} analysis`}
                         >
                           <TableCell className="px-3 py-2 text-center font-mono text-sm text-muted-foreground">
                             {entry.standing.position}

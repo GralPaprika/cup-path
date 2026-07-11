@@ -5,6 +5,12 @@ import {
 } from "@/lib/domain/rank-correlation";
 import { buildCompetitionRankMap } from "@/lib/domain/path-ranking";
 
+export interface GroupPointsBenchmarks {
+  weakest: { groupLetter: string; avgFifaPoints: number };
+  strongest: { groupLetter: string; avgFifaPoints: number };
+  tournamentAverage: number;
+}
+
 export interface GroupStrengthOrdering {
   correlation: CohortOrderingCorrelation;
   rankByPoints: Record<string, number>;
@@ -56,5 +62,38 @@ export function getGroupStrengthRank(
   return {
     byPoints: ordering.rankByPoints[groupLetter] ?? null,
     byAvgRank: ordering.rankByAvgRank[groupLetter] ?? null,
+  };
+}
+
+export function computeGroupPointsBenchmarks(
+  groups: GroupComparisonCard[],
+): GroupPointsBenchmarks | null {
+  const groupsWithAverage = groups.filter(
+    (group) => group.avgFifaPoints !== null,
+  );
+  if (groupsWithAverage.length === 0) {
+    return null;
+  }
+
+  const weakest = groupsWithAverage.reduce((min, group) =>
+    group.avgFifaPoints! < min.avgFifaPoints! ? group : min,
+  );
+  const strongest = groupsWithAverage.reduce((max, group) =>
+    group.avgFifaPoints! > max.avgFifaPoints! ? group : max,
+  );
+  const tournamentAverage =
+    groupsWithAverage.reduce((sum, group) => sum + group.avgFifaPoints!, 0) /
+    groupsWithAverage.length;
+
+  return {
+    weakest: {
+      groupLetter: weakest.groupLetter,
+      avgFifaPoints: weakest.avgFifaPoints!,
+    },
+    strongest: {
+      groupLetter: strongest.groupLetter,
+      avgFifaPoints: strongest.avgFifaPoints!,
+    },
+    tournamentAverage,
   };
 }

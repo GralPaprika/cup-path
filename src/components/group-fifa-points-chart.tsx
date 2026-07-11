@@ -7,6 +7,7 @@ import {
   type FifaPointsObservation,
   type FifaPointsReferenceLine,
 } from "@/components/fifa-points-bar-chart";
+import { computeGroupPointsBenchmarks } from "@/lib/domain/group-strength-ordering";
 import { formatFifaPoints } from "@/lib/format";
 
 interface GroupFifaPointsChartProps {
@@ -19,48 +20,36 @@ function buildGroupBenchmarkLines(
   allGroups: GroupComparisonCard[],
   t: ReturnType<typeof useTranslations<"groups">>,
 ): FifaPointsReferenceLine[] {
-  const groupsWithAverage = allGroups.filter(
-    (entry) => entry.avgFifaPoints !== null,
-  );
-  if (groupsWithAverage.length === 0) {
+  const benchmarks = computeGroupPointsBenchmarks(allGroups);
+  if (!benchmarks) {
     return [];
   }
 
-  const weakest = groupsWithAverage.reduce((min, entry) =>
-    entry.avgFifaPoints! < min.avgFifaPoints! ? entry : min,
-  );
-  const strongest = groupsWithAverage.reduce((max, entry) =>
-    entry.avgFifaPoints! > max.avgFifaPoints! ? entry : max,
-  );
-  const tournamentAverage =
-    groupsWithAverage.reduce((sum, entry) => sum + entry.avgFifaPoints!, 0) /
-    groupsWithAverage.length;
-
   return [
     {
-      value: weakest.avgFifaPoints!,
+      value: benchmarks.weakest.avgFifaPoints,
       stroke: "var(--color-wc-red)",
       legendLabel: t("weakestGroupLine", {
-        group: weakest.groupLetter,
-        value: formatFifaPoints(weakest.avgFifaPoints!),
+        group: benchmarks.weakest.groupLetter,
+        value: formatFifaPoints(benchmarks.weakest.avgFifaPoints),
       }),
       legendClassName: "text-wc-red",
     },
     {
-      value: strongest.avgFifaPoints!,
+      value: benchmarks.strongest.avgFifaPoints,
       stroke: "var(--color-wc-lime)",
       legendLabel: t("strongestGroupLine", {
-        group: strongest.groupLetter,
-        value: formatFifaPoints(strongest.avgFifaPoints!),
+        group: benchmarks.strongest.groupLetter,
+        value: formatFifaPoints(benchmarks.strongest.avgFifaPoints),
       }),
       legendClassName: "text-wc-lime",
     },
     {
-      value: tournamentAverage,
+      value: benchmarks.tournamentAverage,
       stroke: "var(--color-wc-turquoise)",
       strokeDasharray: "7 5",
       legendLabel: t("averageGroupLine", {
-        value: formatFifaPoints(tournamentAverage),
+        value: formatFifaPoints(benchmarks.tournamentAverage),
       }),
       legendClassName: "text-wc-turquoise",
     },

@@ -113,7 +113,6 @@ export function GroupsPageClient() {
         {groupCards.length > 0 && (
           <GroupsView
             groups={groupCards}
-            mode={mode}
             selectedGroupLetter={selectedGroupLetter}
             onSelectGroup={handleSelectGroup}
             selectedTeamId={selectedTeamId ?? undefined}

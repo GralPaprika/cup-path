@@ -1,10 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type {
   GroupComparisonCard,
   GroupQualificationStatus,
-  RankingMode,
 } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
@@ -42,17 +40,14 @@ function formatStandingValue(played: number, value: number | string): string {
 interface GroupDetailPanelProps {
   group: GroupComparisonCard;
   allGroups: GroupComparisonCard[];
-  mode: RankingMode;
   selectedTeamId?: string;
 }
 
 export function GroupDetailPanel({
   group,
   allGroups,
-  mode,
   selectedTeamId,
 }: GroupDetailPanelProps) {
-  const router = useRouter();
   const t = useTranslations("groups");
   const summary = useTranslations("summary");
 
@@ -110,28 +105,16 @@ export function GroupDetailPanel({
             <TableBody>
               {group.teams.map((entry) => {
                 const isSelected = entry.team.id === selectedTeamId;
-                const analysisHref = `/?team=${entry.team.id}&mode=${mode}`;
 
                 return (
                   <TableRow
                     key={entry.team.id}
                     className={cn(
-                      "cursor-pointer border-white/6 transition-colors",
+                      "border-white/6",
                       entry.qualificationStatus &&
                         QUALIFICATION_ROW_STYLES[entry.qualificationStatus],
-                      !entry.qualificationStatus && "hover:bg-white/4",
                       isSelected && "ring-1 ring-inset ring-wc-sky/50",
                     )}
-                    onClick={() => router.push(analysisHref)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        router.push(analysisHref);
-                      }
-                    }}
-                    tabIndex={0}
-                    role="link"
-                    aria-label={`${entry.team.displayName} analysis`}
                   >
                     <TableCell className="px-3 py-2.5 text-center font-mono text-sm text-muted-foreground">
                       {entry.standing.position}

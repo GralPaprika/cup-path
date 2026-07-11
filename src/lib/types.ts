@@ -161,6 +161,8 @@ export interface SimulationResult {
   bestThirdRanking: BestThirdRankingEntry[];
   teamRankings: Record<string, { rank: number; points: number }>;
   focusTeamMatchNums: number[];
+  /** When a comparison team is set, chart slots stop at this shared stage. */
+  comparisonChartMaxStage: PathStage | null;
 }
 
 export interface OpenFootballTeam {

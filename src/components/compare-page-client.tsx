@@ -9,6 +9,7 @@ import {
   isStageWithinReach,
   parsePathStages,
   parseTeamRound,
+  stagesThrough,
   syncTeamRoundToStages,
 } from "@/lib/domain/match-stages";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
@@ -62,12 +63,17 @@ export function ComparePageClient() {
     setLoading(true);
     setError(null);
 
+    const bothTeamsSelected =
+      Boolean(teamAId) && Boolean(teamBId) && teamAId !== teamBId;
+
     try {
       const params = new URLSearchParams({
         mode,
         stages: serializePathStages(stages),
         teamRound,
       });
+      if (teamAId) params.set("team", teamAId);
+      if (bothTeamsSelected) params.set("vs", teamBId);
 
       const response = await fetch(`/api/comparison?${params.toString()}`);
       if (!response.ok) throw new Error("Failed to load comparison");
@@ -104,7 +110,7 @@ export function ComparePageClient() {
     } finally {
       setLoading(false);
     }
-  }, [mode, stages, teamRound, t]);
+  }, [mode, stages, teamRound, teamAId, teamBId, t]);
 
   function handleStagesChange(next: Set<PathStage>) {
     setStages(next);
@@ -121,9 +127,20 @@ export function ComparePageClient() {
     loadComparison();
   }, [loadComparison]);
 
+  const bothTeamsSelected =
+    Boolean(teamAId) && Boolean(teamBId) && teamAId !== teamBId;
+
   useEffect(() => {
+    if (!bothTeamsSelected || !maxStageReached) return;
+    const sharedStages = stagesThrough(maxStageReached);
+    setStages(sharedStages);
+    setTeamRound((current) => syncTeamRoundToStages(current, sharedStages));
+  }, [bothTeamsSelected, maxStageReached, teamAId, teamBId]);
+
+  useEffect(() => {
+    if (bothTeamsSelected) return;
     setMaxStageReached(undefined);
-  }, [teamAId, teamBId]);
+  }, [bothTeamsSelected, teamAId, teamBId]);
 
   useEffect(() => {
     const params = new URLSearchParams({

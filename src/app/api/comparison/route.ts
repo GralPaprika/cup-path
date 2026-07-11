@@ -11,6 +11,7 @@ import { getComparisonAnalysis } from "@/lib/services/analysis-service";
 export async function GET(request: NextRequest) {
   const mode = parseRankingMode(request.nextUrl.searchParams.get("mode"));
   const selectedTeamId = request.nextUrl.searchParams.get("team")?.toUpperCase();
+  const compareTeamId = request.nextUrl.searchParams.get("vs")?.toUpperCase();
   const stages = parsePathStages(request.nextUrl.searchParams.get("stages"));
   const teamRound = syncTeamRoundToStages(
     parseTeamRound(request.nextUrl.searchParams.get("teamRound")),
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
     selectedTeamId,
     stages,
     teamRound,
+    compareTeamId,
   );
   const teamCounts = getTeamCountsByStage();
 

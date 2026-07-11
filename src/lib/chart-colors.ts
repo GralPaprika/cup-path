@@ -18,4 +18,8 @@ export const CHART_COLORS = {
   strongestGroup: "var(--color-wc-lime)",
   /** Tournament all-groups average benchmark. */
   tournamentAvg: "var(--color-wc-turquoise)",
+  /** Simulated path opponent bars (focus team under scenario). */
+  simulatedPath: "var(--color-wc-orange)",
+  /** Third-party comparison path on Simulate (another team's actual path). */
+  pathComparisonTeam: "var(--color-wc-green)",
 } as const;

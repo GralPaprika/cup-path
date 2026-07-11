@@ -3,6 +3,7 @@
 import type {
   AvgPointsContext,
   PathDiffRow,
+  PathStage,
   Team,
   TeamPathSummary,
 } from "@/lib/types";
@@ -17,6 +18,9 @@ import {
 import { TeamSelector } from "@/components/team-selector";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { buildPathChartDataFromSummary } from "@/lib/domain/path-opponent-observations";
+import { CHART_COLORS } from "@/lib/chart-colors";
+import { SimulatedPathPointsChart } from "@/components/simulated-path-points-chart";
 
 interface TeamPathImpactPanelProps {
   teams: Team[];
@@ -30,6 +34,7 @@ interface TeamPathImpactPanelProps {
   onComparisonTeamChange: (teamId: string) => void;
   pathDiff: PathDiffRow[];
   hasOverrides: boolean;
+  comparisonChartMaxStage?: PathStage | null;
 }
 
 function formatPointsDelta(
@@ -180,6 +185,7 @@ export function TeamPathImpactPanel({
   onComparisonTeamChange,
   pathDiff,
   hasOverrides,
+  comparisonChartMaxStage = null,
 }: TeamPathImpactPanelProps) {
   const t = useTranslations("simulate");
   const summary = useTranslations("summary");
@@ -203,6 +209,21 @@ export function TeamPathImpactPanel({
     simulatedSummary.avgOpponentPoints !== null
       ? simulatedSummary.avgOpponentPoints - actualSummary.avgOpponentPoints
       : null;
+
+  const chartMaxStage =
+    showComparison && comparisonChartMaxStage ? comparisonChartMaxStage : null;
+  const actualChart = buildPathChartDataFromSummary(actualSummary, chartMaxStage);
+  const simulatedChart = buildPathChartDataFromSummary(
+    simulatedSummary,
+    chartMaxStage,
+  );
+  const comparisonChart = comparisonSummary
+    ? buildPathChartDataFromSummary(comparisonSummary, chartMaxStage)
+    : null;
+  const showPathChart =
+    actualChart.opponents.length > 0 ||
+    simulatedChart.opponents.length > 0 ||
+    (comparisonChart?.opponents.length ?? 0) > 0;
 
   return (
     <div className="glass-panel space-y-5 p-5 sm:p-6">
@@ -343,6 +364,50 @@ export function TeamPathImpactPanel({
           gridTemplateColumns={gridTemplateColumns}
         />
       </div>
+
+      {showPathChart && (
+        <SimulatedPathPointsChart
+          focusTeam={actualSummary.team}
+          teamPoints={actualSummary.teamPoints}
+          actual={{
+            opponents: actualChart.opponents,
+            avgOpponentPoints: actualChart.avgOpponentPoints,
+            barColor: CHART_COLORS.selectedTeam,
+            avgColor: CHART_COLORS.selectedTeam,
+            legendLabel: t("actualPath"),
+          }}
+          simulated={{
+            opponents: simulatedChart.opponents,
+            avgOpponentPoints: simulatedChart.avgOpponentPoints,
+            barColor: CHART_COLORS.simulatedPath,
+            avgColor: CHART_COLORS.simulatedPath,
+            legendLabel: t("simulatedPath"),
+          }}
+          comparison={
+            showComparison && comparisonSummary && comparisonChart
+              ? {
+                  team: comparisonSummary.team,
+                  opponents: comparisonChart.opponents,
+                  avgOpponentPoints: comparisonChart.avgOpponentPoints,
+                  barColor: CHART_COLORS.pathComparisonTeam,
+                  avgColor: CHART_COLORS.pathComparisonTeam,
+                  legendLabel: t("pathChartComparisonLegend", {
+                    team: comparisonTeamName,
+                  }),
+                }
+              : undefined
+          }
+          title={t("pathChartTitle")}
+          teamPointsLegend={t("pathChartTeamPointsLegend")}
+          opponentPathLegend={t("pathChartOpponentLegend")}
+          matchLabel={t("pathChartMatchLabel")}
+          ariaLabel={
+            showComparison
+              ? t("pathChartAriaWithComparison", { team: focusTeamName })
+              : t("pathChartAria", { team: focusTeamName })
+          }
+        />
+      )}
 
       <p className="text-xs text-muted-foreground">
         {showComparison ? t("pathCompareFootnoteWithComparison") : t("pathCompareFootnote")}

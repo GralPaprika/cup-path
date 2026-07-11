@@ -323,6 +323,13 @@
       "pickWinnerBadge": "Elegir ganador"
     },
     "pathChanges": "Cambios de rival en el camino",
+    "pathChartTitle": "Fuerza del rival por partido",
+    "pathChartComparisonLegend": "Camino de {team}",
+    "pathChartTeamPointsLegend": "Pts equipo",
+    "pathChartOpponentLegend": "barras superpuestas por partido",
+    "pathChartMatchLabel": "P",
+    "pathChartAria": "Puntos FIFA del rival en caminos actual y simulado de {team}",
+    "pathChartAriaWithComparison": "Puntos FIFA del rival en caminos actual, simulado y de comparación de {team}",
     "pathChangeRound": "Fase",
     "pathChangeActual": "Rival actual",
     "pathChangeSimulated": "Rival simulado",

@@ -5,13 +5,12 @@ import {
   type NumericStats,
 } from "@/lib/domain/group-stats";
 import { computeFilteredAverages } from "@/lib/domain/difficulty";
+import {
+  buildOpponentPointsObservations,
+  type OpponentPointsObservation,
+} from "@/lib/domain/path-opponent-observations";
 
-export interface OpponentPointsObservation {
-  teamId: string;
-  displayName: string;
-  flagUrl: string;
-  points: number;
-}
+export type { OpponentPointsObservation } from "@/lib/domain/path-opponent-observations";
 
 export interface PathOpponentStats {
   opponentPointsStats: NumericStats;
@@ -42,18 +41,7 @@ export function computePathOpponentStats(
   const opponentRanks = filtered
     .map((match) => match.opponentRank)
     .filter((value): value is number => value !== null);
-  const opponentPointsObservations = filtered.flatMap((match) =>
-    match.opponentPoints === null
-      ? []
-      : [
-          {
-            teamId: match.opponent.id,
-            displayName: match.opponent.displayName,
-            flagUrl: match.opponent.flagUrl,
-            points: match.opponentPoints,
-          },
-        ],
-  );
+  const opponentPointsObservations = buildOpponentPointsObservations(filtered);
 
   return {
     opponentPointsStats: computeNumericStats(opponentPoints),

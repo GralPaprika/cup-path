@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
 import {
+  getCompareMaxStageReached,
   getTeamMaxStageReached,
   getTeamsAtStage,
   teamReachedStage,
@@ -56,6 +57,34 @@ describe("getTeamMaxStageReached", () => {
     });
 
     assert.equal(getTeamMaxStageReached("MEX"), "r16");
+  });
+});
+
+describe("getCompareMaxStageReached", () => {
+  it("uses the earlier of two teams' max stages", () => {
+    applyWorldCupBundle({
+      name: "test",
+      matches: [
+        ...groupAMatchesComplete(),
+        {
+          team1: "Mexico",
+          team2: "Brazil",
+          round: "Round of 32",
+          date: "2026-07-02",
+          num: 79,
+          score: { ft: [2, 1] },
+        },
+        scheduledMatch("Mexico", "France", "Round of 16", {
+          num: 92,
+          date: "2026-07-06",
+        }),
+        ...groupBMatchesComplete(),
+      ],
+    });
+
+    assert.equal(getTeamMaxStageReached("MEX"), "r16");
+    assert.equal(getTeamMaxStageReached("KOR"), "group");
+    assert.equal(getCompareMaxStageReached("MEX", "KOR"), "group");
   });
 });
 

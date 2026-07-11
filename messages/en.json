@@ -323,6 +323,13 @@
       "pickWinnerBadge": "Pick winner"
     },
     "pathChanges": "Opponent changes on focus path",
+    "pathChartTitle": "Opponent strength by match",
+    "pathChartComparisonLegend": "{team}'s path",
+    "pathChartTeamPointsLegend": "Team pts",
+    "pathChartOpponentLegend": "overlapping bars per match",
+    "pathChartMatchLabel": "M",
+    "pathChartAria": "Opponent FIFA points along actual and simulated paths for {team}",
+    "pathChartAriaWithComparison": "Opponent FIFA points along actual, simulated, and comparison paths for {team}",
     "pathChangeRound": "Round",
     "pathChangeActual": "Actual opponent",
     "pathChangeSimulated": "Simulated opponent",

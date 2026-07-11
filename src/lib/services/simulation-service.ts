@@ -24,6 +24,7 @@ import {
 import {
   hasStrongestWinnerTargets,
 } from "@/lib/domain/strongest-path-winners";
+import { getCompareMaxStageReached } from "@/lib/domain/team-stage-logic";
 
 function mergeGroupFinishes(
   scenario: SimulationScenario,
@@ -205,5 +206,9 @@ export async function getSimulationAnalysis(
     bestThirdRanking: buildBestThirdRanking(activeFinishes),
     teamRankings,
     focusTeamMatchNums: getFocusTeamMatchNums(simulatedBracket, teamId),
+    comparisonChartMaxStage:
+      comparisonTeamId && comparisonActualSummary
+        ? (getCompareMaxStageReached(teamId, comparisonTeamId) ?? null)
+        : null,
   };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Team } from "@/lib/types";
-import type { OpponentPointsObservation } from "@/lib/domain/path-opponent-stats";
+import type { OpponentPointsObservation } from "@/lib/domain/path-opponent-observations";
 import { TeamFlag } from "@/components/team-flag";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";

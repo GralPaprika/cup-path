@@ -45,6 +45,22 @@ export function getTeamMaxStageReached(teamId: string): PathStage {
   return highestStageReached(teamId);
 }
 
+export function getCompareMaxStageReached(
+  teamAId?: string,
+  teamBId?: string,
+): PathStage | undefined {
+  if (teamAId && teamBId && teamAId !== teamBId) {
+    const sharedIndex = Math.min(
+      stageIndex(getTeamMaxStageReached(teamAId)),
+      stageIndex(getTeamMaxStageReached(teamBId)),
+    );
+    return PATH_STAGES[sharedIndex];
+  }
+  if (teamAId) return getTeamMaxStageReached(teamAId);
+  if (teamBId) return getTeamMaxStageReached(teamBId);
+  return undefined;
+}
+
 export function teamReachedStage(teamId: string, minStage: PathStage): boolean {
   if (minStage === "group") return true;
 

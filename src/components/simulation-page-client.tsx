@@ -319,6 +319,7 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
             onComparisonTeamChange={setComparisonTeamId}
             pathDiff={data.pathDiff}
             hasOverrides={hasOverrides}
+            comparisonChartMaxStage={data.comparisonChartMaxStage}
           />
 
           <GroupFinishEditor

@@ -43,6 +43,12 @@ export function clampPathStages(
   return clamped;
 }
 
+export function stagesThrough(maxStage: PathStage): Set<PathStage> {
+  return new Set(
+    PATH_STAGES.filter((stage) => isStageWithinReach(stage, maxStage)),
+  );
+}
+
 export function getMatchStage(round: string): PathStage | null {
   if (round.startsWith("Matchday")) return "group";
   if (round === "Round of 32") return "r32";

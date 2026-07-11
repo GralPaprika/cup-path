@@ -25,7 +25,11 @@ import {
   type CohortOrderingCorrelation,
 } from "@/lib/domain/rank-correlation";
 import { DEFAULT_PATH_STAGES, getFurthestStage } from "@/lib/domain/match-stages";
-import { getTeamMaxStageReached, getTeamsAtStage } from "@/lib/domain/team-stages";
+import {
+  getCompareMaxStageReached,
+  getTeamMaxStageReached,
+  getTeamsAtStage,
+} from "@/lib/domain/team-stages";
 import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
 import { ensureWorldCupData } from "@/lib/data/worldcup-store";
 
@@ -114,6 +118,7 @@ export async function getComparisonAnalysis(
   selectedTeamId?: string,
   stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
   teamRound: PathStage = "group",
+  compareTeamId?: string,
 ): Promise<ComparisonAnalysisResult> {
   await ensureWorldCupData();
   const snapshot = await getRankingsSnapshot(mode);
@@ -145,9 +150,7 @@ export async function getComparisonAnalysis(
     cohortSize: filteredSummaries.filter((summary) =>
       cohortTeamIds.has(summary.team.id),
     ).length,
-    maxStageReached: selectedTeamId
-      ? getTeamMaxStageReached(selectedTeamId)
-      : undefined,
+    maxStageReached: getCompareMaxStageReached(selectedTeamId, compareTeamId),
   };
 }
 

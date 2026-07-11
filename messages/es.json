@@ -134,7 +134,14 @@
       "delta": "Δ (A − B)",
       "harderPathSummary": "El camino de {team} es {gap} más duro por puntos medios del rival.",
       "rankUnavailable": "Camino # no está disponible cuando ningún equipo pertenece al grupo comparable de tu filtro de fases.",
-      "rankCohortNote": "Camino # ordena equipos en {stage} o más usando puntos medios del rival."
+      "rankCohortNote": "Camino # ordena equipos en {stage} o más usando puntos medios del rival.",
+      "chartTitle": "Puntos del rival por partido",
+      "chartLoading": "Cargando gráfico del camino…",
+      "teamPointsLegend": "Pts equipo",
+      "avgOpponentLegend": "Prom. rivales",
+      "opponentPathLegend": "Rivales por partido",
+      "matchLabel": "P",
+      "chartAria": "Gráfico de puntos del rival entre {teamA} y {teamB}."
     },
     "teamRound": {
       "label": "Mostrar equipos",

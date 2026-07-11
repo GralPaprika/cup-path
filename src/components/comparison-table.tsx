@@ -34,6 +34,9 @@ interface ComparisonTableProps {
   entries: ComparisonEntry[];
   mode: RankingMode;
   selectedTeamId?: string;
+  compareTeamAId?: string;
+  compareTeamBId?: string;
+  /** @deprecated Use compareTeamAId and compareTeamBId for distinct highlights */
   compareTeamIds?: string[];
   showDelta?: boolean;
   sortable?: boolean;
@@ -103,6 +106,8 @@ export function ComparisonTable({
   entries,
   mode,
   selectedTeamId,
+  compareTeamAId,
+  compareTeamBId,
   compareTeamIds,
   showDelta = false,
   sortable = true,
@@ -204,9 +209,11 @@ export function ComparisonTable({
         </TableHeader>
         <TableBody>
           {filteredEntries.map((entry) => {
+            const isTeamA = entry.team.id === compareTeamAId;
+            const isTeamB = entry.team.id === compareTeamBId;
+            const isLegacyCompare = compareTeamIds?.includes(entry.team.id);
             const isSelected =
-              entry.team.id === selectedTeamId ||
-              compareTeamIds?.includes(entry.team.id);
+              entry.team.id === selectedTeamId || isTeamA || isTeamB || isLegacyCompare;
             const analysisHref = `/?team=${entry.team.id}&mode=${mode}`;
 
             return (
@@ -214,7 +221,12 @@ export function ComparisonTable({
                 key={entry.team.id}
                 className={cn(
                   "border-white/6 transition-colors",
-                  isSelected && "bg-wc-sky/10 font-medium",
+                  isTeamA && "bg-wc-sky/10 font-medium",
+                  isTeamB && "bg-wc-purple/12 font-medium",
+                  isSelected &&
+                    !isTeamA &&
+                    !isTeamB &&
+                    "bg-wc-sky/10 font-medium",
                   linkToAnalysis && "cursor-pointer hover:bg-white/4",
                 )}
                 onClick={

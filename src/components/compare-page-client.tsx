@@ -192,6 +192,8 @@ export function ComparePageClient() {
               onTeamBChange={setTeamBId}
               cohortStage={cohortStage}
               cohortSize={cohortSize}
+              mode={mode}
+              stages={stages}
             />
             {loading ? (
               <CompareLoadingSkeleton embedded showDelta={false} />
@@ -199,7 +201,8 @@ export function ComparePageClient() {
               <ComparisonTable
                 entries={entries}
                 mode={mode}
-                compareTeamIds={[teamAId, teamBId].filter(Boolean)}
+                compareTeamAId={teamAId || undefined}
+                compareTeamBId={teamBId || undefined}
                 cohortStage={cohortStage}
                 cohortSize={cohortSize}
                 embedded

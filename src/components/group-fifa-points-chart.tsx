@@ -9,6 +9,7 @@ import {
 } from "@/components/fifa-points-bar-chart";
 import { computeGroupPointsBenchmarks } from "@/lib/domain/group-strength-ordering";
 import { formatFifaPoints } from "@/lib/format";
+import { CHART_COLORS } from "@/lib/chart-colors";
 
 interface GroupFifaPointsChartProps {
   group: GroupComparisonCard;
@@ -28,7 +29,7 @@ function buildGroupBenchmarkLines(
   return [
     {
       value: benchmarks.weakest.avgFifaPoints,
-      stroke: "var(--color-wc-red)",
+      stroke: CHART_COLORS.weakestGroup,
       legendLabel: t("weakestGroupLine", {
         group: benchmarks.weakest.groupLetter,
         value: formatFifaPoints(benchmarks.weakest.avgFifaPoints),
@@ -37,7 +38,7 @@ function buildGroupBenchmarkLines(
     },
     {
       value: benchmarks.strongest.avgFifaPoints,
-      stroke: "var(--color-wc-lime)",
+      stroke: CHART_COLORS.strongestGroup,
       legendLabel: t("strongestGroupLine", {
         group: benchmarks.strongest.groupLetter,
         value: formatFifaPoints(benchmarks.strongest.avgFifaPoints),
@@ -46,7 +47,7 @@ function buildGroupBenchmarkLines(
     },
     {
       value: benchmarks.tournamentAverage,
-      stroke: "var(--color-wc-turquoise)",
+      stroke: CHART_COLORS.tournamentAvg,
       strokeDasharray: "7 5",
       legendLabel: t("averageGroupLine", {
         value: formatFifaPoints(benchmarks.tournamentAverage),

@@ -134,7 +134,14 @@
       "delta": "Δ (A − B)",
       "harderPathSummary": "{team}'s path is {gap} harder by average opponent points.",
       "rankUnavailable": "Path # is unavailable when neither team belongs to the comparison cohort for your stage filter.",
-      "rankCohortNote": "Path # ranks teams at {stage} or beyond using average opponent points."
+      "rankCohortNote": "Path # ranks teams at {stage} or beyond using average opponent points.",
+      "chartTitle": "Opponent points by match",
+      "chartLoading": "Loading path chart…",
+      "teamPointsLegend": "Team pts",
+      "avgOpponentLegend": "Avg rivals",
+      "opponentPathLegend": "Rivals per match",
+      "matchLabel": "M",
+      "chartAria": "Head-to-head opponent points chart for {teamA} and {teamB}."
     },
     "teamRound": {
       "label": "Show teams",

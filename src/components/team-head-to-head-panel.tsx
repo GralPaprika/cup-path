@@ -1,6 +1,8 @@
 "use client";
 
-import type { ComparisonEntry, PathStage, Team } from "@/lib/types";
+import { useEffect, useState } from "react";
+import type { ComparisonEntry, PathStage, RankingMode, Team } from "@/lib/types";
+import type { TeamAnalysisResult } from "@/lib/services/analysis-service";
 import { useTranslations } from "next-intl";
 import { TeamSelector } from "@/components/team-selector";
 import { TeamLabel } from "@/components/team-flag";
@@ -8,6 +10,11 @@ import {
   AvgPointsContextFootnote,
   AvgPointsContextHint,
 } from "@/components/avg-points-context";
+import {
+  HeadToHeadPointsChart,
+  type HeadToHeadPathSeries,
+} from "@/components/head-to-head-points-chart";
+import { serializePathStages } from "@/components/path-stage-filters";
 import { Badge } from "@/components/ui/badge";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -30,6 +37,17 @@ interface TeamHeadToHeadPanelProps {
   onTeamBChange: (teamId: string) => void;
   cohortStage: PathStage;
   cohortSize: number;
+  mode: RankingMode;
+  stages: Set<PathStage>;
+}
+
+function buildPathSeries(analysis: TeamAnalysisResult): HeadToHeadPathSeries {
+  return {
+    team: analysis.summary.team,
+    teamPoints: analysis.summary.teamPoints,
+    avgOpponentPoints: analysis.summary.avgOpponentPoints,
+    opponents: analysis.advanced.pathStats.opponentPointsObservations,
+  };
 }
 
 function findEntry(
@@ -114,15 +132,57 @@ export function TeamHeadToHeadPanel({
   onTeamBChange,
   cohortStage,
   cohortSize,
+  mode,
+  stages,
 }: TeamHeadToHeadPanelProps) {
   const t = useTranslations("compare.headToHead");
   const summary = useTranslations("summary");
   const stageLabels = useTranslations("compare.stages");
+  const [analysisA, setAnalysisA] = useState<TeamAnalysisResult | null>(null);
+  const [analysisB, setAnalysisB] = useState<TeamAnalysisResult | null>(null);
+  const [chartLoading, setChartLoading] = useState(false);
 
   const entryA = findEntry(entries, teamAId);
   const entryB = findEntry(entries, teamBId);
   const showComparison =
     Boolean(entryA && entryB) && teamAId !== teamBId;
+
+  useEffect(() => {
+    if (!showComparison) {
+      setAnalysisA(null);
+      setAnalysisB(null);
+      return;
+    }
+
+    let cancelled = false;
+    setChartLoading(true);
+
+    const params = new URLSearchParams({
+      mode,
+      stages: serializePathStages(stages),
+    });
+
+    Promise.all([
+      fetch(`/api/analysis?team=${teamAId}&${params.toString()}`).then((res) =>
+        res.ok ? (res.json() as Promise<TeamAnalysisResult>) : null,
+      ),
+      fetch(`/api/analysis?team=${teamBId}&${params.toString()}`).then((res) =>
+        res.ok ? (res.json() as Promise<TeamAnalysisResult>) : null,
+      ),
+    ])
+      .then(([nextA, nextB]) => {
+        if (cancelled) return;
+        setAnalysisA(nextA);
+        setAnalysisB(nextB);
+      })
+      .finally(() => {
+        if (!cancelled) setChartLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [showComparison, teamAId, teamBId, mode, stages]);
 
   const pointsDelta = formatPointsDelta(
     entryA?.avgOpponentPoints ?? null,
@@ -285,6 +345,33 @@ export function TeamHeadToHeadPanel({
           </div>
         </div>
       )}
+
+      {showComparison && chartLoading && (
+        <div className="rounded-xl border border-white/8 bg-black/10 px-4 py-8 text-center text-sm text-muted-foreground">
+          {t("chartLoading")}
+        </div>
+      )}
+
+      {showComparison &&
+        !chartLoading &&
+        analysisA &&
+        analysisB &&
+        (analysisA.advanced.pathStats.opponentPointsObservations.length > 0 ||
+          analysisB.advanced.pathStats.opponentPointsObservations.length > 0) && (
+          <HeadToHeadPointsChart
+            seriesA={buildPathSeries(analysisA)}
+            seriesB={buildPathSeries(analysisB)}
+            title={t("chartTitle")}
+            teamPointsLegend={t("teamPointsLegend")}
+            avgOpponentLegend={t("avgOpponentLegend")}
+            opponentPathLegend={t("opponentPathLegend")}
+            matchLabel={t("matchLabel")}
+            ariaLabel={t("chartAria", {
+              teamA: analysisA.summary.team.id,
+              teamB: analysisB.summary.team.id,
+            })}
+          />
+        )}
 
       {showComparison && harderTeam && pointsGap !== null && pointsGap > 0 && (
         <p className="text-sm text-muted-foreground">

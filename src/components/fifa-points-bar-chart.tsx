@@ -4,6 +4,7 @@ import type { NumericStats, Team } from "@/lib/types";
 import { TeamFlag } from "@/components/team-flag";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { CHART_COLORS } from "@/lib/chart-colors";
 
 export interface FifaPointsObservation {
   teamId: string;
@@ -38,7 +39,6 @@ interface FifaPointsBarChartProps {
 const WIDTH = 720;
 const HEIGHT = 300;
 const MARGIN = { top: 24, right: 24, bottom: 40, left: 58 };
-const TEAM_LINE_COLOR = "var(--color-wc-sky)";
 
 export function FifaPointsBarChart({
   observations,
@@ -91,7 +91,7 @@ export function FifaPointsBarChart({
         <span className="text-sm font-semibold text-white">{title}</span>
         <span className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-sky/20" />
+            <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-lavender/25" />
             {standardDeviationBandLabel}
           </span>
           <span className="flex items-center gap-1.5">
@@ -138,7 +138,8 @@ export function FifaPointsBarChart({
             y={y(upperDeviation)}
             width={chartWidth}
             height={y(lowerDeviation) - y(upperDeviation)}
-            className="fill-wc-sky/15"
+            fill={CHART_COLORS.stdDevBand}
+            fillOpacity={0.18}
           />
 
           {ticks.map((tick) => (
@@ -166,6 +167,8 @@ export function FifaPointsBarChart({
             const barTop = y(observation.points);
             const barBottom = y(0);
             const labelY = barBottom - 12;
+            const isSelectedTeam =
+              selectedTeam !== null && observation.teamId === selectedTeam.id;
 
             return (
               <g key={`${observation.teamId}-${index}`}>
@@ -175,7 +178,12 @@ export function FifaPointsBarChart({
                   width={barWidth}
                   height={barBottom - barTop}
                   rx={5}
-                  className="fill-wc-lavender/70"
+                  fill={
+                    isSelectedTeam
+                      ? CHART_COLORS.selectedTeam
+                      : CHART_COLORS.bar
+                  }
+                  fillOpacity={0.82}
                 >
                   <title>
                     {observation.displayName}: {formatFifaPoints(observation.points)}
@@ -199,7 +207,7 @@ export function FifaPointsBarChart({
             x2={WIDTH - MARGIN.right}
             y1={y(stats.mean)}
             y2={y(stats.mean)}
-            className="stroke-wc-orange"
+            stroke={CHART_COLORS.mean}
             strokeWidth={1}
             strokeDasharray="7 5"
           />
@@ -221,8 +229,8 @@ export function FifaPointsBarChart({
               x2={WIDTH - MARGIN.right}
               y1={y(selectedTeamPoints)}
               y2={y(selectedTeamPoints)}
-              stroke={TEAM_LINE_COLOR}
-              strokeWidth={1}
+              stroke={CHART_COLORS.selectedTeam}
+              strokeWidth={1.5}
             />
           )}
         </svg>

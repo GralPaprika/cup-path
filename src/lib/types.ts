@@ -108,7 +108,7 @@ export interface ResolvedBracketMatch {
 export interface SimulationScenario {
   knockoutWinners?: Record<number, string>;
   slotOverrides?: Record<string, string>;
-  groupFinishes?: Record<string, [string, string, string]>;
+  groupFinishes?: Record<string, [string, string, string, string]>;
 }
 
 export interface PathDiffRow {
@@ -122,23 +122,55 @@ export interface PathDiffRow {
 export interface GroupFinishCard {
   groupLetter: string;
   positions: Array<{
-    position: 1 | 2 | 3;
+    position: 1 | 2 | 3 | 4;
     teamId: string;
   }>;
   thirdQualifies: boolean;
+}
+
+export interface BestThirdRankingEntry {
+  rank: number;
+  groupLetter: string;
+  teamId: string;
+  points: number;
+  gd: number;
+  gf: number;
+  ga: number;
+  played: number;
+  qualifies: boolean;
+}
+
+export interface PathDifficultyRank {
+  rankByPoints: number | null;
+  rankByAvgRank: number | null;
+  cohortSize: number;
 }
 
 export interface SimulationResult {
   teamId: string;
   actualSummary: TeamPathSummary;
   simulatedSummary: TeamPathSummary;
+  comparisonActualSummary: TeamPathSummary | null;
   actualAvgPointsContext: AvgPointsContext | null;
   simulatedAvgPointsContext: AvgPointsContext | null;
+  comparisonAvgPointsContext: AvgPointsContext | null;
   bracket: ResolvedBracketMatch[];
   changedMatchNums: number[];
+  pendingWinnerMatchNums: number[];
+  affectedMatchNums: number[];
+  actualWinnersByMatchNum: Record<number, string | null>;
+  canPickAllStrongestWinners: boolean;
+  canPickSimulatedStrongestWinners: boolean;
+  pathRanks: {
+    actual: PathDifficultyRank;
+    simulated: PathDifficultyRank;
+    comparison: PathDifficultyRank | null;
+  };
   pathDiff: PathDiffRow[];
-  baselineGroupFinishes: Record<string, [string, string, string]>;
+  baselineGroupFinishes: Record<string, [string, string, string, string]>;
   groupCards: GroupFinishCard[];
+  bestThirdRanking: BestThirdRankingEntry[];
+  teamRankings: Record<string, { rank: number; points: number }>;
   focusTeamMatchNums: number[];
 }
 

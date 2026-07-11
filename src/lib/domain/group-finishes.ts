@@ -1,9 +1,10 @@
-import type { GroupFinishCard, GroupStanding } from "@/lib/types";
+import type { BestThirdRankingEntry, GroupFinishCard, GroupStanding } from "@/lib/types";
 import { getAllMatches } from "@/lib/data/worldcup-loader";
 import { computeGroupStandings } from "@/lib/domain/group-standings";
 import { getGroupNames } from "@/lib/domain/path-builder";
 
 import type { GroupFinishMap } from "@/lib/domain/group-finish-swap";
+import { normalizeGroupFinish } from "@/lib/domain/group-finish-swap";
 
 export type { GroupFinishCard };
 
@@ -27,6 +28,7 @@ export function getBaselineGroupFinishes(): GroupFinishMap {
       standings[0]?.teamId ?? "",
       standings[1]?.teamId ?? "",
       standings[2]?.teamId ?? "",
+      standings[3]?.teamId ?? "",
     ];
   }
 
@@ -64,7 +66,7 @@ export function buildStandingsByGroupFromFinishes(
 
   for (const [letter, ids] of Object.entries(finishes)) {
     const rows: GroupStanding[] = [];
-    for (let index = 0; index < 3; index++) {
+    for (let index = 0; index < 4; index++) {
       const teamId = ids[index];
       if (!teamId) continue;
       const stats = lookupStanding(teamId, base);
@@ -109,6 +111,37 @@ export function getQualifyingThirdGroups(
   );
 }
 
+export function buildBestThirdRanking(
+  finishes: GroupFinishMap,
+): BestThirdRankingEntry[] {
+  const standingsByGroup = buildStandingsByGroupFromFinishes(finishes);
+  const thirdPlaceTeams: Array<{ groupLetter: string; standing: GroupStanding }> =
+    [];
+
+  for (const [groupLetter, standings] of standingsByGroup) {
+    const third = standings.find((entry) => entry.position === 3);
+    if (third) {
+      thirdPlaceTeams.push({ groupLetter, standing: third });
+    }
+  }
+
+  const sorted = [...thirdPlaceTeams].sort((a, b) =>
+    compareStandings(a.standing, b.standing),
+  );
+
+  return sorted.map((entry, index) => ({
+    rank: index + 1,
+    groupLetter: entry.groupLetter,
+    teamId: entry.standing.teamId,
+    points: entry.standing.points,
+    gd: entry.standing.gd,
+    gf: entry.standing.gf,
+    ga: entry.standing.ga,
+    played: entry.standing.played,
+    qualifies: index < 8,
+  }));
+}
+
 export function buildGroupFinishCards(
   finishes: GroupFinishMap,
 ): GroupFinishCard[] {
@@ -119,11 +152,24 @@ export function buildGroupFinishCards(
     .map(([groupLetter, ids]) => ({
       groupLetter,
       positions: ids.map((teamId, index) => ({
-        position: (index + 1) as 1 | 2 | 3,
+        position: (index + 1) as 1 | 2 | 3 | 4,
         teamId,
       })),
       thirdQualifies: qualifyingThirds.has(groupLetter),
     }));
+}
+
+export function normalizeGroupFinishes(
+  finishes: Record<string, [string, string, string] | [string, string, string, string]>,
+): GroupFinishMap {
+  const baseline = getBaselineGroupFinishes();
+  const normalized: GroupFinishMap = { ...baseline };
+
+  for (const [letter, ids] of Object.entries(finishes)) {
+    normalized[letter] = normalizeGroupFinish(ids, baseline[letter]?.[3] ?? "");
+  }
+
+  return normalized;
 }
 
 export type { GroupFinishMap } from "@/lib/domain/group-finish-swap";

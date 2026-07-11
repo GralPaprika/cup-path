@@ -9,6 +9,7 @@ export default async function AboutPage() {
     { title: t("comparisonTitle"), body: t("comparisonBody") },
     { title: t("rankGapTitle"), body: t("rankGapBody") },
     { title: t("stagesTitle"), body: t("stagesBody") },
+    { title: t("simulationTitle"), body: t("simulationBody") },
     { title: t("rankingModesTitle"), body: t("rankingModesBody") },
     { title: t("dataTitle"), body: t("dataBody") },
   ];

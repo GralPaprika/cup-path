@@ -1,30 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseRankingMode } from "@/lib/data/ranking-modes";
-import type { SimulationScenario } from "@/lib/types";
+import { emptySimulationScenario } from "@/lib/domain/simulation-scenario";
 import { getSimulationAnalysis } from "@/lib/services/simulation-service";
+import type { SimulationScenario } from "@/lib/types";
 
-function parseScenario(raw: string | null): SimulationScenario {
-  if (!raw) return { knockoutWinners: {}, slotOverrides: {} };
-  try {
-    const parsed = JSON.parse(raw) as SimulationScenario;
-    return {
-      knockoutWinners: parsed.knockoutWinners ?? {},
-      slotOverrides: parsed.slotOverrides ?? {},
-      groupFinishes: parsed.groupFinishes,
-    };
-  } catch {
-    return { knockoutWinners: {}, slotOverrides: {} };
-  }
+interface SimulationRequestBody {
+  team?: string;
+  compareTeam?: string;
+  mode?: string;
+  scenario?: SimulationScenario;
 }
 
-export async function GET(request: NextRequest) {
-  const teamId = request.nextUrl.searchParams.get("team");
-  const mode = parseRankingMode(request.nextUrl.searchParams.get("mode"));
-  const scenario = parseScenario(request.nextUrl.searchParams.get("scenario"));
+export async function POST(request: NextRequest) {
+  let body: SimulationRequestBody;
+  try {
+    body = (await request.json()) as SimulationRequestBody;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const teamId = body.team;
+  const comparisonTeamId = body.compareTeam;
+  const mode = parseRankingMode(body.mode ?? null);
+  const scenario = body.scenario ?? emptySimulationScenario();
 
   if (!teamId) {
     return NextResponse.json(
-      { error: "team parameter is required" },
+      { error: "team is required" },
       { status: 400 },
     );
   }
@@ -32,7 +34,12 @@ export async function GET(request: NextRequest) {
   const result = await getSimulationAnalysis(
     teamId.toUpperCase(),
     mode,
-    scenario,
+    {
+      knockoutWinners: scenario.knockoutWinners ?? {},
+      slotOverrides: scenario.slotOverrides ?? {},
+      groupFinishes: scenario.groupFinishes,
+    },
+    comparisonTeamId?.toUpperCase(),
   );
 
   if (!result) {

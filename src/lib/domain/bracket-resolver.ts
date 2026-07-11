@@ -127,9 +127,14 @@ function resolveWinnerTeamId(
   homeId: string | null,
   awayId: string | null,
   scenario: SimulationScenario,
+  suppressPlayedResultsMatchNums?: Set<number>,
 ): string | null {
   if (scenario.knockoutWinners?.[matchNum]) {
     return scenario.knockoutWinners[matchNum].toUpperCase();
+  }
+
+  if (suppressPlayedResultsMatchNums?.has(matchNum)) {
+    return null;
   }
 
   const record = getMatchRecord(matchNum);
@@ -142,9 +147,12 @@ function resolveWinnerTeamId(
 
 export function resolveBracket(
   scenario: SimulationScenario = {},
+  options: ResolveBracketOptions = {},
 ): ResolvedBracketMatch[] {
   const standingsByGroup = getStandingsByGroup(scenario);
   const slotOverrides = scenario.slotOverrides ?? {};
+  const suppressPlayedResultsMatchNums =
+    options.suppressPlayedResultsMatchNums;
   const winners = new Map<number, string>();
   const losers = new Map<number, string>();
   const resolved: ResolvedBracketMatch[] = [];
@@ -171,6 +179,7 @@ export function resolveBracket(
       homeId,
       awayId,
       scenario,
+      suppressPlayedResultsMatchNums,
     );
 
     if (winnerTeamId) {
@@ -230,11 +239,78 @@ export function findChangedMatchNums(
     const s = simulated[i];
     if (
       a.home.teamId !== s.home.teamId ||
-      a.away.teamId !== s.away.teamId ||
-      a.winnerTeamId !== s.winnerTeamId
+      a.away.teamId !== s.away.teamId
     ) {
       changed.push(a.num);
     }
   }
   return changed;
+}
+
+export interface ResolveBracketOptions {
+  suppressPlayedResultsMatchNums?: Set<number>;
+}
+
+export function getDownstreamMatchNums(seedMatchNums: number[]): Set<number> {
+  const templates = getBracketTemplateMatches();
+  const downstream = new Set(seedMatchNums);
+
+  let expanded = true;
+  while (expanded) {
+    expanded = false;
+    for (const template of templates) {
+      if (downstream.has(template.num)) continue;
+
+      const dependsOn = [template.home, template.away]
+        .filter(
+          (side) =>
+            (side.kind === "winner" || side.kind === "loser") &&
+            side.matchNum !== undefined,
+        )
+        .map((side) => side.matchNum!);
+
+      if (dependsOn.some((matchNum) => downstream.has(matchNum))) {
+        downstream.add(template.num);
+        expanded = true;
+      }
+    }
+  }
+
+  return downstream;
+}
+
+export function sanitizeKnockoutWinners(
+  winners: Record<number, string> | undefined,
+  staleMatchNums: Set<number>,
+): Record<number, string> {
+  if (!winners || staleMatchNums.size === 0) return winners ?? {};
+
+  const sanitized: Record<number, string> = {};
+  for (const [matchNum, teamId] of Object.entries(winners)) {
+    const num = Number(matchNum);
+    if (!staleMatchNums.has(num)) {
+      sanitized[num] = teamId;
+    }
+  }
+  return sanitized;
+}
+
+export function computePendingWinnerMatchNums(
+  bracket: ResolvedBracketMatch[],
+  suppressMatchNums: Set<number>,
+  knockoutWinners: Record<number, string> | undefined,
+): number[] {
+  if (suppressMatchNums.size === 0) return [];
+
+  return bracket
+    .filter(
+      (match) =>
+        suppressMatchNums.has(match.num) &&
+        match.isPlayed &&
+        Boolean(match.home.teamId) &&
+        Boolean(match.away.teamId) &&
+        !knockoutWinners?.[match.num],
+    )
+    .map((match) => match.num)
+    .sort((a, b) => a - b);
 }

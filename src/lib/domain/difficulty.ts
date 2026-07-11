@@ -1,6 +1,7 @@
 import type {
   ComparisonEntry,
   MatchDifficulty,
+  PathDifficultyRank,
   PathStage,
   RankingEntry,
   Team,
@@ -137,6 +138,53 @@ export interface HardestPathRankResult {
   rankByAvgRank: number | null;
   cohortSize: number;
   cohortStage: PathStage;
+}
+
+export function getPathDifficultyRank(
+  allSummaries: TeamPathSummary[],
+  teamId: string,
+  pathSummary: TeamPathSummary,
+  stages: Set<PathStage>,
+  cohortTeamIds: Set<string>,
+): PathDifficultyRank {
+  const summaryByTeamId = new Map(
+    allSummaries.map((summary) => [summary.team.id, summary]),
+  );
+
+  const cohortEntries = [...cohortTeamIds]
+    .map((id) => {
+      const summary = id === teamId ? pathSummary : summaryByTeamId.get(id);
+      if (!summary) return null;
+
+      const { avgOpponentPoints, avgOpponentRank } = computeFilteredAverages(
+        summary.matches,
+        stages,
+      );
+
+      return {
+        teamId: id,
+        avgOpponentPoints:
+          avgOpponentPoints ?? Number.NEGATIVE_INFINITY,
+        avgOpponentRank: avgOpponentRank ?? Number.POSITIVE_INFINITY,
+      };
+    })
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+
+  const rankedByPoints = [...cohortEntries].sort(
+    (a, b) => b.avgOpponentPoints - a.avgOpponentPoints,
+  );
+  const rankedByRank = [...cohortEntries].sort(
+    (a, b) => a.avgOpponentRank - b.avgOpponentRank,
+  );
+
+  const pointsIndex = rankedByPoints.findIndex((entry) => entry.teamId === teamId);
+  const rankIndex = rankedByRank.findIndex((entry) => entry.teamId === teamId);
+
+  return {
+    rankByPoints: pointsIndex >= 0 ? pointsIndex + 1 : null,
+    rankByAvgRank: rankIndex >= 0 ? rankIndex + 1 : null,
+    cohortSize: cohortEntries.length,
+  };
 }
 
 export function getHardestPathRank(

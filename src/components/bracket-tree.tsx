@@ -2,6 +2,7 @@
 
 import type { ResolvedBracketMatch, Team } from "@/lib/types";
 import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
+import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
 import { useTranslations } from "next-intl";
 import { TeamFlag } from "@/components/team-flag";
 import {
@@ -16,9 +17,14 @@ interface BracketTreeProps {
   teams: Team[];
   scenarioWinners: Record<number, string | undefined>;
   changedMatchNums: number[];
+  pendingWinnerMatchNums: number[];
   focusTeamId: string;
   focusTeamMatchNums: number[];
   onSelectWinner: (matchNum: number, teamId: string) => void;
+  showPickAllStrongest?: boolean;
+  showPickSimulatedStrongest?: boolean;
+  onPickAllStrongest?: () => void;
+  onPickSimulatedStrongest?: () => void;
 }
 
 function BracketSide({
@@ -77,6 +83,7 @@ function BracketMatchCard({
   selectedWinnerId,
   overridden,
   changed,
+  needsWinner,
   focusTeamId,
   focusTeamMatchNums,
   onSelectWinner,
@@ -86,12 +93,15 @@ function BracketMatchCard({
   selectedWinnerId: string | null;
   overridden: boolean;
   changed: boolean;
+  needsWinner: boolean;
   focusTeamId: string;
   focusTeamMatchNums: number[];
   onSelectWinner: (matchNum: number, teamId: string) => void;
 }) {
   const t = useTranslations("simulate.bracket");
+  const stages = useTranslations("compare.stages");
   const involvesFocus = focusTeamMatchNums.includes(match.num);
+  const isCenter = match.num === 103 || match.num === 104;
   const isThirdPlace = match.num === 103;
 
   return (
@@ -99,20 +109,31 @@ function BracketMatchCard({
       className={cn(
         "flex min-h-0 flex-col justify-center rounded-lg border border-white/8 bg-white/[0.02] p-1.5",
         changed && "border-wc-orange/40 bg-wc-orange/5",
-        involvesFocus && !changed && "border-wc-orange/25",
+        needsWinner && "border-wc-purple/50 bg-wc-purple/10 ring-1 ring-wc-purple/30",
+        involvesFocus && !changed && !needsWinner && "border-wc-orange/25",
         isThirdPlace && "opacity-90",
       )}
     >
+      {isCenter && (
+        <p className="mb-1 text-center text-[9px] font-semibold uppercase tracking-widest text-wc-orange">
+          {getRoundDisplayName(stages, match.round)}
+        </p>
+      )}
       <div className="mb-1 flex items-center justify-between gap-1">
         <span className="font-mono text-[9px] text-muted-foreground">
           #{match.num}
         </span>
-        {overridden && (
+        {needsWinner && (
+          <span className="rounded bg-wc-purple/20 px-1 py-0.5 text-[8px] font-semibold uppercase text-wc-purple">
+            {t("pickWinnerBadge")}
+          </span>
+        )}
+        {overridden && !needsWinner && (
           <span className="rounded bg-wc-purple/15 px-1 py-0.5 text-[8px] font-semibold uppercase text-wc-purple">
             {t("simulated")}
           </span>
         )}
-        {match.scoreLabel && !overridden && (
+        {match.scoreLabel && !overridden && !needsWinner && (
           <span className="font-mono text-[9px] text-muted-foreground">
             {match.scoreLabel}
           </span>
@@ -149,29 +170,59 @@ export function BracketTree({
   teams,
   scenarioWinners,
   changedMatchNums,
+  pendingWinnerMatchNums,
   focusTeamId,
   focusTeamMatchNums,
   onSelectWinner,
+  showPickAllStrongest,
+  showPickSimulatedStrongest,
+  onPickAllStrongest,
+  onPickSimulatedStrongest,
 }: BracketTreeProps) {
   const t = useTranslations("simulate");
+  const stages = useTranslations("compare.stages");
   const gridRows = getBracketGridRows();
   const matchByNum = new Map(matches.map((match) => [match.num, match]));
 
   return (
     <div className="space-y-3">
-      <div>
-        <h2 className="text-lg font-semibold text-white">
-          {t("knockoutBracket")}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t("bracketHint")}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-white">
+            {t("knockoutBracket")}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("bracketHint")}</p>
+        </div>
+        {(showPickAllStrongest || showPickSimulatedStrongest) && (
+          <div className="flex shrink-0 flex-wrap justify-end gap-2">
+            {showPickAllStrongest && onPickAllStrongest && (
+              <button
+                type="button"
+                onClick={onPickAllStrongest}
+                className="rounded-lg border border-wc-sky/30 px-3 py-1.5 text-sm font-medium text-wc-sky transition-colors hover:border-wc-sky/50 hover:bg-wc-sky/10"
+              >
+                {t("pickAllStrongestWinners")}
+              </button>
+            )}
+            {showPickSimulatedStrongest && onPickSimulatedStrongest && (
+              <button
+                type="button"
+                onClick={onPickSimulatedStrongest}
+                className="rounded-lg border border-wc-purple/30 px-3 py-1.5 text-sm font-medium text-wc-purple transition-colors hover:border-wc-purple/50 hover:bg-wc-purple/10"
+              >
+                {t("pickSimulatedStrongestWinners")}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="overflow-x-auto pb-2">
         <div
-          className="inline-grid min-w-[920px] gap-x-2 gap-y-0"
+          className="inline-grid w-full min-w-[1280px] gap-x-2 gap-y-1"
           style={{
-            gridTemplateColumns: `repeat(${BRACKET_COLUMNS.length}, minmax(160px, 1fr))`,
-            gridTemplateRows: `repeat(${gridRows}, minmax(28px, auto))`,
+            gridTemplateColumns: `repeat(${BRACKET_COLUMNS.length}, minmax(130px, 1fr))`,
+            gridTemplateRows: `auto repeat(${gridRows}, minmax(0, auto))`,
           }}
         >
           {BRACKET_COLUMNS.map((column, columnIndex) => (
@@ -183,7 +234,7 @@ export function BracketTree({
                 gridRow: 1,
               }}
             >
-              {column.label}
+              {stages(column.roundKey)}
             </div>
           ))}
 
@@ -196,6 +247,7 @@ export function BracketTree({
             return (
               <div
                 key={match.num}
+                className="flex flex-col justify-center"
                 style={{
                   gridColumn: layout.column + 1,
                   gridRow: `${layout.rowStart + 1} / span ${layout.rowSpan}`,
@@ -207,6 +259,7 @@ export function BracketTree({
                   selectedWinnerId={selectedWinnerId}
                   overridden={overridden}
                   changed={changedMatchNums.includes(match.num)}
+                  needsWinner={pendingWinnerMatchNums.includes(match.num)}
                   focusTeamId={focusTeamId}
                   focusTeamMatchNums={focusTeamMatchNums}
                   onSelectWinner={onSelectWinner}

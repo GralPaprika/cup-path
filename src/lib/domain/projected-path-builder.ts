@@ -8,7 +8,7 @@ import type {
 } from "@/lib/types";
 import { enrichTeam, getTeamById } from "@/lib/data/team-registry";
 import { isKnockoutRound } from "@/lib/data/worldcup-loader";
-import { resolveBracket } from "@/lib/domain/bracket-resolver";
+import { resolveBracket, type ResolveBracketOptions } from "@/lib/domain/bracket-resolver";
 import { getMatchStage } from "@/lib/domain/match-stages";
 import { buildTeamPath } from "@/lib/domain/path-builder";
 
@@ -66,6 +66,7 @@ export function buildProjectedTeamPathSummary(
   teamId: string,
   scenario: SimulationScenario,
   rankings: Map<string, RankingEntry>,
+  options: ResolveBracketOptions = {},
 ): TeamPathSummary | null {
   const baseTeam = getTeamById(teamId);
   if (!baseTeam) return null;
@@ -92,7 +93,7 @@ export function buildProjectedTeamPathSummary(
       ),
   );
 
-  const bracket = resolveBracket(scenario);
+  const bracket = resolveBracket(scenario, options);
   for (const bracketMatch of bracket) {
     const isHome = bracketMatch.home.teamId === teamId;
     const isAway = bracketMatch.away.teamId === teamId;

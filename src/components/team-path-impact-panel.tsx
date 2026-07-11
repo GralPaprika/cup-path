@@ -3,17 +3,20 @@
 import type {
   AvgPointsContext,
   PathDiffRow,
+  PathDifficultyRank,
   Team,
   TeamPathSummary,
 } from "@/lib/types";
 import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
+import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
 import { useTranslations } from "next-intl";
 import { TeamFlag } from "@/components/team-flag";
 import {
   AvgPointsContextFootnote,
   AvgPointsContextHint,
 } from "@/components/avg-points-context";
-import { formatFifaPoints } from "@/lib/format";
+import { TeamSelector } from "@/components/team-selector";
+import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface TeamPathImpactPanelProps {
@@ -22,36 +25,128 @@ interface TeamPathImpactPanelProps {
   simulatedSummary: TeamPathSummary;
   actualAvgPointsContext: AvgPointsContext | null;
   simulatedAvgPointsContext: AvgPointsContext | null;
+  comparisonSummary: TeamPathSummary | null;
+  comparisonAvgPointsContext: AvgPointsContext | null;
+  comparisonTeamId: string;
+  onComparisonTeamChange: (teamId: string) => void;
   pathDiff: PathDiffRow[];
+  pathRanks: {
+    actual: PathDifficultyRank;
+    simulated: PathDifficultyRank;
+    comparison: PathDifficultyRank | null;
+  };
   hasOverrides: boolean;
-  onReset: () => void;
 }
 
-function DifficultyTile({
+function formatPointsDelta(
+  baseline: number | null,
+  simulated: number | null,
+): string | null {
+  if (baseline === null || simulated === null) return null;
+  const delta = simulated - baseline;
+  if (delta === 0) return "0";
+  const sign = delta > 0 ? "+" : "-";
+  return `${sign}${formatFifaPoints(Math.abs(delta))}`;
+}
+
+function formatRankDelta(
+  baseline: number | null,
+  simulated: number | null,
+): string | null {
+  if (baseline === null || simulated === null) return null;
+  const delta = simulated - baseline;
+  if (delta === 0) return "0";
+  const sign = delta > 0 ? "+" : "-";
+  return `${sign}${formatStatValue(Math.abs(delta), 1)}`;
+}
+
+function formatPathRank(
+  rank: number | null,
+  cohortSize: number,
+): string {
+  return rank !== null ? `#${rank} / ${cohortSize}` : "—";
+}
+
+function ValueCell({
+  value,
+  hint,
+  valueClassName,
+}: {
+  value: string;
+  hint?: React.ReactNode;
+  valueClassName?: string;
+}) {
+  return (
+    <div className="text-right">
+      <p
+        className={cn(
+          "font-mono text-sm font-semibold tabular-nums text-white",
+          valueClassName,
+        )}
+      >
+        {value}
+      </p>
+      {hint}
+    </div>
+  );
+}
+
+function StatRow({
   label,
-  summary,
-  context,
-  highlight,
+  focusValue,
+  simulatedValue,
+  comparisonValue,
+  deltaVsFocus,
+  deltaVsComparison,
+  hintFocus,
+  hintSimulated,
+  hintComparison,
+  valueClassName,
+  gridTemplateColumns,
 }: {
   label: string;
-  summary: TeamPathSummary;
-  context: AvgPointsContext | null;
-  highlight?: boolean;
+  focusValue: string;
+  simulatedValue: string;
+  comparisonValue?: string;
+  deltaVsFocus: string | null;
+  deltaVsComparison?: string | null;
+  hintFocus?: React.ReactNode;
+  hintSimulated?: React.ReactNode;
+  hintComparison?: React.ReactNode;
+  valueClassName?: string;
+  gridTemplateColumns: string;
 }) {
   return (
     <div
-      className={cn(
-        "rounded-xl border border-white/10 bg-white/[0.03] p-5",
-        highlight && "border-wc-orange/30",
-      )}
+      className="grid items-center gap-3 border-b border-white/6 px-4 py-3 last:border-b-0"
+      style={{ gridTemplateColumns }}
     >
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-        {label}
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <ValueCell
+        value={focusValue}
+        hint={hintFocus}
+        valueClassName={valueClassName}
+      />
+      <ValueCell
+        value={simulatedValue}
+        hint={hintSimulated}
+        valueClassName={valueClassName}
+      />
+      <p className="text-right font-mono text-xs tabular-nums text-muted-foreground">
+        {deltaVsFocus ?? "—"}
       </p>
-      <p className="mt-2 text-2xl font-bold tabular-nums text-wc-orange">
-        {formatFifaPoints(summary.avgOpponentPoints)}
-      </p>
-      <AvgPointsContextHint context={context} align="left" />
+      {comparisonValue !== undefined && (
+        <>
+          <ValueCell
+            value={comparisonValue}
+            hint={hintComparison}
+            valueClassName={valueClassName}
+          />
+          <p className="text-right font-mono text-xs tabular-nums text-muted-foreground">
+            {deltaVsComparison ?? "—"}
+          </p>
+        </>
+      )}
     </div>
   );
 }
@@ -92,12 +187,30 @@ export function TeamPathImpactPanel({
   simulatedSummary,
   actualAvgPointsContext,
   simulatedAvgPointsContext,
+  comparisonSummary,
+  comparisonAvgPointsContext,
+  comparisonTeamId,
+  onComparisonTeamChange,
   pathDiff,
+  pathRanks,
   hasOverrides,
-  onReset,
 }: TeamPathImpactPanelProps) {
   const t = useTranslations("simulate");
+  const summary = useTranslations("summary");
+  const stages = useTranslations("compare.stages");
+  const teamNames = useTranslations("teams");
   const changedRows = pathDiff.filter((row) => row.opponentChanged);
+  const showComparison = Boolean(comparisonTeamId && comparisonSummary);
+  const focusTeamName = getTeamDisplayName(teamNames, actualSummary.team);
+  const comparisonTeamName = comparisonSummary
+    ? getTeamDisplayName(teamNames, comparisonSummary.team)
+    : "";
+  const firstOtherTeam =
+    teams.find((team) => team.id !== actualSummary.team.id)?.id ?? "";
+
+  const gridTemplateColumns = showComparison
+    ? "minmax(0,1fr) minmax(0,0.85fr) minmax(0,0.85fr) minmax(0,0.55fr) minmax(0,0.85fr) minmax(0,0.55fr)"
+    : "minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,0.65fr)";
 
   const pointsDelta =
     actualSummary.avgOpponentPoints !== null &&
@@ -111,30 +224,207 @@ export function TeamPathImpactPanel({
         <h2 className="text-lg font-semibold text-white">
           {t("pathComparison")}
         </h2>
-        {hasOverrides && (
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={onReset}
+            onClick={() =>
+              onComparisonTeamChange(comparisonTeamId ? "" : firstOtherTeam)
+            }
             className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-white/20 hover:text-white"
           >
-            {t("reset")}
+            {comparisonTeamId
+              ? t("hideComparisonTeam")
+              : t("addComparisonTeam")}
           </button>
-        )}
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <DifficultyTile
-          label={t("actualPath")}
-          summary={actualSummary}
-          context={actualAvgPointsContext}
+      {comparisonTeamId && (
+        <div className="max-w-xl">
+          <TeamSelector
+            teams={teams}
+            value={comparisonTeamId}
+            onChange={onComparisonTeamChange}
+            label={t("comparisonTeam")}
+          />
+        </div>
+      )}
+
+      <div className="overflow-x-auto rounded-xl border border-white/8">
+        <div
+          className="grid min-w-[640px] gap-3 border-b border-white/8 bg-white/[0.03] px-4 py-3"
+          style={{ gridTemplateColumns }}
+        >
+          <span />
+          <p className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {focusTeamName}
+          </p>
+          <p
+            className={cn(
+              "text-right text-[10px] font-semibold uppercase tracking-widest",
+              hasOverrides ? "text-wc-orange" : "text-muted-foreground",
+            )}
+          >
+            {t("simulatedPath")}
+          </p>
+          <p className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {t("pathCompareDeltaSimulated")}
+          </p>
+          {showComparison && (
+            <>
+              <p className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                {comparisonTeamName}
+              </p>
+              <p className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                {t("pathCompareDeltaComparison")}
+              </p>
+            </>
+          )}
+        </div>
+
+        <StatRow
+          label={summary("avgDifficulty")}
+          focusValue={formatFifaPoints(actualSummary.avgOpponentPoints)}
+          simulatedValue={formatFifaPoints(simulatedSummary.avgOpponentPoints)}
+          comparisonValue={
+            showComparison && comparisonSummary
+              ? formatFifaPoints(comparisonSummary.avgOpponentPoints)
+              : undefined
+          }
+          deltaVsFocus={formatPointsDelta(
+            actualSummary.avgOpponentPoints,
+            simulatedSummary.avgOpponentPoints,
+          )}
+          deltaVsComparison={
+            showComparison && comparisonSummary
+              ? formatPointsDelta(
+                  comparisonSummary.avgOpponentPoints,
+                  simulatedSummary.avgOpponentPoints,
+                )
+              : undefined
+          }
+          hintFocus={
+            <AvgPointsContextHint context={actualAvgPointsContext} align="right" />
+          }
+          hintSimulated={
+            <AvgPointsContextHint
+              context={simulatedAvgPointsContext}
+              align="right"
+            />
+          }
+          hintComparison={
+            showComparison ? (
+              <AvgPointsContextHint
+                context={comparisonAvgPointsContext}
+                align="right"
+              />
+            ) : undefined
+          }
+          valueClassName="text-wc-orange"
+          gridTemplateColumns={gridTemplateColumns}
         />
-        <DifficultyTile
-          label={t("simulatedPath")}
-          summary={simulatedSummary}
-          context={simulatedAvgPointsContext}
-          highlight={hasOverrides}
+        <StatRow
+          label={summary("avgRank")}
+          focusValue={
+            actualSummary.avgOpponentRank !== null
+              ? formatStatValue(actualSummary.avgOpponentRank, 1)
+              : "—"
+          }
+          simulatedValue={
+            simulatedSummary.avgOpponentRank !== null
+              ? formatStatValue(simulatedSummary.avgOpponentRank, 1)
+              : "—"
+          }
+          comparisonValue={
+            showComparison && comparisonSummary
+              ? comparisonSummary.avgOpponentRank !== null
+                ? formatStatValue(comparisonSummary.avgOpponentRank, 1)
+                : "—"
+              : undefined
+          }
+          deltaVsFocus={formatRankDelta(
+            actualSummary.avgOpponentRank,
+            simulatedSummary.avgOpponentRank,
+          )}
+          deltaVsComparison={
+            showComparison && comparisonSummary
+              ? formatRankDelta(
+                  comparisonSummary.avgOpponentRank,
+                  simulatedSummary.avgOpponentRank,
+                )
+              : undefined
+          }
+          gridTemplateColumns={gridTemplateColumns}
+        />
+        <StatRow
+          label={t("pathRankByPoints")}
+          focusValue={formatPathRank(
+            pathRanks.actual.rankByPoints,
+            pathRanks.actual.cohortSize,
+          )}
+          simulatedValue={formatPathRank(
+            pathRanks.simulated.rankByPoints,
+            pathRanks.simulated.cohortSize,
+          )}
+          comparisonValue={
+            showComparison && pathRanks.comparison
+              ? formatPathRank(
+                  pathRanks.comparison.rankByPoints,
+                  pathRanks.comparison.cohortSize,
+                )
+              : undefined
+          }
+          deltaVsFocus={formatRankDelta(
+            pathRanks.actual.rankByPoints,
+            pathRanks.simulated.rankByPoints,
+          )}
+          deltaVsComparison={
+            showComparison && pathRanks.comparison
+              ? formatRankDelta(
+                  pathRanks.comparison.rankByPoints,
+                  pathRanks.simulated.rankByPoints,
+                )
+              : undefined
+          }
+          gridTemplateColumns={gridTemplateColumns}
+        />
+        <StatRow
+          label={t("pathRankByAvgRank")}
+          focusValue={formatPathRank(
+            pathRanks.actual.rankByAvgRank,
+            pathRanks.actual.cohortSize,
+          )}
+          simulatedValue={formatPathRank(
+            pathRanks.simulated.rankByAvgRank,
+            pathRanks.simulated.cohortSize,
+          )}
+          comparisonValue={
+            showComparison && pathRanks.comparison
+              ? formatPathRank(
+                  pathRanks.comparison.rankByAvgRank,
+                  pathRanks.comparison.cohortSize,
+                )
+              : undefined
+          }
+          deltaVsFocus={formatRankDelta(
+            pathRanks.actual.rankByAvgRank,
+            pathRanks.simulated.rankByAvgRank,
+          )}
+          deltaVsComparison={
+            showComparison && pathRanks.comparison
+              ? formatRankDelta(
+                  pathRanks.comparison.rankByAvgRank,
+                  pathRanks.simulated.rankByAvgRank,
+                )
+              : undefined
+          }
+          gridTemplateColumns={gridTemplateColumns}
         />
       </div>
+
+      <p className="text-xs text-muted-foreground">
+        {showComparison ? t("pathCompareFootnoteWithComparison") : t("pathCompareFootnote")}
+      </p>
 
       {pointsDelta !== null && hasOverrides && pointsDelta !== 0 && (
         <p className="text-sm text-muted-foreground">
@@ -146,9 +436,9 @@ export function TeamPathImpactPanel({
         </p>
       )}
 
-      {(actualAvgPointsContext || simulatedAvgPointsContext) && (
-        <AvgPointsContextFootnote />
-      )}
+      {(actualAvgPointsContext ||
+        simulatedAvgPointsContext ||
+        comparisonAvgPointsContext) && <AvgPointsContextFootnote />}
 
       {changedRows.length > 0 && (
         <section className="space-y-3">
@@ -177,7 +467,7 @@ export function TeamPathImpactPanel({
                     className="border-b border-white/6 last:border-b-0"
                   >
                     <td className="px-4 py-2.5 text-muted-foreground">
-                      {row.round}
+                      {getRoundDisplayName(stages, row.round)}
                     </td>
                     <td className="px-4 py-2.5">
                       <OpponentCell

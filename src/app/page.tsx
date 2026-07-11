@@ -1,14 +1,26 @@
 import { Suspense } from "react";
-import { getAllTeamsEnriched } from "@/lib/data/team-registry";
-import { AnalysisPageClient } from "@/components/analysis-page-client";
+import { redirect } from "next/navigation";
+import { FactsPageClient } from "@/components/facts-page-client";
 import { PageShellSkeleton } from "@/components/loading-skeletons";
 
-export default async function HomePage() {
-  const teams = await getAllTeamsEnriched("live");
+type HomePageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+
+  if (params.team) {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (typeof value === "string") query.set(key, value);
+    }
+    redirect(`/team-analysis?${query.toString()}`);
+  }
 
   return (
     <Suspense fallback={<PageShellSkeleton />}>
-      <AnalysisPageClient teams={teams} />
+      <FactsPageClient />
     </Suspense>
   );
 }

@@ -260,6 +260,193 @@ export interface GroupComparisonCard {
 
 export type { NumericStats } from "@/lib/domain/group-stats";
 
+export interface TournamentSnapshot {
+  avgFifaPoints: number | null;
+  medianFifaRank: number | null;
+  teamCounts: Record<PathStage, number>;
+}
+
+export interface GroupStagePoolFact {
+  teamCount: number;
+  avgFifaPoints: number | null;
+  medianFifaRank: number | null;
+  avgGroupRivalDifficulty: number | null;
+  lowestRankedQualifier: {
+    team: Team;
+    fifaRank: number;
+    fifaPoints: number;
+    groupLetter: string;
+  } | null;
+}
+
+export interface UpsetMatchFact {
+  team: Team;
+  opponent: Team;
+  pointsGap: number;
+  round: string;
+  scoreLabel: string | null;
+}
+
+export interface TeamHighlightFact {
+  team: Team;
+  fifaRank: number | null;
+  fifaPoints: number | null;
+  maxStageReached: PathStage;
+  value: number;
+}
+
+export interface GroupOfDeathFact {
+  groupLetter: string;
+  avgFifaPoints: number | null;
+}
+
+export type GroupMatchResult = "W" | "D" | "L";
+
+export type PaperDrawNote = "equalRating" | "favoriteDrew";
+
+export interface GroupExpectedMatchEntry {
+  team1: Team;
+  team2: Team;
+  groupLetter: string;
+  scoreLabel: string;
+  team1FifaPoints: number | null;
+  team2FifaPoints: number | null;
+  pointsGap: number | null;
+  gapPoints: number;
+  paperDrawNote: PaperDrawNote | null;
+  isDrawGapOutlier: boolean;
+  isWinLossGapOutlier: boolean;
+  isEqualRating: boolean;
+  favoriteTeamId: string | null;
+  underdogTeamId: string | null;
+  team1Expected: GroupMatchResult;
+  team2Expected: GroupMatchResult;
+  team1Actual: GroupMatchResult;
+  team2Actual: GroupMatchResult;
+  expectedWinLanded: boolean;
+  expectedWinMissed: boolean;
+  unexpectedDefeat: boolean;
+  upsetWin: boolean;
+}
+
+export interface GroupExpectedFinishEntry {
+  team: Team;
+  groupLetter: string;
+  fifaRank: number | null;
+  fifaPoints: number | null;
+  expectedPoints: number;
+  expectedPosition: number;
+  actualPosition: number;
+  positionDelta: number;
+}
+
+export interface GroupExpectedUnderperformer {
+  team: Team;
+  groupLetter: string;
+  fifaRank: number | null;
+  fifaPoints: number | null;
+  expectedPosition: number;
+  actualPosition: number;
+  positionDelta: number;
+}
+
+export interface GroupExpectedAnalysis {
+  meanAbsPointsGap: number | null;
+  medianAbsPointsGap: number | null;
+  meanAbsPointsGapFavorite: number | null;
+  medianAbsPointsGapFavorite: number | null;
+  actualDrawCount: number;
+  meanPointsGapOnDraws: number | null;
+  stdDevPointsGapOnDraws: number | null;
+  maxPointsGapOnDraw: number | null;
+  minPointsGapOnDraw: number | null;
+  drawMatches: GroupExpectedMatchEntry[];
+  highestGapDrawMatch: GroupExpectedMatchEntry | null;
+  lowestGapDrawMatch: GroupExpectedMatchEntry | null;
+  actualWinLossCount: number;
+  meanPointsGapOnWinLoss: number | null;
+  stdDevPointsGapOnWinLoss: number | null;
+  maxPointsGapOnWinLoss: number | null;
+  minPointsGapOnWinLoss: number | null;
+  highestGapWinLossMatch: GroupExpectedMatchEntry | null;
+  lowestGapWinLossMatch: GroupExpectedMatchEntry | null;
+  biggestUnderdogWinMatch: GroupExpectedMatchEntry | null;
+  winLossMatches: GroupExpectedMatchEntry[];
+  favoriteMatchCount: number;
+  equalRatingMatchCount: number;
+  expectedDrawLandedCount: number;
+  expectedDrawMissedCount: number;
+  matchCount: number;
+  expectedWinLandedCount: number;
+  expectedWinMissedCount: number;
+  unexpectedDefeatCount: number;
+  upsetWinCount: number;
+  matchLedger: GroupExpectedMatchEntry[];
+  expectedFinishes: GroupExpectedFinishEntry[];
+  eliminatedUnderperformers: GroupExpectedUnderperformer[];
+}
+
+export interface GroupStageDifficultyEntry {
+  team: Team;
+  groupLetter: string;
+  avgOpponentPoints: number;
+  qualified: boolean;
+}
+
+export interface GroupStageDifficultyCohort {
+  total: number;
+  qualified: number;
+  eliminated: number;
+}
+
+export interface GroupStageDifficultySpotlight {
+  team: Team;
+  groupLetter: string;
+  avgOpponentPoints: number;
+  deltaFromMean: number;
+  isSdOutlier: boolean;
+}
+
+export interface GroupStageDifficultyInsights {
+  aboveMean: GroupStageDifficultyCohort;
+  belowMean: GroupStageDifficultyCohort;
+  atMean: GroupStageDifficultyCohort;
+  stdDevAvgOpponentPoints: number | null;
+  medianQualifiedAvg: number | null;
+  medianEliminatedAvg: number | null;
+  qualificationRateGap: number | null;
+  hardestDrawSurvivor: GroupStageDifficultySpotlight | null;
+  easiestDrawCasualty: GroupStageDifficultySpotlight | null;
+}
+
+export interface GroupStageDifficultyStrip {
+  entries: GroupStageDifficultyEntry[];
+  meanAvgOpponentPoints: number | null;
+  stdDevAvgOpponentPoints: number | null;
+  minAvgOpponentPoints: number | null;
+  maxAvgOpponentPoints: number | null;
+  insights: GroupStageDifficultyInsights;
+}
+
+export interface TournamentHighlights {
+  overPerformer: TeamHighlightFact | null;
+  underPerformer: TeamHighlightFact | null;
+  biggestGiantKilling: UpsetMatchFact | null;
+  biggestFavoriteUpset: UpsetMatchFact | null;
+  giantKillerLeader: TeamHighlightFact | null;
+  hardestRemainingPath: TeamHighlightFact | null;
+  easiestRemainingPath: TeamHighlightFact | null;
+  groupOfDeath: GroupOfDeathFact | null;
+}
+
+export interface TournamentFacts {
+  snapshot: TournamentSnapshot;
+  groupStagePool: GroupStagePoolFact;
+  highlights: TournamentHighlights;
+  groupExpectedAnalysis: GroupExpectedAnalysis | null;
+  groupStageDifficulty: GroupStageDifficultyStrip | null;
+}
+
 export interface GroupStanding {
   teamId: string;
   played: number;

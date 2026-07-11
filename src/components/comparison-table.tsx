@@ -214,7 +214,7 @@ export function ComparisonTable({
             const isLegacyCompare = compareTeamIds?.includes(entry.team.id);
             const isSelected =
               entry.team.id === selectedTeamId || isTeamA || isTeamB || isLegacyCompare;
-            const analysisHref = `/?team=${entry.team.id}&mode=${mode}`;
+            const analysisHref = `/team-analysis?team=${entry.team.id}&mode=${mode}`;
 
             return (
               <TableRow

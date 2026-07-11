@@ -6,6 +6,10 @@ import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
 import { Badge } from "@/components/ui/badge";
 import {
+  matchResultBadgeClass,
+  matchResultRowClass,
+} from "@/components/match-result-label";
+import {
   Table,
   TableBody,
   TableCell,
@@ -47,17 +51,8 @@ function pointsGapColor(value: number | null): string {
 }
 
 function rowTint(result: MatchDifficulty["result"], isPlayed: boolean): string {
-  if (!isPlayed) return "";
-  if (result === "W") return "bg-wc-green/8 hover:bg-wc-green/12";
-  if (result === "L") return "bg-wc-red/8 hover:bg-wc-red/12";
-  if (result === "D") return "bg-wc-royal/8 hover:bg-wc-royal/12";
-  return "";
-}
-
-function resultBadgeClass(result: MatchDifficulty["result"]) {
-  if (result === "W") return "bg-wc-green/20 text-wc-green border-wc-green/30";
-  if (result === "L") return "bg-wc-red/20 text-wc-red border-wc-red/30";
-  return "bg-wc-royal/20 text-wc-sky border-wc-sky/30";
+  if (!isPlayed || !result) return "";
+  return matchResultRowClass(result);
 }
 
 export function PathTable({ matches, includedStages }: PathTableProps) {
@@ -149,7 +144,7 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
                     {match.isPlayed && match.result ? (
                       <Badge
                         variant="outline"
-                        className={resultBadgeClass(match.result)}
+                        className={matchResultBadgeClass(match.result)}
                       >
                         {results(match.result)} {match.scoreLabel}
                       </Badge>

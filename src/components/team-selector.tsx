@@ -164,7 +164,7 @@ export function TeamSelector({
 
       <ul
         role="listbox"
-        className="max-h-64 overflow-y-auto p-1 [scrollbar-color:rgba(255,255,255,0.2)_transparent] [scrollbar-width:thin]"
+        className="scrollbar-subtle max-h-64 overflow-y-auto p-1"
         aria-label={t("label")}
       >
         {filteredTeams.length === 0 ? (

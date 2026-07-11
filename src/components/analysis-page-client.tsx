@@ -108,7 +108,7 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
       mode,
       stages: serializePathStages(stages),
     });
-    window.history.replaceState(null, "", `/?${params.toString()}`);
+    window.history.replaceState(null, "", `/team-analysis?${params.toString()}`);
   }, [teamId, mode, stages]);
 
   return (

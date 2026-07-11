@@ -1,6 +1,5 @@
 import type {
   MatchDifficulty,
-  PathDifficultyRank,
   PathStage,
   RankingEntry,
   Team,
@@ -188,39 +187,6 @@ export interface HardestPathRankResult {
   rankByAvgRank: number | null;
   cohortSize: number;
   cohortStage: PathStage;
-}
-
-export function getPathDifficultyRank(
-  allSummaries: TeamPathSummary[],
-  teamId: string,
-  pathSummary: TeamPathSummary,
-  stages: Set<PathStage>,
-  cohortTeamIds: Set<string>,
-  options: FilteredAverageOptions = {},
-): PathDifficultyRank {
-  const cohortEntries = buildCohortMetricEntries(
-    allSummaries,
-    teamId,
-    pathSummary,
-    stages,
-    cohortTeamIds,
-    options,
-  );
-
-  const pointsEntries = cohortEntries.map((entry) => ({
-    teamId: entry.teamId,
-    value: entry.avgOpponentPoints,
-  }));
-  const rankEntries = cohortEntries.map((entry) => ({
-    teamId: entry.teamId,
-    value: entry.avgOpponentRank,
-  }));
-
-  return {
-    rankByPoints: rankTeamInCohort(pointsEntries, teamId, true),
-    rankByAvgRank: rankTeamInCohort(rankEntries, teamId, false),
-    cohortSize: cohortEntries.length,
-  };
 }
 
 export function getHardestPathRank(

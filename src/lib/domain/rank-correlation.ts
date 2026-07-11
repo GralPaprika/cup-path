@@ -51,28 +51,42 @@ export function spearmanRho(rankA: number[], rankB: number[]): number | null {
   return numerator / Math.sqrt(denomA * denomB);
 }
 
+/** Kendall τ-b: adjusts concordance denominator for ties in either array. */
 export function kendallTau(rankA: number[], rankB: number[]): number | null {
   const n = rankA.length;
   if (n < 2 || rankA.length !== rankB.length) return null;
 
   let concordant = 0;
   let discordant = 0;
+  let tiesAOnly = 0;
+  let tiesBOnly = 0;
 
   for (let i = 0; i < n; i += 1) {
     for (let j = i + 1; j < n; j += 1) {
       const signA = Math.sign(rankA[i] - rankA[j]);
       const signB = Math.sign(rankB[i] - rankB[j]);
 
-      if (signA === 0 || signB === 0) continue;
+      if (signA === 0 && signB === 0) continue;
+      if (signA === 0) {
+        tiesAOnly += 1;
+        continue;
+      }
+      if (signB === 0) {
+        tiesBOnly += 1;
+        continue;
+      }
 
       if (signA === signB) concordant += 1;
       else discordant += 1;
     }
   }
 
-  const pairs = (n * (n - 1)) / 2;
-  if (pairs === 0) return null;
-  return (concordant - discordant) / pairs;
+  const denominator = Math.sqrt(
+    (concordant + discordant + tiesAOnly) *
+      (concordant + discordant + tiesBOnly),
+  );
+  if (denominator === 0) return null;
+  return (concordant - discordant) / denominator;
 }
 
 export interface CohortOrderingCorrelation {

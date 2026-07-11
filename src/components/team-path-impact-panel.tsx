@@ -3,8 +3,6 @@
 import type {
   AvgPointsContext,
   PathDiffRow,
-  PathDifficultyRank,
-  PathStage,
   Team,
   TeamPathSummary,
 } from "@/lib/types";
@@ -31,23 +29,8 @@ interface TeamPathImpactPanelProps {
   comparisonTeamId: string;
   onComparisonTeamChange: (teamId: string) => void;
   pathDiff: PathDiffRow[];
-  pathRanks: {
-    actual: PathDifficultyRank;
-    simulated: PathDifficultyRank;
-    comparison: PathDifficultyRank | null;
-  };
-  pathRankCohortStage: PathStage;
   hasOverrides: boolean;
 }
-
-const COHORT_STAGE_KEYS: Record<PathStage, string> = {
-  group: "groupStage",
-  r32: "round32",
-  r16: "round16",
-  qf: "quarterFinal",
-  sf: "semiFinal",
-  final: "final",
-};
 
 function formatPointsDelta(
   baseline: number | null,
@@ -69,13 +52,6 @@ function formatRankDelta(
   if (delta === 0) return "0";
   const sign = delta > 0 ? "+" : "-";
   return `${sign}${formatStatValue(Math.abs(delta), 1)}`;
-}
-
-function formatPathRank(
-  rank: number | null,
-  cohortSize: number,
-): string {
-  return rank !== null ? `#${rank} / ${cohortSize}` : "—";
 }
 
 function ValueCell({
@@ -203,13 +179,10 @@ export function TeamPathImpactPanel({
   comparisonTeamId,
   onComparisonTeamChange,
   pathDiff,
-  pathRanks,
-  pathRankCohortStage,
   hasOverrides,
 }: TeamPathImpactPanelProps) {
   const t = useTranslations("simulate");
   const summary = useTranslations("summary");
-  const compare = useTranslations("compare");
   const stages = useTranslations("compare.stages");
   const teamNames = useTranslations("teams");
   const changedRows = pathDiff.filter((row) => row.opponentChanged);
@@ -369,70 +342,6 @@ export function TeamPathImpactPanel({
           }
           gridTemplateColumns={gridTemplateColumns}
         />
-        <StatRow
-          label={t("pathRankByPoints")}
-          focusValue={formatPathRank(
-            pathRanks.actual.rankByPoints,
-            pathRanks.actual.cohortSize,
-          )}
-          simulatedValue={formatPathRank(
-            pathRanks.simulated.rankByPoints,
-            pathRanks.simulated.cohortSize,
-          )}
-          comparisonValue={
-            showComparison && pathRanks.comparison
-              ? formatPathRank(
-                  pathRanks.comparison.rankByPoints,
-                  pathRanks.comparison.cohortSize,
-                )
-              : undefined
-          }
-          deltaVsFocus={formatRankDelta(
-            pathRanks.actual.rankByPoints,
-            pathRanks.simulated.rankByPoints,
-          )}
-          deltaVsComparison={
-            showComparison && pathRanks.comparison
-              ? formatRankDelta(
-                  pathRanks.comparison.rankByPoints,
-                  pathRanks.simulated.rankByPoints,
-                )
-              : undefined
-          }
-          gridTemplateColumns={gridTemplateColumns}
-        />
-        <StatRow
-          label={t("pathRankByAvgRank")}
-          focusValue={formatPathRank(
-            pathRanks.actual.rankByAvgRank,
-            pathRanks.actual.cohortSize,
-          )}
-          simulatedValue={formatPathRank(
-            pathRanks.simulated.rankByAvgRank,
-            pathRanks.simulated.cohortSize,
-          )}
-          comparisonValue={
-            showComparison && pathRanks.comparison
-              ? formatPathRank(
-                  pathRanks.comparison.rankByAvgRank,
-                  pathRanks.comparison.cohortSize,
-                )
-              : undefined
-          }
-          deltaVsFocus={formatRankDelta(
-            pathRanks.actual.rankByAvgRank,
-            pathRanks.simulated.rankByAvgRank,
-          )}
-          deltaVsComparison={
-            showComparison && pathRanks.comparison
-              ? formatRankDelta(
-                  pathRanks.comparison.rankByAvgRank,
-                  pathRanks.simulated.rankByAvgRank,
-                )
-              : undefined
-          }
-          gridTemplateColumns={gridTemplateColumns}
-        />
       </div>
 
       <p className="text-xs text-muted-foreground">
@@ -440,11 +349,6 @@ export function TeamPathImpactPanel({
       </p>
       <p className="text-xs text-muted-foreground">
         {t("averagesIncludeScheduled")}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {compare("headToHead.rankCohortNote", {
-          stage: stages(COHORT_STAGE_KEYS[pathRankCohortStage]),
-        })}
       </p>
 
       {pointsDelta !== null && hasOverrides && pointsDelta !== 0 && (

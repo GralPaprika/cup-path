@@ -12,13 +12,9 @@ import {
 import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
 import { buildProjectedTeamPathSummary } from "@/lib/domain/projected-path-builder";
 import {
-  buildAllTeamSummaries,
   buildTeamPathSummary,
-  getPathDifficultyRank,
 } from "@/lib/domain/difficulty";
 import { computePathDiff } from "@/lib/domain/path-diff";
-import { getFurthestStage, PATH_STAGES } from "@/lib/domain/match-stages";
-import { getTeamsAtStage } from "@/lib/domain/team-stages";
 import {
   buildBestThirdRanking,
   buildGroupFinishCards,
@@ -171,36 +167,6 @@ export async function getSimulationAnalysis(
     "simulated",
   );
 
-  const allSummaries = buildAllTeamSummaries(rankings);
-  const pathRankStages = new Set(PATH_STAGES);
-  const pathRankCohortStage = getFurthestStage(pathRankStages);
-  const cohortTeamIds = getTeamsAtStage(pathRankCohortStage);
-  const pathRanks = {
-    actual: getPathDifficultyRank(
-      allSummaries,
-      teamId,
-      actualSummary,
-      pathRankStages,
-      cohortTeamIds,
-    ),
-    simulated: getPathDifficultyRank(
-      allSummaries,
-      teamId,
-      simulatedSummary,
-      pathRankStages,
-      cohortTeamIds,
-    ),
-    comparison: comparisonActualSummary
-      ? getPathDifficultyRank(
-          allSummaries,
-          comparisonActualSummary.team.id,
-          comparisonActualSummary,
-          pathRankStages,
-          cohortTeamIds,
-        )
-      : null,
-  };
-
   return {
     teamId: teamId.toUpperCase(),
     actualSummary,
@@ -230,8 +196,6 @@ export async function getSimulationAnalysis(
     actualWinnersByMatchNum,
     canPickAllStrongestWinners,
     canPickSimulatedStrongestWinners,
-    pathRanks,
-    pathRankCohortStage,
     pathDiff: computePathDiff(
       actualSummary.matches,
       simulatedSummary.matches,

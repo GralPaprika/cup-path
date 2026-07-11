@@ -3,6 +3,7 @@ import {
   computeCohortOrderingCorrelation,
   type CohortOrderingCorrelation,
 } from "@/lib/domain/rank-correlation";
+import { buildCompetitionRankMap } from "@/lib/domain/path-ranking";
 
 export interface GroupStrengthOrdering {
   correlation: CohortOrderingCorrelation;
@@ -21,22 +22,24 @@ export function computeGroupStrengthOrdering(
   const pointsValues = eligible.map((group) => group.avgFifaPoints as number);
   const rankValues = eligible.map((group) => group.avgFifaRank as number);
 
-  const rankedByPoints = [...eligible].sort(
-    (a, b) => (b.avgFifaPoints as number) - (a.avgFifaPoints as number),
+  const rankByPoints = Object.fromEntries(
+    buildCompetitionRankMap(
+      eligible.map((group) => ({
+        teamId: group.groupLetter,
+        value: group.avgFifaPoints as number,
+      })),
+      true,
+    ),
   );
-  const rankedByRank = [...eligible].sort(
-    (a, b) => (a.avgFifaRank as number) - (b.avgFifaRank as number),
+  const rankByAvgRank = Object.fromEntries(
+    buildCompetitionRankMap(
+      eligible.map((group) => ({
+        teamId: group.groupLetter,
+        value: group.avgFifaRank as number,
+      })),
+      false,
+    ),
   );
-
-  const rankByPoints: Record<string, number> = {};
-  const rankByAvgRank: Record<string, number> = {};
-
-  rankedByPoints.forEach((group, index) => {
-    rankByPoints[group.groupLetter] = index + 1;
-  });
-  rankedByRank.forEach((group, index) => {
-    rankByAvgRank[group.groupLetter] = index + 1;
-  });
 
   return {
     correlation: computeCohortOrderingCorrelation(pointsValues, rankValues),

@@ -140,12 +140,6 @@ export interface BestThirdRankingEntry {
   qualifies: boolean;
 }
 
-export interface PathDifficultyRank {
-  rankByPoints: number | null;
-  rankByAvgRank: number | null;
-  cohortSize: number;
-}
-
 export interface SimulationResult {
   teamId: string;
   actualSummary: TeamPathSummary;
@@ -161,12 +155,6 @@ export interface SimulationResult {
   actualWinnersByMatchNum: Record<number, string | null>;
   canPickAllStrongestWinners: boolean;
   canPickSimulatedStrongestWinners: boolean;
-  pathRanks: {
-    actual: PathDifficultyRank;
-    simulated: PathDifficultyRank;
-    comparison: PathDifficultyRank | null;
-  };
-  pathRankCohortStage: PathStage;
   pathDiff: PathDiffRow[];
   baselineGroupFinishes: Record<string, [string, string, string, string]>;
   groupCards: GroupFinishCard[];

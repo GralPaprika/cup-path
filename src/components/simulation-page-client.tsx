@@ -318,8 +318,6 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
             comparisonTeamId={comparisonTeamId}
             onComparisonTeamChange={setComparisonTeamId}
             pathDiff={data.pathDiff}
-            pathRanks={data.pathRanks}
-            pathRankCohortStage={data.pathRankCohortStage}
             hasOverrides={hasOverrides}
           />
 

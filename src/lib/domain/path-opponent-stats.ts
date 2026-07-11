@@ -6,9 +6,17 @@ import {
 } from "@/lib/domain/group-stats";
 import { computeFilteredAverages } from "@/lib/domain/difficulty";
 
+export interface OpponentPointsObservation {
+  teamId: string;
+  displayName: string;
+  flagUrl: string;
+  points: number;
+}
+
 export interface PathOpponentStats {
   opponentPointsStats: NumericStats;
   opponentRankStats: NumericStats;
+  opponentPointsObservations: OpponentPointsObservation[];
 }
 
 function filterMatchesByStages(
@@ -34,10 +42,23 @@ export function computePathOpponentStats(
   const opponentRanks = filtered
     .map((match) => match.opponentRank)
     .filter((value): value is number => value !== null);
+  const opponentPointsObservations = filtered.flatMap((match) =>
+    match.opponentPoints === null
+      ? []
+      : [
+          {
+            teamId: match.opponent.id,
+            displayName: match.opponent.displayName,
+            flagUrl: match.opponent.flagUrl,
+            points: match.opponentPoints,
+          },
+        ],
+  );
 
   return {
     opponentPointsStats: computeNumericStats(opponentPoints),
     opponentRankStats: computeNumericStats(opponentRanks),
+    opponentPointsObservations,
   };
 }
 

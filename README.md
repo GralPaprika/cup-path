@@ -6,14 +6,27 @@ Analyze each team's tournament path from the group stage through the final, comp
 
 ## Features
 
-- Team path analysis with opponent difficulty, results, rank gaps, and next opponent
-- Comparison leaderboard across all World Cup 2026 teams (sortable table, stage filters, cohort ranking)
-- **Five ranking modes:** pot-draw cutoff (19 Nov 2025), 19 Jan, 1 Apr, and 11 Jun 2026 snapshots, plus live (hourly)
-- Ranking mode persists across Analysis and Compare pages
+### Pages
+
+- **Analysis** (`/`) — Team path summary, difficulty gauge, tournament path table, advanced statistics
+- **Groups** (`/groups`) — Group strength comparison, standings, path averages per team
+- **Compare** (`/compare`) — Sortable leaderboard, head-to-head two-team comparison
+- **Simulate** (`/simulate`) — What-if path exploration (group swaps, knockout overrides)
+- **About** (`/about`) — Methodology and data sources
+
+### Metrics and UI
+
+- **Path difficulty:** average opponent FIFA points (higher = harder)
+- **Points gap** and **rank gap** on the path table (points gap is the primary per-match signal)
+- **Advanced statistics:** opponent points chart (mean ± 1 SD, selected-team line), distribution stats, Spearman/Kendall cohort agreement
+- **Summary context:** percentile vs all nations and closest anchor team
+- **Cohort `#` rank** among teams at the furthest included stage
+- **Five ranking modes:** pot-draw cutoff (19 Nov 2025), 19 Jan, 1 Apr, 11 Jun 2026 snapshots, plus live
+- Ranking mode persists across Analysis, Groups, Compare, and Simulate
 - FIFA flag images and localized team names (Spanish default, English available)
 - Responsive UI with next-intl (ES/EN)
-- Match data from [openfootball/worldcup.json](https://github.com/openfootball/worldcup.json)
-- FIFA rankings from [World Football Ranking API](https://rapidapi.com/sharmadhirajnp2/api/world-football-ranking)
+
+Full methodology: see the **About** page in the app, or `specs/PLAN.md` locally (gitignored).
 
 ## Getting started
 
@@ -38,6 +51,7 @@ npm run sync:rankings
 |---|---|
 | `npm run dev` | Start development server |
 | `npm run build` | Sync worldcup data and build |
+| `npm run test` | Run domain unit tests (55 tests) |
 | `npm run sync:worldcup` | Fetch latest 2026 data from openfootball |
 | `npm run sync:rankings` | Fetch all ranking snapshots + live from RapidAPI into local runtime cache |
 | `npm run seed:rankings` | Upload ranking snapshots to Vercel Blob |
@@ -57,11 +71,12 @@ See [`.env.example`](.env.example).
 
 ## Methodology
 
-- **Difficulty metric:** average opponent FIFA ranking points (higher = harder)
-- **Rank gap:** opponent rank minus team rank (negative = harder opponent)
+- **Primary difficulty:** unweighted mean of opponent FIFA ranking points over selected stages (higher = harder)
+- **Points gap:** opponent points minus team points (+ = harder opponent) — primary per-match signal
+- **Rank gap:** opponent rank minus team rank (− = harder opponent) — secondary context
+- **Cohort `#` rank:** competition ranking among teams that reached the furthest included stage; eliminated teams may show `—`
 - **Elimination:** knockout loss (including extra time and penalties), or failure to advance from group stage (top 2 per group + 8 best third-place teams)
 - Teams are keyed by **FIFA 3-letter codes** (`ARG`, `ENG`, `CPV`, etc.)
-- Flags come from the API `flag` field or `https://api.fifa.com/api/v3/picture/flags-sq-2/{CODE}`
 
 ## Architecture
 
@@ -98,8 +113,6 @@ Bundled JSON in `data/` is the fallback when Blob is empty or unavailable.
 
 Legacy URL params `yearStart` and `tournamentStart` map to `january` and `june11`.
 
-Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailable.
-
 ## Project structure
 
 ```
@@ -110,13 +123,15 @@ Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailabl
 │   ├── en.json, es.json    # UI strings
 │   └── teams/              # Localized team names by FIFA code
 ├── scripts/                # Sync, seed, and validation scripts
+├── specs/                  # Local planning docs (gitignored)
 ├── src/
 │   ├── app/                # Pages and API routes
 │   ├── components/         # UI components
 │   ├── hooks/              # Client hooks (e.g. synced ranking mode)
 │   └── lib/
 │       ├── data/           # Team registry, rankings client/store, flags
-│       └── domain/         # Path builder, standings, difficulty logic
+│       ├── domain/         # Path builder, standings, difficulty, correlation
+│       └── services/       # Analysis, simulation, sync services
 └── vercel.json             # Vercel cron (once daily on Hobby)
 ```
 
@@ -127,10 +142,17 @@ Bundled seed JSON in `data/rankings/` is used when Blob or the API is unavailabl
 | `GET /api/teams?mode=live` | World Cup teams with flags |
 | `GET /api/analysis?team=ENG&mode=live` | Full path analysis for one team |
 | `GET /api/comparison?mode=live` | All-team difficulty leaderboard |
+| `GET /api/groups?mode=live` | Groups analysis data |
+| `GET /api/simulation?team=...&mode=...` | Simulation state for a team |
+| `POST /api/simulation/strongest-winners` | Pick strongest winners for bracket |
 | `GET /api/cron/sync-scheduled` | Refresh all data in Blob (daily cron on Hobby) |
 | `GET /api/cron/sync-rankings` | Refresh live rankings only (manual, or Pro cron) |
-| `GET /api/cron/sync-rankings?action=snapshots` | Refresh snapshots only (manual) |
 | `GET /api/cron/sync-worldcup` | Refresh match data only (manual) |
+
+## Data sources
+
+- Match data from [openfootball/worldcup.json](https://github.com/openfootball/worldcup.json)
+- FIFA rankings from [World Football Ranking API](https://rapidapi.com/sharmadhirajnp2/api/world-football-ranking)
 
 ## Deployment (Vercel)
 

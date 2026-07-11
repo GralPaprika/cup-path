@@ -59,8 +59,6 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
   const [maxStageReached, setMaxStageReached] = useState<PathStage | undefined>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-
   useEffect(() => {
     fetch(`/api/teams?mode=${mode}`)
       .then((res) => res.json())
@@ -190,8 +188,8 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
                 hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
                 cohortSize={data.cohortSize}
                 cohortStage={data.cohortStage}
-                open={advancedOpen}
-                onOpenChange={setAdvancedOpen}
+                selectedTeam={data.summary.team}
+                selectedTeamPoints={data.summary.teamPoints}
               />
             </>
           )}

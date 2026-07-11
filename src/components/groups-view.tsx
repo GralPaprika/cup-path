@@ -113,6 +113,7 @@ export function GroupsView({
         <div ref={selectedGroupRef}>
           <GroupDetailPanel
             group={selectedGroup}
+            allGroups={groups}
             mode={mode}
             selectedTeamId={selectedTeamId}
           />

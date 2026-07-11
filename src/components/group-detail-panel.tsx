@@ -8,6 +8,7 @@ import type {
 } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
+import { GroupFifaPointsChart } from "@/components/group-fifa-points-chart";
 import { StatsBlock } from "@/components/stats-block";
 import {
   Table,
@@ -40,12 +41,14 @@ function formatStandingValue(played: number, value: number | string): string {
 
 interface GroupDetailPanelProps {
   group: GroupComparisonCard;
+  allGroups: GroupComparisonCard[];
   mode: RankingMode;
   selectedTeamId?: string;
 }
 
 export function GroupDetailPanel({
   group,
+  allGroups,
   mode,
   selectedTeamId,
 }: GroupDetailPanelProps) {
@@ -188,6 +191,12 @@ export function GroupDetailPanel({
             </TableBody>
           </Table>
         </div>
+
+        <GroupFifaPointsChart
+          group={group}
+          allGroups={allGroups}
+          selectedTeamId={selectedTeamId}
+        />
 
         <div className="space-y-4 border-t border-white/8 pt-6">
           <div>

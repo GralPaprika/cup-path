@@ -21,15 +21,28 @@ interface PathTableProps {
   includedStages?: Set<PathStage>;
 }
 
-function formatGap(value: number | null): string {
+function formatRankGap(value: number | null): string {
   if (value === null) return "—";
   return value > 0 ? `+${value}` : `${value}`;
 }
 
-function gapColor(value: number | null): string {
+function formatPointsGap(value: number | null): string {
+  if (value === null) return "—";
+  const formatted = formatFifaPoints(Math.abs(value));
+  return value > 0 ? `+${formatted}` : `-${formatted}`;
+}
+
+function rankGapColor(value: number | null): string {
   if (value === null) return "text-muted-foreground";
   if (value < 0) return "text-wc-red font-semibold";
   if (value > 10) return "text-wc-green font-semibold";
+  return "text-muted-foreground";
+}
+
+function pointsGapColor(value: number | null): string {
+  if (value === null) return "text-muted-foreground";
+  if (value > 25) return "text-wc-red font-semibold";
+  if (value < -25) return "text-wc-green font-semibold";
   return "text-muted-foreground";
 }
 
@@ -72,6 +85,9 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
                 {t("points")}
               </TableHead>
               <TableHead className="text-right text-muted-foreground">
+                {t("pointsGap")}
+              </TableHead>
+              <TableHead className="text-right text-muted-foreground">
                 {t("rank")}
               </TableHead>
               <TableHead className="text-right text-muted-foreground">
@@ -110,13 +126,24 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
                       ? formatFifaPoints(match.opponentPoints)
                       : t("noData")}
                   </TableCell>
+                  <TableCell
+                    className={cn(
+                      "text-right font-mono text-sm",
+                      pointsGapColor(match.pointsGap),
+                    )}
+                  >
+                    {formatPointsGap(match.pointsGap)}
+                  </TableCell>
                   <TableCell className="text-right font-mono text-sm text-white">
                     {match.opponentRank !== null ? `#${match.opponentRank}` : "—"}
                   </TableCell>
                   <TableCell
-                    className={cn("text-right font-mono text-sm", gapColor(match.rankGap))}
+                    className={cn(
+                      "text-right font-mono text-sm",
+                      rankGapColor(match.rankGap),
+                    )}
                   >
-                    {formatGap(match.rankGap)}
+                    {formatRankGap(match.rankGap)}
                   </TableCell>
                   <TableCell className="text-right">
                     {match.isPlayed && match.result ? (

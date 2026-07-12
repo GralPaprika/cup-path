@@ -19,6 +19,10 @@ interface PathStageFiltersProps {
   labelKey?: "label" | "includeLabel";
   maxStageReached?: PathStage;
   variant?: "chips" | "picker" | "toggles";
+  compact?: boolean;
+  align?: "start" | "end";
+  showLabel?: boolean;
+  className?: string;
 }
 
 const STAGE_SHORT_LABEL_KEYS: Record<PathStage, string> = {
@@ -36,6 +40,10 @@ export function PathStageFilters({
   labelKey = "includeLabel",
   maxStageReached,
   variant = "chips",
+  compact = false,
+  align = "start",
+  showLabel = true,
+  className,
 }: PathStageFiltersProps) {
   const t = useTranslations("compare.stages");
 
@@ -60,9 +68,19 @@ export function PathStageFilters({
     onChange(new Set(enabledStages));
   }
 
-  const header = (
-    <div className="space-y-1">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+  const header = showLabel ? (
+    <div
+      className={cn(
+        "space-y-1",
+        align === "end" && "text-right",
+      )}
+    >
+      <div
+        className={cn(
+          "flex flex-wrap items-center gap-2",
+          align === "end" ? "justify-end" : "justify-between",
+        )}
+      >
         <PickerLabel>{t(labelKey)}</PickerLabel>
         {value.size < enabledStages.length && (
           <button
@@ -74,9 +92,16 @@ export function PathStageFilters({
           </button>
         )}
       </div>
-      <p className="text-xs text-muted-foreground">{t("includeHint")}</p>
+      <p
+        className={cn(
+          "text-muted-foreground",
+          compact ? "text-[10px]" : "text-xs",
+        )}
+      >
+        {t("includeHint")}
+      </p>
     </div>
-  );
+  ) : null;
 
   if (variant === "picker") {
     return (
@@ -122,9 +147,22 @@ export function PathStageFilters({
 
   if (variant === "toggles") {
     return (
-      <div className="space-y-3">
+      <div
+        className={cn(
+          "flex flex-col",
+          compact ? "gap-1.5" : "gap-3",
+          align === "end" && "items-end",
+          className,
+        )}
+      >
         {header}
-        <div className="flex flex-wrap gap-1.5">
+        <div
+          className={cn(
+            "flex flex-wrap",
+            compact ? "gap-1" : "gap-1.5",
+            align === "end" && "justify-end",
+          )}
+        >
           {PATH_STAGES.map((stage) => {
             const checked = value.has(stage);
             const disabled =
@@ -136,7 +174,10 @@ export function PathStageFilters({
                 key={stage}
                 title={t(COMPARE_STAGE_I18N_KEYS[stage])}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 transition-colors",
+                  "inline-flex items-center transition-colors",
+                  compact
+                    ? "gap-1 rounded-full border px-1.5 py-0.5"
+                    : "gap-1.5 rounded-md border px-2 py-1",
                   disabled
                     ? "border-white/5 bg-white/[0.02] text-muted-foreground/40"
                     : checked
@@ -147,7 +188,8 @@ export function PathStageFilters({
                 <label
                   htmlFor={`stage-toggle-${stage}`}
                   className={cn(
-                    "cursor-pointer text-[11px] font-semibold tracking-wide",
+                    "cursor-pointer font-semibold tracking-wide",
+                    compact ? "text-[10px]" : "text-[11px]",
                     disabled && "cursor-not-allowed",
                     checked && !disabled && "text-wc-sky",
                   )}

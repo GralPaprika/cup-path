@@ -348,6 +348,8 @@
       "tooltipEvenlyMatched": "Igualdad de puntos FIFA en papel.",
       "tooltipGroup": "Grupo {letter}",
       "binTooltip": "Brecha {label} · {total} partidos · {winPct}% victorias · {drawPct}% empates · {lossPct}% sorpresas",
+      "binTooltipGapRange": "Brecha {label}",
+      "binTooltipMatches": "{count, plural, one {# partido} other {# partidos}}",
       "xAxisLabel": "Brecha de puntos FIFA",
       "yAxisLabel": "Proporción de resultados",
       "footnote": "Desde la perspectiva del mejor clasificado. En fase de grupos solo cuenta el marcador al 90. En eliminatorias, victoria en prórroga cuenta como triunfo; partidos definidos en penales cuentan como empate."

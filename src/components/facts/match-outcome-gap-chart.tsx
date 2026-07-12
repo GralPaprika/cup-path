@@ -22,11 +22,19 @@ export interface MatchOutcomeGapBinStats {
   lossPct: number;
 }
 
-interface HoveredDot {
-  entry: MatchOutcomeGapEntry;
-  x: number;
-  y: number;
-}
+type HoveredTarget =
+  | {
+      kind: "match";
+      entry: MatchOutcomeGapEntry;
+      x: number;
+      y: number;
+    }
+  | {
+      kind: "bin";
+      bin: MatchOutcomeGapBinStats;
+      x: number;
+      y: number;
+    };
 
 export interface MatchOutcomeGapChartProps {
   matches: MatchOutcomeGapEntry[];
@@ -34,10 +42,11 @@ export interface MatchOutcomeGapChartProps {
   ariaLabel: string;
   xAxisLabel: string;
   yAxisLabel: string;
-  legend: ReactNode;
+  legend?: ReactNode;
   footnotes: ReactNode;
   renderMatchTooltip: (entry: MatchOutcomeGapEntry) => ReactNode;
-  formatBinTooltip: (bin: MatchOutcomeGapBinStats) => string;
+  renderBinTooltip: (bin: MatchOutcomeGapBinStats) => ReactNode;
+  getBinAriaLabel: (bin: MatchOutcomeGapBinStats) => string;
 }
 
 const WIDTH = 640;
@@ -57,6 +66,68 @@ const RESULT_BAR_CLASS: Record<GroupMatchResult, string> = {
   D: "fill-wc-sky/80",
   L: "fill-wc-red/80",
 };
+
+const BAR_SEGMENT_RADIUS = 2;
+
+function stackedBarSegmentPath(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  roundTop: boolean,
+  roundBottom: boolean,
+): string {
+  if (height <= 0) return "";
+
+  const left = x;
+  const right = x + width;
+  const top = y;
+  const bottom = y + height;
+  const r = Math.min(BAR_SEGMENT_RADIUS, width / 2, height / 2);
+
+  if (!roundTop && !roundBottom) {
+    return `M ${left} ${top} H ${right} V ${bottom} H ${left} Z`;
+  }
+
+  if (roundTop && roundBottom) {
+    return [
+      `M ${left + r} ${top}`,
+      `H ${right - r}`,
+      `Q ${right} ${top} ${right} ${top + r}`,
+      `V ${bottom - r}`,
+      `Q ${right} ${bottom} ${right - r} ${bottom}`,
+      `H ${left + r}`,
+      `Q ${left} ${bottom} ${left} ${bottom - r}`,
+      `V ${top + r}`,
+      `Q ${left} ${top} ${left + r} ${top}`,
+      "Z",
+    ].join(" ");
+  }
+
+  if (roundTop) {
+    return [
+      `M ${left + r} ${top}`,
+      `H ${right - r}`,
+      `Q ${right} ${top} ${right} ${top + r}`,
+      `V ${bottom}`,
+      `H ${left}`,
+      `V ${top + r}`,
+      `Q ${left} ${top} ${left + r} ${top}`,
+      "Z",
+    ].join(" ");
+  }
+
+  return [
+    `M ${left} ${top}`,
+    `H ${right}`,
+    `V ${bottom - r}`,
+    `Q ${right} ${bottom} ${right - r} ${bottom}`,
+    `H ${left + r}`,
+    `Q ${left} ${bottom} ${left} ${bottom - r}`,
+    `V ${top}`,
+    "Z",
+  ].join(" ");
+}
 
 function buildBinStats(
   matches: MatchOutcomeGapEntry[],
@@ -139,11 +210,14 @@ export function MatchOutcomeGapChart({
   legend,
   footnotes,
   renderMatchTooltip,
-  formatBinTooltip,
+  renderBinTooltip,
+  getBinAriaLabel,
 }: MatchOutcomeGapChartProps) {
-  const [hoveredDot, setHoveredDot] = useState<HoveredDot | null>(null);
+  const [hoveredTarget, setHoveredTarget] = useState<HoveredTarget | null>(
+    null,
+  );
 
-  const showDot = useCallback(
+  const showMatch = useCallback(
     (
       entry: MatchOutcomeGapEntry,
       cx: number,
@@ -154,7 +228,8 @@ export function MatchOutcomeGapChart({
       const screen = svgCoordsToScreen(svgElement, cx, cy);
       if (!screen) return;
 
-      setHoveredDot({
+      setHoveredTarget({
+        kind: "match",
         entry,
         x: screen.x,
         y: screen.y,
@@ -163,12 +238,33 @@ export function MatchOutcomeGapChart({
     [],
   );
 
-  const hideDot = useCallback(() => {
-    setHoveredDot(null);
+  const showBin = useCallback(
+    (
+      bin: MatchOutcomeGapBinStats,
+      cx: number,
+      cy: number,
+      svgElement: SVGSVGElement | null,
+    ) => {
+      if (!svgElement) return;
+      const screen = svgCoordsToScreen(svgElement, cx, cy);
+      if (!screen) return;
+
+      setHoveredTarget({
+        kind: "bin",
+        bin,
+        x: screen.x,
+        y: screen.y,
+      });
+    },
+    [],
+  );
+
+  const hideTooltip = useCallback(() => {
+    setHoveredTarget(null);
   }, []);
 
   useEffect(() => {
-    setHoveredDot(null);
+    setHoveredTarget(null);
   }, [matches]);
 
   if (matches.length === 0) return null;
@@ -197,18 +293,20 @@ export function MatchOutcomeGapChart({
 
   return (
     <figure className="space-y-2">
-      <figcaption className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-        {legend}
-      </figcaption>
+      {legend ? (
+        <figcaption className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+          {legend}
+        </figcaption>
+      ) : null}
 
-      <div className="relative" onMouseLeave={hideDot}>
+      <div className="relative" onMouseLeave={hideTooltip}>
         <svg
           className="h-auto w-full"
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           preserveAspectRatio="xMidYMid meet"
           role="img"
           aria-label={ariaLabel}
-          onMouseLeave={hideDot}
+          onMouseLeave={hideTooltip}
         >
           {[25, 50, 75, 100].map((tick) => (
             <text
@@ -265,22 +363,28 @@ export function MatchOutcomeGapChart({
               { result: "D", pct: bin.drawPct },
               { result: "L", pct: bin.lossPct },
             ];
+            const visibleSegments = segments.filter((segment) => segment.pct > 0);
 
             return (
               <g key={bin.id}>
-                {segments.map((segment) => {
-                  if (segment.pct <= 0) return null;
+                {visibleSegments.map((segment, segmentIndex) => {
                   const height = (segment.pct / 100) * BAR_AREA_HEIGHT;
                   stackTop -= height;
+                  const isBottom = segmentIndex === 0;
+                  const isTop = segmentIndex === visibleSegments.length - 1;
+
                   return (
-                    <rect
+                    <path
                       key={segment.result}
-                      x={x}
-                      y={stackTop}
-                      width={barWidth}
-                      height={height}
+                      d={stackedBarSegmentPath(
+                        x,
+                        stackTop,
+                        barWidth,
+                        height,
+                        isTop,
+                        isBottom,
+                      )}
                       className={RESULT_BAR_CLASS[segment.result]}
-                      rx={segment.result === "W" ? 2 : 0}
                     />
                   );
                 })}
@@ -290,9 +394,36 @@ export function MatchOutcomeGapChart({
                   width={barWidth}
                   height={BAR_AREA_HEIGHT}
                   fill="transparent"
-                >
-                  <title>{formatBinTooltip(bin)}</title>
-                </rect>
+                  className="cursor-default"
+                  aria-label={getBinAriaLabel(bin)}
+                  onMouseEnter={(event) =>
+                    showBin(
+                      bin,
+                      cx,
+                      barBaselineY - BAR_AREA_HEIGHT,
+                      event.currentTarget.ownerSVGElement,
+                    )
+                  }
+                  onMouseMove={(event) =>
+                    showBin(
+                      bin,
+                      cx,
+                      barBaselineY - BAR_AREA_HEIGHT,
+                      event.currentTarget.ownerSVGElement,
+                    )
+                  }
+                  onFocus={(event) =>
+                    showBin(
+                      bin,
+                      cx,
+                      barBaselineY - BAR_AREA_HEIGHT,
+                      event.currentTarget.ownerSVGElement,
+                    )
+                  }
+                  onBlur={hideTooltip}
+                  tabIndex={0}
+                  role="img"
+                />
                 <text
                   x={cx}
                   y={barBaselineY + 18}
@@ -346,22 +477,24 @@ export function MatchOutcomeGapChart({
           {dotRows.map(({ entry, row }) => {
             const cx = xForGapInBinSlot(entry.gapPoints, maxGap, chartWidth);
             const cy = yForDot(row);
-            const isHovered = hoveredDot?.entry.id === entry.id;
+            const isHovered =
+              hoveredTarget?.kind === "match" &&
+              hoveredTarget.entry.id === entry.id;
 
             return (
               <g
                 key={entry.id}
                 className="cursor-pointer"
                 onMouseEnter={(event) =>
-                  showDot(entry, cx, cy, event.currentTarget.ownerSVGElement)
+                  showMatch(entry, cx, cy, event.currentTarget.ownerSVGElement)
                 }
                 onMouseMove={(event) =>
-                  showDot(entry, cx, cy, event.currentTarget.ownerSVGElement)
+                  showMatch(entry, cx, cy, event.currentTarget.ownerSVGElement)
                 }
                 onFocus={(event) =>
-                  showDot(entry, cx, cy, event.currentTarget.ownerSVGElement)
+                  showMatch(entry, cx, cy, event.currentTarget.ownerSVGElement)
                 }
-                onBlur={hideDot}
+                onBlur={hideTooltip}
                 tabIndex={0}
                 role="button"
                 aria-label={`${entry.team1.id} vs ${entry.team2.id}, ${entry.scoreLabel}`}
@@ -411,17 +544,19 @@ export function MatchOutcomeGapChart({
 
         </svg>
 
-        {hoveredDot && typeof document !== "undefined"
+        {hoveredTarget && typeof document !== "undefined"
           ? createPortal(
               <div
                 className="pointer-events-none fixed z-50 transition-opacity duration-150"
                 style={{
-                  left: hoveredDot.x,
-                  top: hoveredDot.y,
+                  left: hoveredTarget.x,
+                  top: hoveredTarget.y,
                   transform: "translate(-50%, calc(-100% - 14px))",
                 }}
               >
-                {renderMatchTooltip(hoveredDot.entry)}
+                {hoveredTarget.kind === "match"
+                  ? renderMatchTooltip(hoveredTarget.entry)
+                  : renderBinTooltip(hoveredTarget.bin)}
               </div>,
               document.body,
             )

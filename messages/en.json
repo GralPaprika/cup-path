@@ -348,6 +348,8 @@
       "tooltipEvenlyMatched": "Equal FIFA points on paper.",
       "tooltipGroup": "Group {letter}",
       "binTooltip": "Gap {label} · {total} matches · {winPct}% wins · {drawPct}% draws · {lossPct}% upsets",
+      "binTooltipGapRange": "Gap {label}",
+      "binTooltipMatches": "{count, plural, one {# match} other {# matches}}",
       "xAxisLabel": "FIFA points gap",
       "yAxisLabel": "Share of results",
       "footnote": "From the higher-rated team's view. Group matches use full-time score only. In knockout ties, extra-time wins count as wins; matches decided on penalties count as draws."

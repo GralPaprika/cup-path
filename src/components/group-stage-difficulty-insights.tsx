@@ -2,60 +2,18 @@
 
 import Link from "next/link";
 import type {
-  GroupStageDifficultyCohort,
   GroupStageDifficultyInsights,
   GroupStageDifficultySpotlight,
 } from "@/lib/types";
 import { TeamFlag } from "@/components/team-flag";
+import { QualificationInsightsPanel } from "@/components/facts/qualification-insights-panel";
 import { formatFifaPoints } from "@/lib/format";
-import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 interface GroupStageDifficultyInsightsProps {
   insights: GroupStageDifficultyInsights;
   meanAvgOpponentPoints: number | null;
   mode: string;
-}
-
-function formatQualificationRate(cohort: GroupStageDifficultyCohort): string {
-  if (cohort.total === 0) return "—";
-  const rate = Math.round((cohort.qualified / cohort.total) * 100);
-  return `${rate}%`;
-}
-
-function CohortTile({
-  label,
-  cohort,
-  countLabel,
-  rateLabel,
-  hint,
-}: {
-  label: string;
-  cohort: GroupStageDifficultyCohort;
-  countLabel: string;
-  rateLabel: string;
-  hint?: string;
-}) {
-  return (
-    <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-2 text-xs text-muted-foreground">{countLabel}</p>
-      <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-white">
-        {cohort.total === 0
-          ? "—"
-          : `${cohort.qualified}/${cohort.total}`}
-      </p>
-      <p className="mt-2 text-xs text-muted-foreground">{rateLabel}</p>
-      <p className="mt-0.5 font-mono text-sm tabular-nums text-wc-sky">
-        {formatQualificationRate(cohort)}
-      </p>
-      {hint ? (
-        <p className="mt-2 text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-    </div>
-  );
 }
 
 function SpotlightCard({
@@ -130,78 +88,58 @@ export function GroupStageDifficultyInsightsPanel({
         })
       : undefined;
 
+  const atMeanNote =
+    meanAvgOpponentPoints !== null && insights.atMean.total > 0
+      ? t("groupDifficultyAtMeanNote", {
+          count: insights.atMean.total,
+          qualified: insights.atMean.qualified,
+          mean: formatFifaPoints(meanAvgOpponentPoints),
+        })
+      : undefined;
+
   return (
-    <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <CohortTile
-          label={t("groupDifficultyAboveMean")}
-          cohort={insights.aboveMean}
-          countLabel={t("groupDifficultyQualifiedCount")}
-          rateLabel={t("groupDifficultyQualificationRate")}
-          hint={t("groupDifficultyAboveMeanHint")}
-        />
-        <CohortTile
-          label={t("groupDifficultyBelowMean")}
-          cohort={insights.belowMean}
-          countLabel={t("groupDifficultyQualifiedCount")}
-          rateLabel={t("groupDifficultyQualificationRate")}
-          hint={t("groupDifficultyBelowMeanHint")}
-        />
-        <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {t("groupDifficultyMedianRivals")}
-          </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {t("groupDifficultyMedianQualified")}
-          </p>
-          <p className="font-mono text-lg font-semibold tabular-nums text-wc-green">
-            {formatFifaPoints(insights.medianQualifiedAvg)}
-          </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {t("groupDifficultyMedianEliminated")}
-          </p>
-          <p className="font-mono text-lg font-semibold tabular-nums text-wc-red">
-            {formatFifaPoints(insights.medianEliminatedAvg)}
-          </p>
-          {rateGapHint ? (
-            <p className={cn("mt-2 text-xs text-muted-foreground")}>
-              {rateGapHint}
-            </p>
-          ) : null}
-        </div>
-      </div>
-
-      {(insights.hardestDrawSurvivor || insights.easiestDrawCasualty) && (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {insights.hardestDrawSurvivor ? (
-            <SpotlightCard
-              title={t("groupDifficultyHardestSurvivor")}
-              spotlight={insights.hardestDrawSurvivor}
-              mode={mode}
-              sdOutlierLabel={t("groupDifficultySdOutlier")}
-            />
-          ) : null}
-          {insights.easiestDrawCasualty ? (
-            <SpotlightCard
-              title={t("groupDifficultyEasiestCasualty")}
-              spotlight={insights.easiestDrawCasualty}
-              mode={mode}
-              sdOutlierLabel={t("groupDifficultySdOutlier")}
-            />
-          ) : null}
-        </div>
-      )}
-
-      {meanAvgOpponentPoints !== null &&
-      insights.atMean.total > 0 ? (
-        <p className="text-xs text-muted-foreground">
-          {t("groupDifficultyAtMeanNote", {
-            count: insights.atMean.total,
-            qualified: insights.atMean.qualified,
-            mean: formatFifaPoints(meanAvgOpponentPoints),
-          })}
-        </p>
-      ) : null}
-    </div>
+    <QualificationInsightsPanel
+      insights={{
+        aboveMean: insights.aboveMean,
+        belowMean: insights.belowMean,
+        atMean: insights.atMean,
+        medianQualified: insights.medianQualifiedAvg,
+        medianEliminated: insights.medianEliminatedAvg,
+        qualificationRateGap: insights.qualificationRateGap,
+      }}
+      labels={{
+        aboveMean: t("groupDifficultyAboveMean"),
+        aboveMeanHint: t("groupDifficultyAboveMeanHint"),
+        belowMean: t("groupDifficultyBelowMean"),
+        belowMeanHint: t("groupDifficultyBelowMeanHint"),
+        qualifiedCount: t("groupDifficultyQualifiedCount"),
+        qualificationRate: t("groupDifficultyQualificationRate"),
+        medianRivals: t("groupDifficultyMedianRivals"),
+        medianQualified: t("groupDifficultyMedianQualified"),
+        medianEliminated: t("groupDifficultyMedianEliminated"),
+      }}
+      rateGapHint={rateGapHint}
+      atMeanNote={atMeanNote}
+      hardestSpotlight={
+        insights.hardestDrawSurvivor ? (
+          <SpotlightCard
+            title={t("groupDifficultyHardestSurvivor")}
+            spotlight={insights.hardestDrawSurvivor}
+            mode={mode}
+            sdOutlierLabel={t("groupDifficultySdOutlier")}
+          />
+        ) : undefined
+      }
+      easiestSpotlight={
+        insights.easiestDrawCasualty ? (
+          <SpotlightCard
+            title={t("groupDifficultyEasiestCasualty")}
+            spotlight={insights.easiestDrawCasualty}
+            mode={mode}
+            sdOutlierLabel={t("groupDifficultySdOutlier")}
+          />
+        ) : undefined
+      }
+    />
   );
 }

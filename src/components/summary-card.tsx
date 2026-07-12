@@ -11,6 +11,7 @@ import {
 } from "@/components/avg-points-context";
 import { Badge } from "@/components/ui/badge";
 import { formatFifaPoints, formatStatValue, formatWholeNumber } from "@/lib/format";
+import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
 import { cn } from "@/lib/utils";
 
 interface SummaryCardProps {
@@ -22,15 +23,6 @@ interface SummaryCardProps {
   cohortStage: PathStage;
   includedStages?: Set<PathStage>;
 }
-
-const COHORT_STAGE_KEYS: Record<PathStage, string> = {
-  group: "groupStage",
-  r32: "round32",
-  r16: "round16",
-  qf: "quarterFinal",
-  sf: "semiFinal",
-  final: "final",
-};
 
 function StatTile({
   label,
@@ -177,7 +169,7 @@ export function SummaryCard({
             }
             rankMeta={
               hardestPathRank
-                ? stages(COHORT_STAGE_KEYS[cohortStage])
+                ? stages(COMPARE_STAGE_I18N_KEYS[cohortStage])
                 : undefined
             }
             rankAltNote={

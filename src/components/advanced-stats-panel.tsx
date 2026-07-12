@@ -7,15 +7,7 @@ import { useTranslations } from "next-intl";
 import { OpponentPointsChart } from "@/components/opponent-points-chart";
 import { StatsBlock } from "@/components/stats-block";
 import { formatStatValue } from "@/lib/format";
-
-const COHORT_STAGE_KEYS: Record<PathStage, string> = {
-  group: "groupStage",
-  r32: "round32",
-  r16: "round16",
-  qf: "quarterFinal",
-  sf: "semiFinal",
-  final: "final",
-};
+import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
 
 interface AdvancedStatsPanelProps {
   pathStats: PathOpponentStats;
@@ -59,7 +51,7 @@ export function AdvancedStatsPanel({
 }: AdvancedStatsPanelProps) {
   const t = useTranslations("analysis.advanced");
   const stages = useTranslations("compare.stages");
-  const stageLabel = stages(COHORT_STAGE_KEYS[cohortStage]);
+  const stageLabel = stages(COMPARE_STAGE_I18N_KEYS[cohortStage]);
 
   const formatCorrelation = (value: number | null) =>
     value === null ? "—" : formatStatValue(value, 3);

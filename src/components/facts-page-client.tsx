@@ -19,17 +19,9 @@ import { TeamLabel } from "@/components/team-flag";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
 import { formatFifaPoints } from "@/lib/format";
 import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
+import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-
-const STAGE_KEYS: Record<PathStage, string> = {
-  group: "groupStage",
-  r32: "round32",
-  r16: "round16",
-  qf: "quarterFinal",
-  sf: "semiFinal",
-  final: "final",
-};
 
 function StatTile({
   label,
@@ -202,7 +194,7 @@ export function FactsPageClient() {
     window.history.replaceState(null, "", `/?${params.toString()}`);
   }, [mode]);
 
-  const stageLabel = (stage: PathStage) => stages(STAGE_KEYS[stage]);
+  const stageLabel = (stage: PathStage) => stages(COMPARE_STAGE_I18N_KEYS[stage]);
 
   if (loading && !facts) {
     return (

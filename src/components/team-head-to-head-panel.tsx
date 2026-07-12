@@ -17,16 +17,8 @@ import {
 import { serializePathStages } from "@/components/path-stage-filters";
 import { Badge } from "@/components/ui/badge";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
+import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
 import { cn } from "@/lib/utils";
-
-const COHORT_STAGE_KEYS: Record<PathStage, string> = {
-  group: "groupStage",
-  r32: "round32",
-  r16: "round16",
-  qf: "quarterFinal",
-  sf: "semiFinal",
-  final: "final",
-};
 
 interface TeamHeadToHeadPanelProps {
   teams: Team[];
@@ -407,7 +399,7 @@ export function TeamHeadToHeadPanel({
       {showComparison && (
         <p className="text-xs text-muted-foreground">
           {t("rankCohortNote", {
-            stage: stageLabels(COHORT_STAGE_KEYS[cohortStage]),
+            stage: stageLabels(COMPARE_STAGE_I18N_KEYS[cohortStage]),
           })}
         </p>
       )}

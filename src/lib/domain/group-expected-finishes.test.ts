@@ -291,6 +291,9 @@ describe("buildGroupExpectedAnalysis", () => {
     assert.ok(outlierDraw);
     assert.equal(outlierDraw.paperDrawNote, "favoriteDrew");
     assert.equal(outlierDraw.isDrawGapOutlier, true);
+    assert.ok(analysis.biggestUnderdogDrawMatch);
+    assert.equal(analysis.biggestUnderdogDrawMatch?.gapPoints, 200);
+    assert.equal(analysis.biggestUnderdogDrawMatch?.paperDrawNote, "favoriteDrew");
   });
 
   it("sorts draw matches by gap descending", () => {

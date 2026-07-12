@@ -9,6 +9,7 @@ import { buildTournamentFacts } from "@/lib/domain/tournament-facts";
 import { buildGroupExpectedAnalysis } from "@/lib/domain/group-expected-finishes";
 import { buildGroupStageDifficultyStrip } from "@/lib/domain/group-stage-difficulty";
 import { buildRound32Analysis } from "@/lib/domain/round-of-32-analysis";
+import { buildRound16Analysis } from "@/lib/domain/round-of-16-analysis";
 import { getTeamCountsByStage } from "@/lib/domain/team-stages";
 import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
 import { ensureWorldCupData } from "@/lib/data/worldcup-store";
@@ -38,5 +39,6 @@ export async function getTournamentFacts(
     groupExpectedAnalysis: buildGroupExpectedAnalysis(rankings),
     groupStageDifficulty: buildGroupStageDifficultyStrip(allComparison),
     roundOf32Analysis: buildRound32Analysis(summaries, rankings),
+    roundOf16Analysis: buildRound16Analysis(summaries, rankings),
   };
 }

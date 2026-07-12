@@ -136,6 +136,15 @@ function findBiggestUnderdogWin(
   );
 }
 
+function findBiggestUnderdogDraw(
+  matches: GroupExpectedMatchEntry[],
+): GroupExpectedMatchEntry | null {
+  return findExtremeMatch(
+    matches.filter((entry) => entry.paperDrawNote === "favoriteDrew"),
+    true,
+  );
+}
+
 function groupLetterFromName(groupName: string): string {
   return groupName.replace("Group ", "").toUpperCase();
 }
@@ -403,6 +412,7 @@ export function buildGroupExpectedAnalysis(
     drawMatches,
     highestGapDrawMatch: findExtremeMatch(drawMatches, true),
     lowestGapDrawMatch: findExtremeMatch(drawMatches, false),
+    biggestUnderdogDrawMatch: findBiggestUnderdogDraw(drawMatches),
     actualWinLossCount: winLossMatches.length,
     meanPointsGapOnWinLoss: winLossGapStats.mean,
     stdDevPointsGapOnWinLoss: winLossGapStats.stdDev,

@@ -182,7 +182,6 @@ export function GroupExpectedFinishesPanel({
                 analysis.biggestUnderdogWinMatch?.gapPoints ?? null,
               )}
               match={analysis.biggestUnderdogWinMatch}
-              hint={t("biggestUnderdogWinHint")}
             />
           </div>
         </div>
@@ -191,7 +190,7 @@ export function GroupExpectedFinishesPanel({
           <p className="mb-2 text-xs font-medium text-muted-foreground">
             {t("drawsRow")}
           </p>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <StatTile
               label={t("avgGapOnDraw")}
               value={formatFifaPoints(analysis.meanPointsGapOnDraws)}
@@ -208,6 +207,13 @@ export function GroupExpectedFinishesPanel({
               label={t("lowestGapOnDraw")}
               value={formatFifaPoints(analysis.minPointsGapOnDraw)}
               match={analysis.lowestGapDrawMatch}
+            />
+            <StatTile
+              label={t("biggestUnderdogDraw")}
+              value={formatFifaPoints(
+                analysis.biggestUnderdogDrawMatch?.gapPoints ?? null,
+              )}
+              match={analysis.biggestUnderdogDrawMatch}
             />
           </div>
         </div>

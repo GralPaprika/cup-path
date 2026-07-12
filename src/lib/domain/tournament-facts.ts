@@ -12,13 +12,12 @@ import type {
   UpsetMatchFact,
 } from "@/lib/types";
 import { getAllMatches } from "@/lib/data/worldcup-loader";
-import { computeFilteredAverages } from "@/lib/domain/difficulty";
 import { computeMean, computeNumericStats } from "@/lib/domain/group-stats";
+import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
 import { getAdvancingTeamIds } from "@/lib/domain/group-standings";
 import {
   PATH_STAGES,
   stageIndex,
-  stagesThrough,
 } from "@/lib/domain/match-stages";
 import { getGroupNames } from "@/lib/domain/path-builder";
 import {
@@ -54,25 +53,14 @@ function buildGroupStagePool(
 ): GroupStagePoolFact {
   const cohortIds = getTeamsAtStage("group");
   const fifaPoints: number[] = [];
-  const rivalDifficulties: number[] = [];
 
   for (const teamId of cohortIds) {
     const ranking = rankings.get(teamId);
     if (ranking) fifaPoints.push(ranking.points);
-
-    const summary = summaries.find((entry) => entry.team.id === teamId);
-    if (!summary) continue;
-
-    const { avgOpponentPoints } = computeFilteredAverages(
-      summary.matches,
-      stagesThrough("group"),
-    );
-    if (avgOpponentPoints !== null) {
-      rivalDifficulties.push(avgOpponentPoints);
-    }
   }
 
   const ranks = [...rankings.values()].map((entry) => entry.rank);
+  const avgFifaPoints = computeMean(fifaPoints);
   const summaryById = new Map(
     summaries.map((summary) => [summary.team.id, summary]),
   );
@@ -101,9 +89,12 @@ function buildGroupStagePool(
 
   return {
     teamCount: teamCounts.group ?? cohortIds.size,
-    avgFifaPoints: computeMean(fifaPoints),
+    avgFifaPoints,
+    avgFifaPointsContext: buildAvgPointsContext(
+      avgFifaPoints,
+      rankings.values(),
+    ),
     medianFifaRank: computeNumericStats(ranks).median,
-    avgGroupRivalDifficulty: computeMean(rivalDifficulties),
     lowestRankedQualifier,
   };
 }
@@ -330,7 +321,13 @@ export function buildTournamentFacts(
   rankings: Map<string, RankingEntry>,
   teamCounts: Record<PathStage, number>,
   groupCards: GroupComparisonCard[] = [],
-): Omit<TournamentFacts, "groupExpectedAnalysis" | "groupStageDifficulty"> {
+): Omit<
+  TournamentFacts,
+  | "groupExpectedAnalysis"
+  | "groupStageDifficulty"
+  | "roundOf32Analysis"
+  | "roundOf16Analysis"
+> {
   const snapshot = buildSnapshot(rankings, teamCounts);
   const groupStagePool = buildGroupStagePool(summaries, rankings, teamCounts);
   const overUnder = buildOverUnderPerformers(summaries, rankings);

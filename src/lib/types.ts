@@ -269,8 +269,8 @@ export interface TournamentSnapshot {
 export interface GroupStagePoolFact {
   teamCount: number;
   avgFifaPoints: number | null;
+  avgFifaPointsContext: AvgPointsContext | null;
   medianFifaRank: number | null;
-  avgGroupRivalDifficulty: number | null;
   lowestRankedQualifier: {
     team: Team;
     fifaRank: number;
@@ -363,6 +363,7 @@ export interface GroupExpectedAnalysis {
   drawMatches: GroupExpectedMatchEntry[];
   highestGapDrawMatch: GroupExpectedMatchEntry | null;
   lowestGapDrawMatch: GroupExpectedMatchEntry | null;
+  biggestUnderdogDrawMatch: GroupExpectedMatchEntry | null;
   actualWinLossCount: number;
   meanPointsGapOnWinLoss: number | null;
   stdDevPointsGapOnWinLoss: number | null;
@@ -428,7 +429,7 @@ export interface GroupStageDifficultyStrip {
   insights: GroupStageDifficultyInsights;
 }
 
-export interface Round32OpponentDifficultyEntry {
+export interface KnockoutOpponentDifficultyEntry {
   team: Team;
   opponent: Team;
   opponentFifaPoints: number;
@@ -436,7 +437,7 @@ export interface Round32OpponentDifficultyEntry {
   matchNum: number | null;
 }
 
-export interface Round32OpponentDifficultySpotlight {
+export interface KnockoutOpponentDifficultySpotlight {
   team: Team;
   opponent: Team;
   opponentFifaPoints: number;
@@ -445,7 +446,7 @@ export interface Round32OpponentDifficultySpotlight {
   matchNum: number | null;
 }
 
-export interface Round32OpponentDifficultyInsights {
+export interface KnockoutOpponentDifficultyInsights {
   aboveMean: GroupStageDifficultyCohort;
   belowMean: GroupStageDifficultyCohort;
   atMean: GroupStageDifficultyCohort;
@@ -453,20 +454,20 @@ export interface Round32OpponentDifficultyInsights {
   medianQualifiedOpponent: number | null;
   medianEliminatedOpponent: number | null;
   qualificationRateGap: number | null;
-  hardestOpponentQualifier: Round32OpponentDifficultySpotlight | null;
-  easiestOpponentEliminated: Round32OpponentDifficultySpotlight | null;
+  hardestOpponentQualifier: KnockoutOpponentDifficultySpotlight | null;
+  easiestOpponentEliminated: KnockoutOpponentDifficultySpotlight | null;
 }
 
-export interface Round32OpponentDifficultyStrip {
-  entries: Round32OpponentDifficultyEntry[];
+export interface KnockoutOpponentDifficultyStrip {
+  entries: KnockoutOpponentDifficultyEntry[];
   meanOpponentPoints: number | null;
   stdDevOpponentPoints: number | null;
   minOpponentPoints: number | null;
   maxOpponentPoints: number | null;
-  insights: Round32OpponentDifficultyInsights;
+  insights: KnockoutOpponentDifficultyInsights;
 }
 
-export interface Round32FixtureEntry {
+export interface KnockoutFixtureEntry {
   matchNum: number | null;
   date: string;
   team1: Team;
@@ -482,7 +483,7 @@ export interface Round32FixtureEntry {
   isGapOutlier: boolean;
 }
 
-export interface Round32QualifierSpotlight {
+export interface KnockoutQualifierSpotlight {
   team: Team;
   fifaRank: number;
   fifaPoints: number | null;
@@ -490,25 +491,45 @@ export interface Round32QualifierSpotlight {
   opponent: Team;
 }
 
-export interface Round32Analysis {
+export interface KnockoutStageAnalysis {
   matchCount: number;
   participantCount: number;
   qualifiedCount: number;
   eliminatedCount: number;
   avgParticipantFifaPoints: number | null;
+  avgParticipantFifaPointsContext: AvgPointsContext | null;
   medianParticipantFifaRank: number | null;
-  avgRivalDifficulty: number | null;
   meanGap: number | null;
   stdDevGap: number | null;
   maxGap: number | null;
   minGap: number | null;
-  highestGapMatch: Round32FixtureEntry | null;
-  lowestGapMatch: Round32FixtureEntry | null;
-  biggestUnderdogWin: Round32FixtureEntry | null;
-  lowestRankedQualifier: Round32QualifierSpotlight | null;
-  fixtures: Round32FixtureEntry[];
-  opponentDifficulty: Round32OpponentDifficultyStrip | null;
+  highestGapMatch: KnockoutFixtureEntry | null;
+  lowestGapMatch: KnockoutFixtureEntry | null;
+  biggestUnderdogWin: KnockoutFixtureEntry | null;
+  lowestRankedQualifier: KnockoutQualifierSpotlight | null;
+  fixtures: KnockoutFixtureEntry[];
+  opponentDifficulty: KnockoutOpponentDifficultyStrip | null;
 }
+
+export type Round32OpponentDifficultyEntry = KnockoutOpponentDifficultyEntry;
+export type Round32OpponentDifficultySpotlight =
+  KnockoutOpponentDifficultySpotlight;
+export type Round32OpponentDifficultyInsights =
+  KnockoutOpponentDifficultyInsights;
+export type Round32OpponentDifficultyStrip = KnockoutOpponentDifficultyStrip;
+export type Round32FixtureEntry = KnockoutFixtureEntry;
+export type Round32QualifierSpotlight = KnockoutQualifierSpotlight;
+export type Round32Analysis = KnockoutStageAnalysis;
+
+export type Round16OpponentDifficultyEntry = KnockoutOpponentDifficultyEntry;
+export type Round16OpponentDifficultySpotlight =
+  KnockoutOpponentDifficultySpotlight;
+export type Round16OpponentDifficultyInsights =
+  KnockoutOpponentDifficultyInsights;
+export type Round16OpponentDifficultyStrip = KnockoutOpponentDifficultyStrip;
+export type Round16FixtureEntry = KnockoutFixtureEntry;
+export type Round16QualifierSpotlight = KnockoutQualifierSpotlight;
+export type Round16Analysis = KnockoutStageAnalysis;
 
 export interface TournamentHighlights {
   overPerformer: TeamHighlightFact | null;
@@ -528,6 +549,7 @@ export interface TournamentFacts {
   groupExpectedAnalysis: GroupExpectedAnalysis | null;
   groupStageDifficulty: GroupStageDifficultyStrip | null;
   roundOf32Analysis: Round32Analysis | null;
+  roundOf16Analysis: Round16Analysis | null;
 }
 
 export interface GroupStanding {

@@ -11,9 +11,11 @@ import type {
 } from "@/lib/types";
 import { GroupExpectedFinishesPanel } from "@/components/group-expected-finishes-panel";
 import { RoundOf32Panel } from "@/components/round-of-32-panel";
+import { RoundOf16Panel } from "@/components/round-of-16-panel";
 import { PageShellSkeleton } from "@/components/loading-skeletons";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { TeamLabel } from "@/components/team-flag";
+import { AvgPointsContextHint } from "@/components/avg-points-context";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
@@ -33,10 +35,12 @@ function StatTile({
   label,
   value,
   hint,
+  footer,
 }: {
   label: string;
   value: string;
   hint?: string;
+  footer?: React.ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
@@ -49,6 +53,7 @@ function StatTile({
       {hint ? (
         <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
       ) : null}
+      {footer}
     </div>
   );
 }
@@ -243,10 +248,16 @@ export function FactsPageClient() {
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <StatTile
                 label={t("groupStagePool.avgFifaPoints")}
                 value={formatFifaPoints(facts.groupStagePool.avgFifaPoints)}
+                footer={
+                  <AvgPointsContextHint
+                    context={facts.groupStagePool.avgFifaPointsContext}
+                    align="left"
+                  />
+                }
               />
               <StatTile
                 label={t("groupStagePool.medianFifaRank")}
@@ -255,13 +266,6 @@ export function FactsPageClient() {
                     ? `#${formatStatValue(facts.groupStagePool.medianFifaRank, 0)}`
                     : "—"
                 }
-              />
-              <StatTile
-                label={t("groupStagePool.avgGroupRivalDifficulty")}
-                value={formatFifaPoints(
-                  facts.groupStagePool.avgGroupRivalDifficulty,
-                )}
-                hint={t("groupStagePool.avgGroupRivalDifficultyHint")}
               />
               {facts.groupStagePool.lowestRankedQualifier ? (
                 <Link
@@ -316,6 +320,13 @@ export function FactsPageClient() {
           {facts.roundOf32Analysis && (
             <RoundOf32Panel
               analysis={facts.roundOf32Analysis}
+              mode={mode}
+            />
+          )}
+
+          {facts.roundOf16Analysis && (
+            <RoundOf16Panel
+              analysis={facts.roundOf16Analysis}
               mode={mode}
             />
           )}

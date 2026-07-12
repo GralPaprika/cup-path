@@ -1,38 +1,41 @@
 "use client";
 
-import type { Round32FixtureEntry } from "@/lib/types";
+import type { KnockoutFixtureEntry } from "@/lib/types";
+import type { KnockoutStageTranslationNamespace } from "@/components/knockout-stage-panel";
 import { formatFifaPoints } from "@/lib/format";
 import { CHART_COLORS } from "@/lib/chart-colors";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-interface RoundOf32GapChartProps {
-  fixtures: Round32FixtureEntry[];
+interface KnockoutStageGapChartProps {
+  fixtures: KnockoutFixtureEntry[];
   mean: number | null;
   stdDev: number | null;
+  translationNamespace: KnockoutStageTranslationNamespace;
 }
 
 const WIDTH = 640;
 const HEIGHT = 120;
 const MARGIN = { top: 16, right: 16, bottom: 28, left: 16 };
 
-function dotClassName(fixture: Round32FixtureEntry): string {
+function dotClassName(fixture: KnockoutFixtureEntry): string {
   return fixture.upsetWin ? "fill-wc-orange/85" : "fill-wc-green/85";
 }
 
-function fixtureScoreLabel(fixture: Round32FixtureEntry): string {
+function fixtureScoreLabel(fixture: KnockoutFixtureEntry): string {
   const parts = [fixture.scoreFt];
   if (fixture.scoreEt) parts.push(`ET ${fixture.scoreEt}`);
   if (fixture.scorePens) parts.push(`Pens ${fixture.scorePens}`);
   return parts.join(" · ");
 }
 
-export function RoundOf32GapChart({
+export function KnockoutStageGapChart({
   fixtures,
   mean,
   stdDev,
-}: RoundOf32GapChartProps) {
-  const t = useTranslations("home.roundOf32");
+  translationNamespace,
+}: KnockoutStageGapChartProps) {
+  const t = useTranslations(translationNamespace);
   const shared = useTranslations("home.groupExpectedFinishes");
 
   if (fixtures.length === 0) return null;

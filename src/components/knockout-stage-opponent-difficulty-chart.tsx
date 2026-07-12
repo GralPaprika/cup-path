@@ -1,29 +1,46 @@
 "use client";
 
-import { RoundOf32OpponentDifficultyInsightsPanel } from "@/components/round-of-32-opponent-difficulty-insights";
-import type { Round32OpponentDifficultyStrip } from "@/lib/types";
+import { KnockoutStageOpponentDifficultyInsightsPanel } from "@/components/knockout-stage-opponent-difficulty-insights";
+import type { KnockoutOpponentDifficultyStrip } from "@/lib/types";
+import type { KnockoutStageTranslationNamespace } from "@/components/knockout-stage-panel";
 import { formatFifaPoints } from "@/lib/format";
 import { CHART_COLORS } from "@/lib/chart-colors";
+import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-interface RoundOf32OpponentDifficultyChartProps {
-  strip: Round32OpponentDifficultyStrip;
+interface KnockoutStageOpponentDifficultyChartProps {
+  strip: KnockoutOpponentDifficultyStrip;
   mode: string;
+  translationNamespace: KnockoutStageTranslationNamespace;
+  wideBars?: boolean;
 }
 
-const BAR_WIDTH = 26;
-const BAR_GAP = 8;
+const DEFAULT_BAR_WIDTH = 26;
+const DEFAULT_BAR_GAP = 8;
+const WIDE_BAR_WIDTH = 42;
+const WIDE_BAR_GAP = 14;
 const HEIGHT = 220;
 const MARGIN = { top: 20, right: 16, bottom: 52, left: 44 };
 
-export function RoundOf32OpponentDifficultyChart({
+function barLayout(wideBars: boolean) {
+  return wideBars
+    ? { barWidth: WIDE_BAR_WIDTH, barGap: WIDE_BAR_GAP, flagSize: 18 }
+    : { barWidth: DEFAULT_BAR_WIDTH, barGap: DEFAULT_BAR_GAP, flagSize: 16 };
+}
+
+export function KnockoutStageOpponentDifficultyChart({
   strip,
   mode,
-}: RoundOf32OpponentDifficultyChartProps) {
-  const t = useTranslations("home.roundOf32");
+  translationNamespace,
+  wideBars = false,
+}: KnockoutStageOpponentDifficultyChartProps) {
+  const t = useTranslations(translationNamespace);
 
   const { entries } = strip;
   if (entries.length === 0) return null;
+
+  const { barWidth, barGap, flagSize } = barLayout(wideBars);
+  const flagHeight = Math.round(flagSize * (11 / 16));
 
   const minVal = strip.minOpponentPoints ?? 0;
   const maxVal = strip.maxOpponentPoints ?? 1;
@@ -33,8 +50,8 @@ export function RoundOf32OpponentDifficultyChart({
 
   const chartHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
   const chartWidth =
-    entries.length * (BAR_WIDTH + BAR_GAP) - BAR_GAP + MARGIN.left + MARGIN.right;
-  const width = Math.max(640, chartWidth);
+    entries.length * (barWidth + barGap) - barGap + MARGIN.left + MARGIN.right;
+  const width = wideBars ? chartWidth : Math.max(640, chartWidth);
   const baselineY = HEIGHT - MARGIN.bottom;
 
   const y = (value: number) =>
@@ -79,10 +96,11 @@ export function RoundOf32OpponentDifficultyChart({
         </p>
       </div>
 
-      <RoundOf32OpponentDifficultyInsightsPanel
+      <KnockoutStageOpponentDifficultyInsightsPanel
         insights={strip.insights}
         meanOpponentPoints={strip.meanOpponentPoints}
         mode={mode}
+        translationNamespace={translationNamespace}
       />
 
       <figure className="overflow-hidden rounded-xl border border-white/8 bg-black/10 p-3">
@@ -112,12 +130,19 @@ export function RoundOf32OpponentDifficultyChart({
           ))}
         </figcaption>
 
-        <div className="scrollbar-subtle max-w-full overflow-x-auto overscroll-x-contain pb-1">
+        <div
+          className={
+            wideBars
+              ? "pb-1"
+              : "scrollbar-subtle max-w-full overflow-x-auto overscroll-x-contain pb-1"
+          }
+        >
           <svg
-            width={width}
+            width={wideBars ? "100%" : width}
             height={HEIGHT}
             viewBox={`0 0 ${width} ${HEIGHT}`}
-            className="block shrink-0"
+            className={wideBars ? "block h-auto w-full" : "block shrink-0"}
+            preserveAspectRatio={wideBars ? "xMidYMid meet" : undefined}
             role="img"
             aria-label={t("opponentDifficultyCaption")}
           >
@@ -152,7 +177,7 @@ export function RoundOf32OpponentDifficultyChart({
             ))}
 
             {entries.map((entry, index) => {
-              const x = MARGIN.left + index * (BAR_WIDTH + BAR_GAP);
+              const x = MARGIN.left + index * (barWidth + barGap);
               const barTop = y(entry.opponentFifaPoints);
               const barHeight = baselineY - barTop;
               const href = `/team-analysis?team=${entry.team.id}&mode=${mode}`;
@@ -162,7 +187,7 @@ export function RoundOf32OpponentDifficultyChart({
                   <rect
                     x={x}
                     y={barTop}
-                    width={BAR_WIDTH}
+                    width={barWidth}
                     height={Math.max(barHeight, 2)}
                     rx={4}
                     className={
@@ -184,17 +209,20 @@ export function RoundOf32OpponentDifficultyChart({
                   </rect>
                   <image
                     href={entry.team.flagUrl}
-                    x={x + (BAR_WIDTH - 16) / 2}
+                    x={x + (barWidth - flagSize) / 2}
                     y={baselineY + 8}
-                    width={16}
-                    height={11}
+                    width={flagSize}
+                    height={flagHeight}
                     className="rounded-sm"
                   />
                   <text
-                    x={x + BAR_WIDTH / 2}
+                    x={x + barWidth / 2}
                     y={baselineY + 32}
                     textAnchor="middle"
-                    className="fill-white font-mono text-[9px] font-semibold"
+                    className={cn(
+                      "fill-white font-mono font-semibold",
+                      wideBars ? "text-[10px]" : "text-[9px]",
+                    )}
                   >
                     {entry.team.id}
                   </text>

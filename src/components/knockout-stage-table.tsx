@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import type { Round32FixtureEntry } from "@/lib/types";
+import type { KnockoutFixtureEntry } from "@/lib/types";
+import type { KnockoutStageTranslationNamespace } from "@/components/knockout-stage-panel";
 import { TeamFlag } from "@/components/team-flag";
 import { MatchScoreBreakdown } from "@/components/match-score-breakdown";
 import { formatFifaPoints } from "@/lib/format";
@@ -12,9 +13,10 @@ import { useTranslations } from "next-intl";
 
 const PAGE_SIZE = 10;
 
-interface RoundOf32TableProps {
-  fixtures: Round32FixtureEntry[];
+interface KnockoutStageTableProps {
+  fixtures: KnockoutFixtureEntry[];
   mode: string;
+  translationNamespace: KnockoutStageTranslationNamespace;
 }
 
 type GapSortDirection = "desc" | "asc";
@@ -56,7 +58,7 @@ function MatchCell({
   fixture,
   mode,
 }: {
-  fixture: Round32FixtureEntry;
+  fixture: KnockoutFixtureEntry;
   mode: string;
 }) {
   const t = useTranslations("home.groupExpectedFinishes");
@@ -87,8 +89,12 @@ function MatchCell({
   );
 }
 
-export function RoundOf32Table({ fixtures, mode }: RoundOf32TableProps) {
-  const t = useTranslations("home.roundOf32");
+export function KnockoutStageTable({
+  fixtures,
+  mode,
+  translationNamespace,
+}: KnockoutStageTableProps) {
+  const t = useTranslations(translationNamespace);
   const shared = useTranslations("home.groupExpectedFinishes");
   const [gapSort, setGapSort] = useState<GapSortDirection>("asc");
   const [page, setPage] = useState(0);
@@ -152,50 +158,50 @@ export function RoundOf32Table({ fixtures, mode }: RoundOf32TableProps) {
                   : fixture.team2;
 
               return (
-              <tr
-                key={`${fixture.matchNum ?? fixture.date}-${fixture.team1.id}-${fixture.team2.id}-${fixture.scoreFt}-${fixture.scoreEt ?? ""}-${fixture.scorePens ?? ""}`}
-                className={cn(
-                  "border-b border-white/6 last:border-b-0",
-                  fixture.upsetWin && "bg-wc-orange/10",
-                )}
-              >
-                <td className="px-3 py-2.5 font-mono text-muted-foreground">
-                  {fixture.matchNum !== null ? `#${fixture.matchNum}` : "—"}
-                  <div className="text-[10px]">{fixture.date}</div>
-                </td>
-                <td className="px-3 py-2.5">
-                  <MatchCell fixture={fixture} mode={mode} />
-                </td>
-                <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
-                  {formatFifaPoints(fixture.team1FifaPoints)}
-                </td>
-                <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
-                  {formatFifaPoints(fixture.team2FifaPoints)}
-                </td>
-                <td className="px-3 py-2.5 text-right font-mono tabular-nums text-wc-orange">
-                  {formatFifaPoints(fixture.gapPoints)}
-                </td>
-                <td className="px-3 py-2.5">
-                  {fixture.isGapOutlier ? (
-                    <span className="inline-flex rounded-md border border-wc-orange/40 bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
-                      {shared("upsetWinBadge")}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
+                <tr
+                  key={`${fixture.matchNum ?? fixture.date}-${fixture.team1.id}-${fixture.team2.id}-${fixture.scoreFt}-${fixture.scoreEt ?? ""}-${fixture.scorePens ?? ""}`}
+                  className={cn(
+                    "border-b border-white/6 last:border-b-0",
+                    fixture.upsetWin && "bg-wc-orange/10",
                   )}
-                </td>
-                <td className="px-3 py-2.5">
-                  <Link
-                    href={`/team-analysis?team=${winner.id}&mode=${mode}`}
-                    className="inline-flex items-center gap-1.5 transition-colors hover:text-wc-sky"
-                  >
-                    <TeamFlag team={winner} size="sm" />
-                    <span className="font-mono font-semibold text-wc-green">
-                      {winner.id}
-                    </span>
-                  </Link>
-                </td>
-              </tr>
+                >
+                  <td className="px-3 py-2.5 font-mono text-muted-foreground">
+                    {fixture.matchNum !== null ? `#${fixture.matchNum}` : "—"}
+                    <div className="text-[10px]">{fixture.date}</div>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <MatchCell fixture={fixture} mode={mode} />
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
+                    {formatFifaPoints(fixture.team1FifaPoints)}
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
+                    {formatFifaPoints(fixture.team2FifaPoints)}
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-mono tabular-nums text-wc-orange">
+                    {formatFifaPoints(fixture.gapPoints)}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    {fixture.isGapOutlier ? (
+                      <span className="inline-flex rounded-md border border-wc-orange/40 bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
+                        {shared("upsetWinBadge")}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <Link
+                      href={`/team-analysis?team=${winner.id}&mode=${mode}`}
+                      className="inline-flex items-center gap-1.5 transition-colors hover:text-wc-sky"
+                    >
+                      <TeamFlag team={winner} size="sm" />
+                      <span className="font-mono font-semibold text-wc-green">
+                        {winner.id}
+                      </span>
+                    </Link>
+                  </td>
+                </tr>
               );
             })}
           </tbody>

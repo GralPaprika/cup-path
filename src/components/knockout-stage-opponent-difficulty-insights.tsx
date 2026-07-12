@@ -3,18 +3,20 @@
 import Link from "next/link";
 import type {
   GroupStageDifficultyCohort,
-  Round32OpponentDifficultyInsights,
-  Round32OpponentDifficultySpotlight,
+  KnockoutOpponentDifficultyInsights,
+  KnockoutOpponentDifficultySpotlight,
 } from "@/lib/types";
+import type { KnockoutStageTranslationNamespace } from "@/components/knockout-stage-panel";
 import { TeamFlag } from "@/components/team-flag";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-interface RoundOf32OpponentDifficultyInsightsProps {
-  insights: Round32OpponentDifficultyInsights;
+interface KnockoutStageOpponentDifficultyInsightsProps {
+  insights: KnockoutOpponentDifficultyInsights;
   meanOpponentPoints: number | null;
   mode: string;
+  translationNamespace: KnockoutStageTranslationNamespace;
 }
 
 function formatQualificationRate(cohort: GroupStageDifficultyCohort): string {
@@ -61,13 +63,15 @@ function SpotlightCard({
   spotlight,
   mode,
   sdOutlierLabel,
+  translationNamespace,
 }: {
   title: string;
-  spotlight: Round32OpponentDifficultySpotlight;
+  spotlight: KnockoutOpponentDifficultySpotlight;
   mode: string;
   sdOutlierLabel: string;
+  translationNamespace: KnockoutStageTranslationNamespace;
 }) {
-  const t = useTranslations("home.roundOf32");
+  const t = useTranslations(translationNamespace);
   const deltaPrefix = spotlight.deltaFromMean >= 0 ? "+" : "";
 
   return (
@@ -108,12 +112,13 @@ function SpotlightCard({
   );
 }
 
-export function RoundOf32OpponentDifficultyInsightsPanel({
+export function KnockoutStageOpponentDifficultyInsightsPanel({
   insights,
   meanOpponentPoints,
   mode,
-}: RoundOf32OpponentDifficultyInsightsProps) {
-  const t = useTranslations("home.roundOf32");
+  translationNamespace,
+}: KnockoutStageOpponentDifficultyInsightsProps) {
+  const t = useTranslations(translationNamespace);
 
   const rateGapHint =
     insights.qualificationRateGap !== null &&
@@ -178,6 +183,7 @@ export function RoundOf32OpponentDifficultyInsightsPanel({
               spotlight={insights.hardestOpponentQualifier}
               mode={mode}
               sdOutlierLabel={t("opponentDifficultySdOutlier")}
+              translationNamespace={translationNamespace}
             />
           ) : null}
           {insights.easiestOpponentEliminated ? (
@@ -186,6 +192,7 @@ export function RoundOf32OpponentDifficultyInsightsPanel({
               spotlight={insights.easiestOpponentEliminated}
               mode={mode}
               sdOutlierLabel={t("opponentDifficultySdOutlier")}
+              translationNamespace={translationNamespace}
             />
           ) : null}
         </div>

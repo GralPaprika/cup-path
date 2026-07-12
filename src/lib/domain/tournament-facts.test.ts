@@ -45,8 +45,8 @@ describe("buildTournamentFacts", () => {
 
     assert.ok(facts.groupStagePool.teamCount >= 48);
     assert.ok(facts.groupStagePool.avgFifaPoints !== null);
+    assert.ok(facts.groupStagePool.avgFifaPointsContext !== null);
     assert.ok(facts.groupStagePool.medianFifaRank !== null);
-    assert.ok(facts.groupStagePool.avgGroupRivalDifficulty !== null);
     assert.ok(facts.snapshot.avgFifaPoints !== null);
     assert.ok(facts.snapshot.medianFifaRank !== null);
   });

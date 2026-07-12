@@ -5,6 +5,7 @@ import type { PathStage } from "@/lib/types";
 import { GroupExpectedFinishesPanel } from "@/components/groups/group-expected-finishes-panel";
 import { KnockoutStagePanel } from "@/components/knockout/knockout-stage-panel";
 import { ParticipantPoolSection } from "@/components/facts/participant-pool-section";
+import { MatchOutcomeGapPanel } from "@/components/facts/match-outcome-gap-panel";
 import { HighlightCard } from "@/components/facts/highlight-card";
 import {
   formatStageDelta,
@@ -85,6 +86,10 @@ export function FactsPageClient() {
             }
             mode={mode}
           />
+
+          {facts.matchOutcomeGap && facts.matchOutcomeGap.matches.length > 0 && (
+            <MatchOutcomeGapPanel dataset={facts.matchOutcomeGap} />
+          )}
 
           {facts.groupExpectedAnalysis && (
             <GroupExpectedFinishesPanel

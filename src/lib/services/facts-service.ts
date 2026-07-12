@@ -9,6 +9,7 @@ import { buildTournamentFacts } from "@/lib/domain/tournament/tournament-facts";
 import { buildGroupExpectedAnalysis } from "@/lib/domain/group/group-expected-finishes";
 import { buildGroupStageDifficultyStrip } from "@/lib/domain/group/group-stage-difficulty";
 import { buildKnockoutFactsAnalyses } from "@/lib/domain/knockout/knockout-facts-rounds";
+import { buildMatchOutcomeGapDataset } from "@/lib/domain/match/match-outcome-gap";
 import { getTeamCountsByStage } from "@/lib/domain/team/team-stages";
 import { loadTournamentRuntime } from "@/lib/services/tournament-runtime";
 
@@ -42,5 +43,6 @@ export async function getTournamentFacts(
     groupExpectedAnalysis: buildGroupExpectedAnalysis(ctx, rankings),
     groupStageDifficulty: buildGroupStageDifficultyStrip(ctx, allComparison),
     knockoutAnalyses: buildKnockoutFactsAnalyses(ctx, rankings),
+    matchOutcomeGap: buildMatchOutcomeGapDataset(ctx, rankings),
   };
 }

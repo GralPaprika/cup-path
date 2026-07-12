@@ -39,6 +39,18 @@ export function FactsPageSkeleton() {
 
         <CollapsibleSectionSkeleton>
           <div className="space-y-4">
+            <Skeleton className="h-8 w-full max-w-md bg-white/10" />
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton key={index} className="h-16 rounded-lg bg-white/10" />
+              ))}
+            </div>
+            <Skeleton className="h-52 w-full rounded-xl bg-white/10" />
+          </div>
+        </CollapsibleSectionSkeleton>
+
+        <CollapsibleSectionSkeleton>
+          <div className="space-y-4">
             <Skeleton className="h-2.5 w-24 bg-white/10" />
             <AtGlanceRowSkeleton tileVariants={AT_GLANCE_MATCH_TILES} />
             <AtGlanceRowSkeleton tileVariants={AT_GLANCE_MATCH_TILES} />

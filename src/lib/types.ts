@@ -570,6 +570,33 @@ export interface TournamentHighlights {
   groupOfDeath: GroupOfDeathFact | null;
 }
 
+export interface MatchOutcomeGapEntry {
+  id: string;
+  matchNum: number | null;
+  stage: PathStage;
+  round: string;
+  groupLetter: string | null;
+  team1: Team;
+  team2: Team;
+  team1FifaPoints: number | null;
+  team2FifaPoints: number | null;
+  gapPoints: number;
+  favoriteTeamId: string | null;
+  favoriteResult: GroupMatchResult;
+  isEqualRating: boolean;
+  scoreLabel: string;
+  isOutlier: boolean;
+  outlierKind: "draw" | "upset" | null;
+}
+
+export interface MatchOutcomeGapDataset {
+  matches: MatchOutcomeGapEntry[];
+  drawGapMean: number | null;
+  drawGapStdDev: number | null;
+  upsetGapMean: number | null;
+  upsetGapStdDev: number | null;
+}
+
 export interface TournamentFacts {
   snapshot: TournamentSnapshot;
   groupStagePool: GroupStagePoolFact;
@@ -577,6 +604,7 @@ export interface TournamentFacts {
   groupExpectedAnalysis: GroupExpectedAnalysis | null;
   groupStageDifficulty: GroupStageDifficultyStrip | null;
   knockoutAnalyses: Partial<Record<KnockoutFactsRoundId, KnockoutStageAnalysis>>;
+  matchOutcomeGap: MatchOutcomeGapDataset | null;
 }
 
 export interface GroupStanding {

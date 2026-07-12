@@ -428,6 +428,88 @@ export interface GroupStageDifficultyStrip {
   insights: GroupStageDifficultyInsights;
 }
 
+export interface Round32OpponentDifficultyEntry {
+  team: Team;
+  opponent: Team;
+  opponentFifaPoints: number;
+  qualified: boolean;
+  matchNum: number | null;
+}
+
+export interface Round32OpponentDifficultySpotlight {
+  team: Team;
+  opponent: Team;
+  opponentFifaPoints: number;
+  deltaFromMean: number;
+  isSdOutlier: boolean;
+  matchNum: number | null;
+}
+
+export interface Round32OpponentDifficultyInsights {
+  aboveMean: GroupStageDifficultyCohort;
+  belowMean: GroupStageDifficultyCohort;
+  atMean: GroupStageDifficultyCohort;
+  stdDevOpponentPoints: number | null;
+  medianQualifiedOpponent: number | null;
+  medianEliminatedOpponent: number | null;
+  qualificationRateGap: number | null;
+  hardestOpponentQualifier: Round32OpponentDifficultySpotlight | null;
+  easiestOpponentEliminated: Round32OpponentDifficultySpotlight | null;
+}
+
+export interface Round32OpponentDifficultyStrip {
+  entries: Round32OpponentDifficultyEntry[];
+  meanOpponentPoints: number | null;
+  stdDevOpponentPoints: number | null;
+  minOpponentPoints: number | null;
+  maxOpponentPoints: number | null;
+  insights: Round32OpponentDifficultyInsights;
+}
+
+export interface Round32FixtureEntry {
+  matchNum: number | null;
+  date: string;
+  team1: Team;
+  team2: Team;
+  team1FifaPoints: number | null;
+  team2FifaPoints: number | null;
+  gapPoints: number;
+  scoreFt: string;
+  scoreEt: string | null;
+  scorePens: string | null;
+  winnerTeamId: string;
+  upsetWin: boolean;
+  isGapOutlier: boolean;
+}
+
+export interface Round32QualifierSpotlight {
+  team: Team;
+  fifaRank: number;
+  fifaPoints: number | null;
+  gapPoints: number;
+  opponent: Team;
+}
+
+export interface Round32Analysis {
+  matchCount: number;
+  participantCount: number;
+  qualifiedCount: number;
+  eliminatedCount: number;
+  avgParticipantFifaPoints: number | null;
+  medianParticipantFifaRank: number | null;
+  avgRivalDifficulty: number | null;
+  meanGap: number | null;
+  stdDevGap: number | null;
+  maxGap: number | null;
+  minGap: number | null;
+  highestGapMatch: Round32FixtureEntry | null;
+  lowestGapMatch: Round32FixtureEntry | null;
+  biggestUnderdogWin: Round32FixtureEntry | null;
+  lowestRankedQualifier: Round32QualifierSpotlight | null;
+  fixtures: Round32FixtureEntry[];
+  opponentDifficulty: Round32OpponentDifficultyStrip | null;
+}
+
 export interface TournamentHighlights {
   overPerformer: TeamHighlightFact | null;
   underPerformer: TeamHighlightFact | null;
@@ -445,6 +527,7 @@ export interface TournamentFacts {
   highlights: TournamentHighlights;
   groupExpectedAnalysis: GroupExpectedAnalysis | null;
   groupStageDifficulty: GroupStageDifficultyStrip | null;
+  roundOf32Analysis: Round32Analysis | null;
 }
 
 export interface GroupStanding {

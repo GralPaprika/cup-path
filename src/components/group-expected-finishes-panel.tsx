@@ -2,6 +2,7 @@
 
 import type { GroupExpectedAnalysis, GroupExpectedMatchEntry } from "@/lib/types";
 import { TeamFlag } from "@/components/team-flag";
+import { CollapsibleSection } from "@/components/collapsible-section";
 import { GroupDrawsTable } from "@/components/group-draws-table";
 import { GroupDrawsGapChart } from "@/components/group-draws-gap-chart";
 import { GroupWinLossTable } from "@/components/group-win-loss-table";
@@ -145,14 +146,7 @@ export function GroupExpectedFinishesPanel({
     analysis.eliminatedUnderperformers.length > 0;
 
   return (
-    <section className="glass-panel space-y-6 p-5 sm:p-6">
-      <div>
-        <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
-        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          {t("subtitle")}
-        </p>
-      </div>
-
+    <CollapsibleSection title={t("title")} subtitle={t("subtitle")}>
       <div className="space-y-4">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           {t("atGlanceTitle")}
@@ -299,6 +293,6 @@ export function GroupExpectedFinishesPanel({
       {!hasStandingsStory && (
         <p className="text-xs text-muted-foreground">{t("tiebreakerFootnote")}</p>
       )}
-    </section>
+    </CollapsibleSection>
   );
 }

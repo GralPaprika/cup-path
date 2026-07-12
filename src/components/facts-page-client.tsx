@@ -10,6 +10,7 @@ import type {
   UpsetMatchFact,
 } from "@/lib/types";
 import { GroupExpectedFinishesPanel } from "@/components/group-expected-finishes-panel";
+import { RoundOf32Panel } from "@/components/round-of-32-panel";
 import { PageShellSkeleton } from "@/components/loading-skeletons";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { TeamLabel } from "@/components/team-flag";
@@ -308,6 +309,13 @@ export function FactsPageClient() {
             <GroupExpectedFinishesPanel
               analysis={facts.groupExpectedAnalysis}
               groupStageDifficulty={facts.groupStageDifficulty}
+              mode={mode}
+            />
+          )}
+
+          {facts.roundOf32Analysis && (
+            <RoundOf32Panel
+              analysis={facts.roundOf32Analysis}
               mode={mode}
             />
           )}

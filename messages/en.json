@@ -352,6 +352,13 @@
       "binTooltipMatches": "{count, plural, one {# match} other {# matches}}",
       "xAxisLabel": "FIFA points gap",
       "yAxisLabel": "Share of results",
+      "expandChart": "Expand chart",
+      "closeExpandedChart": "Close expanded chart",
+      "expandedChartTitle": "Results vs FIFA points gap",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "resetZoom": "Reset zoom",
+      "interactionHint": "Scroll to zoom match dots. Drag to pan.",
       "footnote": "From the higher-rated team's view. Group matches use full-time score only. In knockout ties, extra-time wins count as wins; matches decided on penalties count as draws."
     },
     "highlights": {

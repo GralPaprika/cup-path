@@ -352,6 +352,13 @@
       "binTooltipMatches": "{count, plural, one {# partido} other {# partidos}}",
       "xAxisLabel": "Brecha de puntos FIFA",
       "yAxisLabel": "Proporción de resultados",
+      "expandChart": "Ampliar gráfico",
+      "closeExpandedChart": "Cerrar gráfico ampliado",
+      "expandedChartTitle": "Resultados vs brecha de puntos FIFA",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "resetZoom": "Restablecer zoom",
+      "interactionHint": "Desplázate para acercar los puntos. Arrastra para mover.",
       "footnote": "Desde la perspectiva del mejor clasificado. En fase de grupos solo cuenta el marcador al 90. En eliminatorias, victoria en prórroga cuenta como triunfo; partidos definidos en penales cuentan como empate."
     },
     "highlights": {

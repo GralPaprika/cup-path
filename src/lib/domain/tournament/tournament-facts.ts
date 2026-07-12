@@ -321,6 +321,7 @@ export function buildTournamentFacts(
   | "groupExpectedAnalysis"
   | "groupStageDifficulty"
   | "knockoutAnalyses"
+  | "matchOutcomeGap"
 > {
   const snapshot = buildSnapshot(rankings, teamCounts);
   const groupStagePool = buildGroupStagePool(ctx, summaries, rankings, teamCounts);

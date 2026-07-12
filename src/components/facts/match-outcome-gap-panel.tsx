@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Maximize2 } from "lucide-react";
 import type { MatchOutcomeGapDataset, PathStage } from "@/lib/types";
 import { CollapsibleSection } from "@/components/shared/collapsible-section";
 import { PathStageFilters } from "@/components/path/path-stage-filters";
@@ -8,13 +9,16 @@ import {
   computeOutcomeShares,
   MatchOutcomeGapChart,
 } from "@/components/facts/match-outcome-gap-chart";
-import { MatchOutcomeGapBinTooltip } from "@/components/facts/match-outcome-gap-bin-tooltip";
-import { MatchOutcomeGapMatchTooltip } from "@/components/facts/match-outcome-gap-match-tooltip";
+import { MatchOutcomeGapChartOverlay } from "@/components/facts/match-outcome-gap-chart-overlay";
 import { usePersistedMatchOutcomeGapStages } from "@/hooks/use-persisted-match-outcome-gap-stages";
+import {
+  useMatchOutcomeGapBinLabels,
+  useMatchOutcomeGapChartProps,
+  useMatchOutcomeGapLegend,
+} from "@/hooks/use-match-outcome-gap-chart-props";
 import { getFurthestStage } from "@/lib/domain/match/match-stages";
-import type { MatchOutcomeGapBinId } from "@/lib/domain/match/match-outcome-gap";
-import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 interface MatchOutcomeGapPanelProps {
   dataset: MatchOutcomeGapDataset;
@@ -30,7 +34,7 @@ export function MatchOutcomeGapPanel({
   dataset,
 }: MatchOutcomeGapPanelProps) {
   const t = useTranslations("home.matchOutcomeGap");
-  const stages = useTranslations("compare.stages");
+  const [overlayOpen, setOverlayOpen] = useState(false);
 
   const availableStages = useMemo(
     () => availableStagesFromDataset(dataset),
@@ -56,49 +60,29 @@ export function MatchOutcomeGapPanel({
     [filteredMatches],
   );
 
-  const binLabels: Record<MatchOutcomeGapBinId, string> = {
-    "0-25": t("bin0to25"),
-    "26-50": t("bin26to50"),
-    "51-100": t("bin51to100"),
-    "101-250": t("bin101to250"),
-    "251+": t("bin251plus"),
-  };
+  const binLabels = useMatchOutcomeGapBinLabels();
+  const outcomeLegend = useMatchOutcomeGapLegend();
+  const chartProps = useMatchOutcomeGapChartProps(filteredMatches, binLabels);
 
-  const outcomeLegend = (
-    <>
-      <span className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-green/80" />
-        {t("favoriteWin")}
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-sky/80" />
-        {t("draw")}
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-red/80" />
-        {t("upset")}
-      </span>
-      <span className="flex items-center gap-1.5 text-wc-orange">
-        <span className="inline-flex h-3 w-3 items-center justify-center rounded-full border-2 border-wc-orange" />
-        {t("outlier")}
-      </span>
-    </>
-  );
+  const stageFilters = hydrated ? (
+    <PathStageFilters
+      value={selectedStages}
+      onChange={setSelectedStages}
+      maxStageReached={maxStageReached}
+      variant="toggles"
+      compact
+      align="end"
+      showLabel={false}
+      className="shrink-0"
+    />
+  ) : null;
 
   return (
     <CollapsibleSection title={t("title")} subtitle={t("subtitle")}>
       <div className="space-y-5">
         {!hydrated ? null : filteredMatches.length === 0 ? (
           <>
-            <PathStageFilters
-              value={selectedStages}
-              onChange={setSelectedStages}
-              maxStageReached={maxStageReached}
-              variant="toggles"
-              compact
-              align="end"
-              showLabel={false}
-            />
+            {stageFilters}
             <p className="text-sm text-muted-foreground">{t("noMatches")}</p>
           </>
         ) : (
@@ -129,65 +113,38 @@ export function MatchOutcomeGapPanel({
               <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
                 {outcomeLegend}
               </div>
-              <PathStageFilters
-                value={selectedStages}
-                onChange={setSelectedStages}
-                maxStageReached={maxStageReached}
-                variant="toggles"
-                compact
-                align="end"
-                showLabel={false}
-                className="shrink-0"
-              />
+              {stageFilters}
             </div>
 
-            <MatchOutcomeGapChart
-              matches={filteredMatches}
-              binLabels={binLabels}
-              ariaLabel={t("chartAria", { count: filteredMatches.length })}
-              xAxisLabel={t("xAxisLabel")}
-              yAxisLabel={t("yAxisLabel")}
-              footnotes={
-                <p className="text-xs text-muted-foreground">{t("footnote")}</p>
-              }
-              getBinAriaLabel={(bin) =>
-                t("binTooltip", {
-                  label: bin.label,
-                  total: bin.total,
-                  winPct: Math.round(bin.winPct),
-                  drawPct: Math.round(bin.drawPct),
-                  lossPct: Math.round(bin.lossPct),
-                })
-              }
-              renderBinTooltip={(bin) => (
-                <MatchOutcomeGapBinTooltip
-                  bin={bin}
-                  gapRangeLabel={t("binTooltipGapRange", { label: bin.label })}
-                  matchesLabel={t("binTooltipMatches", { count: bin.total })}
-                  favoriteWinLabel={t("favoriteWin")}
-                  drawLabel={t("draw")}
-                  upsetLabel={t("upset")}
-                />
-              )}
-              renderMatchTooltip={(entry) => (
-                <MatchOutcomeGapMatchTooltip
-                  entry={entry}
-                  roundLabel={getRoundDisplayName(stages, entry.round)}
-                  favoriteWinLabel={t("favoriteWin")}
-                  drawLabel={t("draw")}
-                  upsetLabel={t("upset")}
-                  gapLabel={t("tooltipGap")}
-                  favoriteLabel={t("tooltipFavorite")}
-                  evenlyMatchedLabel={t("tooltipEvenlyMatched")}
-                  outlierLabel={t("outlier")}
-                  groupLabel={
-                    entry.groupLetter
-                      ? t("tooltipGroup", { letter: entry.groupLetter })
-                      : undefined
-                  }
-                />
-              )}
-            />
+            <div className="relative">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="absolute right-0 top-0 z-10"
+                aria-label={t("expandChart")}
+                onClick={() => setOverlayOpen(true)}
+              >
+                <Maximize2 />
+              </Button>
+
+              <MatchOutcomeGapChart {...chartProps} />
+
+              <MatchOutcomeGapChartOverlay
+                open={overlayOpen}
+                onClose={() => setOverlayOpen(false)}
+                title={t("expandedChartTitle")}
+                closeLabel={t("closeExpandedChart")}
+                zoomInLabel={t("zoomIn")}
+                zoomOutLabel={t("zoomOut")}
+                resetZoomLabel={t("resetZoom")}
+                interactionHint={t("interactionHint")}
+                legend={outcomeLegend}
+                stageFilters={stageFilters}
+                noMatchesMessage={t("noMatches")}
+                {...chartProps}
+              />
+            </div>
           </>
         )}
       </div>

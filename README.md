@@ -52,7 +52,7 @@ npm run sync:rankings
 |---|---|
 | `npm run dev` | Start development server |
 | `npm run build` | Sync worldcup data and build |
-| `npm run test` | Run domain unit tests (55 tests) |
+| `npm run test` | Run domain unit tests (81 tests) |
 | `npm run sync:worldcup` | Fetch latest 2026 data from openfootball |
 | `npm run sync:rankings` | Fetch all ranking snapshots + live from RapidAPI into local runtime cache |
 | `npm run seed:rankings` | Upload ranking snapshots to Vercel Blob |
@@ -81,6 +81,8 @@ See [`.env.example`](.env.example).
 
 ## Architecture
 
+### Data flow (production)
+
 ```
 openfootball JSON ──► Vercel Cron ──► Vercel Blob (match data)
 RapidAPI rankings ──► Vercel Cron ──► Vercel Blob (rankings)
@@ -101,6 +103,38 @@ RapidAPI rankings ──► Vercel Cron ──► Vercel Blob (rankings)
 **Pro plan:** add more crons in `vercel.json` (e.g. hourly `/api/cron/sync-rankings`).
 
 Bundled JSON in `data/` is the fallback when Blob is empty or unavailable.
+
+### Application layers
+
+Tournament data is loaded once per request at the **service boundary**, then passed into pure domain functions as `TournamentContext`:
+
+```
+Vercel Blob / bundled JSON
+        │
+        ▼
+  data/ (worldcup-store, rankings-store, team-registry)
+        │
+        ▼
+  loadTournamentRuntime(mode)  →  { ctx, rankings }
+        │
+        ▼
+  services/ (analysis, simulation, facts)
+        │  precompute read-side analytics (group strength, path charts, …)
+        ▼
+  API routes  →  JSON DTOs
+        │
+        ▼
+  page clients (useApiQuery + useUrlParamsSync)
+        │
+        ▼
+  components (presentation only)
+```
+
+- **`TournamentContext`** (`src/lib/domain/tournament-context.ts`) — matches + team lookup; domain modules take `ctx` as their first argument instead of reading data singletons.
+- **`loadTournamentRuntime`** (`src/lib/services/tournament-runtime.ts`) — ensures worldcup data, builds context, loads rankings for a mode.
+- **Shared DTOs** — `src/lib/types.ts` for cross-layer shapes; `src/lib/api/responses.ts` re-exports service result types for page clients.
+- **Client hooks** — `useApiQuery` (fetch + abort + error state), `useUrlParamsSync` (URL param persistence), `useSyncedRankingMode` (ranking mode cookie/URL sync).
+- **Interactive simulation edits** (group swaps, knockout winner picks) stay on the client and POST scenario state to `/api/simulation`.
 
 **Ranking modes**
 
@@ -128,11 +162,13 @@ Legacy URL params `yearStart` and `tournamentStart` map to `january` and `june11
 ├── src/
 │   ├── app/                # Pages and API routes
 │   ├── components/         # UI components
-│   ├── hooks/              # Client hooks (e.g. synced ranking mode)
+│   ├── hooks/              # useApiQuery, useUrlParamsSync, useSyncedRankingMode
 │   └── lib/
-│       ├── data/           # Team registry, rankings client/store, flags
-│       ├── domain/         # Path builder, standings, difficulty, correlation
-│       └── services/       # Analysis, simulation, sync services
+│       ├── api/            # Shared API response type re-exports
+│       ├── client/         # Browser-only helpers (group selection, ranking prefs, …)
+│       ├── data/           # Team registry, rankings client/store, tournament context loader
+│       ├── domain/         # Pure logic (path builder, standings, difficulty, correlation)
+│       └── services/       # Analysis, simulation, facts, tournament-runtime
 └── vercel.json             # Vercel cron (once daily on Hobby)
 ```
 
@@ -141,14 +177,20 @@ Legacy URL params `yearStart` and `tournamentStart` map to `january` and `june11
 | Route | Purpose |
 |---|---|
 | `GET /api/teams?mode=live` | World Cup teams with flags |
-| `GET /api/analysis?team=ENG&mode=live` | Full path analysis for one team |
-| `GET /api/comparison?mode=live` | All-team difficulty leaderboard |
-| `GET /api/groups?mode=live` | Groups analysis data |
-| `GET /api/simulation?team=...&mode=...` | Simulation state for a team |
+| `GET /api/facts?mode=live` | Tournament snapshot, stage cohorts, highlights |
+| `GET /api/analysis?team=ENG&mode=live&stages=...` | Full path analysis for one team |
+| `GET /api/comparison?mode=live&stages=...&teamRound=...` | All-team difficulty leaderboard + team counts by stage |
+| `GET /api/groups?mode=live` | Group cards, strength ordering, points benchmarks |
+| `POST /api/simulation` | Simulation state (body: `{ mode, team, compareTeam?, scenario }`) |
 | `POST /api/simulation/strongest-winners` | Pick strongest winners for bracket |
 | `GET /api/cron/sync-scheduled` | Refresh all data in Blob (daily cron on Hobby) |
 | `GET /api/cron/sync-rankings` | Refresh live rankings only (manual, or Pro cron) |
 | `GET /api/cron/sync-worldcup` | Refresh match data only (manual) |
+
+### Notable response fields
+
+- **`GET /api/groups`** — `{ groups, strengthOrdering, pointsBenchmarks }`
+- **`POST /api/simulation`** — `SimulationResult` including precomputed `actualPathChart`, `simulatedPathChart`, `comparisonPathChart`
 
 ## Data sources
 

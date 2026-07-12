@@ -3,7 +3,7 @@ import {
   parsePathStages,
   parseTeamRound,
   syncTeamRoundToStages,
-} from "@/lib/domain/match-stages";
+} from "@/lib/domain/match/match-stages";
 import { parseRankingMode } from "@/lib/data/ranking-modes";
 import { getComparisonAnalysis } from "@/lib/services/analysis-service";
 

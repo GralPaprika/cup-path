@@ -7,8 +7,8 @@ import type {
   GroupStrengthOrdering,
 } from "@/lib/types";
 import { GroupCard } from "@/components/groups/group-card";
-import { GroupDetailPanel } from "@/components/group-detail-panel";
-import { GroupsAdvancedPanel } from "@/components/groups-advanced-panel";
+import { GroupDetailPanel } from "@/components/groups/group-detail-panel";
+import { GroupsAdvancedPanel } from "@/components/groups/groups-advanced-panel";
 import { GROUP_CARDS_GRID_CLASS } from "@/components/groups/layout-classes";
 import { QualificationLegend } from "@/components/groups/qualification-legend";
 import { scrollIntoViewRespectingMotion } from "@/lib/client/scroll-into-view";

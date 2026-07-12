@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { RankingMode } from "@/lib/types";
-import type { TournamentContext } from "@/lib/domain/tournament-context";
+import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
 import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
 import { getTournamentContext } from "@/lib/data/tournament-context";
 import { ensureWorldCupData } from "@/lib/data/worldcup-store";

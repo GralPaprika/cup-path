@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Team } from "@/lib/types";
-import { TeamFlag } from "@/components/team-flag";
+import { TeamFlag } from "@/components/team/team-flag";
 
 interface FactsMatchCellProps {
   team1: Team;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parsePathStages } from "@/lib/domain/match-stages";
+import { parsePathStages } from "@/lib/domain/match/match-stages";
 import { parseRankingMode } from "@/lib/data/ranking-modes";
 import { getTeamAnalysis } from "@/lib/services/analysis-service";
 

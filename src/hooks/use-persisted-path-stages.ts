@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { PathStage } from "@/lib/types";
-import { parsePathStages } from "@/lib/domain/match-stages";
+import { parsePathStages } from "@/lib/domain/match/match-stages";
 import {
   readInitialPathStages,
   writePathStagesPreference,

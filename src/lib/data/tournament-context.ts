@@ -2,7 +2,7 @@ import type { OpenFootballMatch, OpenFootballTeam } from "@/lib/types";
 import {
   createTournamentContext,
   type TournamentContext,
-} from "@/lib/domain/tournament-context";
+} from "@/lib/domain/tournament/tournament-context";
 import { getAllMatches } from "@/lib/data/worldcup-loader";
 import {
   getAllTeams,

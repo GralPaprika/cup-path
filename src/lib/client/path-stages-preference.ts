@@ -1,6 +1,6 @@
 import type { PathStage } from "@/lib/types";
-import { parsePathStages } from "@/lib/domain/match-stages";
-import { serializePathStages } from "@/components/path-stage-filters";
+import { parsePathStages } from "@/lib/domain/match/match-stages";
+import { serializePathStages } from "@/components/path/path-stage-filters";
 
 export type PathStagesPageId = "team-analysis" | "compare";
 

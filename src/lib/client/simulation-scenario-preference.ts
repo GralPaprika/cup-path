@@ -1,7 +1,7 @@
 import {
   emptySimulationScenario,
   parseSimulationScenario,
-} from "@/lib/domain/simulation-scenario";
+} from "@/lib/domain/core/simulation-scenario";
 import type { SimulationScenario } from "@/lib/types";
 
 export const SIMULATION_SCENARIO_STORAGE_KEY = "cuppath:simulate-scenario";

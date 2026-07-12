@@ -1,5 +1,5 @@
 import type { Team } from "@/lib/types";
-import { TeamFlag } from "@/components/team-flag";
+import { TeamFlag } from "@/components/team/team-flag";
 
 export function PathChartLegendLineItem({
   color,

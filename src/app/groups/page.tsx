@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { GroupsPageClient } from "@/components/groups-page-client";
+import { GroupsPageClient } from "@/components/pages/groups-page-client";
 import { ComparisonGroupsSkeleton } from "@/components/loading-skeletons";
 
 export default function GroupsPage() {

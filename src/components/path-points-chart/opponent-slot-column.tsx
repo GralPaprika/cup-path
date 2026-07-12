@@ -1,5 +1,5 @@
-import type { OpponentPointsObservation } from "@/lib/domain/path-opponent-observations";
-import { TeamFlag } from "@/components/team-flag";
+import type { OpponentPointsObservation } from "@/lib/domain/path/path-opponent-observations";
+import { TeamFlag } from "@/components/team/team-flag";
 import { OPPONENT_SLOT_MIN_WIDTH } from "@/components/path-points-chart/constants";
 
 interface OpponentSlotColumnProps {

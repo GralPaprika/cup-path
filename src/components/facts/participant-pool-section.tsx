@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import type { AvgPointsContext, Team } from "@/lib/types";
-import { TeamLabel } from "@/components/team-flag";
-import { AvgPointsContextHint } from "@/components/avg-points-context";
+import { TeamLabel } from "@/components/team/team-flag";
+import { AvgPointsContextHint } from "@/components/shared/avg-points-context";
 import { StatTile } from "@/components/facts/stat-tile";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 

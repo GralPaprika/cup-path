@@ -1,7 +1,7 @@
 "use client";
 
 import type { TeamHighlightFact, UpsetMatchFact } from "@/lib/types";
-import { TeamLabel } from "@/components/team-flag";
+import { TeamLabel } from "@/components/team/team-flag";
 import { useTranslations } from "next-intl";
 
 export function formatStageDelta(

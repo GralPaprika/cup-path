@@ -6,7 +6,7 @@ import {
   formatGoalDifference,
   formatStandingValue,
 } from "@/components/groups/standing-format";
-import { TeamLabel } from "@/components/team-flag";
+import { TeamLabel } from "@/components/team/team-flag";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";

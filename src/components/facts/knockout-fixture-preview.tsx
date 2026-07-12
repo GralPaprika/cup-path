@@ -1,9 +1,9 @@
 "use client";
 
 import type { KnockoutFixtureEntry } from "@/lib/types";
-import { TeamFlag } from "@/components/team-flag";
-import { MatchResultLabel } from "@/components/match-result-label";
-import { MatchScoreBreakdown } from "@/components/match-score-breakdown";
+import { TeamFlag } from "@/components/team/team-flag";
+import { MatchResultLabel } from "@/components/shared/match-result-label";
+import { MatchScoreBreakdown } from "@/components/path/match-score-breakdown";
 import { formatFifaPoints } from "@/lib/format";
 import { useTranslations } from "next-intl";
 

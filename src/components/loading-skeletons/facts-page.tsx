@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { KNOCKOUT_FACTS_ROUNDS } from "@/lib/domain/knockout-facts-round-config";
+import { KNOCKOUT_FACTS_ROUNDS } from "@/lib/domain/knockout/knockout-facts-round-config";
 import {
   AT_GLANCE_MATCH_TILES,
   AtGlanceRowSkeleton,
@@ -33,18 +33,6 @@ export function FactsPageSkeleton() {
         <Skeleton className="h-8 w-64 bg-white/10 sm:h-9" />
         <Skeleton className="mt-1 h-4 w-full max-w-3xl bg-white/10 sm:h-5" />
       </header>
-
-      <div className="glass-panel mb-6 p-5 sm:p-6">
-        <Skeleton className="mb-3 h-2.5 w-40 bg-white/10" />
-        <div className="flex flex-wrap gap-1.5 rounded-xl border border-white/10 bg-white/5 p-1">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <Skeleton
-              key={index}
-              className="h-9 flex-1 rounded-lg bg-white/10 sm:flex-none sm:w-24"
-            />
-          ))}
-        </div>
-      </div>
 
       <div className="space-y-6">
         <ParticipantPoolSectionSkeleton />

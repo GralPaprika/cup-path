@@ -2,14 +2,14 @@ import type { RankingMode, TournamentFacts } from "@/lib/types";
 import {
   buildAllTeamSummaries,
   buildComparison,
-} from "@/lib/domain/difficulty";
-import { buildGroupComparisonCards } from "@/lib/domain/group-comparison";
-import { DEFAULT_PATH_STAGES } from "@/lib/domain/match-stages";
-import { buildTournamentFacts } from "@/lib/domain/tournament-facts";
-import { buildGroupExpectedAnalysis } from "@/lib/domain/group-expected-finishes";
-import { buildGroupStageDifficultyStrip } from "@/lib/domain/group-stage-difficulty";
-import { buildKnockoutFactsAnalyses } from "@/lib/domain/knockout-facts-rounds";
-import { getTeamCountsByStage } from "@/lib/domain/team-stages";
+} from "@/lib/domain/core/difficulty";
+import { buildGroupComparisonCards } from "@/lib/domain/group/group-comparison";
+import { DEFAULT_PATH_STAGES } from "@/lib/domain/match/match-stages";
+import { buildTournamentFacts } from "@/lib/domain/tournament/tournament-facts";
+import { buildGroupExpectedAnalysis } from "@/lib/domain/group/group-expected-finishes";
+import { buildGroupStageDifficultyStrip } from "@/lib/domain/group/group-stage-difficulty";
+import { buildKnockoutFactsAnalyses } from "@/lib/domain/knockout/knockout-facts-rounds";
+import { getTeamCountsByStage } from "@/lib/domain/team/team-stages";
 import { loadTournamentRuntime } from "@/lib/services/tournament-runtime";
 
 export async function getTournamentFacts(

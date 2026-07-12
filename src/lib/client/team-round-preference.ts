@@ -1,5 +1,5 @@
 import type { PathStage } from "@/lib/types";
-import { parseTeamRound } from "@/lib/domain/match-stages";
+import { parseTeamRound } from "@/lib/domain/match/match-stages";
 
 export type TeamRoundPageId = "compare";
 

@@ -1,4 +1,4 @@
-import type { OpponentPointsObservation } from "@/lib/domain/path-opponent-observations";
+import type { OpponentPointsObservation } from "@/lib/domain/path/path-opponent-observations";
 import {
   BAR_GAP_THREE_SERIES,
   BAR_GAP_TWO_SERIES,

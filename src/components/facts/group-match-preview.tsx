@@ -1,8 +1,8 @@
 "use client";
 
 import type { GroupExpectedMatchEntry } from "@/lib/types";
-import { TeamFlag } from "@/components/team-flag";
-import { MatchResultLabel } from "@/components/match-result-label";
+import { TeamFlag } from "@/components/team/team-flag";
+import { MatchResultLabel } from "@/components/shared/match-result-label";
 import { formatFifaPoints } from "@/lib/format";
 import { useTranslations } from "next-intl";
 

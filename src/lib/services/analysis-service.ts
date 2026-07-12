@@ -8,35 +8,35 @@ import type {
   RankingMode,
   TeamPathSummary,
 } from "@/lib/types";
-import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
+import { buildAvgPointsContext } from "@/lib/domain/core/points-anchor";
 import {
   applyStageFilterToSummary,
   buildAllTeamSummaries,
   buildComparison,
   buildTeamPathSummary,
   getHardestPathRank,
-} from "@/lib/domain/difficulty";
-import { buildGroupComparisonCards } from "@/lib/domain/group-comparison";
+} from "@/lib/domain/core/difficulty";
+import { buildGroupComparisonCards } from "@/lib/domain/group/group-comparison";
 import {
   computeGroupPointsBenchmarks,
   computeGroupStrengthOrdering,
-} from "@/lib/domain/group-strength-ordering";
+} from "@/lib/domain/group/group-strength-ordering";
 import {
   collectCohortDifficultyValues,
   computePathOpponentStats,
   type PathOpponentStats,
-} from "@/lib/domain/path-opponent-stats";
+} from "@/lib/domain/path/path-opponent-stats";
 import {
   computeCohortOrderingCorrelation,
   type CohortOrderingCorrelation,
-} from "@/lib/domain/rank-correlation";
-import { DEFAULT_PATH_STAGES, getFurthestStage } from "@/lib/domain/match-stages";
+} from "@/lib/domain/core/rank-correlation";
+import { DEFAULT_PATH_STAGES, getFurthestStage } from "@/lib/domain/match/match-stages";
 import {
   getCompareMaxStageReached,
   getTeamCountsByStage,
   getTeamMaxStageReached,
   getTeamsAtStage,
-} from "@/lib/domain/team-stages";
+} from "@/lib/domain/team/team-stages";
 import { loadTournamentRuntime } from "@/lib/services/tournament-runtime";
 
 export interface TeamAnalysisAdvanced {

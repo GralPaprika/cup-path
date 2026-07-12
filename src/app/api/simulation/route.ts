@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseRankingMode } from "@/lib/data/ranking-modes";
-import { emptySimulationScenario } from "@/lib/domain/simulation-scenario";
+import { emptySimulationScenario } from "@/lib/domain/core/simulation-scenario";
 import { getSimulationAnalysis } from "@/lib/services/simulation-service";
 import type { SimulationScenario } from "@/lib/types";
 

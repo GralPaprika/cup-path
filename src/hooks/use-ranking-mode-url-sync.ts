@@ -1,6 +1,6 @@
 "use client";
 
-import { useRankingMode } from "@/components/ranking-mode-provider";
+import { useRankingMode } from "@/components/layout/ranking-mode-provider";
 import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
 
 type ExtraParams = URLSearchParams | Record<string, string>;

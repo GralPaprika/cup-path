@@ -6,21 +6,21 @@ import {
   getDownstreamMatchNums,
   getFocusTeamMatchNums,
   resolveBracket,
-} from "@/lib/domain/bracket-resolver";
-import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
-import { buildProjectedTeamPathSummary } from "@/lib/domain/projected-path-builder";
-import { buildTeamPathSummary } from "@/lib/domain/difficulty";
-import { computePathDiff } from "@/lib/domain/path-diff";
+} from "@/lib/domain/bracket/bracket-resolver";
+import { buildAvgPointsContext } from "@/lib/domain/core/points-anchor";
+import { buildProjectedTeamPathSummary } from "@/lib/domain/core/projected-path-builder";
+import { buildTeamPathSummary } from "@/lib/domain/core/difficulty";
+import { computePathDiff } from "@/lib/domain/path/path-diff";
 import {
   buildBestThirdRanking,
   buildGroupFinishCards,
   getBaselineGroupFinishes,
   normalizeGroupFinishes,
-} from "@/lib/domain/group-finishes";
-import { hasStrongestWinnerTargets } from "@/lib/domain/strongest-path-winners";
-import { buildPathChartDataFromSummary, getMaxStageFromMatches, getSharedMaxStage } from "@/lib/domain/path-opponent-observations";
+} from "@/lib/domain/group/group-finishes";
+import { hasStrongestWinnerTargets } from "@/lib/domain/core/strongest-path-winners";
+import { buildPathChartDataFromSummary, getMaxStageFromMatches, getSharedMaxStage } from "@/lib/domain/path/path-opponent-observations";
 import { loadTournamentRuntime } from "@/lib/services/tournament-runtime";
-import type { TournamentContext } from "@/lib/domain/tournament-context";
+import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
 
 function mergeGroupFinishes(
   ctx: TournamentContext,

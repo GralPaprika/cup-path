@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { FactsPageClient } from "@/components/facts-page-client";
+import { FactsPageClient } from "@/components/pages/facts-page-client";
 import { FactsPageSkeleton } from "@/components/loading-skeletons";
 
 type HomePageProps = {

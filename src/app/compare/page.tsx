@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ComparePageClient } from "@/components/compare-page-client";
+import { ComparePageClient } from "@/components/pages/compare-page-client";
 import { CompareLoadingSkeleton } from "@/components/loading-skeletons";
 
 export default function ComparePage() {

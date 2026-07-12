@@ -4,8 +4,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Geist_Mono } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { RankingModeProvider } from "@/components/ranking-mode-provider";
-import { SiteHeader } from "@/components/site-header";
+import { RankingModeProvider } from "@/components/layout/ranking-mode-provider";
+import { SiteHeader } from "@/components/layout/site-header";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({

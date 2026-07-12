@@ -13,7 +13,7 @@ import {
   UpsetHighlightBody,
 } from "@/components/facts/facts-highlight-bodies";
 import { KNOCKOUT_FACTS_ROUNDS } from "@/lib/domain/knockout-facts-round-config";
-import { PageShellSkeleton } from "@/components/loading-skeletons";
+import { FactsPageSkeleton } from "@/components/loading-skeletons";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
@@ -46,11 +46,7 @@ export function FactsPageClient() {
   const stageLabel = (stage: PathStage) => stages(COMPARE_STAGE_I18N_KEYS[stage]);
 
   if (loading && !facts) {
-    return (
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-        <PageShellSkeleton />
-      </div>
-    );
+    return <FactsPageSkeleton />;
   }
 
   return (

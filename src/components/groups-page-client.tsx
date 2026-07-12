@@ -22,7 +22,9 @@ export function GroupsPageClient() {
   const [mode, setMode] = useSyncedRankingMode(searchParams);
   const [selectedGroupLetter, setSelectedGroupLetter] = useState("A");
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [detailScrollTrigger, setDetailScrollTrigger] = useState(0);
   const userPickedGroup = useRef(false);
+  const deepLinkScrollPending = useRef(Boolean(selectedTeamId));
 
   const groupsUrl = `/api/groups?mode=${mode}`;
   const {
@@ -39,7 +41,14 @@ export function GroupsPageClient() {
 
   useEffect(() => {
     userPickedGroup.current = false;
+    deepLinkScrollPending.current = Boolean(selectedTeamId);
   }, [selectedTeamId, mode]);
+
+  useEffect(() => {
+    if (!deepLinkScrollPending.current || groupCards.length === 0) return;
+    deepLinkScrollPending.current = false;
+    setDetailScrollTrigger((count) => count + 1);
+  }, [groupCards.length]);
 
   useEffect(() => {
     if (groupCards.length === 0 || userPickedGroup.current) return;
@@ -62,6 +71,7 @@ export function GroupsPageClient() {
   function handleSelectGroup(groupLetter: string) {
     userPickedGroup.current = true;
     setSelectedGroupLetter(groupLetter);
+    setDetailScrollTrigger((count) => count + 1);
   }
 
   return (
@@ -103,6 +113,7 @@ export function GroupsPageClient() {
             selectedTeamId={selectedTeamId ?? undefined}
             advancedOpen={advancedOpen}
             onAdvancedOpenChange={setAdvancedOpen}
+            detailScrollTrigger={detailScrollTrigger}
           />
         )}
       </div>

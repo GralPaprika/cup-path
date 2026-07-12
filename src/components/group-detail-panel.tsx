@@ -4,30 +4,17 @@ import type {
   GroupComparisonCard,
   GroupPointsBenchmarks,
 } from "@/lib/types";
+import { GroupTeamTableRow } from "@/components/groups/group-team-table-row";
 import { useTranslations } from "next-intl";
-import { TeamLabel } from "@/components/team-flag";
 import { GroupFifaPointsChart } from "@/components/group-fifa-points-chart";
 import { StatsBlock } from "@/components/stats-block";
-import { QUALIFICATION_ROW_STYLES } from "@/components/groups/qualification-styles";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
-import { formatFifaPoints, formatStatValue } from "@/lib/format";
-
-function formatGoalDifference(value: number): string {
-  if (value > 0) return `+${value}`;
-  return String(value);
-}
-
-function formatStandingValue(played: number, value: number | string): string {
-  return played > 0 ? String(value) : "—";
-}
 
 interface GroupDetailPanelProps {
   group: GroupComparisonCard;
@@ -95,74 +82,14 @@ export function GroupDetailPanel({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {group.teams.map((entry) => {
-                const isSelected = entry.team.id === selectedTeamId;
-
-                return (
-                  <TableRow
-                    key={entry.team.id}
-                    className={cn(
-                      "border-white/6",
-                      entry.qualificationStatus &&
-                        QUALIFICATION_ROW_STYLES[entry.qualificationStatus],
-                      isSelected && "ring-1 ring-inset ring-wc-sky/50",
-                    )}
-                  >
-                    <TableCell className="px-3 py-2.5 text-center font-mono text-sm text-muted-foreground">
-                      {entry.standing.position}
-                    </TableCell>
-                    <TableCell className="max-w-[10rem] whitespace-normal px-3 py-2.5">
-                      <TeamLabel
-                        team={entry.team}
-                        showCode
-                        flagSize="sm"
-                        className="w-full"
-                        nameClassName="text-sm font-medium text-white"
-                      />
-                    </TableCell>
-                    <TableCell className="px-3 py-2.5 text-center font-mono text-sm tabular-nums text-white">
-                      {formatStandingValue(
-                        entry.standing.played,
-                        entry.standing.points,
-                      )}
-                    </TableCell>
-                    <TableCell className="px-3 py-2.5 text-center font-mono text-sm tabular-nums text-muted-foreground">
-                      {entry.standing.played > 0
-                        ? formatGoalDifference(entry.standing.gd)
-                        : "—"}
-                    </TableCell>
-                    <TableCell className="px-3 py-2.5 text-center font-mono text-sm tabular-nums text-white">
-                      {formatStandingValue(
-                        entry.standing.played,
-                        entry.standing.gf,
-                      )}
-                    </TableCell>
-                    <TableCell className="px-3 py-2.5 text-center font-mono text-sm tabular-nums text-white">
-                      {formatStandingValue(
-                        entry.standing.played,
-                        entry.standing.ga,
-                      )}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-2.5 text-right font-mono text-sm tabular-nums text-wc-orange">
-                      {formatFifaPoints(entry.fifaPoints)}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-2.5 text-right font-mono text-sm tabular-nums text-white">
-                      {entry.fifaRank ?? "—"}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-2.5 text-right font-mono text-sm tabular-nums text-wc-orange">
-                      {formatFifaPoints(entry.avgOpponentPoints)}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-2.5 text-right font-mono text-sm tabular-nums text-white">
-                      {entry.avgOpponentRank !== null
-                        ? formatStatValue(entry.avgOpponentRank, 1)
-                        : "—"}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-2.5 text-center font-mono text-sm tabular-nums text-muted-foreground">
-                      {entry.rankAmongTeams ?? "—"}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {group.teams.map((entry) => (
+                <GroupTeamTableRow
+                  key={entry.team.id}
+                  entry={entry}
+                  selectedTeamId={selectedTeamId}
+                  variant="full"
+                />
+              ))}
             </TableBody>
           </Table>
         </div>

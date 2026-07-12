@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { FactsPageClient } from "@/components/facts-page-client";
-import { PageShellSkeleton } from "@/components/loading-skeletons";
+import { FactsPageSkeleton } from "@/components/loading-skeletons";
 
 type HomePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -19,7 +19,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }
 
   return (
-    <Suspense fallback={<PageShellSkeleton />}>
+    <Suspense fallback={<FactsPageSkeleton />}>
       <FactsPageClient />
     </Suspense>
   );

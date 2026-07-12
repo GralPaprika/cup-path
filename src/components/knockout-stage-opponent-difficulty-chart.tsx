@@ -2,7 +2,6 @@
 
 import { KnockoutStageOpponentDifficultyInsightsPanel } from "@/components/knockout-stage-opponent-difficulty-insights";
 import type { KnockoutOpponentDifficultyStrip } from "@/lib/types";
-import type { KnockoutStageTranslationNamespace } from "@/components/knockout-stage-panel";
 import { formatFifaPoints } from "@/lib/format";
 import { CHART_COLORS } from "@/lib/chart-colors";
 import { cn } from "@/lib/utils";
@@ -11,8 +10,11 @@ import { useTranslations } from "next-intl";
 interface KnockoutStageOpponentDifficultyChartProps {
   strip: KnockoutOpponentDifficultyStrip;
   mode: string;
-  translationNamespace: KnockoutStageTranslationNamespace;
   wideBars?: boolean;
+  opponentDifficultyTitle: string;
+  opponentDifficultySubtitle: string;
+  opponentDifficultyCaption: string;
+  opponentDifficultyFootnote: string;
 }
 
 const DEFAULT_BAR_WIDTH = 26;
@@ -31,10 +33,13 @@ function barLayout(wideBars: boolean) {
 export function KnockoutStageOpponentDifficultyChart({
   strip,
   mode,
-  translationNamespace,
   wideBars = false,
+  opponentDifficultyTitle,
+  opponentDifficultySubtitle,
+  opponentDifficultyCaption,
+  opponentDifficultyFootnote,
 }: KnockoutStageOpponentDifficultyChartProps) {
-  const t = useTranslations(translationNamespace);
+  const shared = useTranslations("home.knockoutStage");
 
   const { entries } = strip;
   if (entries.length === 0) return null;
@@ -64,21 +69,21 @@ export function KnockoutStageOpponentDifficultyChart({
       value: strip.meanOpponentPoints,
       stroke: CHART_COLORS.mean,
       dash: "4 4",
-      label: t("opponentDifficultyLegendMean"),
+      label: shared("opponentDifficultyLegendMean"),
       className: "text-wc-orange",
     },
     {
       value: strip.maxOpponentPoints,
       stroke: "var(--color-wc-red)",
       dash: "2 3",
-      label: t("opponentDifficultyLegendHighest"),
+      label: shared("opponentDifficultyLegendHighest"),
       className: "text-wc-red",
     },
     {
       value: strip.minOpponentPoints,
       stroke: "var(--color-wc-sky)",
       dash: "2 3",
-      label: t("opponentDifficultyLegendLowest"),
+      label: shared("opponentDifficultyLegendLowest"),
       className: "text-wc-sky",
     },
   ].filter(
@@ -89,10 +94,10 @@ export function KnockoutStageOpponentDifficultyChart({
     <div className="space-y-3">
       <div>
         <h3 className="text-sm font-semibold text-white">
-          {t("opponentDifficultyTitle")}
+          {opponentDifficultyTitle}
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t("opponentDifficultySubtitle", { count: entries.length })}
+          {opponentDifficultySubtitle}
         </p>
       </div>
 
@@ -100,18 +105,17 @@ export function KnockoutStageOpponentDifficultyChart({
         insights={strip.insights}
         meanOpponentPoints={strip.meanOpponentPoints}
         mode={mode}
-        translationNamespace={translationNamespace}
       />
 
       <figure className="overflow-hidden rounded-xl border border-white/8 bg-black/10 p-3">
         <figcaption className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-green/80" />
-            {t("opponentDifficultyLegendQualified")}
+            {shared("opponentDifficultyLegendQualified")}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-red/80" />
-            {t("opponentDifficultyLegendEliminated")}
+            {shared("opponentDifficultyLegendEliminated")}
           </span>
           {referenceLines.map((line) => (
             <span
@@ -144,7 +148,7 @@ export function KnockoutStageOpponentDifficultyChart({
             className={wideBars ? "block h-auto w-full" : "block shrink-0"}
             preserveAspectRatio={wideBars ? "xMidYMid meet" : undefined}
             role="img"
-            aria-label={t("opponentDifficultyCaption")}
+            aria-label={opponentDifficultyCaption}
           >
             <line
               x1={MARGIN.left}
@@ -197,13 +201,13 @@ export function KnockoutStageOpponentDifficultyChart({
                     }
                   >
                     <title>
-                      {t("opponentDifficultyTooltip", {
+                      {shared("opponentDifficultyTooltip", {
                         team: entry.team.id,
                         opponent: entry.opponent.id,
                         points: formatFifaPoints(entry.opponentFifaPoints),
                         status: entry.qualified
-                          ? t("opponentDifficultyQualified")
-                          : t("opponentDifficultyEliminated"),
+                          ? shared("opponentDifficultyQualified")
+                          : shared("opponentDifficultyEliminated"),
                       })}
                     </title>
                   </rect>
@@ -233,7 +237,7 @@ export function KnockoutStageOpponentDifficultyChart({
         </div>
 
         <p className="mt-2 text-xs text-muted-foreground">
-          {t("opponentDifficultyFootnote")}
+          {opponentDifficultyFootnote}
         </p>
       </figure>
     </div>

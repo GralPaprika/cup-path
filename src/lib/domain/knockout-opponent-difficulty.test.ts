@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
-import { buildRound32Analysis } from "@/lib/domain/round-of-32-analysis";
-import { buildRound32OpponentDifficultyStrip } from "@/lib/domain/round-of-32-opponent-difficulty";
+import { buildKnockoutStageAnalysis } from "@/lib/domain/knockout-stage-analysis";
+import { buildKnockoutOpponentDifficultyStrip } from "@/lib/domain/knockout-opponent-difficulty";
 import {
   groupAMatchesComplete,
   groupBMatchesComplete,
@@ -14,7 +14,7 @@ afterEach(() => {
   restoreBundledWorldCup();
 });
 
-describe("buildRound32OpponentDifficultyStrip", () => {
+describe("buildKnockoutOpponentDifficultyStrip", () => {
   it("builds one entry per team from played Round of 32 fixtures", () => {
     applyWorldCupBundle({
       name: "test",
@@ -37,7 +37,7 @@ describe("buildRound32OpponentDifficultyStrip", () => {
       ["MAR", rankingEntry("MAR", 11, 1713)],
     ]);
 
-    const analysis = buildRound32Analysis([], rankings);
+    const analysis = buildKnockoutStageAnalysis("Round of 32", rankings);
     assert.ok(analysis?.opponentDifficulty);
 
     const strip = analysis.opponentDifficulty;
@@ -54,7 +54,7 @@ describe("buildRound32OpponentDifficultyStrip", () => {
   });
 
   it("sorts entries by opponent FIFA points descending", () => {
-    const strip = buildRound32OpponentDifficultyStrip([
+    const strip = buildKnockoutOpponentDifficultyStrip([
       {
         matchNum: 1,
         date: "2026-06-29",

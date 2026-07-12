@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import type { KnockoutFixtureEntry } from "@/lib/types";
-import type { KnockoutStageTranslationNamespace } from "@/components/knockout-stage-panel";
+import { SortButton, type SortDirection } from "@/components/facts/sort-button";
 import { TeamFlag } from "@/components/team-flag";
 import { MatchScoreBreakdown } from "@/components/match-score-breakdown";
 import { formatFifaPoints } from "@/lib/format";
@@ -16,42 +15,6 @@ const PAGE_SIZE = 10;
 interface KnockoutStageTableProps {
   fixtures: KnockoutFixtureEntry[];
   mode: string;
-  translationNamespace: KnockoutStageTranslationNamespace;
-}
-
-type GapSortDirection = "desc" | "asc";
-
-function SortButton({
-  active,
-  direction,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  direction: GapSortDirection;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium transition-colors",
-        active
-          ? "bg-wc-sky/15 text-wc-sky"
-          : "text-muted-foreground hover:bg-white/6 hover:text-white",
-      )}
-    >
-      {children}
-      {active &&
-        (direction === "desc" ? (
-          <ArrowDown className="size-3 shrink-0" />
-        ) : (
-          <ArrowUp className="size-3 shrink-0" />
-        ))}
-    </button>
-  );
 }
 
 function MatchCell({
@@ -61,7 +24,7 @@ function MatchCell({
   fixture: KnockoutFixtureEntry;
   mode: string;
 }) {
-  const t = useTranslations("home.groupExpectedFinishes");
+  const tables = useTranslations("home.factsTables");
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
@@ -84,19 +47,15 @@ function MatchCell({
         <TeamFlag team={fixture.team2} size="sm" />
         <span className="font-mono font-semibold">{fixture.team2.id}</span>
       </Link>
-      <span className="sr-only">{t("vs")}</span>
+      <span className="sr-only">{tables("vs")}</span>
     </div>
   );
 }
 
-export function KnockoutStageTable({
-  fixtures,
-  mode,
-  translationNamespace,
-}: KnockoutStageTableProps) {
-  const t = useTranslations(translationNamespace);
-  const shared = useTranslations("home.groupExpectedFinishes");
-  const [gapSort, setGapSort] = useState<GapSortDirection>("asc");
+export function KnockoutStageTable({ fixtures, mode }: KnockoutStageTableProps) {
+  const shared = useTranslations("home.knockoutStage");
+  const tables = useTranslations("home.factsTables");
+  const [gapSort, setGapSort] = useState<SortDirection>("asc");
   const [page, setPage] = useState(0);
 
   useEffect(() => {
@@ -133,21 +92,17 @@ export function KnockoutStageTable({
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead>
             <tr className="border-b border-white/8 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              <th className="px-3 py-2.5">{t("columnMatch")}</th>
-              <th className="px-3 py-2.5">{shared("drawsColumnMatch")}</th>
-              <th className="px-3 py-2.5 text-right">
-                {shared("drawsColumnTeamAPts")}
-              </th>
-              <th className="px-3 py-2.5 text-right">
-                {shared("drawsColumnTeamBPts")}
-              </th>
+              <th className="px-3 py-2.5">{shared("columnMatch")}</th>
+              <th className="px-3 py-2.5">{tables("columnMatch")}</th>
+              <th className="px-3 py-2.5 text-right">{tables("columnTeamAPts")}</th>
+              <th className="px-3 py-2.5 text-right">{tables("columnTeamBPts")}</th>
               <th className="px-3 py-2.5 text-right">
                 <SortButton active direction={gapSort} onClick={toggleGapSort}>
-                  {shared("drawsColumnGap")}
+                  {tables("columnGap")}
                 </SortButton>
               </th>
-              <th className="px-3 py-2.5">{shared("winLossColumnUpset")}</th>
-              <th className="px-3 py-2.5">{t("columnQualified")}</th>
+              <th className="px-3 py-2.5">{tables("columnUpset")}</th>
+              <th className="px-3 py-2.5">{shared("columnQualified")}</th>
             </tr>
           </thead>
           <tbody>
@@ -184,7 +139,7 @@ export function KnockoutStageTable({
                   <td className="px-3 py-2.5">
                     {fixture.isGapOutlier ? (
                       <span className="inline-flex rounded-md border border-wc-orange/40 bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
-                        {shared("upsetWinBadge")}
+                        {tables("upsetBadge")}
                       </span>
                     ) : (
                       <span className="text-muted-foreground">—</span>
@@ -211,18 +166,16 @@ export function KnockoutStageTable({
       <div className="space-y-1">
         {fixtures.some((fixture) => fixture.upsetWin) && (
           <p className="text-xs text-muted-foreground">
-            {shared("winLossTableUnderdogHint")}
+            {tables("underdogRowHint")}
           </p>
         )}
-        <p className="text-xs text-muted-foreground">
-          {shared("winLossTableUpsetHint")}
-        </p>
+        <p className="text-xs text-muted-foreground">{tables("upsetRowHint")}</p>
       </div>
 
       {sortedFixtures.length > PAGE_SIZE && (
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>
-            {shared("drawsTablePageInfo", {
+            {tables("pageInfo", {
               start: pageStart + 1,
               end: Math.min(pageStart + PAGE_SIZE, sortedFixtures.length),
               total: sortedFixtures.length,
@@ -235,10 +188,10 @@ export function KnockoutStageTable({
               onClick={() => setPage((current) => Math.max(0, current - 1))}
               className="rounded-md border border-white/10 px-2.5 py-1 font-medium text-white transition-colors enabled:hover:border-white/20 enabled:hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {shared("drawsTablePrev")}
+              {tables("prev")}
             </button>
             <span className="font-mono tabular-nums">
-              {shared("drawsTablePageCount", {
+              {tables("pageCount", {
                 page: safePage + 1,
                 totalPages,
               })}
@@ -251,7 +204,7 @@ export function KnockoutStageTable({
               }
               className="rounded-md border border-white/10 px-2.5 py-1 font-medium text-white transition-colors enabled:hover:border-white/20 enabled:hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {shared("drawsTableNext")}
+              {tables("next")}
             </button>
           </div>
         </div>

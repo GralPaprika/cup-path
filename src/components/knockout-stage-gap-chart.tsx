@@ -1,7 +1,6 @@
 "use client";
 
 import type { KnockoutFixtureEntry } from "@/lib/types";
-import type { KnockoutStageTranslationNamespace } from "@/components/knockout-stage-panel";
 import { formatFifaPoints } from "@/lib/format";
 import { CHART_COLORS } from "@/lib/chart-colors";
 import { cn } from "@/lib/utils";
@@ -11,7 +10,7 @@ interface KnockoutStageGapChartProps {
   fixtures: KnockoutFixtureEntry[];
   mean: number | null;
   stdDev: number | null;
-  translationNamespace: KnockoutStageTranslationNamespace;
+  gapChartCaption: string;
 }
 
 const WIDTH = 640;
@@ -33,10 +32,10 @@ export function KnockoutStageGapChart({
   fixtures,
   mean,
   stdDev,
-  translationNamespace,
+  gapChartCaption,
 }: KnockoutStageGapChartProps) {
-  const t = useTranslations(translationNamespace);
-  const shared = useTranslations("home.groupExpectedFinishes");
+  const shared = useTranslations("home.knockoutStage");
+  const tables = useTranslations("home.factsTables");
 
   if (fixtures.length === 0) return null;
 
@@ -74,26 +73,26 @@ export function KnockoutStageGapChart({
       <figcaption className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2 w-2 rounded-full bg-wc-green/85" />
-          {t("gapChartLegendFavoriteQualified")}
+          {shared("gapChartLegendFavoriteQualified")}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2 w-2 rounded-full bg-wc-orange/85" />
-          {t("gapChartLegendUnderdogQualified")}
+          {shared("gapChartLegendUnderdogQualified")}
         </span>
         <span className="flex items-center gap-1.5 text-wc-orange">
           <span className="inline-block w-5 border-t border-dashed border-wc-orange" />
-          {shared("drawGapChartLegendMean")}
+          {tables("gapChartLegendMean")}
         </span>
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block h-3 w-5 rounded-sm"
             style={{ backgroundColor: CHART_COLORS.stdDevBand, opacity: 0.35 }}
           />
-          {shared("drawGapChartLegendBand")}
+          {tables("gapChartLegendBand")}
         </span>
         <span className="flex items-center gap-1.5 text-wc-orange">
           <span className="inline-flex h-3 w-3 items-center justify-center rounded-full border-2 border-wc-orange" />
-          {t("gapChartLegendBigUpset")}
+          {shared("gapChartLegendBigUpset")}
         </span>
       </figcaption>
 
@@ -101,7 +100,7 @@ export function KnockoutStageGapChart({
         className="h-auto w-full"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
-        aria-label={t("gapChartCaption")}
+        aria-label={gapChartCaption}
       >
         <line
           x1={MARGIN.left}
@@ -159,7 +158,7 @@ export function KnockoutStageGapChart({
                 className={cn(dotClassName(fixture))}
               >
                 <title>
-                  {t("gapChartTooltip", {
+                  {shared("gapChartTooltip", {
                     match:
                       fixture.matchNum !== null
                         ? `#${fixture.matchNum}`
@@ -193,15 +192,13 @@ export function KnockoutStageGapChart({
       </svg>
 
       <div className="space-y-1">
-        <p className="text-xs text-muted-foreground">{t("gapChartFootnote")}</p>
+        <p className="text-xs text-muted-foreground">{shared("gapChartFootnote")}</p>
         {fixtures.some((fixture) => fixture.upsetWin) && (
           <p className="text-xs text-muted-foreground">
-            {shared("winLossTableUnderdogHint")}
+            {tables("underdogRowHint")}
           </p>
         )}
-        <p className="text-xs text-muted-foreground">
-          {shared("winLossTableUpsetHint")}
-        </p>
+        <p className="text-xs text-muted-foreground">{tables("upsetRowHint")}</p>
       </div>
     </figure>
   );

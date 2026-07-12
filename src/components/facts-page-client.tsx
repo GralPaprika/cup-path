@@ -10,14 +10,14 @@ import type {
   UpsetMatchFact,
 } from "@/lib/types";
 import { GroupExpectedFinishesPanel } from "@/components/group-expected-finishes-panel";
-import { RoundOf32Panel } from "@/components/round-of-32-panel";
-import { RoundOf16Panel } from "@/components/round-of-16-panel";
+import { KnockoutStagePanel } from "@/components/knockout-stage-panel";
+import { ParticipantPoolSection } from "@/components/facts/participant-pool-section";
+import { KNOCKOUT_FACTS_ROUNDS } from "@/lib/domain/knockout-facts-round-config";
 import { PageShellSkeleton } from "@/components/loading-skeletons";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { TeamLabel } from "@/components/team-flag";
-import { AvgPointsContextHint } from "@/components/avg-points-context";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
-import { formatFifaPoints, formatStatValue } from "@/lib/format";
+import { formatFifaPoints } from "@/lib/format";
 import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -236,78 +236,32 @@ export function FactsPageClient() {
 
       {facts && (
         <div className="space-y-6">
-          <section className="glass-panel space-y-4 p-5 sm:p-6">
-            <div>
-              <h2 className="text-lg font-semibold text-white">
-                {t("groupStagePool.title")}
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("groupStagePool.subtitle", {
-                  count: facts.groupStagePool.teamCount,
-                })}
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <StatTile
-                label={t("groupStagePool.avgFifaPoints")}
-                value={formatFifaPoints(facts.groupStagePool.avgFifaPoints)}
-                footer={
-                  <AvgPointsContextHint
-                    context={facts.groupStagePool.avgFifaPointsContext}
-                    align="left"
-                  />
-                }
-              />
-              <StatTile
-                label={t("groupStagePool.medianFifaRank")}
-                value={
-                  facts.groupStagePool.medianFifaRank !== null
-                    ? `#${formatStatValue(facts.groupStagePool.medianFifaRank, 0)}`
-                    : "—"
-                }
-              />
-              {facts.groupStagePool.lowestRankedQualifier ? (
-                <Link
-                  href={`/team-analysis?team=${facts.groupStagePool.lowestRankedQualifier.team.id}&mode=${mode}`}
-                  className="block rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
-                >
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                    {t("groupStagePool.lowestRankedQualifier")}
-                  </p>
-                  <div className="mt-2">
-                    <TeamLabel
-                      team={facts.groupStagePool.lowestRankedQualifier.team}
-                      showCode
-                      flagSize="sm"
-                      nameClassName="text-sm font-semibold text-white"
-                    />
-                  </div>
-                  <p className="mt-2 font-mono text-sm tabular-nums text-wc-orange">
-                    FIFA #
-                    {formatStatValue(
-                      facts.groupStagePool.lowestRankedQualifier.fifaRank,
-                      0,
-                    )}{" "}
-                    · {formatFifaPoints(
-                      facts.groupStagePool.lowestRankedQualifier.fifaPoints,
-                    )}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t("groupStagePool.lowestRankedQualifierHint", {
+          <ParticipantPoolSection
+            title={t("groupStagePool.title")}
+            subtitle={t("groupStagePool.subtitle", {
+              count: facts.groupStagePool.teamCount,
+            })}
+            avgFifaPointsLabel={t("groupStagePool.avgFifaPoints")}
+            medianFifaRankLabel={t("groupStagePool.medianFifaRank")}
+            lowestRankedQualifierLabel={t("groupStagePool.lowestRankedQualifier")}
+            avgFifaPoints={facts.groupStagePool.avgFifaPoints}
+            avgFifaPointsContext={facts.groupStagePool.avgFifaPointsContext}
+            medianFifaRank={facts.groupStagePool.medianFifaRank}
+            lowestRankedQualifier={
+              facts.groupStagePool.lowestRankedQualifier
+                ? {
+                    team: facts.groupStagePool.lowestRankedQualifier.team,
+                    fifaRank: facts.groupStagePool.lowestRankedQualifier.fifaRank,
+                    fifaPoints: facts.groupStagePool.lowestRankedQualifier.fifaPoints,
+                    hint: t("groupStagePool.lowestRankedQualifierHint", {
                       group:
                         facts.groupStagePool.lowestRankedQualifier.groupLetter,
-                    })}
-                  </p>
-                </Link>
-              ) : (
-                <StatTile
-                  label={t("groupStagePool.lowestRankedQualifier")}
-                  value="—"
-                />
-              )}
-            </div>
-          </section>
+                    }),
+                  }
+                : null
+            }
+            mode={mode}
+          />
 
           {facts.groupExpectedAnalysis && (
             <GroupExpectedFinishesPanel
@@ -317,19 +271,18 @@ export function FactsPageClient() {
             />
           )}
 
-          {facts.roundOf32Analysis && (
-            <RoundOf32Panel
-              analysis={facts.roundOf32Analysis}
-              mode={mode}
-            />
-          )}
-
-          {facts.roundOf16Analysis && (
-            <RoundOf16Panel
-              analysis={facts.roundOf16Analysis}
-              mode={mode}
-            />
-          )}
+          {KNOCKOUT_FACTS_ROUNDS.map((round) => {
+            const analysis = facts.knockoutAnalyses[round.id];
+            if (!analysis) return null;
+            return (
+              <KnockoutStagePanel
+                key={round.id}
+                round={round}
+                analysis={analysis}
+                mode={mode}
+              />
+            );
+          })}
 
           <section className="space-y-4">
             <h2 className="text-lg font-semibold text-white">

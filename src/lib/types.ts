@@ -511,25 +511,14 @@ export interface KnockoutStageAnalysis {
   opponentDifficulty: KnockoutOpponentDifficultyStrip | null;
 }
 
-export type Round32OpponentDifficultyEntry = KnockoutOpponentDifficultyEntry;
-export type Round32OpponentDifficultySpotlight =
-  KnockoutOpponentDifficultySpotlight;
-export type Round32OpponentDifficultyInsights =
-  KnockoutOpponentDifficultyInsights;
-export type Round32OpponentDifficultyStrip = KnockoutOpponentDifficultyStrip;
-export type Round32FixtureEntry = KnockoutFixtureEntry;
-export type Round32QualifierSpotlight = KnockoutQualifierSpotlight;
-export type Round32Analysis = KnockoutStageAnalysis;
+export type KnockoutFactsRoundId = "r32" | "r16" | "qf";
 
-export type Round16OpponentDifficultyEntry = KnockoutOpponentDifficultyEntry;
-export type Round16OpponentDifficultySpotlight =
-  KnockoutOpponentDifficultySpotlight;
-export type Round16OpponentDifficultyInsights =
-  KnockoutOpponentDifficultyInsights;
-export type Round16OpponentDifficultyStrip = KnockoutOpponentDifficultyStrip;
-export type Round16FixtureEntry = KnockoutFixtureEntry;
-export type Round16QualifierSpotlight = KnockoutQualifierSpotlight;
-export type Round16Analysis = KnockoutStageAnalysis;
+export interface KnockoutFactsRoundDefinition {
+  id: KnockoutFactsRoundId;
+  roundName: string;
+  translationNamespace: "home.roundOf32" | "home.roundOf16" | "home.quarterFinal";
+  wideOpponentDifficultyBars: boolean;
+}
 
 export interface TournamentHighlights {
   overPerformer: TeamHighlightFact | null;
@@ -548,8 +537,7 @@ export interface TournamentFacts {
   highlights: TournamentHighlights;
   groupExpectedAnalysis: GroupExpectedAnalysis | null;
   groupStageDifficulty: GroupStageDifficultyStrip | null;
-  roundOf32Analysis: Round32Analysis | null;
-  roundOf16Analysis: Round16Analysis | null;
+  knockoutAnalyses: Partial<Record<KnockoutFactsRoundId, KnockoutStageAnalysis>>;
 }
 
 export interface GroupStanding {

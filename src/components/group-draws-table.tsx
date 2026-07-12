@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import type { GroupExpectedMatchEntry } from "@/lib/types";
+import { SortButton, type SortDirection } from "@/components/facts/sort-button";
 import { TeamFlag } from "@/components/team-flag";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -19,41 +19,6 @@ interface GroupDrawsTableProps {
 
 function isAboveMeanGap(gapPoints: number, meanGap: number | null): boolean {
   return meanGap !== null && gapPoints > meanGap;
-}
-
-type GapSortDirection = "desc" | "asc";
-
-function SortButton({
-  active,
-  direction,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  direction: GapSortDirection;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium transition-colors",
-        active
-          ? "bg-wc-sky/15 text-wc-sky"
-          : "text-muted-foreground hover:bg-white/6 hover:text-white",
-      )}
-    >
-      {children}
-      {active &&
-        (direction === "desc" ? (
-          <ArrowDown className="size-3 shrink-0" />
-        ) : (
-          <ArrowUp className="size-3 shrink-0" />
-        ))}
-    </button>
-  );
 }
 
 function MatchCell({
@@ -95,7 +60,7 @@ export function GroupDrawsTable({
   mode,
 }: GroupDrawsTableProps) {
   const t = useTranslations("home.groupExpectedFinishes");
-  const [gapSort, setGapSort] = useState<GapSortDirection>("desc");
+  const [gapSort, setGapSort] = useState<SortDirection>("desc");
   const [page, setPage] = useState(0);
 
   useEffect(() => {

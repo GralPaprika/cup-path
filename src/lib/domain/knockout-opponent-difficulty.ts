@@ -1,5 +1,4 @@
 import type {
-  GroupStageDifficultyCohort,
   KnockoutFixtureEntry,
   KnockoutOpponentDifficultyEntry,
   KnockoutOpponentDifficultyInsights,
@@ -7,44 +6,8 @@ import type {
   KnockoutOpponentDifficultyStrip,
 } from "@/lib/types";
 import { computeNumericStats } from "@/lib/domain/group-stats";
-
-const MEAN_EPSILON = 0.005;
-
-function buildCohort(
-  entries: KnockoutOpponentDifficultyEntry[],
-): GroupStageDifficultyCohort {
-  const qualified = entries.filter((entry) => entry.qualified).length;
-  return {
-    total: entries.length,
-    qualified,
-    eliminated: entries.length - qualified,
-  };
-}
-
-function qualificationRate(cohort: GroupStageDifficultyCohort): number | null {
-  if (cohort.total === 0) return null;
-  return cohort.qualified / cohort.total;
-}
-
-function findExtremeEntry(
-  entries: KnockoutOpponentDifficultyEntry[],
-  filter: (entry: KnockoutOpponentDifficultyEntry) => boolean,
-  pickMax: boolean,
-): KnockoutOpponentDifficultyEntry | null {
-  const pool = entries.filter(filter);
-  if (pool.length === 0) return null;
-
-  return pool.reduce((best, current) => {
-    if (pickMax) {
-      return current.opponentFifaPoints > best.opponentFifaPoints
-        ? current
-        : best;
-    }
-    return current.opponentFifaPoints < best.opponentFifaPoints
-      ? current
-      : best;
-  });
-}
+import { buildQualificationInsights } from "@/lib/domain/qualification-insights";
+import { isMeanPlusStdDevOutlier } from "@/lib/domain/stats-helpers";
 
 function toSpotlight(
   entry: KnockoutOpponentDifficultyEntry,
@@ -52,12 +15,12 @@ function toSpotlight(
   stdDev: number | null,
   kind: "qualifier" | "eliminated",
 ): KnockoutOpponentDifficultySpotlight {
-  const isSdOutlier =
-    stdDev !== null &&
-    stdDev > 0 &&
-    (kind === "qualifier"
-      ? entry.opponentFifaPoints >= mean + stdDev
-      : entry.opponentFifaPoints <= mean - stdDev);
+  const isSdOutlier = isMeanPlusStdDevOutlier(
+    entry.opponentFifaPoints,
+    mean,
+    stdDev,
+    kind === "qualifier" ? "high" : "low",
+  );
 
   return {
     team: entry.team,
@@ -74,65 +37,24 @@ function buildKnockoutOpponentDifficultyInsights(
   mean: number,
   stdDev: number | null,
 ): KnockoutOpponentDifficultyInsights {
-  const aboveMeanEntries = entries.filter(
-    (entry) => entry.opponentFifaPoints > mean + MEAN_EPSILON,
-  );
-  const belowMeanEntries = entries.filter(
-    (entry) => entry.opponentFifaPoints < mean - MEAN_EPSILON,
-  );
-  const atMeanEntries = entries.filter(
-    (entry) => Math.abs(entry.opponentFifaPoints - mean) <= MEAN_EPSILON,
-  );
-
-  const aboveMean = buildCohort(aboveMeanEntries);
-  const belowMean = buildCohort(belowMeanEntries);
-  const atMean = buildCohort(atMeanEntries);
-
-  const qualifiedOpponents = entries
-    .filter((entry) => entry.qualified)
-    .map((entry) => entry.opponentFifaPoints);
-  const eliminatedOpponents = entries
-    .filter((entry) => !entry.qualified)
-    .map((entry) => entry.opponentFifaPoints);
-
-  const qualifiedStats = computeNumericStats(qualifiedOpponents);
-  const eliminatedStats = computeNumericStats(eliminatedOpponents);
-
-  const aboveRate = qualificationRate(aboveMean);
-  const belowRate = qualificationRate(belowMean);
-  const qualificationRateGap =
-    aboveRate !== null && belowRate !== null ? belowRate - aboveRate : null;
-
-  const hardestOpponentQualifierEntry = findExtremeEntry(
+  const insights = buildQualificationInsights({
     entries,
-    (entry) => entry.qualified,
-    true,
-  );
-  const easiestOpponentEliminatedEntry = findExtremeEntry(
-    entries,
-    (entry) => !entry.qualified,
-    false,
-  );
+    getValue: (entry) => entry.opponentFifaPoints,
+    isQualified: (entry) => entry.qualified,
+    toSpotlight: (entry, insightMean, insightStdDev, kind) =>
+      toSpotlight(entry, insightMean, insightStdDev, kind),
+  });
 
   return {
-    aboveMean,
-    belowMean,
-    atMean,
-    stdDevOpponentPoints: stdDev,
-    medianQualifiedOpponent: qualifiedStats.median,
-    medianEliminatedOpponent: eliminatedStats.median,
-    qualificationRateGap,
-    hardestOpponentQualifier: hardestOpponentQualifierEntry
-      ? toSpotlight(hardestOpponentQualifierEntry, mean, stdDev, "qualifier")
-      : null,
-    easiestOpponentEliminated: easiestOpponentEliminatedEntry
-      ? toSpotlight(
-          easiestOpponentEliminatedEntry,
-          mean,
-          stdDev,
-          "eliminated",
-        )
-      : null,
+    aboveMean: insights.aboveMean,
+    belowMean: insights.belowMean,
+    atMean: insights.atMean,
+    stdDevOpponentPoints: insights.stdDevValue,
+    medianQualifiedOpponent: insights.medianQualifiedValue,
+    medianEliminatedOpponent: insights.medianEliminatedValue,
+    qualificationRateGap: insights.qualificationRateGap,
+    hardestOpponentQualifier: insights.hardestQualifierSpotlight,
+    easiestOpponentEliminated: insights.easiestEliminatedSpotlight,
   };
 }
 

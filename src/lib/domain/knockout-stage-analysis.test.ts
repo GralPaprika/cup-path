@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
-import { buildRound32Analysis } from "@/lib/domain/round-of-32-analysis";
+import { buildKnockoutStageAnalysis } from "@/lib/domain/knockout-stage-analysis";
 import {
   groupAMatchesComplete,
   groupBMatchesComplete,
@@ -21,7 +21,7 @@ function rankingsMap(
   );
 }
 
-describe("buildRound32Analysis", () => {
+describe("buildKnockoutStageAnalysis", () => {
   it("returns null when no Round of 32 matches have been played", () => {
     applyWorldCupBundle({
       name: "test",
@@ -35,7 +35,7 @@ describe("buildRound32Analysis", () => {
       { id: "RSA", rank: 60, points: 1400 },
     ]);
 
-    assert.equal(buildRound32Analysis([], rankings), null);
+    assert.equal(buildKnockoutStageAnalysis("Round of 32", rankings), null);
   });
 
   it("builds one fixture row per played Round of 32 tie", () => {
@@ -64,7 +64,7 @@ describe("buildRound32Analysis", () => {
       { id: "RSA", rank: 60, points: 1400 },
     ]);
 
-    const analysis = buildRound32Analysis([], rankings);
+    const analysis = buildKnockoutStageAnalysis("Round of 32", rankings);
 
     assert.ok(analysis);
     assert.equal(analysis.matchCount, 1);
@@ -81,5 +81,19 @@ describe("buildRound32Analysis", () => {
     assert.equal(fixture.scorePens, "4-3");
     assert.equal(fixture.team1.id, "NED");
     assert.equal(fixture.team2.id, "MAR");
+  });
+
+  it("returns null when no Round of 16 matches have been played", () => {
+    applyWorldCupBundle({
+      name: "test",
+      matches: [...groupAMatchesComplete(), ...groupBMatchesComplete()],
+    });
+
+    const rankings = rankingsMap([
+      { id: "MEX", rank: 14, points: 1670 },
+      { id: "CZE", rank: 22, points: 1590 },
+    ]);
+
+    assert.equal(buildKnockoutStageAnalysis("Round of 16", rankings), null);
   });
 });

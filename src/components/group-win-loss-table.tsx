@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import type { GroupExpectedMatchEntry } from "@/lib/types";
+import { SortButton, type SortDirection } from "@/components/facts/sort-button";
 import { TeamFlag } from "@/components/team-flag";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -14,41 +14,6 @@ const PAGE_SIZE = 10;
 interface GroupWinLossTableProps {
   winLossMatches: GroupExpectedMatchEntry[];
   mode: string;
-}
-
-type GapSortDirection = "desc" | "asc";
-
-function SortButton({
-  active,
-  direction,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  direction: GapSortDirection;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium transition-colors",
-        active
-          ? "bg-wc-sky/15 text-wc-sky"
-          : "text-muted-foreground hover:bg-white/6 hover:text-white",
-      )}
-    >
-      {children}
-      {active &&
-        (direction === "desc" ? (
-          <ArrowDown className="size-3 shrink-0" />
-        ) : (
-          <ArrowUp className="size-3 shrink-0" />
-        ))}
-    </button>
-  );
 }
 
 function MatchCell({
@@ -89,7 +54,7 @@ export function GroupWinLossTable({
   mode,
 }: GroupWinLossTableProps) {
   const t = useTranslations("home.groupExpectedFinishes");
-  const [gapSort, setGapSort] = useState<GapSortDirection>("asc");
+  const [gapSort, setGapSort] = useState<SortDirection>("asc");
   const [page, setPage] = useState(0);
 
   useEffect(() => {

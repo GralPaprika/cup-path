@@ -6,7 +6,6 @@ import type {
   KnockoutOpponentDifficultyInsights,
   KnockoutOpponentDifficultySpotlight,
 } from "@/lib/types";
-import type { KnockoutStageTranslationNamespace } from "@/components/knockout-stage-panel";
 import { TeamFlag } from "@/components/team-flag";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -16,7 +15,6 @@ interface KnockoutStageOpponentDifficultyInsightsProps {
   insights: KnockoutOpponentDifficultyInsights;
   meanOpponentPoints: number | null;
   mode: string;
-  translationNamespace: KnockoutStageTranslationNamespace;
 }
 
 function formatQualificationRate(cohort: GroupStageDifficultyCohort): string {
@@ -63,15 +61,13 @@ function SpotlightCard({
   spotlight,
   mode,
   sdOutlierLabel,
-  translationNamespace,
 }: {
   title: string;
   spotlight: KnockoutOpponentDifficultySpotlight;
   mode: string;
   sdOutlierLabel: string;
-  translationNamespace: KnockoutStageTranslationNamespace;
 }) {
-  const t = useTranslations(translationNamespace);
+  const shared = useTranslations("home.knockoutStage");
   const deltaPrefix = spotlight.deltaFromMean >= 0 ? "+" : "";
 
   return (
@@ -96,7 +92,7 @@ function SpotlightCard({
           {spotlight.team.id}
         </span>
         <span className="text-xs text-muted-foreground">
-          {t("opponentDifficultyVs", { opponent: spotlight.opponent.id })}
+          {shared("opponentDifficultyVs", { opponent: spotlight.opponent.id })}
         </span>
       </div>
 
@@ -104,7 +100,7 @@ function SpotlightCard({
         {formatFifaPoints(spotlight.opponentFifaPoints)}
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        {t("opponentDifficultyDeltaFromMean", {
+        {shared("opponentDifficultyDeltaFromMean", {
           delta: `${deltaPrefix}${formatFifaPoints(spotlight.deltaFromMean)}`,
         })}
       </p>
@@ -116,20 +112,19 @@ export function KnockoutStageOpponentDifficultyInsightsPanel({
   insights,
   meanOpponentPoints,
   mode,
-  translationNamespace,
 }: KnockoutStageOpponentDifficultyInsightsProps) {
-  const t = useTranslations(translationNamespace);
+  const shared = useTranslations("home.knockoutStage");
 
   const rateGapHint =
     insights.qualificationRateGap !== null &&
     insights.aboveMean.total > 0 &&
     insights.belowMean.total > 0
-      ? t("opponentDifficultyRateGapHint", {
+      ? shared("opponentDifficultyRateGapHint", {
           gap: Math.round(Math.abs(insights.qualificationRateGap) * 100),
           direction:
             insights.qualificationRateGap > 0
-              ? t("opponentDifficultyRateGapEasier")
-              : t("opponentDifficultyRateGapHarder"),
+              ? shared("opponentDifficultyRateGapEasier")
+              : shared("opponentDifficultyRateGapHarder"),
         })
       : undefined;
 
@@ -137,31 +132,31 @@ export function KnockoutStageOpponentDifficultyInsightsPanel({
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-3">
         <CohortTile
-          label={t("opponentDifficultyAboveMean")}
+          label={shared("opponentDifficultyAboveMean")}
           cohort={insights.aboveMean}
-          countLabel={t("opponentDifficultyQualifiedCount")}
-          rateLabel={t("opponentDifficultyQualificationRate")}
-          hint={t("opponentDifficultyAboveMeanHint")}
+          countLabel={shared("opponentDifficultyQualifiedCount")}
+          rateLabel={shared("opponentDifficultyQualificationRate")}
+          hint={shared("opponentDifficultyAboveMeanHint")}
         />
         <CohortTile
-          label={t("opponentDifficultyBelowMean")}
+          label={shared("opponentDifficultyBelowMean")}
           cohort={insights.belowMean}
-          countLabel={t("opponentDifficultyQualifiedCount")}
-          rateLabel={t("opponentDifficultyQualificationRate")}
-          hint={t("opponentDifficultyBelowMeanHint")}
+          countLabel={shared("opponentDifficultyQualifiedCount")}
+          rateLabel={shared("opponentDifficultyQualificationRate")}
+          hint={shared("opponentDifficultyBelowMeanHint")}
         />
         <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {t("opponentDifficultyMedianRivals")}
+            {shared("opponentDifficultyMedianRivals")}
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            {t("opponentDifficultyMedianQualified")}
+            {shared("opponentDifficultyMedianQualified")}
           </p>
           <p className="font-mono text-lg font-semibold tabular-nums text-wc-green">
             {formatFifaPoints(insights.medianQualifiedOpponent)}
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            {t("opponentDifficultyMedianEliminated")}
+            {shared("opponentDifficultyMedianEliminated")}
           </p>
           <p className="font-mono text-lg font-semibold tabular-nums text-wc-red">
             {formatFifaPoints(insights.medianEliminatedOpponent)}
@@ -179,20 +174,18 @@ export function KnockoutStageOpponentDifficultyInsightsPanel({
         <div className="grid gap-3 sm:grid-cols-2">
           {insights.hardestOpponentQualifier ? (
             <SpotlightCard
-              title={t("opponentDifficultyHardestQualifier")}
+              title={shared("opponentDifficultyHardestQualifier")}
               spotlight={insights.hardestOpponentQualifier}
               mode={mode}
-              sdOutlierLabel={t("opponentDifficultySdOutlier")}
-              translationNamespace={translationNamespace}
+              sdOutlierLabel={shared("opponentDifficultySdOutlier")}
             />
           ) : null}
           {insights.easiestOpponentEliminated ? (
             <SpotlightCard
-              title={t("opponentDifficultyEasiestEliminated")}
+              title={shared("opponentDifficultyEasiestEliminated")}
               spotlight={insights.easiestOpponentEliminated}
               mode={mode}
-              sdOutlierLabel={t("opponentDifficultySdOutlier")}
-              translationNamespace={translationNamespace}
+              sdOutlierLabel={shared("opponentDifficultySdOutlier")}
             />
           ) : null}
         </div>
@@ -200,7 +193,7 @@ export function KnockoutStageOpponentDifficultyInsightsPanel({
 
       {meanOpponentPoints !== null && insights.atMean.total > 0 ? (
         <p className="text-xs text-muted-foreground">
-          {t("opponentDifficultyAtMeanNote", {
+          {shared("opponentDifficultyAtMeanNote", {
             count: insights.atMean.total,
             qualified: insights.atMean.qualified,
             mean: formatFifaPoints(meanOpponentPoints),

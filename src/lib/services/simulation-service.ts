@@ -18,8 +18,7 @@ import {
   normalizeGroupFinishes,
 } from "@/lib/domain/group-finishes";
 import { hasStrongestWinnerTargets } from "@/lib/domain/strongest-path-winners";
-import { getCompareMaxStageReached } from "@/lib/domain/team-stage-logic";
-import { buildPathChartDataFromSummary } from "@/lib/domain/path-opponent-observations";
+import { buildPathChartDataFromSummary, getMaxStageFromMatches, getSharedMaxStage } from "@/lib/domain/path-opponent-observations";
 import { loadTournamentRuntime } from "@/lib/services/tournament-runtime";
 import type { TournamentContext } from "@/lib/domain/tournament-context";
 
@@ -142,6 +141,16 @@ export async function getSimulationAnalysis(
   );
   if (!simulatedSummary) return null;
 
+  const comparisonProjectedSummary = comparisonTeamId
+    ? buildProjectedTeamPathSummary(
+        ctx,
+        comparisonTeamId,
+        effectiveScenario,
+        rankings,
+        { suppressPlayedResultsMatchNums },
+      )
+    : null;
+
   const baselineGroupFinishes = getBaselineGroupFinishes(ctx);
   const activeFinishes =
     effectiveScenario.groupFinishes ?? baselineGroupFinishes;
@@ -168,12 +177,15 @@ export async function getSimulationAnalysis(
     "simulated",
   );
 
-  const comparisonChartMaxStage =
-    comparisonTeamId && comparisonActualSummary
-      ? (getCompareMaxStageReached(ctx, teamId, comparisonTeamId) ?? null)
-      : null;
-  const chartMaxStage =
-    comparisonTeamId && comparisonChartMaxStage ? comparisonChartMaxStage : null;
+  // Path summaries include projected matches; use match-list stage logic rather than
+  // getCompareMaxStageReached(ctx, …), which reads only recorded tournament results.
+  const pathChartMaxStage = comparisonProjectedSummary
+    ? getSharedMaxStage(
+        getMaxStageFromMatches(actualSummary.matches),
+        getMaxStageFromMatches(simulatedSummary.matches),
+        getMaxStageFromMatches(comparisonProjectedSummary.matches),
+      )
+    : null;
 
   return {
     teamId: teamId.toUpperCase(),
@@ -216,14 +228,14 @@ export async function getSimulationAnalysis(
     bestThirdRanking: buildBestThirdRanking(ctx, activeFinishes),
     teamRankings,
     focusTeamMatchNums: getFocusTeamMatchNums(simulatedBracket, teamId),
-    comparisonChartMaxStage,
-    actualPathChart: buildPathChartDataFromSummary(actualSummary, chartMaxStage),
+    pathChartMaxStage,
+    actualPathChart: buildPathChartDataFromSummary(actualSummary, pathChartMaxStage),
     simulatedPathChart: buildPathChartDataFromSummary(
       simulatedSummary,
-      chartMaxStage,
+      pathChartMaxStage,
     ),
-    comparisonPathChart: comparisonActualSummary
-      ? buildPathChartDataFromSummary(comparisonActualSummary, chartMaxStage)
+    comparisonPathChart: comparisonProjectedSummary
+      ? buildPathChartDataFromSummary(comparisonProjectedSummary, pathChartMaxStage)
       : null,
   };
 }

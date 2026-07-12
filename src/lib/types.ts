@@ -200,8 +200,8 @@ export interface SimulationResult {
   bestThirdRanking: BestThirdRankingEntry[];
   teamRankings: Record<string, { rank: number; points: number }>;
   focusTeamMatchNums: number[];
-  /** When a comparison team is set, chart slots stop at this shared stage. */
-  comparisonChartMaxStage: PathStage | null;
+  /** When a comparison team is set, all path charts truncate at this shared stage. */
+  pathChartMaxStage: PathStage | null;
   actualPathChart: PathChartData;
   simulatedPathChart: PathChartData;
   comparisonPathChart: PathChartData | null;

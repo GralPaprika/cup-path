@@ -1,6 +1,10 @@
-import type { MatchDifficulty, PathStage, TeamPathSummary } from "@/lib/types";
-import type { OpponentPointsObservation } from "@/lib/types";
-import { getMatchStage, isStageWithinReach } from "@/lib/domain/match-stages";
+import type {
+  MatchDifficulty,
+  OpponentPointsObservation,
+  PathStage,
+  TeamPathSummary,
+} from "@/lib/types";
+import { getMatchStage, isStageWithinReach, PATH_STAGES, stageIndex } from "@/lib/domain/match-stages";
 
 export type { OpponentPointsObservation } from "@/lib/types";
 
@@ -39,6 +43,30 @@ export function computeAvgOpponentPointsFromMatches(
     .filter((value): value is number => value !== null);
   if (points.length === 0) return null;
   return points.reduce((sum, value) => sum + value, 0) / points.length;
+}
+
+export function getMaxStageFromMatches(
+  matches: MatchDifficulty[],
+): PathStage | null {
+  let highest = -1;
+
+  for (const match of matches) {
+    const stage = getMatchStage(match.round);
+    if (!stage) continue;
+    highest = Math.max(highest, stageIndex(stage));
+  }
+
+  return highest >= 0 ? PATH_STAGES[highest] : null;
+}
+
+export function getSharedMaxStage(
+  ...stages: Array<PathStage | null | undefined>
+): PathStage | null {
+  const valid = stages.filter((stage): stage is PathStage => stage != null);
+  if (valid.length === 0) return null;
+
+  const minIdx = Math.min(...valid.map((stage) => stageIndex(stage)));
+  return PATH_STAGES[minIdx];
 }
 
 export function buildPathChartDataFromSummary(

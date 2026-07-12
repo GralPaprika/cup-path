@@ -7,7 +7,6 @@ import {
   clampPathStages,
   getFurthestStage,
   isStageWithinReach,
-  parsePathStages,
   parseTeamRound,
   stagesThrough,
   syncTeamRoundToStages,
@@ -24,6 +23,11 @@ import { CompareLoadingSkeleton } from "@/components/loading-skeletons";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import { usePersistedPathStages } from "@/hooks/use-persisted-path-stages";
+import {
+  readInitialTeamRound,
+  writeTeamRoundPreference,
+} from "@/lib/client/team-round-preference";
 import type { ComparisonAnalysisResult, TeamsResponse } from "@/lib/api/responses";
 import { useTranslations } from "next-intl";
 
@@ -33,15 +37,11 @@ export function ComparePageClient() {
   const searchParams = useSearchParams();
   const initialTeamA = searchParams.get("team")?.toUpperCase() ?? "";
   const initialTeamB = searchParams.get("vs")?.toUpperCase() ?? "";
-  const initialStages = parsePathStages(searchParams.get("stages"));
-  const initialTeamRound = syncTeamRoundToStages(
-    parseTeamRound(searchParams.get("teamRound")),
-    initialStages,
-  );
 
   const [mode, setMode] = useSyncedRankingMode(searchParams);
-  const [stages, setStages] = useState<Set<PathStage>>(initialStages);
-  const [teamRound, setTeamRound] = useState<PathStage>(initialTeamRound);
+  const [stages, setStages, stagesHydrated] = usePersistedPathStages("compare");
+  const [teamRound, setTeamRound] = useState<PathStage>(() => parseTeamRound(null));
+  const [filtersHydrated, setFiltersHydrated] = useState(false);
   const [teamAId, setTeamAId] = useState(initialTeamA);
   const [teamBId, setTeamBId] = useState(initialTeamB);
   const [entries, setEntries] = useState<ComparisonEntry[]>([]);
@@ -57,6 +57,14 @@ export function ComparePageClient() {
     [mode],
   );
   const teamList = teamsData?.teams ?? [];
+
+  useEffect(() => {
+    if (!stagesHydrated) return;
+    setTeamRound(syncTeamRoundToStages(readInitialTeamRound("compare"), stages));
+    setFiltersHydrated(true);
+    // Hydrate team round once after stage preferences load from localStorage.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stagesHydrated]);
 
   const bothTeamsSelected =
     Boolean(teamAId) && Boolean(teamBId) && teamAId !== teamBId;
@@ -75,8 +83,8 @@ export function ComparePageClient() {
     error,
   } = useApiQuery<ComparisonAnalysisResult & { teamRound: PathStage }>(
     `/api/comparison?${comparisonParams.toString()}`,
-    [mode, stages, teamRound, teamAId, teamBId],
-    { errorMessage: t("error") },
+    [mode, stages, teamRound, teamAId, teamBId, filtersHydrated],
+    { errorMessage: t("error"), enabled: filtersHydrated },
   );
 
   useEffect(() => {
@@ -110,11 +118,20 @@ export function ComparePageClient() {
 
   function handleStagesChange(next: Set<PathStage>) {
     setStages(next);
-    setTeamRound((current) => syncTeamRoundToStages(current, next));
+    setTeamRound((current) => {
+      const resolved = syncTeamRoundToStages(current, next);
+      writeTeamRoundPreference("compare", resolved);
+      return resolved;
+    });
   }
 
   function handleTeamRoundChange(next: PathStage) {
-    setTeamRound(syncTeamRoundToStages(next, stages));
+    setTeamRound((current) => {
+      const resolved = syncTeamRoundToStages(next, stages);
+      if (resolved === current) return current;
+      writeTeamRoundPreference("compare", resolved);
+      return resolved;
+    });
   }
 
   const minTeamRound = getFurthestStage(stages);
@@ -123,8 +140,12 @@ export function ComparePageClient() {
     if (!bothTeamsSelected || !maxStageReached) return;
     const sharedStages = stagesThrough(maxStageReached);
     setStages(sharedStages);
-    setTeamRound((current) => syncTeamRoundToStages(current, sharedStages));
-  }, [bothTeamsSelected, maxStageReached, teamAId, teamBId]);
+    setTeamRound((current) => {
+      const resolved = syncTeamRoundToStages(current, sharedStages);
+      writeTeamRoundPreference("compare", resolved);
+      return resolved;
+    });
+  }, [bothTeamsSelected, maxStageReached, teamAId, teamBId, setStages]);
 
   useEffect(() => {
     if (bothTeamsSelected) return;
@@ -134,16 +155,12 @@ export function ComparePageClient() {
   useUrlParamsSync(
     "/compare",
     () => {
-      const params = new URLSearchParams({
-        mode,
-        stages: serializePathStages(stages),
-        teamRound,
-      });
+      const params = new URLSearchParams({ mode });
       if (teamAId) params.set("team", teamAId);
       if (teamBId) params.set("vs", teamBId);
       return params;
     },
-    [mode, stages, teamRound, teamAId, teamBId],
+    [mode, teamAId, teamBId],
   );
 
   return (

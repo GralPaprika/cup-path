@@ -6,7 +6,6 @@ import type { PathStage, Team } from "@/lib/types";
 import {
   clampPathStages,
   isStageWithinReach,
-  parsePathStages,
 } from "@/lib/domain/match-stages";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { TeamSelector } from "@/components/team-selector";
@@ -17,6 +16,7 @@ import {
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import { usePersistedPathStages } from "@/hooks/use-persisted-path-stages";
 import type { TeamAnalysisResult, TeamsResponse } from "@/lib/api/responses";
 import { AdvancedStatsPanel } from "@/components/advanced-stats-panel";
 import { SummaryCard } from "@/components/summary-card";
@@ -36,11 +36,10 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
   const t = useTranslations("common");
   const analysis = useTranslations("analysis");
   const initialTeam = searchParams.get("team")?.toUpperCase() ?? teams[0]?.id ?? "ARG";
-  const initialStages = parsePathStages(searchParams.get("stages"));
 
   const [teamId, setTeamId] = useState(initialTeam);
   const [mode, setMode] = useSyncedRankingMode(searchParams);
-  const [stages, setStages] = useState<Set<PathStage>>(initialStages);
+  const [stages, setStages, stagesHydrated] = usePersistedPathStages("team-analysis");
   const [data, setData] = useState<TeamAnalysisResult | null>(null);
   const [maxStageReached, setMaxStageReached] = useState<PathStage | undefined>();
 
@@ -61,8 +60,8 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
     error,
   } = useApiQuery<TeamAnalysisResult>(
     `/api/analysis?${analysisParams.toString()}`,
-    [teamId, mode, stages],
-    { errorMessage: t("error") },
+    [teamId, mode, stages, stagesHydrated],
+    { errorMessage: t("error"), enabled: stagesHydrated },
   );
 
   useEffect(() => {
@@ -85,9 +84,8 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
       new URLSearchParams({
         team: teamId,
         mode,
-        stages: serializePathStages(stages),
       }),
-    [teamId, mode, stages],
+    [teamId, mode],
   );
 
   return (

@@ -1,31 +1,25 @@
 "use client";
 
-import type { GroupComparisonCard } from "@/lib/types";
+import type { GroupComparisonCard, GroupPointsBenchmarks } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import {
   FifaPointsBarChart,
   type FifaPointsObservation,
   type FifaPointsReferenceLine,
 } from "@/components/fifa-points-bar-chart";
-import { computeGroupPointsBenchmarks } from "@/lib/domain/group-strength-ordering";
 import { formatFifaPoints } from "@/lib/format";
 import { CHART_COLORS } from "@/lib/chart-colors";
 
 interface GroupFifaPointsChartProps {
   group: GroupComparisonCard;
-  allGroups: GroupComparisonCard[];
+  pointsBenchmarks: GroupPointsBenchmarks | null;
   selectedTeamId?: string;
 }
 
 function buildGroupBenchmarkLines(
-  allGroups: GroupComparisonCard[],
+  benchmarks: GroupPointsBenchmarks,
   t: ReturnType<typeof useTranslations<"groups">>,
 ): FifaPointsReferenceLine[] {
-  const benchmarks = computeGroupPointsBenchmarks(allGroups);
-  if (!benchmarks) {
-    return [];
-  }
-
   return [
     {
       value: benchmarks.weakest.avgFifaPoints,
@@ -59,7 +53,7 @@ function buildGroupBenchmarkLines(
 
 export function GroupFifaPointsChart({
   group,
-  allGroups,
+  pointsBenchmarks,
   selectedTeamId,
 }: GroupFifaPointsChartProps) {
   const t = useTranslations("groups");
@@ -82,7 +76,9 @@ export function GroupFifaPointsChart({
     : undefined;
 
   const stats = group.fifaPointsStats;
-  const referenceLines = buildGroupBenchmarkLines(allGroups, t);
+  const referenceLines = pointsBenchmarks
+    ? buildGroupBenchmarkLines(pointsBenchmarks, t)
+    : [];
 
   if (stats.mean === null || stats.stdDev === null) {
     return null;

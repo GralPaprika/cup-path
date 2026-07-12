@@ -1,17 +1,12 @@
 import assert from "node:assert/strict";
-import { afterEach, describe, it } from "node:test";
-import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
+import { describe, it } from "node:test";
 import { buildKnockoutStageAnalysis } from "@/lib/domain/knockout-stage-analysis";
 import {
+  createTestContext,
   groupAMatchesComplete,
   groupBMatchesComplete,
   rankingEntry,
-  restoreBundledWorldCup,
 } from "@/lib/domain/test-fixtures";
-
-afterEach(() => {
-  restoreBundledWorldCup();
-});
 
 function rankingsMap(
   entries: Array<{ id: string; rank: number; points: number }>,
@@ -23,10 +18,7 @@ function rankingsMap(
 
 describe("buildKnockoutStageAnalysis", () => {
   it("returns null when no Round of 32 matches have been played", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [...groupAMatchesComplete(), ...groupBMatchesComplete()],
-    });
+    const ctx = createTestContext([...groupAMatchesComplete(), ...groupBMatchesComplete()]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1670 },
@@ -35,13 +27,11 @@ describe("buildKnockoutStageAnalysis", () => {
       { id: "RSA", rank: 60, points: 1400 },
     ]);
 
-    assert.equal(buildKnockoutStageAnalysis("Round of 32", rankings), null);
+    assert.equal(buildKnockoutStageAnalysis(ctx, "Round of 32", rankings), null);
   });
 
   it("builds one fixture row per played Round of 32 tie", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         ...groupAMatchesComplete(),
         ...groupBMatchesComplete(),
         {
@@ -52,8 +42,7 @@ describe("buildKnockoutStageAnalysis", () => {
           team2: "Morocco",
           score: { ft: [1, 1], p: [4, 3] },
         },
-      ],
-    });
+      ]);
 
     const rankings = rankingsMap([
       { id: "NED", rank: 7, points: 1756 },
@@ -64,7 +53,7 @@ describe("buildKnockoutStageAnalysis", () => {
       { id: "RSA", rank: 60, points: 1400 },
     ]);
 
-    const analysis = buildKnockoutStageAnalysis("Round of 32", rankings);
+    const analysis = buildKnockoutStageAnalysis(ctx, "Round of 32", rankings);
 
     assert.ok(analysis);
     assert.equal(analysis.matchCount, 1);
@@ -84,16 +73,13 @@ describe("buildKnockoutStageAnalysis", () => {
   });
 
   it("returns null when no Round of 16 matches have been played", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [...groupAMatchesComplete(), ...groupBMatchesComplete()],
-    });
+    const ctx = createTestContext([...groupAMatchesComplete(), ...groupBMatchesComplete()]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1670 },
       { id: "CZE", rank: 22, points: 1590 },
     ]);
 
-    assert.equal(buildKnockoutStageAnalysis("Round of 16", rankings), null);
+    assert.equal(buildKnockoutStageAnalysis(ctx, "Round of 16", rankings), null);
   });
 });

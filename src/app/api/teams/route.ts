@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { RankingMode } from "@/lib/types";
+import { parseRankingMode } from "@/lib/data/ranking-modes";
 import { getAllTeamsEnriched } from "@/lib/data/team-registry";
 
 export async function GET(request: NextRequest) {
-  const mode = (request.nextUrl.searchParams.get("mode") as RankingMode) ?? "live";
+  const mode = parseRankingMode(request.nextUrl.searchParams.get("mode"));
   const teams = await getAllTeamsEnriched(mode);
   return NextResponse.json({ teams });
 }

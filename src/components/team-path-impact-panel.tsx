@@ -2,8 +2,8 @@
 
 import type {
   AvgPointsContext,
+  PathChartData,
   PathDiffRow,
-  PathStage,
   Team,
   TeamPathSummary,
 } from "@/lib/types";
@@ -18,7 +18,6 @@ import {
 import { TeamSelector } from "@/components/team-selector";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { buildPathChartDataFromSummary } from "@/lib/domain/path-opponent-observations";
 import { CHART_COLORS } from "@/lib/chart-colors";
 import { SimulatedPathPointsChart } from "@/components/simulated-path-points-chart";
 
@@ -34,7 +33,9 @@ interface TeamPathImpactPanelProps {
   onComparisonTeamChange: (teamId: string) => void;
   pathDiff: PathDiffRow[];
   hasOverrides: boolean;
-  comparisonChartMaxStage?: PathStage | null;
+  actualPathChart: PathChartData;
+  simulatedPathChart: PathChartData;
+  comparisonPathChart: PathChartData | null;
 }
 
 function formatPointsDelta(
@@ -185,7 +186,9 @@ export function TeamPathImpactPanel({
   onComparisonTeamChange,
   pathDiff,
   hasOverrides,
-  comparisonChartMaxStage = null,
+  actualPathChart,
+  simulatedPathChart,
+  comparisonPathChart,
 }: TeamPathImpactPanelProps) {
   const t = useTranslations("simulate");
   const summary = useTranslations("summary");
@@ -210,16 +213,9 @@ export function TeamPathImpactPanel({
       ? simulatedSummary.avgOpponentPoints - actualSummary.avgOpponentPoints
       : null;
 
-  const chartMaxStage =
-    showComparison && comparisonChartMaxStage ? comparisonChartMaxStage : null;
-  const actualChart = buildPathChartDataFromSummary(actualSummary, chartMaxStage);
-  const simulatedChart = buildPathChartDataFromSummary(
-    simulatedSummary,
-    chartMaxStage,
-  );
-  const comparisonChart = comparisonSummary
-    ? buildPathChartDataFromSummary(comparisonSummary, chartMaxStage)
-    : null;
+  const actualChart = actualPathChart;
+  const simulatedChart = simulatedPathChart;
+  const comparisonChart = comparisonPathChart;
   const showPathChart =
     actualChart.opponents.length > 0 ||
     simulatedChart.opponents.length > 0 ||

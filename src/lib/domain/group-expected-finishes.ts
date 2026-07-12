@@ -7,10 +7,11 @@ import type {
   OpenFootballMatch,
   RankingEntry,
 } from "@/lib/types";
-import { getTeamById, resolveTeam } from "@/lib/data/team-registry";
-import { getAllMatches, isMatchPlayed } from "@/lib/data/worldcup-loader";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
+import { isMatchPlayed } from "@/lib/data/worldcup-loader";
 import { computeGroupStandings, isTeamEliminatedFromGroup } from "@/lib/domain/group-standings";
 import { computeMean, computeNumericStats } from "@/lib/domain/group-stats";
+import { getGroupNames } from "@/lib/domain/path-builder";
 
 function resultPoints(result: GroupMatchResult): number {
   if (result === "W") return 3;
@@ -150,13 +151,14 @@ function groupLetterFromName(groupName: string): string {
 }
 
 function buildMatchEntry(
+  ctx: TournamentContext,
   match: OpenFootballMatch,
   rankings: Map<string, RankingEntry>,
 ): GroupExpectedMatchEntry | null {
   if (!isMatchPlayed(match) || !match.score?.ft) return null;
 
-  const home = resolveTeam(match.team1);
-  const away = resolveTeam(match.team2);
+  const home = ctx.resolveTeam(match.team1);
+  const away = ctx.resolveTeam(match.team2);
   if (!home || !away) return null;
 
   const homePoints = rankings.get(home.id)?.points ?? null;
@@ -242,19 +244,20 @@ function buildMatchEntry(
 }
 
 function processCompleteGroup(
+  ctx: TournamentContext,
   groupName: string,
   matches: OpenFootballMatch[],
   rankings: Map<string, RankingEntry>,
   expectedPointsByTeam: Map<string, number>,
   matchLedger: GroupExpectedMatchEntry[],
 ): GroupExpectedFinishEntry[] {
-  const standings = computeGroupStandings(matches);
+  const standings = computeGroupStandings(ctx, matches);
   if (!standings.every((standing) => standing.played === 3)) return [];
 
   const letter = groupLetterFromName(groupName);
 
   for (const match of matches) {
-    const entry = buildMatchEntry(match, rankings);
+    const entry = buildMatchEntry(ctx, match, rankings);
     if (!entry) continue;
 
     matchLedger.push(entry);
@@ -284,7 +287,7 @@ function processCompleteGroup(
   });
 
   return sortedByExpected.flatMap((teamId, index) => {
-    const team = getTeamById(teamId);
+    const team = ctx.getTeamById(teamId);
     const actual = standings.find((standing) => standing.teamId === teamId);
     if (!team || !actual) return [];
 
@@ -305,9 +308,10 @@ function processCompleteGroup(
 }
 
 export function buildGroupExpectedAnalysis(
+  ctx: TournamentContext,
   rankings: Map<string, RankingEntry>,
 ): GroupExpectedAnalysis | null {
-  const groupMatches = getAllMatches().filter((match) => match.group);
+  const groupMatches = ctx.matches.filter((match) => match.group);
   const groups = [
     ...new Set(
       groupMatches.map((match) => match.group).filter(Boolean) as string[],
@@ -322,6 +326,7 @@ export function buildGroupExpectedAnalysis(
     const matches = groupMatches.filter((match) => match.group === groupName);
     expectedFinishes.push(
       ...processCompleteGroup(
+        ctx,
         groupName,
         matches,
         rankings,
@@ -367,17 +372,14 @@ export function buildGroupExpectedAnalysis(
     .map((entry) => entry.pointsGap)
     .filter((value): value is number => value !== null);
 
-  const groupNames = [
-    ...new Set(
-      groupMatches.map((match) => match.group).filter(Boolean) as string[],
-    ),
-  ];
+  const groupNames = getGroupNames();
 
   const eliminatedUnderperformers: GroupExpectedUnderperformer[] =
     expectedFinishes
       .filter(
         (finish) =>
           isTeamEliminatedFromGroup(
+            ctx,
             finish.team.id,
             groupMatches,
             groupNames,

@@ -5,7 +5,7 @@ import {
   computePointsPercentile,
   findClosestPointsAnchor,
 } from "@/lib/domain/points-anchor";
-import { rankingEntry } from "@/lib/domain/test-fixtures";
+import { bundledTestContext, rankingEntry } from "@/lib/domain/test-fixtures";
 
 const rankings = [
   rankingEntry("MEX", 10, 1800),
@@ -34,31 +34,33 @@ describe("computePointsPercentile", () => {
 });
 
 describe("findClosestPointsAnchor", () => {
+  const ctx = bundledTestContext();
+
   it("picks closest points and breaks ties by rank", () => {
     const entries = [
       rankingEntry("MEX", 5, 1750),
       rankingEntry("ARG", 3, 1750),
     ];
-    const anchor = findClosestPointsAnchor(1748, entries);
+    const anchor = findClosestPointsAnchor(ctx, 1748, entries);
     assert.ok(anchor);
     assert.equal(anchor.team.id, "ARG");
     assert.equal(anchor.gap, 2);
   });
 
   it("excludes team when excludeTeamId is set", () => {
-    const anchor = findClosestPointsAnchor(
-      1800,
-      rankings,
-      { excludeTeamId: "MEX" },
-    );
+    const anchor = findClosestPointsAnchor(ctx, 1800, rankings, {
+      excludeTeamId: "MEX",
+    });
     assert.ok(anchor);
     assert.equal(anchor.team.id, "ARG");
   });
 });
 
 describe("buildAvgPointsContext", () => {
+  const ctx = bundledTestContext();
+
   it("combines percentile and anchor", () => {
-    const context = buildAvgPointsContext(1800, rankings, {
+    const context = buildAvgPointsContext(ctx, 1800, rankings, {
       excludeTeamId: "MEX",
     });
     assert.ok(context);

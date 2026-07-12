@@ -1,12 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type {
-  PathStage,
-  TournamentFacts,
-} from "@/lib/types";
+import type { PathStage } from "@/lib/types";
 import { GroupExpectedFinishesPanel } from "@/components/group-expected-finishes-panel";
 import { KnockoutStagePanel } from "@/components/knockout-stage-panel";
 import { ParticipantPoolSection } from "@/components/facts/participant-pool-section";
@@ -19,7 +15,10 @@ import {
 import { KNOCKOUT_FACTS_ROUNDS } from "@/lib/domain/knockout-facts-round-config";
 import { PageShellSkeleton } from "@/components/loading-skeletons";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import type { TournamentFacts } from "@/lib/api/responses";
 import { formatFifaPoints } from "@/lib/format";
 import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
 import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
@@ -31,33 +30,18 @@ export function FactsPageClient() {
   const stages = useTranslations("compare.stages");
   const searchParams = useSearchParams();
   const [mode, setMode] = useSyncedRankingMode(searchParams);
-  const [facts, setFacts] = useState<TournamentFacts | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const loadFacts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`/api/facts?mode=${mode}`);
-      if (!response.ok) throw new Error("Failed to load facts");
-      const json = (await response.json()) as TournamentFacts;
-      setFacts(json);
-    } catch {
-      setError(common("error"));
-    } finally {
-      setLoading(false);
-    }
-  }, [mode, common]);
+  const { data: facts, loading, error } = useApiQuery<TournamentFacts>(
+    `/api/facts?mode=${mode}`,
+    [mode],
+    { errorMessage: common("error") },
+  );
 
-  useEffect(() => {
-    loadFacts();
-  }, [loadFacts]);
-
-  useEffect(() => {
-    const params = new URLSearchParams({ mode });
-    window.history.replaceState(null, "", `/?${params.toString()}`);
-  }, [mode]);
+  useUrlParamsSync(
+    "/",
+    () => new URLSearchParams({ mode }),
+    [mode],
+  );
 
   const stageLabel = (stage: PathStage) => stages(COMPARE_STAGE_I18N_KEYS[stage]);
 

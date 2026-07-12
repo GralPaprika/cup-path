@@ -7,6 +7,7 @@ import {
   PATH_STAGES,
   serializePathStages,
 } from "@/lib/domain/match-stages";
+import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { PickerItem, PickerLabel, PickerList } from "@/components/picker-list";
@@ -19,15 +20,6 @@ interface PathStageFiltersProps {
   maxStageReached?: PathStage;
   variant?: "chips" | "picker" | "toggles";
 }
-
-const STAGE_LABEL_KEYS: Record<PathStage, string> = {
-  group: "groupStage",
-  r32: "round32",
-  r16: "round16",
-  qf: "quarterFinal",
-  sf: "semiFinal",
-  final: "final",
-};
 
 const STAGE_SHORT_LABEL_KEYS: Record<PathStage, string> = {
   group: "groupStageShort",
@@ -119,7 +111,7 @@ export function PathStageFilters({
                 >
                   <Check className="size-3" strokeWidth={3} />
                 </span>
-                <span className="truncate">{t(STAGE_LABEL_KEYS[stage])}</span>
+                <span className="truncate">{t(COMPARE_STAGE_I18N_KEYS[stage])}</span>
               </PickerItem>
             );
           })}
@@ -142,7 +134,7 @@ export function PathStageFilters({
             return (
               <div
                 key={stage}
-                title={t(STAGE_LABEL_KEYS[stage])}
+                title={t(COMPARE_STAGE_I18N_KEYS[stage])}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 transition-colors",
                   disabled
@@ -209,7 +201,7 @@ export function PathStageFilters({
                 onChange={() => toggleStage(stage)}
                 className="size-4 rounded border-white/20 bg-white/5 text-wc-green focus:ring-wc-green/40 disabled:cursor-not-allowed disabled:opacity-50"
               />
-              {t(STAGE_LABEL_KEYS[stage])}
+              {t(COMPARE_STAGE_I18N_KEYS[stage])}
             </label>
           );
         })}

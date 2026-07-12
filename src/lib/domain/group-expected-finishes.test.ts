@@ -1,18 +1,13 @@
 import assert from "node:assert/strict";
-import { afterEach, describe, it } from "node:test";
-import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
+import { describe, it } from "node:test";
 import { buildGroupExpectedAnalysis } from "@/lib/domain/group-expected-finishes";
 import {
+  createTestContext,
   groupAMatchesComplete,
   groupBMatchesComplete,
   playedGroupMatch,
   rankingEntry,
-  restoreBundledWorldCup,
 } from "@/lib/domain/test-fixtures";
-
-afterEach(() => {
-  restoreBundledWorldCup();
-});
 
 function rankingsMap(
   entries: Array<{ id: string; rank: number; points: number }>,
@@ -28,10 +23,7 @@ function gapForEntry(entry: { gapPoints: number }): number {
 
 describe("buildGroupExpectedAnalysis", () => {
   it("marks favorite win as expected and landed", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: groupAMatchesComplete(),
-    });
+    const ctx = createTestContext(groupAMatchesComplete());
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1700 },
@@ -39,7 +31,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     const mexVsRsa = analysis.matchLedger.find(
@@ -55,16 +47,13 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("marks favorite loss as expected win missed with upset", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         playedGroupMatch("Mexico", "South Africa", 0, 2, {
           round: "Matchday 1",
           date: "2026-06-11",
         }),
         ...groupAMatchesComplete().slice(1),
-      ],
-    });
+      ]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1700 },
@@ -72,7 +61,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     const upset = analysis.matchLedger.find(
@@ -85,9 +74,7 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("expects a draw when FIFA points are equal", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         playedGroupMatch("Mexico", "Czechia", 1, 1, {
           round: "Matchday 1",
           date: "2026-06-11",
@@ -112,8 +99,7 @@ describe("buildGroupExpectedAnalysis", () => {
           round: "Matchday 3",
           date: "2026-06-25",
         }),
-      ],
-    });
+      ]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1600 },
@@ -121,7 +107,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     const equalRatedDraw = analysis.matchLedger.find(
@@ -135,10 +121,7 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("orders expected positions by expected points then FIFA points", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: groupAMatchesComplete(),
-    });
+    const ctx = createTestContext(groupAMatchesComplete());
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1700 },
@@ -146,7 +129,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     const mexFinish = analysis.expectedFinishes.find(
@@ -158,16 +141,13 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("flags eliminated teams that finished worse than their paper position", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         ...groupAMatchesComplete().slice(0, -1),
         playedGroupMatch("South Africa", "Korea Republic", 1, 2, {
           round: "Matchday 3",
           date: "2026-06-25",
         }),
-      ],
-    });
+      ]);
 
     const rankings = rankingsMap([
       { id: "RSA", rank: 8, points: 1900 },
@@ -175,7 +155,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "CZE", rank: 22, points: 1600 },
       { id: "KOR", rank: 23, points: 1500 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     const rsa = analysis.eliminatedUnderperformers.find(
@@ -188,10 +168,7 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("omits incomplete groups from the analysis", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: groupAMatchesComplete().slice(0, 2),
-    });
+    const ctx = createTestContext(groupAMatchesComplete().slice(0, 2));
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1700 },
@@ -199,16 +176,13 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.equal(analysis, null);
   });
 
   it("aggregates match counts across complete groups", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [...groupAMatchesComplete(), ...groupBMatchesComplete()],
-    });
+    const ctx = createTestContext([...groupAMatchesComplete(), ...groupBMatchesComplete()]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1700 },
@@ -220,7 +194,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "BIH", rank: 45, points: 1450 },
       { id: "QAT", rank: 60, points: 1380 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     assert.equal(analysis.matchCount, 12);
@@ -229,9 +203,7 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("computes draw gap stats from actual drawn matches", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         playedGroupMatch("Mexico", "Czechia", 1, 1, {
           round: "Matchday 1",
           date: "2026-06-11",
@@ -256,8 +228,7 @@ describe("buildGroupExpectedAnalysis", () => {
           round: "Matchday 3",
           date: "2026-06-25",
         }),
-      ],
-    });
+      ]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1600 },
@@ -265,7 +236,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     assert.equal(analysis.actualDrawCount, 2);
@@ -297,9 +268,7 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("sorts draw matches by gap descending", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         playedGroupMatch("Mexico", "Czechia", 1, 1, {
           round: "Matchday 1",
           date: "2026-06-11",
@@ -324,8 +293,7 @@ describe("buildGroupExpectedAnalysis", () => {
           round: "Matchday 3",
           date: "2026-06-25",
         }),
-      ],
-    });
+      ]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1600 },
@@ -333,7 +301,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     assert.equal(
@@ -346,10 +314,7 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("computes win/loss gap stats from decisive group matches", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: groupAMatchesComplete(),
-    });
+    const ctx = createTestContext(groupAMatchesComplete());
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1700 },
@@ -357,7 +322,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     assert.equal(analysis.actualWinLossCount, 5);
@@ -368,16 +333,13 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("annotates win/loss matches with big surprise and SD outlier flags", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         playedGroupMatch("Mexico", "South Africa", 0, 2, {
           round: "Matchday 1",
           date: "2026-06-11",
         }),
         ...groupAMatchesComplete().slice(1),
-      ],
-    });
+      ]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1700 },
@@ -385,7 +347,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     assert.equal(analysis.winLossMatches.length, 5);
@@ -417,9 +379,7 @@ describe("buildGroupExpectedAnalysis", () => {
   });
 
   it("splits gap stats between favorite and evenly matched matches", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         playedGroupMatch("Mexico", "Czechia", 1, 1, {
           round: "Matchday 1",
           date: "2026-06-11",
@@ -444,8 +404,7 @@ describe("buildGroupExpectedAnalysis", () => {
           round: "Matchday 3",
           date: "2026-06-25",
         }),
-      ],
-    });
+      ]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1600 },
@@ -453,7 +412,7 @@ describe("buildGroupExpectedAnalysis", () => {
       { id: "KOR", rank: 23, points: 1500 },
       { id: "RSA", rank: 55, points: 1400 },
     ]);
-    const analysis = buildGroupExpectedAnalysis(rankings);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
 
     assert.ok(analysis);
     assert.equal(analysis.equalRatingMatchCount, 2);

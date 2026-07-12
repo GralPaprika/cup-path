@@ -6,9 +6,11 @@ import {
 } from "@/lib/domain/difficulty";
 import { buildGroupStageDifficultyStrip } from "@/lib/domain/group-stage-difficulty";
 import { DEFAULT_PATH_STAGES } from "@/lib/domain/match-stages";
-import { rankingEntry } from "@/lib/domain/test-fixtures";
+import { bundledTestContext, rankingEntry } from "@/lib/domain/test-fixtures";
 
 describe("buildGroupStageDifficultyStrip", () => {
+  const ctx = bundledTestContext();
+
   it("sorts teams by avg group opponent points descending", () => {
     const rankings = new Map([
       ["MEX", rankingEntry("MEX", 14, 1700)],
@@ -16,8 +18,9 @@ describe("buildGroupStageDifficultyStrip", () => {
       ["KOR", rankingEntry("KOR", 23, 1500)],
       ["RSA", rankingEntry("RSA", 55, 1400)],
     ]);
-    const summaries = buildAllTeamSummaries(rankings);
+    const summaries = buildAllTeamSummaries(ctx, rankings);
     const comparison = buildComparison(
+      ctx,
       summaries,
       undefined,
       new Set(DEFAULT_PATH_STAGES),
@@ -25,7 +28,7 @@ describe("buildGroupStageDifficultyStrip", () => {
       rankings,
     );
 
-    const strip = buildGroupStageDifficultyStrip(comparison);
+    const strip = buildGroupStageDifficultyStrip(ctx, comparison);
 
     assert.ok(strip);
     assert.ok(strip.entries.length >= 4);
@@ -50,8 +53,9 @@ describe("buildGroupStageDifficultyStrip", () => {
       ["KOR", rankingEntry("KOR", 23, 1500)],
       ["RSA", rankingEntry("RSA", 55, 1400)],
     ]);
-    const summaries = buildAllTeamSummaries(rankings);
+    const summaries = buildAllTeamSummaries(ctx, rankings);
     const comparison = buildComparison(
+      ctx,
       summaries,
       undefined,
       new Set(DEFAULT_PATH_STAGES),
@@ -59,7 +63,7 @@ describe("buildGroupStageDifficultyStrip", () => {
       rankings,
     );
 
-    const strip = buildGroupStageDifficultyStrip(comparison);
+    const strip = buildGroupStageDifficultyStrip(ctx, comparison);
     assert.ok(strip);
 
     const { insights } = strip;

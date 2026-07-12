@@ -1,18 +1,13 @@
 import assert from "node:assert/strict";
-import { afterEach, describe, it } from "node:test";
-import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
+import { describe, it } from "node:test";
 import { buildProjectedTeamPathSummary } from "@/lib/domain/projected-path-builder";
 import {
+  createTestContext,
   groupAMatchesComplete,
   groupBMatchesComplete,
   rankingEntry,
-  restoreBundledWorldCup,
   scheduledMatch,
 } from "@/lib/domain/test-fixtures";
-
-afterEach(() => {
-  restoreBundledWorldCup();
-});
 
 function rankingsMap() {
   return new Map([
@@ -25,9 +20,7 @@ function rankingsMap() {
 
 describe("buildProjectedTeamPathSummary", () => {
   it("marks eliminated after a recorded knockout loss", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         ...groupAMatchesComplete(),
         ...groupBMatchesComplete(),
         {
@@ -38,10 +31,9 @@ describe("buildProjectedTeamPathSummary", () => {
           num: 73,
           score: { ft: [0, 1] },
         },
-      ],
-    });
+      ]);
 
-    const summary = buildProjectedTeamPathSummary("CZE", {}, rankingsMap());
+    const summary = buildProjectedTeamPathSummary(ctx, "CZE", {}, rankingsMap());
 
     assert.ok(summary);
     assert.equal(summary.isEliminated, true);
@@ -54,23 +46,20 @@ describe("buildProjectedTeamPathSummary", () => {
   });
 
   it("recomputes averages over the simulated path", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         ...groupAMatchesComplete(),
         scheduledMatch("Mexico", "Brazil", "Round of 32", {
           num: 79,
           date: "2026-07-02",
         }),
-      ],
-    });
+      ]);
 
-    const actual = buildProjectedTeamPathSummary(
+    const actual = buildProjectedTeamPathSummary(ctx, 
       "MEX",
       {},
       rankingsMap(),
     );
-    const simulated = buildProjectedTeamPathSummary(
+    const simulated = buildProjectedTeamPathSummary(ctx, 
       "MEX",
       {
         groupFinishes: { A: ["MEX", "CZE", "RSA", "KOR"] },

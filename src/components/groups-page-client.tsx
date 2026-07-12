@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { GroupComparisonCard } from "@/lib/types";
-import { parseSelectedGroupLetter } from "@/components/group-detail-panel";
+import { parseSelectedGroupLetter } from "@/lib/client/group-selection";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { GroupsView } from "@/components/groups-view";
 import { ComparisonGroupsSkeleton } from "@/components/loading-skeletons";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import type { GroupsAnalysisResult } from "@/lib/api/responses";
 import { useTranslations } from "next-intl";
 
 export function GroupsPageClient() {
@@ -18,38 +20,22 @@ export function GroupsPageClient() {
   const urlGroup = searchParams.get("group")?.toUpperCase() ?? null;
 
   const [mode, setMode] = useSyncedRankingMode(searchParams);
-  const [groupCards, setGroupCards] = useState<GroupComparisonCard[]>([]);
   const [selectedGroupLetter, setSelectedGroupLetter] = useState("A");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const userPickedGroup = useRef(false);
 
-  const loadGroups = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const groupsUrl = `/api/groups?mode=${mode}`;
+  const {
+    data: groupsData,
+    loading,
+    error,
+  } = useApiQuery<GroupsAnalysisResult>(groupsUrl, [mode], {
+    errorMessage: t("error"),
+  });
 
-    try {
-      const params = new URLSearchParams({ mode });
-      if (selectedTeamId) params.set("team", selectedTeamId);
-
-      const response = await fetch(`/api/groups?${params.toString()}`);
-      if (!response.ok) throw new Error("Failed to load groups");
-      const json = (await response.json()) as {
-        groups: GroupComparisonCard[];
-      };
-
-      setGroupCards(json.groups);
-    } catch {
-      setError(t("error"));
-    } finally {
-      setLoading(false);
-    }
-  }, [mode, selectedTeamId, t]);
-
-  useEffect(() => {
-    loadGroups();
-  }, [loadGroups]);
+  const groupCards = groupsData?.groups ?? [];
+  const strengthOrdering = groupsData?.strengthOrdering;
+  const pointsBenchmarks = groupsData?.pointsBenchmarks ?? null;
 
   useEffect(() => {
     userPickedGroup.current = false;
@@ -63,18 +49,15 @@ export function GroupsPageClient() {
     );
   }, [groupCards, urlGroup, selectedTeamId]);
 
-  useEffect(() => {
-    if (groupCards.length === 0) return;
-
-    const params = new URLSearchParams({ mode, group: selectedGroupLetter });
-    if (selectedTeamId) params.set("team", selectedTeamId);
-    const nextUrl = `/groups?${params.toString()}`;
-    const currentUrl = `${window.location.pathname}${window.location.search}`;
-
-    if (currentUrl !== nextUrl) {
-      window.history.replaceState(null, "", nextUrl);
-    }
-  }, [mode, selectedGroupLetter, selectedTeamId, groupCards.length]);
+  useUrlParamsSync(
+    "/groups",
+    () => {
+      const params = new URLSearchParams({ mode, group: selectedGroupLetter });
+      if (selectedTeamId) params.set("team", selectedTeamId);
+      return params;
+    },
+    [mode, selectedGroupLetter, selectedTeamId, groupCards.length],
+  );
 
   function handleSelectGroup(groupLetter: string) {
     userPickedGroup.current = true;
@@ -110,9 +93,11 @@ export function GroupsPageClient() {
             {error}
           </div>
         )}
-        {groupCards.length > 0 && (
+        {groupCards.length > 0 && strengthOrdering && (
           <GroupsView
             groups={groupCards}
+            strengthOrdering={strengthOrdering}
+            pointsBenchmarks={pointsBenchmarks}
             selectedGroupLetter={selectedGroupLetter}
             onSelectGroup={handleSelectGroup}
             selectedTeamId={selectedTeamId ?? undefined}

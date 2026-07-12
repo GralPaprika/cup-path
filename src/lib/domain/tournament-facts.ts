@@ -11,7 +11,7 @@ import type {
   TeamPathSummary,
   UpsetMatchFact,
 } from "@/lib/types";
-import { getAllMatches } from "@/lib/data/worldcup-loader";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import { computeMean, computeNumericStats } from "@/lib/domain/group-stats";
 import { buildParticipantPoolStats } from "@/lib/domain/participant-pool";
 import { getAdvancingTeamIds } from "@/lib/domain/group-standings";
@@ -47,18 +47,19 @@ function buildSnapshot(
 }
 
 function buildGroupStagePool(
+  ctx: TournamentContext,
   summaries: TeamPathSummary[],
   rankings: Map<string, RankingEntry>,
   teamCounts: Record<PathStage, number>,
 ): GroupStagePoolFact {
-  const cohortIds = getTeamsAtStage("group");
-  const pool = buildParticipantPoolStats(cohortIds, rankings);
+  const cohortIds = getTeamsAtStage(ctx, "group");
+  const pool = buildParticipantPoolStats(ctx, cohortIds, rankings);
   const summaryById = new Map(
     summaries.map((summary) => [summary.team.id, summary]),
   );
 
-  const groupMatches = getAllMatches().filter((match) => match.group);
-  const advancing = getAdvancingTeamIds(groupMatches, getGroupNames());
+  const groupMatches = ctx.matches.filter((match) => match.group);
+  const advancing = getAdvancingTeamIds(ctx, groupMatches, getGroupNames());
 
   let lowestRankedQualifier: GroupStagePoolFact["lowestRankedQualifier"] = null;
   for (const teamId of advancing) {
@@ -95,6 +96,7 @@ interface PerformanceDelta {
 }
 
 function buildPerformanceDeltas(
+  ctx: TournamentContext,
   summaries: TeamPathSummary[],
   rankings: Map<string, RankingEntry>,
 ): PerformanceDelta[] {
@@ -102,7 +104,7 @@ function buildPerformanceDeltas(
     const ranking = rankings.get(summary.team.id);
     if (!ranking) return [];
 
-    const actualIndex = stageIndex(getTeamMaxStageReached(summary.team.id));
+    const actualIndex = stageIndex(getTeamMaxStageReached(ctx, summary.team.id));
     const expectedIndex = expectedStageIndexFromRank(ranking.rank);
 
     return [
@@ -131,10 +133,11 @@ function toTeamHighlight(
 }
 
 function buildOverUnderPerformers(
+  ctx: TournamentContext,
   summaries: TeamPathSummary[],
   rankings: Map<string, RankingEntry>,
 ): Pick<TournamentHighlights, "overPerformer" | "underPerformer"> {
-  const deltas = buildPerformanceDeltas(summaries, rankings);
+  const deltas = buildPerformanceDeltas(ctx, summaries, rankings);
   if (deltas.length === 0) {
     return { overPerformer: null, underPerformer: null };
   }
@@ -218,6 +221,7 @@ function scanUpsetMatches(summaries: TeamPathSummary[]): {
 }
 
 function buildGiantKillerLeader(
+  ctx: TournamentContext,
   summaries: TeamPathSummary[],
   rankings: Map<string, RankingEntry>,
   giantKillerTotals: Map<string, number>,
@@ -242,12 +246,13 @@ function buildGiantKillerLeader(
     team: summary.team,
     fifaRank: ranking?.rank ?? null,
     fifaPoints: ranking?.points ?? null,
-    maxStageReached: getTeamMaxStageReached(leaderId),
+    maxStageReached: getTeamMaxStageReached(ctx, leaderId),
     value: leaderTotal,
   };
 }
 
 function buildRemainingPathHighlights(
+  ctx: TournamentContext,
   summaries: TeamPathSummary[],
   rankings: Map<string, RankingEntry>,
 ): Pick<TournamentHighlights, "hardestRemainingPath" | "easiestRemainingPath"> {
@@ -278,7 +283,7 @@ function buildRemainingPathHighlights(
       team: summary.team,
       fifaRank: ranking?.rank ?? null,
       fifaPoints: ranking?.points ?? null,
-      maxStageReached: getTeamMaxStageReached(summary.team.id),
+      maxStageReached: getTeamMaxStageReached(ctx, summary.team.id),
       value: summary.avgOpponentPoints ?? 0,
     };
   }
@@ -306,6 +311,7 @@ function buildGroupOfDeath(
 }
 
 export function buildTournamentFacts(
+  ctx: TournamentContext,
   summaries: TeamPathSummary[],
   rankings: Map<string, RankingEntry>,
   teamCounts: Record<PathStage, number>,
@@ -317,10 +323,10 @@ export function buildTournamentFacts(
   | "knockoutAnalyses"
 > {
   const snapshot = buildSnapshot(rankings, teamCounts);
-  const groupStagePool = buildGroupStagePool(summaries, rankings, teamCounts);
-  const overUnder = buildOverUnderPerformers(summaries, rankings);
+  const groupStagePool = buildGroupStagePool(ctx, summaries, rankings, teamCounts);
+  const overUnder = buildOverUnderPerformers(ctx, summaries, rankings);
   const upsets = scanUpsetMatches(summaries);
-  const remainingPaths = buildRemainingPathHighlights(summaries, rankings);
+  const remainingPaths = buildRemainingPathHighlights(ctx, summaries, rankings);
 
   const highlights: TournamentHighlights = {
     ...overUnder,
@@ -328,6 +334,7 @@ export function buildTournamentFacts(
     biggestGiantKilling: upsets.biggestGiantKilling,
     biggestFavoriteUpset: upsets.biggestFavoriteUpset,
     giantKillerLeader: buildGiantKillerLeader(
+      ctx,
       summaries,
       rankings,
       upsets.giantKillerTotals,

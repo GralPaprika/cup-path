@@ -1,24 +1,17 @@
 import assert from "node:assert/strict";
-import { afterEach, describe, it } from "node:test";
-import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
+import { describe, it } from "node:test";
 import { buildKnockoutStageAnalysis } from "@/lib/domain/knockout-stage-analysis";
 import { buildKnockoutOpponentDifficultyStrip } from "@/lib/domain/knockout-opponent-difficulty";
 import {
+  createTestContext,
   groupAMatchesComplete,
   groupBMatchesComplete,
   rankingEntry,
-  restoreBundledWorldCup,
 } from "@/lib/domain/test-fixtures";
-
-afterEach(() => {
-  restoreBundledWorldCup();
-});
 
 describe("buildKnockoutOpponentDifficultyStrip", () => {
   it("builds one entry per team from played Round of 32 fixtures", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [
+    const ctx = createTestContext([
         ...groupAMatchesComplete(),
         ...groupBMatchesComplete(),
         {
@@ -29,15 +22,14 @@ describe("buildKnockoutOpponentDifficultyStrip", () => {
           team2: "Morocco",
           score: { ft: [2, 0] },
         },
-      ],
-    });
+      ]);
 
     const rankings = new Map([
       ["NED", rankingEntry("NED", 7, 1756)],
       ["MAR", rankingEntry("MAR", 11, 1713)],
     ]);
 
-    const analysis = buildKnockoutStageAnalysis("Round of 32", rankings);
+    const analysis = buildKnockoutStageAnalysis(ctx, "Round of 32", rankings);
     assert.ok(analysis?.opponentDifficulty);
 
     const strip = analysis.opponentDifficulty;

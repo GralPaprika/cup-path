@@ -6,9 +6,13 @@ import type {
   Team,
   TeamPathSummary,
 } from "@/lib/types";
-import { enrichTeam, getTeamById } from "@/lib/data/team-registry";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
+import { enrichTeam } from "@/lib/data/team-registry";
 import { isKnockoutRound } from "@/lib/data/worldcup-loader";
-import { resolveBracket, type ResolveBracketOptions } from "@/lib/domain/bracket-resolver";
+import {
+  resolveBracket,
+  type ResolveBracketOptions,
+} from "@/lib/domain/bracket-resolver";
 import { computeFilteredAverages } from "@/lib/domain/difficulty";
 import { getMatchStage, PATH_STAGES } from "@/lib/domain/match-stages";
 import { buildTeamPath } from "@/lib/domain/path-builder";
@@ -61,17 +65,18 @@ function toMatchDifficulty(
 }
 
 export function buildProjectedTeamPathSummary(
+  ctx: TournamentContext,
   teamId: string,
   scenario: SimulationScenario,
   rankings: Map<string, RankingEntry>,
   options: ResolveBracketOptions = {},
 ): TeamPathSummary | null {
-  const baseTeam = getTeamById(teamId);
+  const baseTeam = ctx.getTeamById(teamId);
   if (!baseTeam) return null;
 
   const teamRanking = rankings.get(teamId);
   const team = withFlag(baseTeam, teamRanking);
-  const actualPath = buildTeamPath(teamId);
+  const actualPath = buildTeamPath(ctx, teamId);
   const groupEntries = actualPath.filter(
     (entry) => !isKnockoutRound(entry.match.round),
   );
@@ -91,7 +96,7 @@ export function buildProjectedTeamPathSummary(
       ),
   );
 
-  const bracket = resolveBracket(scenario, options);
+  const bracket = resolveBracket(ctx, scenario, options);
   for (const bracketMatch of bracket) {
     const isHome = bracketMatch.home.teamId === teamId;
     const isAway = bracketMatch.away.teamId === teamId;
@@ -102,7 +107,7 @@ export function buildProjectedTeamPathSummary(
       : bracketMatch.home.teamId;
     if (!opponentId) continue;
 
-    const opponent = getTeamById(opponentId);
+    const opponent = ctx.getTeamById(opponentId);
     if (!opponent) continue;
 
     const overridden = Boolean(scenario.knockoutWinners?.[bracketMatch.num]);

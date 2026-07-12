@@ -1,21 +1,17 @@
 import assert from "node:assert/strict";
-import { afterEach, describe, it } from "node:test";
-import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
+import { describe, it } from "node:test";
 import { buildAllTeamSummaries } from "@/lib/domain/difficulty";
 import { PATH_STAGES } from "@/lib/domain/match-stages";
 import {
+  bundledTestContext,
+  createTestContext,
   groupAMatchesComplete,
   groupBMatchesComplete,
   rankingEntry,
-  restoreBundledWorldCup,
 } from "@/lib/domain/test-fixtures";
 import { getTeamCountsByStage } from "@/lib/domain/team-stage-logic";
 import { buildTournamentFacts } from "@/lib/domain/tournament-facts";
 import type { TeamPathSummary } from "@/lib/types";
-
-afterEach(() => {
-  restoreBundledWorldCup();
-});
 
 function rankingsMap(
   entries: Array<{ id: string; rank: number; points: number }>,
@@ -27,10 +23,7 @@ function rankingsMap(
 
 describe("buildTournamentFacts", () => {
   it("builds cohort rows for every stage with team counts", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [...groupAMatchesComplete(), ...groupBMatchesComplete()],
-    });
+    const ctx = createTestContext([...groupAMatchesComplete(), ...groupBMatchesComplete()]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 14, points: 1670 },
@@ -38,10 +31,10 @@ describe("buildTournamentFacts", () => {
       { id: "KOR", rank: 23, points: 1580 },
       { id: "RSA", rank: 60, points: 1400 },
     ]);
-    const summaries = buildAllTeamSummaries(rankings);
-    const teamCounts = getTeamCountsByStage();
+    const summaries = buildAllTeamSummaries(ctx, rankings);
+    const teamCounts = getTeamCountsByStage(ctx);
 
-    const facts = buildTournamentFacts(summaries, rankings, teamCounts);
+    const facts = buildTournamentFacts(ctx, summaries, rankings, teamCounts);
 
     assert.ok(facts.groupStagePool.teamCount >= 48);
     assert.ok(facts.groupStagePool.avgFifaPoints !== null);
@@ -52,6 +45,7 @@ describe("buildTournamentFacts", () => {
   });
 
   it("picks the biggest giant-killing win by positive points gap", () => {
+    const ctx = bundledTestContext();
     const summaries: TeamPathSummary[] = [
       {
         team: {
@@ -105,7 +99,7 @@ describe("buildTournamentFacts", () => {
       PATH_STAGES.map((stage) => [stage, 48]),
     ) as Record<(typeof PATH_STAGES)[number], number>;
 
-    const facts = buildTournamentFacts(summaries, rankings, teamCounts);
+    const facts = buildTournamentFacts(ctx, summaries, rankings, teamCounts);
 
     assert.equal(facts.highlights.biggestGiantKilling?.team.id, "AAA");
     assert.equal(facts.highlights.biggestGiantKilling?.pointsGap, 400);
@@ -114,18 +108,15 @@ describe("buildTournamentFacts", () => {
   });
 
   it("marks over- and under-performers by stage delta vs seed", () => {
-    applyWorldCupBundle({
-      name: "test",
-      matches: [...groupAMatchesComplete(), ...groupBMatchesComplete()],
-    });
+    const ctx = createTestContext([...groupAMatchesComplete(), ...groupBMatchesComplete()]);
 
     const rankings = rankingsMap([
       { id: "MEX", rank: 2, points: 1830 },
       { id: "KOR", rank: 40, points: 1450 },
     ]);
-    const summaries = buildAllTeamSummaries(rankings);
-    const teamCounts = getTeamCountsByStage();
-    const facts = buildTournamentFacts(summaries, rankings, teamCounts);
+    const summaries = buildAllTeamSummaries(ctx, rankings);
+    const teamCounts = getTeamCountsByStage(ctx);
+    const facts = buildTournamentFacts(ctx, summaries, rankings, teamCounts);
 
     if (facts.highlights.overPerformer) {
       assert.ok(facts.highlights.overPerformer.value > 0);

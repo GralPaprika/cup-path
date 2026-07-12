@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ComparisonEntry, PathStage, Team } from "@/lib/types";
 import {
@@ -21,7 +21,10 @@ import { TeamRoundSelector } from "@/components/team-round-selector";
 import { ComparisonTable } from "@/components/comparison-table";
 import { TeamHeadToHeadPanel } from "@/components/team-head-to-head-panel";
 import { CompareLoadingSkeleton } from "@/components/loading-skeletons";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import type { ComparisonAnalysisResult, TeamsResponse } from "@/lib/api/responses";
 import { useTranslations } from "next-intl";
 
 export function ComparePageClient() {
@@ -41,7 +44,6 @@ export function ComparePageClient() {
   const [teamRound, setTeamRound] = useState<PathStage>(initialTeamRound);
   const [teamAId, setTeamAId] = useState(initialTeamA);
   const [teamBId, setTeamBId] = useState(initialTeamB);
-  const [teamList, setTeamList] = useState<Team[]>([]);
   const [entries, setEntries] = useState<ComparisonEntry[]>([]);
   const [cohortStage, setCohortStage] = useState<PathStage>("group");
   const [cohortSize, setCohortSize] = useState(48);
@@ -49,68 +51,62 @@ export function ComparePageClient() {
   const [teamCounts, setTeamCounts] = useState<Record<PathStage, number> | null>(
     null,
   );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const { data: teamsData } = useApiQuery<TeamsResponse>(
+    `/api/teams?mode=${mode}`,
+    [mode],
+  );
+  const teamList = teamsData?.teams ?? [];
+
+  const bothTeamsSelected =
+    Boolean(teamAId) && Boolean(teamBId) && teamAId !== teamBId;
+
+  const comparisonParams = new URLSearchParams({
+    mode,
+    stages: serializePathStages(stages),
+    teamRound,
+  });
+  if (teamAId) comparisonParams.set("team", teamAId);
+  if (bothTeamsSelected) comparisonParams.set("vs", teamBId);
+
+  const {
+    data: rawComparison,
+    loading,
+    error,
+  } = useApiQuery<ComparisonAnalysisResult & { teamRound: PathStage }>(
+    `/api/comparison?${comparisonParams.toString()}`,
+    [mode, stages, teamRound, teamAId, teamBId],
+    { errorMessage: t("error") },
+  );
 
   useEffect(() => {
-    fetch(`/api/teams?mode=${mode}`)
-      .then((res) => res.json())
-      .then((json: { teams: Team[] }) => setTeamList(json.teams))
-      .catch(() => setTeamList([]));
-  }, [mode]);
+    if (!rawComparison) return;
 
-  const loadComparison = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    const bothTeamsSelected =
-      Boolean(teamAId) && Boolean(teamBId) && teamAId !== teamBId;
-
-    try {
-      const params = new URLSearchParams({
-        mode,
-        stages: serializePathStages(stages),
-        teamRound,
-      });
-      if (teamAId) params.set("team", teamAId);
-      if (bothTeamsSelected) params.set("vs", teamBId);
-
-      const response = await fetch(`/api/comparison?${params.toString()}`);
-      if (!response.ok) throw new Error("Failed to load comparison");
-      const json = (await response.json()) as {
-        comparison: ComparisonEntry[];
-        teamCounts: Record<PathStage, number>;
-        cohortStage: PathStage;
-        cohortSize: number;
-        maxStageReached?: PathStage;
-        teamRound: PathStage;
-      };
-
-      if (
-        json.maxStageReached &&
-        [...stages].some((stage) => !isStageWithinReach(stage, json.maxStageReached!))
-      ) {
-        setStages(clampPathStages(stages, json.maxStageReached));
-        return;
-      }
-
-      const syncedTeamRound = syncTeamRoundToStages(json.teamRound, stages);
-      if (syncedTeamRound !== teamRound || json.teamRound !== syncedTeamRound) {
-        setTeamRound(syncedTeamRound);
-        return;
-      }
-
-      setEntries(json.comparison);
-      setTeamCounts(json.teamCounts);
-      setCohortStage(json.cohortStage);
-      setCohortSize(json.cohortSize);
-      setMaxStageReached(json.maxStageReached);
-    } catch {
-      setError(t("error"));
-    } finally {
-      setLoading(false);
+    if (
+      rawComparison.maxStageReached &&
+      [...stages].some(
+        (stage) => !isStageWithinReach(stage, rawComparison.maxStageReached!),
+      )
+    ) {
+      setStages(clampPathStages(stages, rawComparison.maxStageReached));
+      return;
     }
-  }, [mode, stages, teamRound, teamAId, teamBId, t]);
+
+    const syncedTeamRound = syncTeamRoundToStages(
+      rawComparison.teamRound,
+      stages,
+    );
+    if (syncedTeamRound !== teamRound || rawComparison.teamRound !== syncedTeamRound) {
+      setTeamRound(syncedTeamRound);
+      return;
+    }
+
+    setEntries(rawComparison.comparison);
+    setTeamCounts(rawComparison.teamCounts);
+    setCohortStage(rawComparison.cohortStage);
+    setCohortSize(rawComparison.cohortSize);
+    setMaxStageReached(rawComparison.maxStageReached);
+  }, [rawComparison, stages, teamRound]);
 
   function handleStagesChange(next: Set<PathStage>) {
     setStages(next);
@@ -124,13 +120,6 @@ export function ComparePageClient() {
   const minTeamRound = getFurthestStage(stages);
 
   useEffect(() => {
-    loadComparison();
-  }, [loadComparison]);
-
-  const bothTeamsSelected =
-    Boolean(teamAId) && Boolean(teamBId) && teamAId !== teamBId;
-
-  useEffect(() => {
     if (!bothTeamsSelected || !maxStageReached) return;
     const sharedStages = stagesThrough(maxStageReached);
     setStages(sharedStages);
@@ -142,16 +131,20 @@ export function ComparePageClient() {
     setMaxStageReached(undefined);
   }, [bothTeamsSelected, teamAId, teamBId]);
 
-  useEffect(() => {
-    const params = new URLSearchParams({
-      mode,
-      stages: serializePathStages(stages),
-      teamRound,
-    });
-    if (teamAId) params.set("team", teamAId);
-    if (teamBId) params.set("vs", teamBId);
-    window.history.replaceState(null, "", `/compare?${params.toString()}`);
-  }, [mode, stages, teamRound, teamAId, teamBId]);
+  useUrlParamsSync(
+    "/compare",
+    () => {
+      const params = new URLSearchParams({
+        mode,
+        stages: serializePathStages(stages),
+        teamRound,
+      });
+      if (teamAId) params.set("team", teamAId);
+      if (teamBId) params.set("vs", teamBId);
+      return params;
+    },
+    [mode, stages, teamRound, teamAId, teamBId],
+  );
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">

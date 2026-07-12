@@ -6,15 +6,14 @@ import type {
   PathStage,
   RankingEntry,
 } from "@/lib/types";
-import { getTeamById } from "@/lib/data/team-registry";
-import { getAllMatches } from "@/lib/data/worldcup-loader";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import {
   computeGroupStandings,
   getAdvancingTeamIds,
 } from "@/lib/domain/group-standings";
 import { computeNumericStats, computeMean } from "@/lib/domain/group-stats";
 import { getGroupNames } from "@/lib/domain/path-builder";
-import { getTeamsAtStage } from "@/lib/domain/team-stages";
+import { getTeamsAtStage } from "@/lib/domain/team-stage-logic";
 
 function average(values: number[]): number | null {
   return computeMean(values);
@@ -33,31 +32,32 @@ function getQualificationStatus(
 }
 
 export function buildGroupComparisonCards(
+  ctx: TournamentContext,
   allComparison: ComparisonEntry[],
   rankings: Map<string, RankingEntry>,
   teamRound: PathStage = "group",
 ): GroupComparisonCard[] {
   const groupNames = getGroupNames();
-  const allGroupMatches = getAllMatches().filter((match) => match.group);
-  const advancing = getAdvancingTeamIds(allGroupMatches, groupNames);
+  const allGroupMatches = ctx.matches.filter((match) => match.group);
+  const advancing = getAdvancingTeamIds(ctx, allGroupMatches, groupNames);
   const comparisonById = new Map(
     allComparison.map((entry) => [entry.team.id, entry]),
   );
   const visibleTeamIds =
-    teamRound === "group" ? null : getTeamsAtStage(teamRound);
+    teamRound === "group" ? null : getTeamsAtStage(ctx, teamRound);
 
   return groupNames.map((groupName) => {
     const groupLetter = groupName.replace("Group ", "");
     const groupMatches = allGroupMatches.filter(
       (match) => match.group === groupName,
     );
-    const standings = computeGroupStandings(groupMatches);
+    const standings = computeGroupStandings(ctx, groupMatches);
     const isComplete = standings.every((standing) => standing.played === 3);
 
     const teams: GroupComparisonTeamEntry[] = standings.map((standing) => {
       const comparison = comparisonById.get(standing.teamId);
       const ranking = rankings.get(standing.teamId);
-      const team = comparison?.team ?? getTeamById(standing.teamId);
+      const team = comparison?.team ?? ctx.getTeamById(standing.teamId);
       if (!team) {
         throw new Error(`Unknown team: ${standing.teamId}`);
       }

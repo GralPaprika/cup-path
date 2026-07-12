@@ -6,18 +6,12 @@ import type {
   ResolvedMatchSide,
   SimulationScenario,
 } from "@/lib/types";
-import { resolveTeam } from "@/lib/data/team-registry";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import { getBracketTemplateMatches } from "@/lib/data/bracket-template";
-import {
-  getAllMatches,
-  getMatchWinner,
-  isMatchPlayed,
-} from "@/lib/data/worldcup-loader";
+import { getMatchWinner, isMatchPlayed } from "@/lib/data/worldcup-loader";
 import { computeGroupStandings } from "@/lib/domain/group-standings";
 import { getGroupNames } from "@/lib/domain/path-builder";
-import {
-  buildStandingsByGroupFromFinishes,
-} from "@/lib/domain/group-finishes";
+import { buildStandingsByGroupFromFinishes } from "@/lib/domain/group-finishes";
 
 export function formatSlotLabel(spec: BracketSlotSpec): string {
   if (spec.kind === "groupPosition" && spec.group && spec.position) {
@@ -36,16 +30,17 @@ export function formatSlotLabel(spec: BracketSlotSpec): string {
 }
 
 function getStandingsByGroup(
+  ctx: TournamentContext,
   scenario: SimulationScenario = {},
 ): Map<string, GroupStanding[]> {
   if (
     scenario.groupFinishes &&
     Object.keys(scenario.groupFinishes).length > 0
   ) {
-    return buildStandingsByGroupFromFinishes(scenario.groupFinishes);
+    return buildStandingsByGroupFromFinishes(ctx, scenario.groupFinishes);
   }
 
-  const groupMatches = getAllMatches().filter((match) => match.group);
+  const groupMatches = ctx.matches.filter((match) => match.group);
   const map = new Map<string, GroupStanding[]>();
 
   for (const groupName of getGroupNames()) {
@@ -53,6 +48,7 @@ function getStandingsByGroup(
     map.set(
       letter,
       computeGroupStandings(
+        ctx,
         groupMatches.filter((match) => match.group === groupName),
       ),
     );
@@ -118,11 +114,15 @@ function formatMatchScoreLabel(match: OpenFootballMatch): string | null {
   return label;
 }
 
-function getMatchRecord(num: number): OpenFootballMatch | undefined {
-  return getAllMatches().find((match) => match.num === num);
+function getMatchRecord(
+  ctx: TournamentContext,
+  num: number,
+): OpenFootballMatch | undefined {
+  return ctx.matches.find((match) => match.num === num);
 }
 
 function resolveWinnerTeamId(
+  ctx: TournamentContext,
   matchNum: number,
   homeId: string | null,
   awayId: string | null,
@@ -137,19 +137,20 @@ function resolveWinnerTeamId(
     return null;
   }
 
-  const record = getMatchRecord(matchNum);
+  const record = getMatchRecord(ctx, matchNum);
   if (!record || !isMatchPlayed(record)) return null;
 
   const winnerName = getMatchWinner(record);
   if (!winnerName) return null;
-  return resolveTeam(winnerName)?.id ?? null;
+  return ctx.resolveTeam(winnerName)?.id ?? null;
 }
 
 export function resolveBracket(
+  ctx: TournamentContext,
   scenario: SimulationScenario = {},
   options: ResolveBracketOptions = {},
 ): ResolvedBracketMatch[] {
-  const standingsByGroup = getStandingsByGroup(scenario);
+  const standingsByGroup = getStandingsByGroup(ctx, scenario);
   const slotOverrides = scenario.slotOverrides ?? {};
   const suppressPlayedResultsMatchNums =
     options.suppressPlayedResultsMatchNums;
@@ -173,8 +174,9 @@ export function resolveBracket(
       slotOverrides,
     );
 
-    const record = getMatchRecord(template.num);
+    const record = getMatchRecord(ctx, template.num);
     const winnerTeamId = resolveWinnerTeamId(
+      ctx,
       template.num,
       homeId,
       awayId,

@@ -1,7 +1,6 @@
 import type { MatchResult, OpenFootballMatch, Team } from "@/lib/types";
-import { resolveTeam } from "@/lib/data/team-registry";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import {
-  getAllMatches,
   getMatchWinner,
   isKnockoutRound,
   isMatchPlayed,
@@ -26,9 +25,13 @@ const GROUP_NAMES = [
   "Group L",
 ];
 
-function getOpponent(match: OpenFootballMatch, teamId: string): Team | null {
-  const home = resolveTeam(match.team1);
-  const away = resolveTeam(match.team2);
+function getOpponent(
+  ctx: TournamentContext,
+  match: OpenFootballMatch,
+  teamId: string,
+): Team | null {
+  const home = ctx.resolveTeam(match.team1);
+  const away = ctx.resolveTeam(match.team2);
   if (!home || !away) return null;
   if (home.id === teamId) return away;
   if (away.id === teamId) return home;
@@ -36,12 +39,13 @@ function getOpponent(match: OpenFootballMatch, teamId: string): Team | null {
 }
 
 function getTeamGoals(
+  ctx: TournamentContext,
   match: OpenFootballMatch,
   teamId: string,
 ): [number, number] | null {
   if (!match.score?.ft) return null;
-  const home = resolveTeam(match.team1);
-  const away = resolveTeam(match.team2);
+  const home = ctx.resolveTeam(match.team1);
+  const away = ctx.resolveTeam(match.team2);
   if (!home || !away) return null;
 
   const [homeGoals, awayGoals] = match.score.ft;
@@ -51,6 +55,7 @@ function getTeamGoals(
 }
 
 function getMatchResult(
+  ctx: TournamentContext,
   match: OpenFootballMatch,
   teamId: string,
 ): MatchResult {
@@ -59,16 +64,17 @@ function getMatchResult(
   const winner = getMatchWinner(match);
   if (!winner) return "D";
 
-  const winnerTeam = resolveTeam(winner);
+  const winnerTeam = ctx.resolveTeam(winner);
   if (!winnerTeam) return null;
   return winnerTeam.id === teamId ? "W" : "L";
 }
 
 function formatScore(
+  ctx: TournamentContext,
   match: OpenFootballMatch,
   teamId: string,
 ): string | null {
-  const goals = getTeamGoals(match, teamId);
+  const goals = getTeamGoals(ctx, match, teamId);
   if (!goals) return null;
 
   const [forGoals, againstGoals] = goals;
@@ -83,42 +89,54 @@ function formatScore(
   return label;
 }
 
-export function getTeamMatches(teamId: string): OpenFootballMatch[] {
-  return getAllMatches()
+export function getTeamMatches(
+  ctx: TournamentContext,
+  teamId: string,
+): OpenFootballMatch[] {
+  return ctx.matches
     .filter((match) => {
-      const home = resolveTeam(match.team1);
-      const away = resolveTeam(match.team2);
+      const home = ctx.resolveTeam(match.team1);
+      const away = ctx.resolveTeam(match.team2);
       return home?.id === teamId || away?.id === teamId;
     })
     .sort((a, b) => a.date.localeCompare(b.date) || (a.num ?? 0) - (b.num ?? 0));
 }
 
-export function isTeamEliminated(teamId: string): boolean {
-  const matches = getTeamMatches(teamId);
-  const groupMatches = getAllMatches().filter((m) => m.group);
+export function isTeamEliminated(
+  ctx: TournamentContext,
+  teamId: string,
+): boolean {
+  const matches = getTeamMatches(ctx, teamId);
+  const groupMatches = ctx.matches.filter((m) => m.group);
   const playedKnockout = matches.filter(
     (m) => isKnockoutRound(m.round) && isMatchPlayed(m),
   );
 
   for (const match of playedKnockout) {
-    const result = getMatchResult(match, teamId);
+    const result = getMatchResult(ctx, match, teamId);
     if (result === "L") return true;
   }
 
-  return isTeamEliminatedFromGroup(teamId, groupMatches, GROUP_NAMES);
+  return isTeamEliminatedFromGroup(ctx, teamId, groupMatches, GROUP_NAMES);
 }
 
-export function getNextMatch(teamId: string): OpenFootballMatch | null {
-  if (isTeamEliminated(teamId)) return null;
+export function getNextMatch(
+  ctx: TournamentContext,
+  teamId: string,
+): OpenFootballMatch | null {
+  if (isTeamEliminated(ctx, teamId)) return null;
 
-  const matches = getTeamMatches(teamId);
+  const matches = getTeamMatches(ctx, teamId);
   return matches.find((match) => !isMatchPlayed(match)) ?? null;
 }
 
-export function getNextOpponent(teamId: string): Team | null {
-  const nextMatch = getNextMatch(teamId);
+export function getNextOpponent(
+  ctx: TournamentContext,
+  teamId: string,
+): Team | null {
+  const nextMatch = getNextMatch(ctx, teamId);
   if (!nextMatch) return null;
-  return getOpponent(nextMatch, teamId);
+  return getOpponent(ctx, nextMatch, teamId);
 }
 
 export interface TeamPathMatch {
@@ -130,15 +148,18 @@ export interface TeamPathMatch {
   isNext: boolean;
 }
 
-export function buildTeamPath(teamId: string): TeamPathMatch[] {
-  const matches = getTeamMatches(teamId);
-  const nextMatch = getNextMatch(teamId);
-  const eliminated = isTeamEliminated(teamId);
+export function buildTeamPath(
+  ctx: TournamentContext,
+  teamId: string,
+): TeamPathMatch[] {
+  const matches = getTeamMatches(ctx, teamId);
+  const nextMatch = getNextMatch(ctx, teamId);
+  const eliminated = isTeamEliminated(ctx, teamId);
 
   const path: TeamPathMatch[] = [];
 
   for (const match of matches) {
-    const opponent = getOpponent(match, teamId);
+    const opponent = getOpponent(ctx, match, teamId);
     if (!opponent) continue;
 
     const isPlayed = isMatchPlayed(match);
@@ -147,19 +168,23 @@ export function buildTeamPath(teamId: string): TeamPathMatch[] {
     path.push({
       match,
       opponent,
-      result: getMatchResult(match, teamId),
-      scoreLabel: formatScore(match, teamId),
+      result: getMatchResult(ctx, match, teamId),
+      scoreLabel: formatScore(ctx, match, teamId),
       isPlayed,
       isNext,
     });
 
-    if (isPlayed && getMatchResult(match, teamId) === "L" && isKnockoutRound(match.round)) {
+    if (
+      isPlayed &&
+      getMatchResult(ctx, match, teamId) === "L" &&
+      isKnockoutRound(match.round)
+    ) {
       break;
     }
   }
 
-  const groupMatches = getAllMatches().filter((m) => m.group);
-  if (isTeamEliminatedFromGroup(teamId, groupMatches, GROUP_NAMES)) {
+  const groupMatches = ctx.matches.filter((m) => m.group);
+  if (isTeamEliminatedFromGroup(ctx, teamId, groupMatches, GROUP_NAMES)) {
     const lastGroupIndex = path.findLastIndex(
       (entry) => entry.match.group && entry.isPlayed,
     );
@@ -175,7 +200,7 @@ export function getGroupNames(): string[] {
   return GROUP_NAMES;
 }
 
-export function getAdvancingTeams(): Set<string> {
-  const groupMatches = getAllMatches().filter((m) => m.group);
-  return getAdvancingTeamIds(groupMatches, GROUP_NAMES);
+export function getAdvancingTeams(ctx: TournamentContext): Set<string> {
+  const groupMatches = ctx.matches.filter((m) => m.group);
+  return getAdvancingTeamIds(ctx, groupMatches, GROUP_NAMES);
 }

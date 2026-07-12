@@ -9,6 +9,7 @@ import {
   resolveBracket,
   sanitizeKnockoutWinners,
 } from "@/lib/domain/bracket-resolver";
+import { bundledTestContext } from "@/lib/domain/test-fixtures";
 
 describe("formatSlotLabel", () => {
   it("formats group and winner slots", () => {
@@ -81,7 +82,8 @@ describe("computePendingWinnerMatchNums", () => {
 
 describe("resolveBracket", () => {
   it("fills round-of-32 slots from group finishes", () => {
-    const bracket = resolveBracket({
+    const ctx = bundledTestContext();
+    const bracket = resolveBracket(ctx, {
       groupFinishes: {
         A: ["MEX", "RSA", "KOR", "CZE"],
         B: ["CAN", "SUI", "BIH", "QAT"],
@@ -95,7 +97,8 @@ describe("resolveBracket", () => {
   });
 
   it("uses scenario knockout winners over recorded results", () => {
-    const bracket = resolveBracket({
+    const ctx = bundledTestContext();
+    const bracket = resolveBracket(ctx, {
       groupFinishes: {
         A: ["MEX", "RSA", "KOR", "CZE"],
         B: ["CAN", "SUI", "BIH", "QAT"],

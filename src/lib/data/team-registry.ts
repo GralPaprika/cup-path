@@ -32,6 +32,10 @@ function normalizeName(value: string): string {
     .trim();
 }
 
+export function teamFromOpenFootball(raw: OpenFootballTeam): Team {
+  return buildTeam(raw);
+}
+
 function buildTeam(raw: OpenFootballTeam): Team {
   const aliases = new Set<string>([
     raw.name,

@@ -6,6 +6,7 @@ import {
   isTeamEliminatedFromGroup,
 } from "@/lib/domain/group-standings";
 import {
+  createTestContext,
   groupAMatchesComplete,
   groupBMatchesComplete,
   playedGroupMatch,
@@ -13,7 +14,9 @@ import {
 
 describe("computeGroupStandings", () => {
   it("orders by points, then goal difference, then goals scored", () => {
-    const standings = computeGroupStandings(groupAMatchesComplete());
+    const matches = groupAMatchesComplete();
+    const ctx = createTestContext(matches);
+    const standings = computeGroupStandings(ctx, matches);
     assert.equal(standings[0].teamId, "MEX");
     assert.equal(standings[1].teamId, "CZE");
     assert.equal(standings[2].teamId, "RSA");
@@ -30,7 +33,8 @@ describe("computeGroupStandings", () => {
       playedGroupMatch("Mexico", "Czechia", 0, 0),
       playedGroupMatch("South Africa", "Korea Republic", 0, 0),
     ];
-    const standings = computeGroupStandings(matches);
+    const ctx = createTestContext(matches);
+    const standings = computeGroupStandings(ctx, matches);
     const tied = standings.filter((row) => row.points === 5);
     assert.equal(tied.length, 2);
     assert.ok(tied[0].gd >= tied[1].gd);
@@ -40,7 +44,8 @@ describe("computeGroupStandings", () => {
 describe("getAdvancingTeamIds", () => {
   it("adds provisional top two from incomplete groups", () => {
     const incomplete = groupAMatchesComplete().slice(0, 2);
-    const advancing = getAdvancingTeamIds(incomplete, ["Group A"]);
+    const ctx = createTestContext(incomplete);
+    const advancing = getAdvancingTeamIds(ctx, incomplete, ["Group A"]);
     assert.ok(advancing.has("MEX"));
     assert.ok(advancing.has("CZE"));
     assert.equal(advancing.size, 2);
@@ -48,7 +53,8 @@ describe("getAdvancingTeamIds", () => {
 
   it("adds best third-place teams when all groups are complete", () => {
     const matches = [...groupAMatchesComplete(), ...groupBMatchesComplete()];
-    const advancing = getAdvancingTeamIds(matches, ["Group A", "Group B"]);
+    const ctx = createTestContext(matches);
+    const advancing = getAdvancingTeamIds(ctx, matches, ["Group A", "Group B"]);
     assert.ok(advancing.has("MEX"));
     assert.ok(advancing.has("CZE"));
     assert.ok(advancing.has("CAN"));
@@ -62,12 +68,23 @@ describe("getAdvancingTeamIds", () => {
 describe("isTeamEliminatedFromGroup", () => {
   it("returns false before the group stage finishes", () => {
     const incomplete = groupAMatchesComplete().slice(0, 2);
-    assert.equal(isTeamEliminatedFromGroup("RSA", incomplete, ["Group A"]), false);
+    const ctx = createTestContext(incomplete);
+    assert.equal(
+      isTeamEliminatedFromGroup(ctx, "RSA", incomplete, ["Group A"]),
+      false,
+    );
   });
 
   it("returns true for fourth place after the group completes", () => {
     const matches = groupAMatchesComplete();
-    assert.equal(isTeamEliminatedFromGroup("KOR", matches, ["Group A"]), true);
-    assert.equal(isTeamEliminatedFromGroup("MEX", matches, ["Group A"]), false);
+    const ctx = createTestContext(matches);
+    assert.equal(
+      isTeamEliminatedFromGroup(ctx, "KOR", matches, ["Group A"]),
+      true,
+    );
+    assert.equal(
+      isTeamEliminatedFromGroup(ctx, "MEX", matches, ["Group A"]),
+      false,
+    );
   });
 });

@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type {
   GroupComparisonCard,
-  GroupQualificationStatus,
+  GroupPointsBenchmarks,
+  GroupStrengthOrdering,
 } from "@/lib/types";
 import { GroupDetailPanel } from "@/components/group-detail-panel";
 import { GroupsAdvancedPanel } from "@/components/groups-advanced-panel";
 import {
-  computeGroupStrengthOrdering,
-  getGroupStrengthRank,
-} from "@/lib/domain/group-strength-ordering";
+  QUALIFICATION_LEGEND_STYLES,
+  QUALIFICATION_ROW_STYLES,
+} from "@/components/groups/qualification-styles";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
 import {
@@ -24,26 +25,10 @@ import {
 import { cn } from "@/lib/utils";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 
-const QUALIFICATION_ROW_STYLES: Record<
-  Exclude<GroupQualificationStatus, null>,
-  string
-> = {
-  first: "bg-wc-green/12 hover:bg-wc-green/18",
-  second: "bg-wc-sky/12 hover:bg-wc-sky/18",
-  bestThird: "bg-wc-purple/12 hover:bg-wc-purple/18",
-};
-
-const QUALIFICATION_LEGEND_STYLES: Record<
-  Exclude<GroupQualificationStatus, null>,
-  string
-> = {
-  first: "bg-wc-green/50",
-  second: "bg-wc-sky/50",
-  bestThird: "bg-wc-purple/50",
-};
-
 interface GroupsViewProps {
   groups: GroupComparisonCard[];
+  strengthOrdering: GroupStrengthOrdering;
+  pointsBenchmarks: GroupPointsBenchmarks | null;
   selectedGroupLetter: string;
   onSelectGroup: (groupLetter: string) => void;
   selectedTeamId?: string;
@@ -53,6 +38,8 @@ interface GroupsViewProps {
 
 export function GroupsView({
   groups,
+  strengthOrdering,
+  pointsBenchmarks,
   selectedGroupLetter,
   onSelectGroup,
   selectedTeamId,
@@ -63,11 +50,6 @@ export function GroupsView({
   const summary = useTranslations("summary");
   const common = useTranslations("common");
   const selectedGroupRef = useRef<HTMLDivElement>(null);
-
-  const groupOrdering = useMemo(
-    () => computeGroupStrengthOrdering(groups),
-    [groups],
-  );
 
   const selectedGroup = groups.find(
     (group) => group.groupLetter === selectedGroupLetter,
@@ -108,7 +90,7 @@ export function GroupsView({
         <div ref={selectedGroupRef}>
           <GroupDetailPanel
             group={selectedGroup}
-            allGroups={groups}
+            pointsBenchmarks={pointsBenchmarks}
             selectedTeamId={selectedTeamId}
           />
         </div>
@@ -116,6 +98,8 @@ export function GroupsView({
 
       <GroupsAdvancedPanel
         groups={groups}
+        strengthOrdering={strengthOrdering}
+        pointsBenchmarks={pointsBenchmarks}
         selectedGroupLetter={selectedGroupLetter}
         open={advancedOpen}
         onOpenChange={onAdvancedOpenChange}
@@ -126,7 +110,10 @@ export function GroupsView({
         {groups.map((group) => {
           const isSelected = group.groupLetter === selectedGroupLetter;
           const isTeamGroup = group.groupLetter === teamGroupLetter;
-          const strengthRank = getGroupStrengthRank(groupOrdering, group.groupLetter);
+          const strengthRank = {
+            byPoints: strengthOrdering.rankByPoints[group.groupLetter] ?? null,
+            byAvgRank: strengthOrdering.rankByAvgRank[group.groupLetter] ?? null,
+          };
 
           return (
             <article
@@ -184,7 +171,7 @@ export function GroupsView({
                     {strengthRank.byPoints !== null &&
                       t("groupStrengthRankOf", {
                         rank: strengthRank.byPoints,
-                        total: groupOrdering.groupCount,
+                        total: strengthOrdering.groupCount,
                       })}
                     {strengthRank.byPoints !== null &&
                       strengthRank.byAvgRank !== null &&
@@ -192,7 +179,7 @@ export function GroupsView({
                     {strengthRank.byAvgRank !== null &&
                       t("groupStrengthRankAlt", {
                         rank: strengthRank.byAvgRank,
-                        total: groupOrdering.groupCount,
+                        total: strengthOrdering.groupCount,
                       })}
                   </p>
                 )}

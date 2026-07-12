@@ -1,5 +1,5 @@
 import type { GroupStanding, OpenFootballMatch } from "@/lib/types";
-import { resolveTeam } from "@/lib/data/team-registry";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import { getMatchWinner, isMatchPlayed } from "@/lib/data/worldcup-loader";
 
 function initStanding(teamId: string): GroupStanding {
@@ -25,13 +25,14 @@ function compareStandings(a: GroupStanding, b: GroupStanding): number {
 }
 
 export function computeGroupStandings(
+  ctx: TournamentContext,
   matches: OpenFootballMatch[],
 ): GroupStanding[] {
   const standings = new Map<string, GroupStanding>();
 
   for (const match of matches) {
-    const home = resolveTeam(match.team1);
-    const away = resolveTeam(match.team2);
+    const home = ctx.resolveTeam(match.team1);
+    const away = ctx.resolveTeam(match.team2);
     if (!home || !away) continue;
 
     if (!standings.has(home.id)) standings.set(home.id, initStanding(home.id));
@@ -82,6 +83,7 @@ function compareThirdPlace(a: GroupStanding, b: GroupStanding): number {
 }
 
 export function getAdvancingTeamIds(
+  ctx: TournamentContext,
   allGroupMatches: OpenFootballMatch[],
   groupNames: string[],
 ): Set<string> {
@@ -90,7 +92,7 @@ export function getAdvancingTeamIds(
 
   for (const groupName of groupNames) {
     const groupMatches = allGroupMatches.filter((m) => m.group === groupName);
-    const standings = computeGroupStandings(groupMatches);
+    const standings = computeGroupStandings(ctx, groupMatches);
     const groupComplete = standings.every((s) => s.played === 3);
 
     if (!groupComplete) {
@@ -111,7 +113,7 @@ export function getAdvancingTeamIds(
 
   const allGroupsComplete = groupNames.every((groupName) => {
     const groupMatches = allGroupMatches.filter((m) => m.group === groupName);
-    const standings = computeGroupStandings(groupMatches);
+    const standings = computeGroupStandings(ctx, groupMatches);
     return standings.every((s) => s.played === 3);
   });
 
@@ -128,26 +130,27 @@ export function getAdvancingTeamIds(
 }
 
 export function isTeamEliminatedFromGroup(
+  ctx: TournamentContext,
   teamId: string,
   allGroupMatches: OpenFootballMatch[],
   groupNames: string[],
 ): boolean {
   const groupName = allGroupMatches.find((match) => {
-    const home = resolveTeam(match.team1);
-    const away = resolveTeam(match.team2);
+    const home = ctx.resolveTeam(match.team1);
+    const away = ctx.resolveTeam(match.team2);
     return home?.id === teamId || away?.id === teamId;
   })?.group;
 
   if (!groupName) return false;
 
   const groupMatches = allGroupMatches.filter((m) => m.group === groupName);
-  const standings = computeGroupStandings(groupMatches);
+  const standings = computeGroupStandings(ctx, groupMatches);
   const teamStanding = standings.find((s) => s.teamId === teamId);
   if (!teamStanding) return false;
 
   const groupComplete = standings.every((s) => s.played === 3);
   if (!groupComplete) return false;
 
-  const advancing = getAdvancingTeamIds(allGroupMatches, groupNames);
+  const advancing = getAdvancingTeamIds(ctx, allGroupMatches, groupNames);
   return !advancing.has(teamId);
 }

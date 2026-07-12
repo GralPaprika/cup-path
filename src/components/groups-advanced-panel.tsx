@@ -3,12 +3,11 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import type { GroupComparisonCard } from "@/lib/types";
-import {
-  computeGroupPointsBenchmarks,
-  computeGroupStrengthOrdering,
-  getGroupStrengthRank,
-} from "@/lib/domain/group-strength-ordering";
+import type {
+  GroupComparisonCard,
+  GroupPointsBenchmarks,
+  GroupStrengthOrdering,
+} from "@/lib/types";
 import { useTranslations } from "next-intl";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -23,6 +22,8 @@ import {
 
 interface GroupsAdvancedPanelProps {
   groups: GroupComparisonCard[];
+  strengthOrdering: GroupStrengthOrdering;
+  pointsBenchmarks: GroupPointsBenchmarks | null;
   selectedGroupLetter: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -129,6 +130,8 @@ function sortGroupRows(
 
 export function GroupsAdvancedPanel({
   groups,
+  strengthOrdering,
+  pointsBenchmarks,
   selectedGroupLetter,
   open,
   onOpenChange,
@@ -138,35 +141,30 @@ export function GroupsAdvancedPanel({
   const common = useTranslations("common");
   const [sortKey, setSortKey] = useState<GroupTableSortKey>("rankByPts");
 
-  const ordering = useMemo(
-    () => computeGroupStrengthOrdering(groups),
-    [groups],
-  );
-  const benchmarks = useMemo(
-    () => computeGroupPointsBenchmarks(groups),
-    [groups],
-  );
-  const selectedRank = getGroupStrengthRank(ordering, selectedGroupLetter);
+  const selectedRank = {
+    byPoints: strengthOrdering.rankByPoints[selectedGroupLetter] ?? null,
+    byAvgRank: strengthOrdering.rankByAvgRank[selectedGroupLetter] ?? null,
+  };
 
   const tableRows = useMemo(() => {
     const rows: GroupTableRow[] = groups.flatMap((group) =>
       group.avgFifaPoints !== null &&
       group.avgFifaRank !== null &&
-      ordering.rankByPoints[group.groupLetter] !== undefined &&
-      ordering.rankByAvgRank[group.groupLetter] !== undefined
+      strengthOrdering.rankByPoints[group.groupLetter] !== undefined &&
+      strengthOrdering.rankByAvgRank[group.groupLetter] !== undefined
         ? [
             {
               groupLetter: group.groupLetter,
               avgFifaPoints: group.avgFifaPoints,
               avgFifaRank: group.avgFifaRank,
-              rankByPoints: ordering.rankByPoints[group.groupLetter],
-              rankByAvgRank: ordering.rankByAvgRank[group.groupLetter],
+              rankByPoints: strengthOrdering.rankByPoints[group.groupLetter],
+              rankByAvgRank: strengthOrdering.rankByAvgRank[group.groupLetter],
             },
           ]
         : [],
     );
     return sortGroupRows(rows, sortKey);
-  }, [groups, ordering, sortKey]);
+  }, [groups, strengthOrdering, sortKey]);
 
   const formatCorrelation = (value: number | null) =>
     value === null ? "—" : formatStatValue(value, 3);
@@ -196,7 +194,7 @@ export function GroupsAdvancedPanel({
       </summary>
 
       <div className="space-y-5 px-5 py-5">
-        {benchmarks && (
+        {pointsBenchmarks && (
           <section>
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
               {t("benchmarksTitle")}
@@ -204,17 +202,17 @@ export function GroupsAdvancedPanel({
             <div className="grid gap-3 sm:grid-cols-3">
               <CorrelationTile
                 label={t("weakestGroupBenchmark")}
-                value={`${benchmarks.weakest.groupLetter} · ${formatFifaPoints(benchmarks.weakest.avgFifaPoints)}`}
+                value={`${pointsBenchmarks.weakest.groupLetter} · ${formatFifaPoints(pointsBenchmarks.weakest.avgFifaPoints)}`}
                 valueClassName="text-wc-red"
               />
               <CorrelationTile
                 label={t("strongestGroupBenchmark")}
-                value={`${benchmarks.strongest.groupLetter} · ${formatFifaPoints(benchmarks.strongest.avgFifaPoints)}`}
+                value={`${pointsBenchmarks.strongest.groupLetter} · ${formatFifaPoints(pointsBenchmarks.strongest.avgFifaPoints)}`}
                 valueClassName="text-wc-lime"
               />
               <CorrelationTile
                 label={t("tournamentAverageBenchmark")}
-                value={formatFifaPoints(benchmarks.tournamentAverage)}
+                value={formatFifaPoints(pointsBenchmarks.tournamentAverage)}
                 valueClassName="text-wc-turquoise"
               />
             </div>
@@ -285,9 +283,9 @@ export function GroupsAdvancedPanel({
                 {tableRows.map((row) => {
                   const isSelected = row.groupLetter === selectedGroupLetter;
                   const isWeakest =
-                    benchmarks?.weakest.groupLetter === row.groupLetter;
+                    pointsBenchmarks?.weakest.groupLetter === row.groupLetter;
                   const isStrongest =
-                    benchmarks?.strongest.groupLetter === row.groupLetter;
+                    pointsBenchmarks?.strongest.groupLetter === row.groupLetter;
 
                   return (
                     <TableRow
@@ -317,13 +315,13 @@ export function GroupsAdvancedPanel({
                       <TableCell className="px-3 py-2 text-right font-mono text-sm tabular-nums text-white">
                         {t("rankValue", {
                           rank: row.rankByPoints,
-                          total: ordering.groupCount,
+                          total: strengthOrdering.groupCount,
                         })}
                       </TableCell>
                       <TableCell className="px-3 py-2 text-right font-mono text-sm tabular-nums text-white">
                         {t("rankValue", {
                           rank: row.rankByAvgRank,
-                          total: ordering.groupCount,
+                          total: strengthOrdering.groupCount,
                         })}
                       </TableCell>
                     </TableRow>
@@ -339,16 +337,16 @@ export function GroupsAdvancedPanel({
             {t("groupOrderingTitle")}
           </h3>
           <p className="mb-3 text-xs text-muted-foreground">
-            {t("groupOrderingHint", { count: ordering.groupCount })}
+            {t("groupOrderingHint", { count: strengthOrdering.groupCount })}
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <CorrelationTile
               label={t("spearmanRho")}
-              value={formatCorrelation(ordering.correlation.spearmanRho)}
+              value={formatCorrelation(strengthOrdering.correlation.spearmanRho)}
             />
             <CorrelationTile
               label={t("kendallTau")}
-              value={formatCorrelation(ordering.correlation.kendallTau)}
+              value={formatCorrelation(strengthOrdering.correlation.kendallTau)}
             />
             <CorrelationTile
               label={t("selectedRankByPoints", {
@@ -358,7 +356,7 @@ export function GroupsAdvancedPanel({
                 selectedRank.byPoints !== null
                   ? t("rankValue", {
                       rank: selectedRank.byPoints,
-                      total: ordering.groupCount,
+                      total: strengthOrdering.groupCount,
                     })
                   : "—"
               }
@@ -371,7 +369,7 @@ export function GroupsAdvancedPanel({
                 selectedRank.byAvgRank !== null
                   ? t("rankValue", {
                       rank: selectedRank.byAvgRank,
-                      total: ordering.groupCount,
+                      total: strengthOrdering.groupCount,
                     })
                   : "—"
               }

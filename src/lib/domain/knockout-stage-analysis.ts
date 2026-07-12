@@ -4,9 +4,8 @@ import type {
   OpenFootballMatch,
   RankingEntry,
 } from "@/lib/types";
-import { resolveTeam } from "@/lib/data/team-registry";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import {
-  getAllMatches,
   getMatchWinner,
   isMatchPlayed,
 } from "@/lib/data/worldcup-loader";
@@ -31,17 +30,18 @@ function gapPointsForTeams(
 }
 
 function buildKnockoutFixture(
+  ctx: TournamentContext,
   match: OpenFootballMatch,
   rankings: Map<string, RankingEntry>,
 ): KnockoutFixtureEntry | null {
-  const team1 = resolveTeam(match.team1);
-  const team2 = resolveTeam(match.team2);
+  const team1 = ctx.resolveTeam(match.team1);
+  const team2 = ctx.resolveTeam(match.team2);
   if (!team1 || !team2) return null;
 
   const winnerName = getMatchWinner(match);
   if (!winnerName) return null;
 
-  const winner = resolveTeam(winnerName);
+  const winner = ctx.resolveTeam(winnerName);
   if (!winner) return null;
 
   const score = buildMatchScoreBreakdown(match.score);
@@ -80,15 +80,16 @@ function buildKnockoutFixture(
 }
 
 export function buildKnockoutStageAnalysis(
+  ctx: TournamentContext,
   roundName: string,
   rankings: Map<string, RankingEntry>,
 ): KnockoutStageAnalysis | null {
-  const roundMatches = getAllMatches().filter(
+  const roundMatches = ctx.matches.filter(
     (match) => match.round === roundName && isMatchPlayed(match),
   );
 
   const rawFixtures = roundMatches
-    .map((match) => buildKnockoutFixture(match, rankings))
+    .map((match) => buildKnockoutFixture(ctx, match, rankings))
     .filter((fixture): fixture is KnockoutFixtureEntry => fixture !== null);
 
   if (rawFixtures.length === 0) return null;
@@ -112,7 +113,7 @@ export function buildKnockoutStageAnalysis(
   const participantIds = new Set(
     fixtures.flatMap((fixture) => [fixture.team1.id, fixture.team2.id]),
   );
-  const pool = buildParticipantPoolStats(participantIds, rankings);
+  const pool = buildParticipantPoolStats(ctx, participantIds, rankings);
 
   return {
     matchCount,

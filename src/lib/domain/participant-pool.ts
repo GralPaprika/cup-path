@@ -4,6 +4,7 @@ import type {
   RankingEntry,
   Team,
 } from "@/lib/types";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import { computeNumericStats } from "@/lib/domain/group-stats";
 import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
 
@@ -15,6 +16,7 @@ export interface ParticipantPoolStats {
 }
 
 export function buildParticipantPoolStats(
+  ctx: TournamentContext,
   participantIds: Iterable<string>,
   rankings: Map<string, RankingEntry>,
 ): ParticipantPoolStats {
@@ -34,6 +36,7 @@ export function buildParticipantPoolStats(
     participantCount: ids.length,
     avgParticipantFifaPoints: participantPointsStats.mean,
     avgParticipantFifaPointsContext: buildAvgPointsContext(
+      ctx,
       participantPointsStats.mean,
       rankings.values(),
     ),

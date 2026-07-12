@@ -1,8 +1,10 @@
 import type {
+  AvgPointsContext,
   ComparisonEntry,
   GroupComparisonCard,
+  GroupPointsBenchmarks,
+  GroupStrengthOrdering,
   PathStage,
-  AvgPointsContext,
   RankingMode,
   TeamPathSummary,
 } from "@/lib/types";
@@ -16,6 +18,10 @@ import {
 } from "@/lib/domain/difficulty";
 import { buildGroupComparisonCards } from "@/lib/domain/group-comparison";
 import {
+  computeGroupPointsBenchmarks,
+  computeGroupStrengthOrdering,
+} from "@/lib/domain/group-strength-ordering";
+import {
   collectCohortDifficultyValues,
   computePathOpponentStats,
   type PathOpponentStats,
@@ -27,11 +33,11 @@ import {
 import { DEFAULT_PATH_STAGES, getFurthestStage } from "@/lib/domain/match-stages";
 import {
   getCompareMaxStageReached,
+  getTeamCountsByStage,
   getTeamMaxStageReached,
   getTeamsAtStage,
 } from "@/lib/domain/team-stages";
-import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
-import { ensureWorldCupData } from "@/lib/data/worldcup-store";
+import { loadTournamentRuntime } from "@/lib/services/tournament-runtime";
 
 export interface TeamAnalysisAdvanced {
   pathStats: PathOpponentStats;
@@ -54,16 +60,14 @@ export async function getTeamAnalysis(
   mode: RankingMode,
   stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
 ): Promise<TeamAnalysisResult | null> {
-  await ensureWorldCupData();
-  const snapshot = await getRankingsSnapshot(mode);
-  const rankings = buildRankingsMap(snapshot);
-  const summary = buildTeamPathSummary(teamId, rankings);
+  const { ctx, rankings } = await loadTournamentRuntime(mode);
+  const summary = buildTeamPathSummary(ctx, teamId, rankings);
 
   if (!summary) return null;
 
-  const allSummaries = buildAllTeamSummaries(rankings);
+  const allSummaries = buildAllTeamSummaries(ctx, rankings);
   const cohortStage = getFurthestStage(stages);
-  const cohortTeamIds = getTeamsAtStage(cohortStage);
+  const cohortTeamIds = getTeamsAtStage(ctx, cohortStage);
   const { rank, rankByAvgRank, cohortSize } = getHardestPathRank(
     allSummaries,
     teamId,
@@ -83,6 +87,7 @@ export async function getTeamAnalysis(
   return {
     summary: filteredSummary,
     avgPointsContext: buildAvgPointsContext(
+      ctx,
       filteredSummary.avgOpponentPoints,
       rankings.values(),
       { excludeTeamId: teamId },
@@ -91,7 +96,7 @@ export async function getTeamAnalysis(
     hardestPathRankByAvgRank: rankByAvgRank,
     cohortSize,
     cohortStage,
-    maxStageReached: getTeamMaxStageReached(teamId),
+    maxStageReached: getTeamMaxStageReached(ctx, teamId),
     advanced: {
       pathStats: computePathOpponentStats(summary.matches, stages),
       cohortCorrelation: computeCohortOrderingCorrelation(
@@ -107,10 +112,13 @@ export interface ComparisonAnalysisResult {
   cohortStage: PathStage;
   cohortSize: number;
   maxStageReached?: PathStage;
+  teamCounts: Record<PathStage, number>;
 }
 
 export interface GroupsAnalysisResult {
   groups: GroupComparisonCard[];
+  strengthOrdering: GroupStrengthOrdering;
+  pointsBenchmarks: GroupPointsBenchmarks | null;
 }
 
 export async function getComparisonAnalysis(
@@ -120,23 +128,22 @@ export async function getComparisonAnalysis(
   teamRound: PathStage = "group",
   compareTeamId?: string,
 ): Promise<ComparisonAnalysisResult> {
-  await ensureWorldCupData();
-  const snapshot = await getRankingsSnapshot(mode);
-  const rankings = buildRankingsMap(snapshot);
-  const allSummaries = buildAllTeamSummaries(rankings);
+  const { ctx, rankings } = await loadTournamentRuntime(mode);
+  const allSummaries = buildAllTeamSummaries(ctx, rankings);
 
   const cohortStage = getFurthestStage(stages);
-  const cohortTeamIds = getTeamsAtStage(cohortStage);
+  const cohortTeamIds = getTeamsAtStage(ctx, cohortStage);
 
   let filteredSummaries = allSummaries;
   if (teamRound !== "group") {
-    const teamIds = getTeamsAtStage(teamRound);
+    const teamIds = getTeamsAtStage(ctx, teamRound);
     filteredSummaries = allSummaries.filter((summary) =>
       teamIds.has(summary.team.id),
     );
   }
 
   const comparison = buildComparison(
+    ctx,
     filteredSummaries,
     selectedTeamId,
     stages,
@@ -150,25 +157,33 @@ export async function getComparisonAnalysis(
     cohortSize: filteredSummaries.filter((summary) =>
       cohortTeamIds.has(summary.team.id),
     ).length,
-    maxStageReached: getCompareMaxStageReached(selectedTeamId, compareTeamId),
+    maxStageReached: getCompareMaxStageReached(
+      ctx,
+      selectedTeamId,
+      compareTeamId,
+    ),
+    teamCounts: getTeamCountsByStage(ctx),
   };
 }
 
 export async function getGroupsAnalysis(
   mode: RankingMode,
 ): Promise<GroupsAnalysisResult> {
-  await ensureWorldCupData();
-  const snapshot = await getRankingsSnapshot(mode);
-  const rankings = buildRankingsMap(snapshot);
-  const allSummaries = buildAllTeamSummaries(rankings);
+  const { ctx, rankings } = await loadTournamentRuntime(mode);
+  const allSummaries = buildAllTeamSummaries(ctx, rankings);
   const comparison = buildComparison(
+    ctx,
     allSummaries,
     undefined,
     new Set(DEFAULT_PATH_STAGES),
-    getTeamsAtStage("group"),
+    getTeamsAtStage(ctx, "group"),
     rankings,
   );
-  const groups = buildGroupComparisonCards(comparison, rankings, "group");
+  const groups = buildGroupComparisonCards(ctx, comparison, rankings, "group");
 
-  return { groups };
+  return {
+    groups,
+    strengthOrdering: computeGroupStrengthOrdering(groups),
+    pointsBenchmarks: computeGroupPointsBenchmarks(groups),
+  };
 }

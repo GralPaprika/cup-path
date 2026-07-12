@@ -1,12 +1,4 @@
-export interface NumericStats {
-  count: number;
-  mean: number | null;
-  median: number | null;
-  variance: number | null;
-  stdDev: number | null;
-  min: number | null;
-  max: number | null;
-}
+import type { NumericStats } from "@/lib/types";
 
 const EMPTY_STATS: NumericStats = {
   count: 0,
@@ -46,3 +38,5 @@ export function computeNumericStats(values: number[]): NumericStats {
     max: sorted[count - 1],
   };
 }
+
+export type { NumericStats } from "@/lib/types";

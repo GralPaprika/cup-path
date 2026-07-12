@@ -1,6 +1,13 @@
-import type { OpenFootballMatch, RankingEntry, WorldCupData } from "@/lib/types";
-import { applyWorldCupBundle } from "@/lib/data/worldcup-loader";
+import type {
+  OpenFootballMatch,
+  OpenFootballTeam,
+  RankingEntry,
+  WorldCupData,
+} from "@/lib/types";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
+import { createTournamentContextFromOpenFootball } from "@/lib/data/tournament-context";
 import bundledWorldcup from "../../../data/worldcup/2026/worldcup.json";
+import bundledTeams from "../../../data/worldcup/2026/worldcup.teams.json";
 
 export function rankingEntry(
   teamId: string,
@@ -117,8 +124,17 @@ export function groupBMatchesComplete(): OpenFootballMatch[] {
   ];
 }
 
-export function restoreBundledWorldCup(): void {
-  applyWorldCupBundle(bundledWorldcup as WorldCupData);
+const BUNDLED_TEAMS = bundledTeams as OpenFootballTeam[];
+
+export function createTestContext(
+  matches: OpenFootballMatch[],
+  rawTeams: OpenFootballTeam[] = BUNDLED_TEAMS,
+): TournamentContext {
+  return createTournamentContextFromOpenFootball(matches, rawTeams);
+}
+
+export function bundledTestContext(): TournamentContext {
+  return createTestContext((bundledWorldcup as WorldCupData).matches);
 }
 
 export { bundledWorldcup };

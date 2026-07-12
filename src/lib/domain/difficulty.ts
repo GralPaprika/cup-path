@@ -5,6 +5,7 @@ import type {
   Team,
   TeamPathSummary,
 } from "@/lib/types";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import {
   buildTeamPath,
   getNextOpponent,
@@ -21,7 +22,7 @@ import {
   buildCompetitionRankMap,
   rankTeamInCohort,
 } from "@/lib/domain/path-ranking";
-import { enrichTeam, getAllTeams, getTeamById } from "@/lib/data/team-registry";
+import { enrichTeam } from "@/lib/data/team-registry";
 import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
 
 const ALL_PATH_STAGES = new Set(PATH_STAGES);
@@ -101,15 +102,16 @@ function buildCohortMetricEntries(
 }
 
 export function buildTeamPathSummary(
+  ctx: TournamentContext,
   teamId: string,
   rankings: Map<string, RankingEntry>,
 ): TeamPathSummary | null {
-  const baseTeam = getTeamById(teamId);
+  const baseTeam = ctx.getTeamById(teamId);
   if (!baseTeam) return null;
 
   const teamRanking = rankings.get(teamId);
   const team = withFlag(baseTeam, teamRanking);
-  const path = buildTeamPath(teamId);
+  const path = buildTeamPath(ctx, teamId);
 
   const matches: MatchDifficulty[] = path.map(
     ({ match, opponent, result, scoreLabel, isPlayed, isNext }) => {
@@ -148,7 +150,7 @@ export function buildTeamPathSummary(
     ALL_PATH_STAGES,
   );
 
-  const nextOpponent = getNextOpponent(teamId);
+  const nextOpponent = getNextOpponent(ctx, teamId);
 
   return {
     team,
@@ -157,7 +159,7 @@ export function buildTeamPathSummary(
     matches,
     avgOpponentPoints,
     avgOpponentRank,
-    isEliminated: isTeamEliminated(teamId),
+    isEliminated: isTeamEliminated(ctx, teamId),
     nextOpponent: nextOpponent
       ? withFlag(nextOpponent, rankings.get(nextOpponent.id))
       : null,
@@ -167,10 +169,12 @@ export function buildTeamPathSummary(
 }
 
 export function buildAllTeamSummaries(
+  ctx: TournamentContext,
   rankings: Map<string, RankingEntry>,
 ): TeamPathSummary[] {
-  const summaries = getAllTeams()
-    .map((team) => buildTeamPathSummary(team.id, rankings))
+  const summaries = ctx
+    .getAllTeams()
+    .map((team) => buildTeamPathSummary(ctx, team.id, rankings))
     .filter((summary): summary is TeamPathSummary => summary !== null);
 
   summaries.sort((a, b) => {
@@ -244,6 +248,7 @@ export function applyStageFilterToSummary(
 }
 
 export function buildComparison(
+  ctx: TournamentContext,
   summaries: TeamPathSummary[],
   selectedTeamId?: string,
   stages: Set<PathStage> = new Set(DEFAULT_PATH_STAGES),
@@ -288,7 +293,7 @@ export function buildComparison(
   return entries.map((entry) => ({
     ...entry,
     avgPointsContext: rankings
-      ? buildAvgPointsContext(entry.avgOpponentPoints, rankings.values(), {
+      ? buildAvgPointsContext(ctx, entry.avgOpponentPoints, rankings.values(), {
           excludeTeamId: entry.team.id,
         })
       : null,

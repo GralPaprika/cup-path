@@ -2,12 +2,13 @@
 
 import type {
   GroupComparisonCard,
-  GroupQualificationStatus,
+  GroupPointsBenchmarks,
 } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team-flag";
 import { GroupFifaPointsChart } from "@/components/group-fifa-points-chart";
 import { StatsBlock } from "@/components/stats-block";
+import { QUALIFICATION_ROW_STYLES } from "@/components/groups/qualification-styles";
 import {
   Table,
   TableBody,
@@ -18,15 +19,6 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
-
-const QUALIFICATION_ROW_STYLES: Record<
-  Exclude<GroupQualificationStatus, null>,
-  string
-> = {
-  first: "bg-wc-green/12 hover:bg-wc-green/18",
-  second: "bg-wc-sky/12 hover:bg-wc-sky/18",
-  bestThird: "bg-wc-purple/12 hover:bg-wc-purple/18",
-};
 
 function formatGoalDifference(value: number): string {
   if (value > 0) return `+${value}`;
@@ -39,13 +31,13 @@ function formatStandingValue(played: number, value: number | string): string {
 
 interface GroupDetailPanelProps {
   group: GroupComparisonCard;
-  allGroups: GroupComparisonCard[];
+  pointsBenchmarks: GroupPointsBenchmarks | null;
   selectedTeamId?: string;
 }
 
 export function GroupDetailPanel({
   group,
-  allGroups,
+  pointsBenchmarks,
   selectedTeamId,
 }: GroupDetailPanelProps) {
   const t = useTranslations("groups");
@@ -177,7 +169,7 @@ export function GroupDetailPanel({
 
         <GroupFifaPointsChart
           group={group}
-          allGroups={allGroups}
+          pointsBenchmarks={pointsBenchmarks}
           selectedTeamId={selectedTeamId}
         />
 
@@ -210,26 +202,4 @@ export function GroupDetailPanel({
       </div>
     </section>
   );
-}
-
-export function parseSelectedGroupLetter(
-  urlGroup: string | null,
-  groups: GroupComparisonCard[],
-  selectedTeamId?: string,
-): string {
-  const letters = new Set(groups.map((group) => group.groupLetter));
-  const normalized = urlGroup?.toUpperCase();
-
-  if (selectedTeamId) {
-    const teamGroup = groups.find((group) =>
-      group.teams.some((entry) => entry.team.id === selectedTeamId),
-    )?.groupLetter;
-    if (teamGroup) return teamGroup;
-  }
-
-  if (normalized && letters.has(normalized)) {
-    return normalized;
-  }
-
-  return letters.has("A") ? "A" : (groups[0]?.groupLetter ?? "A");
 }

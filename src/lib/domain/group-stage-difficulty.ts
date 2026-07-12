@@ -5,7 +5,7 @@ import type {
   GroupStageDifficultySpotlight,
   GroupStageDifficultyStrip,
 } from "@/lib/types";
-import { getAllMatches } from "@/lib/data/worldcup-loader";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import { computeNumericStats } from "@/lib/domain/group-stats";
 import { getAdvancingTeamIds } from "@/lib/domain/group-standings";
 import { getGroupNames } from "@/lib/domain/path-builder";
@@ -59,11 +59,12 @@ function buildGroupStageDifficultyInsights(
 }
 
 export function buildGroupStageDifficultyStrip(
+  ctx: TournamentContext,
   comparison: ComparisonEntry[],
 ): GroupStageDifficultyStrip | null {
   const groupNames = getGroupNames();
-  const groupMatches = getAllMatches().filter((match) => match.group);
-  const advancing = getAdvancingTeamIds(groupMatches, groupNames);
+  const groupMatches = ctx.matches.filter((match) => match.group);
+  const advancing = getAdvancingTeamIds(ctx, groupMatches, groupNames);
 
   const entries: GroupStageDifficultyEntry[] = comparison
     .filter((entry) => entry.avgOpponentPoints !== null)

@@ -4,7 +4,6 @@ import {
   parseTeamRound,
   syncTeamRoundToStages,
 } from "@/lib/domain/match-stages";
-import { getTeamCountsByStage } from "@/lib/domain/team-stages";
 import { parseRankingMode } from "@/lib/data/ranking-modes";
 import { getComparisonAnalysis } from "@/lib/services/analysis-service";
 
@@ -24,12 +23,10 @@ export async function GET(request: NextRequest) {
     teamRound,
     compareTeamId,
   );
-  const teamCounts = getTeamCountsByStage();
 
   return NextResponse.json({
     ...result,
     mode,
     teamRound,
-    teamCounts,
   });
 }

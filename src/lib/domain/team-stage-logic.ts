@@ -1,10 +1,13 @@
 import type { PathStage } from "@/lib/types";
-import { getAllTeams, resolveTeam } from "@/lib/data/team-registry";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import {
   getMatchWinner,
   isMatchPlayed,
 } from "@/lib/data/worldcup-loader";
-import { getAdvancingTeams, getTeamMatches } from "@/lib/domain/path-builder";
+import {
+  getAdvancingTeams,
+  getTeamMatches,
+} from "@/lib/domain/path-builder";
 import { getMatchStage, PATH_STAGES } from "@/lib/domain/match-stages";
 
 function stageIndex(stage: PathStage): number {
@@ -12,18 +15,22 @@ function stageIndex(stage: PathStage): number {
 }
 
 function teamWonKnockoutMatch(
+  ctx: TournamentContext,
   teamId: string,
   match: ReturnType<typeof getTeamMatches>[number],
 ): boolean {
   if (!isMatchPlayed(match) || match.round.startsWith("Matchday")) return false;
 
   const winner = getMatchWinner(match);
-  const winnerTeam = winner ? resolveTeam(winner) : undefined;
+  const winnerTeam = winner ? ctx.resolveTeam(winner) : undefined;
   return winnerTeam?.id === teamId;
 }
 
-function highestStageReached(teamId: string): PathStage {
-  const matches = getTeamMatches(teamId);
+function highestStageReached(
+  ctx: TournamentContext,
+  teamId: string,
+): PathStage {
+  const matches = getTeamMatches(ctx, teamId);
   let highest = 0;
 
   for (const match of matches) {
@@ -33,7 +40,7 @@ function highestStageReached(teamId: string): PathStage {
     const stageIdx = stageIndex(stage);
     highest = Math.max(highest, stageIdx);
 
-    if (teamWonKnockoutMatch(teamId, match) && stageIdx < PATH_STAGES.length - 1) {
+    if (teamWonKnockoutMatch(ctx, teamId, match) && stageIdx < PATH_STAGES.length - 1) {
       highest = Math.max(highest, stageIdx + 1);
     }
   }
@@ -41,51 +48,68 @@ function highestStageReached(teamId: string): PathStage {
   return PATH_STAGES[highest];
 }
 
-export function getTeamMaxStageReached(teamId: string): PathStage {
-  return highestStageReached(teamId);
+export function getTeamMaxStageReached(
+  ctx: TournamentContext,
+  teamId: string,
+): PathStage {
+  return highestStageReached(ctx, teamId);
 }
 
 export function getCompareMaxStageReached(
+  ctx: TournamentContext,
   teamAId?: string,
   teamBId?: string,
 ): PathStage | undefined {
   if (teamAId && teamBId && teamAId !== teamBId) {
     const sharedIndex = Math.min(
-      stageIndex(getTeamMaxStageReached(teamAId)),
-      stageIndex(getTeamMaxStageReached(teamBId)),
+      stageIndex(getTeamMaxStageReached(ctx, teamAId)),
+      stageIndex(getTeamMaxStageReached(ctx, teamBId)),
     );
     return PATH_STAGES[sharedIndex];
   }
-  if (teamAId) return getTeamMaxStageReached(teamAId);
-  if (teamBId) return getTeamMaxStageReached(teamBId);
+  if (teamAId) return getTeamMaxStageReached(ctx, teamAId);
+  if (teamBId) return getTeamMaxStageReached(ctx, teamBId);
   return undefined;
 }
 
-export function teamReachedStage(teamId: string, minStage: PathStage): boolean {
+export function teamReachedStage(
+  ctx: TournamentContext,
+  teamId: string,
+  minStage: PathStage,
+): boolean {
   if (minStage === "group") return true;
 
   if (minStage === "r32") {
-    const advancing = getAdvancingTeams();
+    const advancing = getAdvancingTeams(ctx);
     if (advancing.has(teamId)) return true;
   }
 
-  return stageIndex(highestStageReached(teamId)) >= stageIndex(minStage);
+  return stageIndex(highestStageReached(ctx, teamId)) >= stageIndex(minStage);
 }
 
-export function getTeamsAtStage(minStage: PathStage): Set<string> {
+export function getTeamsAtStage(
+  ctx: TournamentContext,
+  minStage: PathStage,
+): Set<string> {
   return new Set(
-    getAllTeams()
-      .filter((team) => teamReachedStage(team.id, minStage))
+    ctx
+      .getAllTeams()
+      .filter((team) => teamReachedStage(ctx, team.id, minStage))
       .map((team) => team.id),
   );
 }
 
-export function countTeamsAtStage(minStage: PathStage): number {
-  return getTeamsAtStage(minStage).size;
+export function countTeamsAtStage(
+  ctx: TournamentContext,
+  minStage: PathStage,
+): number {
+  return getTeamsAtStage(ctx, minStage).size;
 }
 
-export function getTeamCountsByStage(): Record<PathStage, number> {
+export function getTeamCountsByStage(
+  ctx: TournamentContext,
+): Record<PathStage, number> {
   return Object.fromEntries(
-    PATH_STAGES.map((stage) => [stage, countTeamsAtStage(stage)]),
+    PATH_STAGES.map((stage) => [stage, countTeamsAtStage(ctx, stage)]),
   ) as Record<PathStage, number>;
 }

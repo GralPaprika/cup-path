@@ -1,10 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { AvgPointsContext, PathStage, Team, TeamPathSummary } from "@/lib/types";
-import type { CohortOrderingCorrelation } from "@/lib/domain/rank-correlation";
-import type { PathOpponentStats } from "@/lib/domain/path-opponent-stats";
+import type { PathStage, Team } from "@/lib/types";
 import {
   clampPathStages,
   isStageWithinReach,
@@ -16,7 +14,10 @@ import {
   PathStageFilters,
   serializePathStages,
 } from "@/components/path-stage-filters";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import type { TeamAnalysisResult, TeamsResponse } from "@/lib/api/responses";
 import { AdvancedStatsPanel } from "@/components/advanced-stats-panel";
 import { SummaryCard } from "@/components/summary-card";
 import { PathTable } from "@/components/path-table";
@@ -25,20 +26,6 @@ import {
   SummaryCardSkeleton,
 } from "@/components/loading-skeletons";
 import { useTranslations } from "next-intl";
-
-interface AnalysisResponse {
-  summary: TeamPathSummary;
-  avgPointsContext: AvgPointsContext | null;
-  hardestPathRank: number | null;
-  hardestPathRankByAvgRank: number | null;
-  cohortSize: number;
-  cohortStage: PathStage;
-  maxStageReached: PathStage;
-  advanced: {
-    pathStats: PathOpponentStats;
-    cohortCorrelation: CohortOrderingCorrelation;
-  };
-}
 
 function stagesNeedClamp(stages: Set<PathStage>, maxStage: PathStage): boolean {
   return [...stages].some((stage) => !isStageWithinReach(stage, maxStage));
@@ -54,62 +41,54 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
   const [teamId, setTeamId] = useState(initialTeam);
   const [mode, setMode] = useSyncedRankingMode(searchParams);
   const [stages, setStages] = useState<Set<PathStage>>(initialStages);
-  const [teamList, setTeamList] = useState(teams);
-  const [data, setData] = useState<AnalysisResponse | null>(null);
+  const [data, setData] = useState<TeamAnalysisResult | null>(null);
   const [maxStageReached, setMaxStageReached] = useState<PathStage | undefined>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    fetch(`/api/teams?mode=${mode}`)
-      .then((res) => res.json())
-      .then((json: { teams: Team[] }) => setTeamList(json.teams))
-      .catch(() => setTeamList(teams));
-  }, [mode, teams]);
+
+  const { data: teamsData } = useApiQuery<TeamsResponse>(
+    `/api/teams?mode=${mode}`,
+    [mode],
+  );
+  const teamList = teamsData?.teams ?? teams;
+
+  const analysisParams = new URLSearchParams({
+    team: teamId,
+    mode,
+    stages: serializePathStages(stages),
+  });
+  const {
+    data: rawData,
+    loading,
+    error,
+  } = useApiQuery<TeamAnalysisResult>(
+    `/api/analysis?${analysisParams.toString()}`,
+    [teamId, mode, stages],
+    { errorMessage: t("error") },
+  );
 
   useEffect(() => {
     setMaxStageReached(undefined);
   }, [teamId]);
 
-  const loadAnalysis = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  useEffect(() => {
+    if (!rawData) return;
+    if (stagesNeedClamp(stages, rawData.maxStageReached)) {
+      setStages(clampPathStages(stages, rawData.maxStageReached));
+      return;
+    }
+    setMaxStageReached(rawData.maxStageReached);
+    setData(rawData);
+  }, [rawData, stages]);
 
-    try {
-      const params = new URLSearchParams({
+  useUrlParamsSync(
+    "/team-analysis",
+    () =>
+      new URLSearchParams({
         team: teamId,
         mode,
         stages: serializePathStages(stages),
-      });
-      const response = await fetch(`/api/analysis?${params.toString()}`);
-      if (!response.ok) throw new Error("Failed to load analysis");
-      const json = (await response.json()) as AnalysisResponse;
-
-      if (stagesNeedClamp(stages, json.maxStageReached)) {
-        setStages(clampPathStages(stages, json.maxStageReached));
-        return;
-      }
-
-      setMaxStageReached(json.maxStageReached);
-      setData(json);
-    } catch {
-      setError(t("error"));
-    } finally {
-      setLoading(false);
-    }
-  }, [teamId, mode, stages, t]);
-
-  useEffect(() => {
-    loadAnalysis();
-  }, [loadAnalysis]);
-
-  useEffect(() => {
-    const params = new URLSearchParams({
-      team: teamId,
-      mode,
-      stages: serializePathStages(stages),
-    });
-    window.history.replaceState(null, "", `/team-analysis?${params.toString()}`);
-  }, [teamId, mode, stages]);
+      }),
+    [teamId, mode, stages],
+  );
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">

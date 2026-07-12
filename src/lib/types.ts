@@ -5,7 +5,46 @@ export type RankingMode =
   | "january"
   | "november19";
 
-import type { NumericStats } from "@/lib/domain/group-stats";
+export interface NumericStats {
+  count: number;
+  mean: number | null;
+  median: number | null;
+  variance: number | null;
+  stdDev: number | null;
+  min: number | null;
+  max: number | null;
+}
+
+export interface CohortOrderingCorrelation {
+  spearmanRho: number | null;
+  kendallTau: number | null;
+  comparableTeamCount: number;
+}
+
+export interface GroupPointsBenchmarks {
+  weakest: { groupLetter: string; avgFifaPoints: number };
+  strongest: { groupLetter: string; avgFifaPoints: number };
+  tournamentAverage: number;
+}
+
+export interface GroupStrengthOrdering {
+  correlation: CohortOrderingCorrelation;
+  rankByPoints: Record<string, number>;
+  rankByAvgRank: Record<string, number>;
+  groupCount: number;
+}
+
+export interface OpponentPointsObservation {
+  teamId: string;
+  displayName: string;
+  flagUrl: string;
+  points: number;
+}
+
+export interface PathChartData {
+  opponents: OpponentPointsObservation[];
+  avgOpponentPoints: number | null;
+}
 
 export type PathStage = "group" | "r32" | "r16" | "qf" | "sf" | "final";
 
@@ -163,6 +202,9 @@ export interface SimulationResult {
   focusTeamMatchNums: number[];
   /** When a comparison team is set, chart slots stop at this shared stage. */
   comparisonChartMaxStage: PathStage | null;
+  actualPathChart: PathChartData;
+  simulatedPathChart: PathChartData;
+  comparisonPathChart: PathChartData | null;
 }
 
 export interface OpenFootballTeam {
@@ -257,8 +299,6 @@ export interface GroupComparisonCard {
   fifaRankStats: NumericStats;
   fifaPointsStats: NumericStats;
 }
-
-export type { NumericStats } from "@/lib/domain/group-stats";
 
 export interface TournamentSnapshot {
   avgFifaPoints: number | null;

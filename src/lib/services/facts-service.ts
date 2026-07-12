@@ -10,33 +10,37 @@ import { buildGroupExpectedAnalysis } from "@/lib/domain/group-expected-finishes
 import { buildGroupStageDifficultyStrip } from "@/lib/domain/group-stage-difficulty";
 import { buildKnockoutFactsAnalyses } from "@/lib/domain/knockout-facts-rounds";
 import { getTeamCountsByStage } from "@/lib/domain/team-stages";
-import { buildRankingsMap, getRankingsSnapshot } from "@/lib/data/rankings-store";
-import { ensureWorldCupData } from "@/lib/data/worldcup-store";
+import { loadTournamentRuntime } from "@/lib/services/tournament-runtime";
 
 export async function getTournamentFacts(
   mode: RankingMode,
 ): Promise<TournamentFacts> {
-  await ensureWorldCupData();
-  const snapshot = await getRankingsSnapshot(mode);
-  const rankings = buildRankingsMap(snapshot);
-  const summaries = buildAllTeamSummaries(rankings);
-  const teamCounts = getTeamCountsByStage();
+  const { ctx, rankings } = await loadTournamentRuntime(mode);
+  const summaries = buildAllTeamSummaries(ctx, rankings);
+  const teamCounts = getTeamCountsByStage(ctx);
 
   const allComparison = buildComparison(
+    ctx,
     summaries,
     undefined,
     new Set(DEFAULT_PATH_STAGES),
     new Set(summaries.map((entry) => entry.team.id)),
     rankings,
   );
-  const groupCards = buildGroupComparisonCards(allComparison, rankings);
+  const groupCards = buildGroupComparisonCards(ctx, allComparison, rankings);
 
-  const base = buildTournamentFacts(summaries, rankings, teamCounts, groupCards);
+  const base = buildTournamentFacts(
+    ctx,
+    summaries,
+    rankings,
+    teamCounts,
+    groupCards,
+  );
 
   return {
     ...base,
-    groupExpectedAnalysis: buildGroupExpectedAnalysis(rankings),
-    groupStageDifficulty: buildGroupStageDifficultyStrip(allComparison),
-    knockoutAnalyses: buildKnockoutFactsAnalyses(rankings),
+    groupExpectedAnalysis: buildGroupExpectedAnalysis(ctx, rankings),
+    groupStageDifficulty: buildGroupStageDifficultyStrip(ctx, allComparison),
+    knockoutAnalyses: buildKnockoutFactsAnalyses(ctx, rankings),
   };
 }

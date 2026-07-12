@@ -1,4 +1,5 @@
 import type { SimulationScenario } from "@/lib/types";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import { resolveBracket } from "@/lib/domain/bracket-resolver";
 
 export type StrongestWinnerScope = "all" | "simulated";
@@ -54,6 +55,7 @@ function shouldPickStrongest(
 }
 
 export function buildStrongestKnockoutWinners(
+  ctx: TournamentContext,
   scenario: SimulationScenario,
   actualWinnersByMatchNum: Record<number, string | null>,
   teamRankings: Record<string, TeamRankingSnapshot>,
@@ -66,6 +68,7 @@ export function buildStrongestKnockoutWinners(
   for (let pass = 0; pass < 32; pass += 1) {
     let iterationChanged = false;
     const bracket = resolveBracket(
+      ctx,
       { ...scenario, knockoutWinners: draft },
       { suppressPlayedResultsMatchNums: suppressMatchNums },
     );
@@ -108,6 +111,7 @@ export function buildStrongestKnockoutWinners(
 
   const normalized: Record<number, string> = {};
   const finalBracket = resolveBracket(
+    ctx,
     { ...scenario, knockoutWinners: draft },
     { suppressPlayedResultsMatchNums: suppressMatchNums },
   );
@@ -145,6 +149,7 @@ export function buildStrongestKnockoutWinners(
 }
 
 export function hasStrongestWinnerTargets(
+  ctx: TournamentContext,
   scenario: SimulationScenario,
   actualWinnersByMatchNum: Record<number, string | null>,
   teamRankings: Record<string, TeamRankingSnapshot>,
@@ -154,6 +159,7 @@ export function hasStrongestWinnerTargets(
 ): boolean {
   return (
     buildStrongestKnockoutWinners(
+      ctx,
       scenario,
       actualWinnersByMatchNum,
       teamRankings,

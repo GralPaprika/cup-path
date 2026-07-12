@@ -1,22 +1,15 @@
-import type { GroupComparisonCard } from "@/lib/types";
+import type {
+  GroupComparisonCard,
+  GroupPointsBenchmarks,
+  GroupStrengthOrdering,
+} from "@/lib/types";
 import {
   computeCohortOrderingCorrelation,
   type CohortOrderingCorrelation,
 } from "@/lib/domain/rank-correlation";
 import { buildCompetitionRankMap } from "@/lib/domain/path-ranking";
 
-export interface GroupPointsBenchmarks {
-  weakest: { groupLetter: string; avgFifaPoints: number };
-  strongest: { groupLetter: string; avgFifaPoints: number };
-  tournamentAverage: number;
-}
-
-export interface GroupStrengthOrdering {
-  correlation: CohortOrderingCorrelation;
-  rankByPoints: Record<string, number>;
-  rankByAvgRank: Record<string, number>;
-  groupCount: number;
-}
+export type { GroupPointsBenchmarks, GroupStrengthOrdering } from "@/lib/types";
 
 export function computeGroupStrengthOrdering(
   groups: GroupComparisonCard[],

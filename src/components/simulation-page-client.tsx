@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import type { SimulationResult, SimulationScenario, Team } from "@/lib/types";
@@ -24,6 +24,8 @@ import {
   readSimulationScenarioPreference,
   writeSimulationScenarioPreference,
 } from "@/lib/client/simulation-scenario-preference";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
 import { useTranslations } from "next-intl";
 
@@ -126,11 +128,34 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
     emptySimulationScenario,
   );
   const [scenarioHydrated, setScenarioHydrated] = useState(false);
-  const [data, setData] = useState<SimulationResult | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [pickWinnersAlertDismissed, setPickWinnersAlertDismissed] =
     useState(false);
+
+  const simulationBody = useMemo(
+    () => ({
+      mode,
+      team: teamId,
+      compareTeam: comparisonTeamId || undefined,
+      scenario,
+    }),
+    [mode, teamId, comparisonTeamId, scenario],
+  );
+
+  const {
+    data,
+    loading,
+    error,
+  } = useApiQuery<SimulationResult>(
+    "/api/simulation",
+    [mode, teamId, comparisonTeamId, scenario, scenarioHydrated],
+    {
+      enabled: scenarioHydrated,
+      method: "POST",
+      body: simulationBody,
+      errorMessage: common("error"),
+    },
+  );
+
   const pendingWinnersKey = data?.pendingWinnerMatchNums.join(",") ?? "";
 
   useEffect(() => {
@@ -147,44 +172,17 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
     writeSimulationScenarioPreference(scenario);
   }, [scenario, scenarioHydrated]);
 
-  const loadSimulation = useCallback(async () => {
-    if (!scenarioHydrated) return;
-
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/simulation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode,
-          team: teamId,
-          compareTeam: comparisonTeamId || undefined,
-          scenario,
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to load simulation");
-      const json = (await response.json()) as SimulationResult;
-      setData(json);
-    } catch {
-      setError(common("error"));
-    } finally {
-      setLoading(false);
-    }
-  }, [mode, teamId, scenario, comparisonTeamId, common, scenarioHydrated]);
-
-  useEffect(() => {
-    if (!scenarioHydrated) return;
-    loadSimulation();
-  }, [loadSimulation, scenarioHydrated]);
-
-  useEffect(() => {
-    const params = new URLSearchParams({ mode, team: teamId });
-    if (comparisonTeamId) {
-      params.set("compareTeam", comparisonTeamId);
-    }
-    window.history.replaceState(null, "", `/simulate?${params.toString()}`);
-  }, [mode, teamId, comparisonTeamId]);
+  useUrlParamsSync(
+    "/simulate",
+    () => {
+      const params = new URLSearchParams({ mode, team: teamId });
+      if (comparisonTeamId) {
+        params.set("compareTeam", comparisonTeamId);
+      }
+      return params;
+    },
+    [mode, teamId, comparisonTeamId],
+  );
 
   function handleSelectWinner(matchNum: number, winnerId: string) {
     setScenario((current) => ({
@@ -319,7 +317,9 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
             onComparisonTeamChange={setComparisonTeamId}
             pathDiff={data.pathDiff}
             hasOverrides={hasOverrides}
-            comparisonChartMaxStage={data.comparisonChartMaxStage}
+            actualPathChart={data.actualPathChart}
+            simulatedPathChart={data.simulatedPathChart}
+            comparisonPathChart={data.comparisonPathChart}
           />
 
           <GroupFinishEditor

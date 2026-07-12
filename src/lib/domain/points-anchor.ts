@@ -1,5 +1,6 @@
 import type { AvgPointsContext, PointsAnchor, RankingEntry } from "@/lib/types";
-import { enrichTeam, getTeamById } from "@/lib/data/team-registry";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
+import { enrichTeam } from "@/lib/data/team-registry";
 
 export function computePointsPercentile(
   targetPoints: number | null,
@@ -22,6 +23,7 @@ export function computePointsPercentile(
 }
 
 export function buildAvgPointsContext(
+  ctx: TournamentContext,
   targetPoints: number | null,
   rankings: Iterable<RankingEntry>,
   options?: { excludeTeamId?: string },
@@ -30,7 +32,7 @@ export function buildAvgPointsContext(
 
   const entries = [...rankings];
   const percentileResult = computePointsPercentile(targetPoints, entries);
-  const anchor = findClosestPointsAnchor(targetPoints, entries, options);
+  const anchor = findClosestPointsAnchor(ctx, targetPoints, entries, options);
 
   if (!percentileResult) return null;
 
@@ -42,6 +44,7 @@ export function buildAvgPointsContext(
 }
 
 export function findClosestPointsAnchor(
+  ctx: TournamentContext,
   targetPoints: number | null,
   rankings: Iterable<RankingEntry>,
   options?: { excludeTeamId?: string },
@@ -58,7 +61,7 @@ export function findClosestPointsAnchor(
       continue;
     }
 
-    const team = getTeamById(entry.teamId);
+    const team = ctx.getTeamById(entry.teamId);
     if (!team) continue;
 
     const gap = Math.abs(entry.points - targetPoints);

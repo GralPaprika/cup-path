@@ -1,12 +1,8 @@
 import type { MatchDifficulty, PathStage, TeamPathSummary } from "@/lib/types";
+import type { OpponentPointsObservation } from "@/lib/types";
 import { getMatchStage, isStageWithinReach } from "@/lib/domain/match-stages";
 
-export interface OpponentPointsObservation {
-  teamId: string;
-  displayName: string;
-  flagUrl: string;
-  points: number;
-}
+export type { OpponentPointsObservation } from "@/lib/types";
 
 export function buildOpponentPointsObservations(
   matches: MatchDifficulty[],

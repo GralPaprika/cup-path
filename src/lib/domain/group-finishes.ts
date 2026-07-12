@@ -1,5 +1,5 @@
 import type { BestThirdRankingEntry, GroupFinishCard, GroupStanding } from "@/lib/types";
-import { getAllMatches } from "@/lib/data/worldcup-loader";
+import type { TournamentContext } from "@/lib/domain/tournament-context";
 import { computeGroupStandings } from "@/lib/domain/group-standings";
 import { getGroupNames } from "@/lib/domain/path-builder";
 
@@ -15,13 +15,14 @@ function compareStandings(a: GroupStanding, b: GroupStanding): number {
   return a.teamId.localeCompare(b.teamId);
 }
 
-export function getBaselineGroupFinishes(): GroupFinishMap {
-  const groupMatches = getAllMatches().filter((match) => match.group);
+export function getBaselineGroupFinishes(ctx: TournamentContext): GroupFinishMap {
+  const groupMatches = ctx.matches.filter((match) => match.group);
   const finishes: GroupFinishMap = {};
 
   for (const groupName of getGroupNames()) {
     const letter = groupName.replace("Group ", "");
     const standings = computeGroupStandings(
+      ctx,
       groupMatches.filter((match) => match.group === groupName),
     );
     finishes[letter] = [
@@ -47,9 +48,10 @@ function lookupStanding(
 }
 
 export function buildStandingsByGroupFromFinishes(
+  ctx: TournamentContext,
   finishes: GroupFinishMap,
 ): Map<string, GroupStanding[]> {
-  const groupMatches = getAllMatches().filter((match) => match.group);
+  const groupMatches = ctx.matches.filter((match) => match.group);
   const base = new Map<string, GroupStanding[]>();
 
   for (const groupName of getGroupNames()) {
@@ -57,6 +59,7 @@ export function buildStandingsByGroupFromFinishes(
     base.set(
       letter,
       computeGroupStandings(
+        ctx,
         groupMatches.filter((match) => match.group === groupName),
       ),
     );
@@ -81,12 +84,13 @@ export function buildStandingsByGroupFromFinishes(
 }
 
 export function getQualifyingThirdGroups(
+  ctx: TournamentContext,
   finishes: GroupFinishMap,
 ): Set<string> {
-  const standingsByGroup = buildStandingsByGroupFromFinishes(finishes);
+  const standingsByGroup = buildStandingsByGroupFromFinishes(ctx, finishes);
   const thirdPlaceTeams: GroupStanding[] = [];
 
-  for (const [letter, standings] of standingsByGroup) {
+  for (const [, standings] of standingsByGroup) {
     const third = standings.find((entry) => entry.position === 3);
     if (third) {
       thirdPlaceTeams.push({ ...third, teamId: third.teamId });
@@ -112,9 +116,10 @@ export function getQualifyingThirdGroups(
 }
 
 export function buildBestThirdRanking(
+  ctx: TournamentContext,
   finishes: GroupFinishMap,
 ): BestThirdRankingEntry[] {
-  const standingsByGroup = buildStandingsByGroupFromFinishes(finishes);
+  const standingsByGroup = buildStandingsByGroupFromFinishes(ctx, finishes);
   const thirdPlaceTeams: Array<{ groupLetter: string; standing: GroupStanding }> =
     [];
 
@@ -143,9 +148,10 @@ export function buildBestThirdRanking(
 }
 
 export function buildGroupFinishCards(
+  ctx: TournamentContext,
   finishes: GroupFinishMap,
 ): GroupFinishCard[] {
-  const qualifyingThirds = getQualifyingThirdGroups(finishes);
+  const qualifyingThirds = getQualifyingThirdGroups(ctx, finishes);
 
   return Object.entries(finishes)
     .sort(([a], [b]) => a.localeCompare(b))
@@ -160,9 +166,10 @@ export function buildGroupFinishCards(
 }
 
 export function normalizeGroupFinishes(
+  ctx: TournamentContext,
   finishes: Record<string, [string, string, string] | [string, string, string, string]>,
 ): GroupFinishMap {
-  const baseline = getBaselineGroupFinishes();
+  const baseline = getBaselineGroupFinishes(ctx);
   const normalized: GroupFinishMap = { ...baseline };
 
   for (const [letter, ids] of Object.entries(finishes)) {

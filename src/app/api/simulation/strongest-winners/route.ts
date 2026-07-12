@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
   const context = await getSimulationStrongestWinnersContext(scenario, mode);
 
   const knockoutWinners = buildStrongestKnockoutWinners(
+    context.ctx,
     context.effectiveScenario,
     context.actualWinnersByMatchNum,
     context.teamRankings,

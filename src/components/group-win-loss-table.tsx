@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { GroupExpectedMatchEntry } from "@/lib/types";
 import {
@@ -8,8 +7,8 @@ import {
   usePaginatedRows,
 } from "@/components/facts/use-paginated-rows";
 import { FactsTablePagination } from "@/components/facts/facts-table-pagination";
+import { FactsMatchCell } from "@/components/facts/facts-match-cell";
 import { SortButton, type SortDirection } from "@/components/facts/sort-button";
-import { TeamFlag } from "@/components/team-flag";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -17,39 +16,6 @@ import { useTranslations } from "next-intl";
 interface GroupWinLossTableProps {
   winLossMatches: GroupExpectedMatchEntry[];
   mode: string;
-}
-
-function MatchCell({
-  entry,
-  mode,
-}: {
-  entry: GroupExpectedMatchEntry;
-  mode: string;
-}) {
-  const t = useTranslations("home.groupExpectedFinishes");
-
-  return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <Link
-        href={`/team-analysis?team=${entry.team1.id}&mode=${mode}`}
-        className="inline-flex items-center gap-1 transition-colors hover:text-wc-sky"
-      >
-        <TeamFlag team={entry.team1} size="sm" />
-        <span className="font-mono font-semibold">{entry.team1.id}</span>
-      </Link>
-      <span className="font-mono tabular-nums text-muted-foreground">
-        {entry.scoreLabel}
-      </span>
-      <Link
-        href={`/team-analysis?team=${entry.team2.id}&mode=${mode}`}
-        className="inline-flex items-center gap-1 transition-colors hover:text-wc-sky"
-      >
-        <TeamFlag team={entry.team2} size="sm" />
-        <span className="font-mono font-semibold">{entry.team2.id}</span>
-      </Link>
-      <span className="sr-only">{t("vs")}</span>
-    </div>
-  );
 }
 
 export function GroupWinLossTable({
@@ -116,7 +82,17 @@ export function GroupWinLossTable({
                   {entry.groupLetter}
                 </td>
                 <td className="px-3 py-2.5">
-                  <MatchCell entry={entry} mode={mode} />
+                  <FactsMatchCell
+                    team1={entry.team1}
+                    team2={entry.team2}
+                    mode={mode}
+                    vsLabel={t("vs")}
+                    score={
+                      <span className="font-mono tabular-nums text-muted-foreground">
+                        {entry.scoreLabel}
+                      </span>
+                    }
+                  />
                 </td>
                 <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
                   {formatFifaPoints(entry.team1FifaPoints)}

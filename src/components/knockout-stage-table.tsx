@@ -8,6 +8,7 @@ import {
   usePaginatedRows,
 } from "@/components/facts/use-paginated-rows";
 import { FactsTablePagination } from "@/components/facts/facts-table-pagination";
+import { FactsMatchCell } from "@/components/facts/facts-match-cell";
 import { SortButton, type SortDirection } from "@/components/facts/sort-button";
 import { TeamFlag } from "@/components/team-flag";
 import { MatchScoreBreakdown } from "@/components/match-score-breakdown";
@@ -18,41 +19,6 @@ import { useTranslations } from "next-intl";
 interface KnockoutStageTableProps {
   fixtures: KnockoutFixtureEntry[];
   mode: string;
-}
-
-function MatchCell({
-  fixture,
-  mode,
-}: {
-  fixture: KnockoutFixtureEntry;
-  mode: string;
-}) {
-  const tables = useTranslations("home.factsTables");
-
-  return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <Link
-        href={`/team-analysis?team=${fixture.team1.id}&mode=${mode}`}
-        className="inline-flex items-center gap-1 transition-colors hover:text-wc-sky"
-      >
-        <TeamFlag team={fixture.team1} size="sm" />
-        <span className="font-mono font-semibold">{fixture.team1.id}</span>
-      </Link>
-      <MatchScoreBreakdown
-        ft={fixture.scoreFt}
-        et={fixture.scoreEt}
-        pens={fixture.scorePens}
-      />
-      <Link
-        href={`/team-analysis?team=${fixture.team2.id}&mode=${mode}`}
-        className="inline-flex items-center gap-1 transition-colors hover:text-wc-sky"
-      >
-        <TeamFlag team={fixture.team2} size="sm" />
-        <span className="font-mono font-semibold">{fixture.team2.id}</span>
-      </Link>
-      <span className="sr-only">{tables("vs")}</span>
-    </div>
-  );
 }
 
 export function KnockoutStageTable({ fixtures, mode }: KnockoutStageTableProps) {
@@ -125,7 +91,19 @@ export function KnockoutStageTable({ fixtures, mode }: KnockoutStageTableProps) 
                     <div className="text-[10px]">{fixture.date}</div>
                   </td>
                   <td className="px-3 py-2.5">
-                    <MatchCell fixture={fixture} mode={mode} />
+                    <FactsMatchCell
+                      team1={fixture.team1}
+                      team2={fixture.team2}
+                      mode={mode}
+                      vsLabel={tables("vs")}
+                      score={
+                        <MatchScoreBreakdown
+                          ft={fixture.scoreFt}
+                          et={fixture.scoreEt}
+                          pens={fixture.scorePens}
+                        />
+                      }
+                    />
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
                     {formatFifaPoints(fixture.team1FifaPoints)}

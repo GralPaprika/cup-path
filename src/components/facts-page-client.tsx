@@ -6,159 +6,24 @@ import { useSearchParams } from "next/navigation";
 import type {
   PathStage,
   TournamentFacts,
-  TeamHighlightFact,
-  UpsetMatchFact,
 } from "@/lib/types";
 import { GroupExpectedFinishesPanel } from "@/components/group-expected-finishes-panel";
 import { KnockoutStagePanel } from "@/components/knockout-stage-panel";
 import { ParticipantPoolSection } from "@/components/facts/participant-pool-section";
+import { HighlightCard } from "@/components/facts/highlight-card";
+import {
+  formatStageDelta,
+  TeamHighlightBody,
+  UpsetHighlightBody,
+} from "@/components/facts/facts-highlight-bodies";
 import { KNOCKOUT_FACTS_ROUNDS } from "@/lib/domain/knockout-facts-round-config";
 import { PageShellSkeleton } from "@/components/loading-skeletons";
 import { RankingModeToggle } from "@/components/ranking-mode-toggle";
-import { TeamLabel } from "@/components/team-flag";
 import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
 import { formatFifaPoints } from "@/lib/format";
 import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
 import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
-import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-
-function StatTile({
-  label,
-  value,
-  hint,
-  footer,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-  footer?: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-1 font-mono text-xl font-semibold tabular-nums text-white">
-        {value}
-      </p>
-      {hint ? (
-        <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-      {footer}
-    </div>
-  );
-}
-
-function HighlightCard({
-  title,
-  body,
-  footnote,
-  href,
-}: {
-  title: string;
-  body: React.ReactNode;
-  footnote?: string;
-  href?: string;
-}) {
-  const content = (
-    <div
-      className={cn(
-        "flex h-full flex-col rounded-xl border border-white/8 bg-white/[0.03] p-4",
-        href && "transition-colors hover:border-white/15 hover:bg-white/[0.05]",
-      )}
-    >
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-        {title}
-      </p>
-      <div className="mt-2 flex-1">{body}</div>
-      {footnote ? (
-        <p className="mt-3 text-xs text-muted-foreground">{footnote}</p>
-      ) : null}
-    </div>
-  );
-
-  if (!href) return content;
-
-  return (
-    <Link href={href} className="block h-full">
-      {content}
-    </Link>
-  );
-}
-
-function TeamHighlightBody({
-  highlight,
-  valueLabel,
-  stageLabel,
-}: {
-  highlight: TeamHighlightFact;
-  valueLabel: string;
-  stageLabel: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <TeamLabel
-        team={highlight.team}
-        showCode
-        flagSize="md"
-        nameClassName="text-sm font-semibold text-white"
-      />
-      <p className="text-xs text-muted-foreground">
-        {stageLabel} · FIFA #{highlight.fifaRank ?? "—"}
-      </p>
-      <p className="font-mono text-sm font-semibold tabular-nums text-wc-orange">
-        {valueLabel}
-      </p>
-    </div>
-  );
-}
-
-function UpsetHighlightBody({
-  upset,
-  roundLabel,
-  pointsGapLabel,
-}: {
-  upset: UpsetMatchFact;
-  roundLabel: string;
-  pointsGapLabel: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <TeamLabel
-        team={upset.team}
-        showCode
-        flagSize="md"
-        nameClassName="text-sm font-semibold text-white"
-      />
-      <p className="text-xs text-muted-foreground">
-        {roundLabel}
-        {upset.scoreLabel ? ` · ${upset.scoreLabel}` : ""}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        vs{" "}
-        <TeamLabel
-          team={upset.opponent}
-          showCode
-          flagSize="sm"
-          nameClassName="inline text-xs font-medium text-white"
-        />
-      </p>
-      <p className="font-mono text-sm font-semibold tabular-nums text-wc-orange">
-        {pointsGapLabel}
-      </p>
-    </div>
-  );
-}
-
-function formatStageDelta(
-  delta: number,
-  t: ReturnType<typeof useTranslations<"home">>,
-): string {
-  if (delta > 0) return t("highlights.stageDeltaPositive", { delta });
-  if (delta < 0) return t("highlights.stageDeltaNegative", { delta: Math.abs(delta) });
-  return "0";
-}
 
 export function FactsPageClient() {
   const t = useTranslations("home");

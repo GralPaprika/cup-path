@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { GroupExpectedMatchEntry } from "@/lib/types";
+import {
+  FACTS_TABLE_PAGE_SIZE,
+  usePaginatedRows,
+} from "@/components/facts/use-paginated-rows";
+import { FactsTablePagination } from "@/components/facts/facts-table-pagination";
 import { SortButton, type SortDirection } from "@/components/facts/sort-button";
 import { TeamFlag } from "@/components/team-flag";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-
-const PAGE_SIZE = 10;
 
 interface GroupDrawsTableProps {
   drawMatches: GroupExpectedMatchEntry[];
@@ -61,11 +64,6 @@ export function GroupDrawsTable({
 }: GroupDrawsTableProps) {
   const t = useTranslations("home.groupExpectedFinishes");
   const [gapSort, setGapSort] = useState<SortDirection>("desc");
-  const [page, setPage] = useState(0);
-
-  useEffect(() => {
-    setPage(0);
-  }, [drawMatches, gapSort]);
 
   const sortedMatches = useMemo(() => {
     const sorted = [...drawMatches];
@@ -77,10 +75,15 @@ export function GroupDrawsTable({
     return sorted;
   }, [drawMatches, gapSort]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedMatches.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages - 1);
-  const pageStart = safePage * PAGE_SIZE;
-  const visibleMatches = sortedMatches.slice(pageStart, pageStart + PAGE_SIZE);
+  const {
+    visibleRows: visibleMatches,
+    pageStart,
+    safePage,
+    totalPages,
+    showPagination,
+    prevPage,
+    nextPage,
+  } = usePaginatedRows(sortedMatches, FACTS_TABLE_PAGE_SIZE, gapSort);
 
   if (drawMatches.length === 0) return null;
 
@@ -111,42 +114,42 @@ export function GroupDrawsTable({
               const aboveMean = isAboveMeanGap(entry.gapPoints, meanGap);
 
               return (
-            <tr
-              key={`${entry.groupLetter}-${entry.team1.id}-${entry.team2.id}-${entry.scoreLabel}`}
-              className={cn(
-                "border-b border-white/6 last:border-b-0",
-                aboveMean && "bg-wc-turquoise/10",
-              )}
-            >
-              <td className="px-3 py-2.5 font-mono text-muted-foreground">
-                {entry.groupLetter}
-              </td>
-              <td className="px-3 py-2.5">
-                <MatchCell entry={entry} mode={mode} />
-              </td>
-              <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
-                {formatFifaPoints(entry.team1FifaPoints)}
-              </td>
-              <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
-                {formatFifaPoints(entry.team2FifaPoints)}
-              </td>
-              <td className="px-3 py-2.5 text-right font-mono tabular-nums text-wc-orange">
-                {formatFifaPoints(entry.gapPoints)}
-              </td>
-              <td className="px-3 py-2.5">
-                {entry.isDrawGapOutlier ? (
-                  <span className="inline-flex rounded-md border border-wc-orange/40 bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
-                    {t("outlierDraw")}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </td>
-            </tr>
+                <tr
+                  key={`${entry.groupLetter}-${entry.team1.id}-${entry.team2.id}-${entry.scoreLabel}`}
+                  className={cn(
+                    "border-b border-white/6 last:border-b-0",
+                    aboveMean && "bg-wc-turquoise/10",
+                  )}
+                >
+                  <td className="px-3 py-2.5 font-mono text-muted-foreground">
+                    {entry.groupLetter}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <MatchCell entry={entry} mode={mode} />
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
+                    {formatFifaPoints(entry.team1FifaPoints)}
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
+                    {formatFifaPoints(entry.team2FifaPoints)}
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-mono tabular-nums text-wc-orange">
+                    {formatFifaPoints(entry.gapPoints)}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    {entry.isDrawGapOutlier ? (
+                      <span className="inline-flex rounded-md border border-wc-orange/40 bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
+                        {t("outlierDraw")}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                </tr>
               );
             })}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
       </div>
 
       {meanGap !== null &&
@@ -156,42 +159,27 @@ export function GroupDrawsTable({
           </p>
         )}
 
-      {sortedMatches.length > PAGE_SIZE && (
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>
-            {t("drawsTablePageInfo", {
-              start: pageStart + 1,
-              end: Math.min(pageStart + PAGE_SIZE, sortedMatches.length),
-              total: sortedMatches.length,
-            })}
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={safePage === 0}
-              onClick={() => setPage((current) => Math.max(0, current - 1))}
-              className="rounded-md border border-white/10 px-2.5 py-1 font-medium text-white transition-colors enabled:hover:border-white/20 enabled:hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {t("drawsTablePrev")}
-            </button>
-            <span className="font-mono tabular-nums">
-              {t("drawsTablePageCount", {
-                page: safePage + 1,
-                totalPages,
-              })}
-            </span>
-            <button
-              type="button"
-              disabled={safePage >= totalPages - 1}
-              onClick={() =>
-                setPage((current) => Math.min(totalPages - 1, current + 1))
-              }
-              className="rounded-md border border-white/10 px-2.5 py-1 font-medium text-white transition-colors enabled:hover:border-white/20 enabled:hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {t("drawsTableNext")}
-            </button>
-          </div>
-        </div>
+      {showPagination && (
+        <FactsTablePagination
+          pageStart={pageStart}
+          pageSize={FACTS_TABLE_PAGE_SIZE}
+          totalItems={sortedMatches.length}
+          safePage={safePage}
+          totalPages={totalPages}
+          onPrev={prevPage}
+          onNext={nextPage}
+          pageInfo={t("drawsTablePageInfo", {
+            start: pageStart + 1,
+            end: Math.min(pageStart + FACTS_TABLE_PAGE_SIZE, sortedMatches.length),
+            total: sortedMatches.length,
+          })}
+          pageCount={t("drawsTablePageCount", {
+            page: safePage + 1,
+            totalPages,
+          })}
+          prevLabel={t("drawsTablePrev")}
+          nextLabel={t("drawsTableNext")}
+        />
       )}
     </div>
   );

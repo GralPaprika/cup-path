@@ -13,7 +13,7 @@ import type {
 } from "@/lib/types";
 import { getAllMatches } from "@/lib/data/worldcup-loader";
 import { computeMean, computeNumericStats } from "@/lib/domain/group-stats";
-import { buildAvgPointsContext } from "@/lib/domain/points-anchor";
+import { buildParticipantPoolStats } from "@/lib/domain/participant-pool";
 import { getAdvancingTeamIds } from "@/lib/domain/group-standings";
 import {
   PATH_STAGES,
@@ -52,15 +52,7 @@ function buildGroupStagePool(
   teamCounts: Record<PathStage, number>,
 ): GroupStagePoolFact {
   const cohortIds = getTeamsAtStage("group");
-  const fifaPoints: number[] = [];
-
-  for (const teamId of cohortIds) {
-    const ranking = rankings.get(teamId);
-    if (ranking) fifaPoints.push(ranking.points);
-  }
-
-  const ranks = [...rankings.values()].map((entry) => entry.rank);
-  const avgFifaPoints = computeMean(fifaPoints);
+  const pool = buildParticipantPoolStats(cohortIds, rankings);
   const summaryById = new Map(
     summaries.map((summary) => [summary.team.id, summary]),
   );
@@ -88,13 +80,10 @@ function buildGroupStagePool(
   }
 
   return {
-    teamCount: teamCounts.group ?? cohortIds.size,
-    avgFifaPoints,
-    avgFifaPointsContext: buildAvgPointsContext(
-      avgFifaPoints,
-      rankings.values(),
-    ),
-    medianFifaRank: computeNumericStats(ranks).median,
+    teamCount: teamCounts.group ?? pool.participantCount,
+    avgFifaPoints: pool.avgParticipantFifaPoints,
+    avgFifaPointsContext: pool.avgParticipantFifaPointsContext,
+    medianFifaRank: pool.medianParticipantFifaRank,
     lowestRankedQualifier,
   };
 }

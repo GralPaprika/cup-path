@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { KnockoutFixtureEntry } from "@/lib/types";
+import {
+  FACTS_TABLE_PAGE_SIZE,
+  usePaginatedRows,
+} from "@/components/facts/use-paginated-rows";
+import { FactsTablePagination } from "@/components/facts/facts-table-pagination";
 import { SortButton, type SortDirection } from "@/components/facts/sort-button";
 import { TeamFlag } from "@/components/team-flag";
 import { MatchScoreBreakdown } from "@/components/match-score-breakdown";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-
-const PAGE_SIZE = 10;
 
 interface KnockoutStageTableProps {
   fixtures: KnockoutFixtureEntry[];
@@ -56,11 +59,6 @@ export function KnockoutStageTable({ fixtures, mode }: KnockoutStageTableProps) 
   const shared = useTranslations("home.knockoutStage");
   const tables = useTranslations("home.factsTables");
   const [gapSort, setGapSort] = useState<SortDirection>("asc");
-  const [page, setPage] = useState(0);
-
-  useEffect(() => {
-    setPage(0);
-  }, [fixtures, gapSort]);
 
   const sortedFixtures = useMemo(() => {
     const sorted = [...fixtures];
@@ -72,13 +70,15 @@ export function KnockoutStageTable({ fixtures, mode }: KnockoutStageTableProps) 
     return sorted;
   }, [fixtures, gapSort]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedFixtures.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages - 1);
-  const pageStart = safePage * PAGE_SIZE;
-  const visibleFixtures = sortedFixtures.slice(
+  const {
+    visibleRows: visibleFixtures,
     pageStart,
-    pageStart + PAGE_SIZE,
-  );
+    safePage,
+    totalPages,
+    showPagination,
+    prevPage,
+    nextPage,
+  } = usePaginatedRows(sortedFixtures, FACTS_TABLE_PAGE_SIZE, gapSort);
 
   if (fixtures.length === 0) return null;
 
@@ -172,42 +172,27 @@ export function KnockoutStageTable({ fixtures, mode }: KnockoutStageTableProps) 
         <p className="text-xs text-muted-foreground">{tables("upsetRowHint")}</p>
       </div>
 
-      {sortedFixtures.length > PAGE_SIZE && (
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>
-            {tables("pageInfo", {
-              start: pageStart + 1,
-              end: Math.min(pageStart + PAGE_SIZE, sortedFixtures.length),
-              total: sortedFixtures.length,
-            })}
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={safePage === 0}
-              onClick={() => setPage((current) => Math.max(0, current - 1))}
-              className="rounded-md border border-white/10 px-2.5 py-1 font-medium text-white transition-colors enabled:hover:border-white/20 enabled:hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {tables("prev")}
-            </button>
-            <span className="font-mono tabular-nums">
-              {tables("pageCount", {
-                page: safePage + 1,
-                totalPages,
-              })}
-            </span>
-            <button
-              type="button"
-              disabled={safePage >= totalPages - 1}
-              onClick={() =>
-                setPage((current) => Math.min(totalPages - 1, current + 1))
-              }
-              className="rounded-md border border-white/10 px-2.5 py-1 font-medium text-white transition-colors enabled:hover:border-white/20 enabled:hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {tables("next")}
-            </button>
-          </div>
-        </div>
+      {showPagination && (
+        <FactsTablePagination
+          pageStart={pageStart}
+          pageSize={FACTS_TABLE_PAGE_SIZE}
+          totalItems={sortedFixtures.length}
+          safePage={safePage}
+          totalPages={totalPages}
+          onPrev={prevPage}
+          onNext={nextPage}
+          pageInfo={tables("pageInfo", {
+            start: pageStart + 1,
+            end: Math.min(pageStart + FACTS_TABLE_PAGE_SIZE, sortedFixtures.length),
+            total: sortedFixtures.length,
+          })}
+          pageCount={tables("pageCount", {
+            page: safePage + 1,
+            totalPages,
+          })}
+          prevLabel={tables("prev")}
+          nextLabel={tables("next")}
+        />
       )}
     </div>
   );

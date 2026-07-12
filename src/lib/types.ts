@@ -516,7 +516,6 @@ export type KnockoutFactsRoundId = "r32" | "r16" | "qf";
 export interface KnockoutFactsRoundDefinition {
   id: KnockoutFactsRoundId;
   roundName: string;
-  translationNamespace: "home.roundOf32" | "home.roundOf16" | "home.quarterFinal";
   wideOpponentDifficultyBars: boolean;
 }
 

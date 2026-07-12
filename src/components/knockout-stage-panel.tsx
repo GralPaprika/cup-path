@@ -14,6 +14,7 @@ import { KnockoutStageTable } from "@/components/knockout-stage-table";
 import { KnockoutStageGapChart } from "@/components/knockout-stage-gap-chart";
 import { KnockoutStageOpponentDifficultyChart } from "@/components/knockout-stage-opponent-difficulty-chart";
 import { formatFifaPoints } from "@/lib/format";
+import { homeFactsRoundNamespace } from "@/lib/i18n/stage-keys";
 import { useTranslations } from "next-intl";
 
 interface KnockoutStagePanelProps {
@@ -55,7 +56,7 @@ export function KnockoutStagePanel({
   mode,
 }: KnockoutStagePanelProps) {
   const shared = useTranslations("home.knockoutStage");
-  const stage = useTranslations(round.translationNamespace);
+  const stage = useTranslations(homeFactsRoundNamespace(round.id));
 
   return (
     <>

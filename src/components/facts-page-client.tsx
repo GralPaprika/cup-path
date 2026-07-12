@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import type { PathStage } from "@/lib/types";
 import { GroupExpectedFinishesPanel } from "@/components/group-expected-finishes-panel";
 import { KnockoutStagePanel } from "@/components/knockout-stage-panel";
@@ -14,10 +13,9 @@ import {
 } from "@/components/facts/facts-highlight-bodies";
 import { KNOCKOUT_FACTS_ROUNDS } from "@/lib/domain/knockout-facts-round-config";
 import { FactsPageSkeleton } from "@/components/loading-skeletons";
-import { RankingModeToggle } from "@/components/ranking-mode-toggle";
+import { useRankingMode } from "@/components/ranking-mode-provider";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
-import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
 import type { TournamentFacts } from "@/lib/api/responses";
 import { formatFifaPoints } from "@/lib/format";
 import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
@@ -28,8 +26,7 @@ export function FactsPageClient() {
   const t = useTranslations("home");
   const common = useTranslations("common");
   const stages = useTranslations("compare.stages");
-  const searchParams = useSearchParams();
-  const [mode, setMode] = useSyncedRankingMode(searchParams);
+  const { mode } = useRankingMode();
 
   const { data: facts, loading, error } = useApiQuery<TournamentFacts>(
     `/api/facts?mode=${mode}`,
@@ -37,11 +34,7 @@ export function FactsPageClient() {
     { errorMessage: common("error") },
   );
 
-  useUrlParamsSync(
-    "/",
-    () => new URLSearchParams({ mode }),
-    [mode],
-  );
+  useRankingModeUrlSync("/");
 
   const stageLabel = (stage: PathStage) => stages(COMPARE_STAGE_I18N_KEYS[stage]);
 
@@ -57,13 +50,6 @@ export function FactsPageClient() {
           {t("subtitle")}
         </p>
       </header>
-
-      <div className="glass-panel mb-6 p-5 sm:p-6">
-        <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          {t("rankingSnapshot")}
-        </p>
-        <RankingModeToggle value={mode} onChange={setMode} variant="compact" />
-      </div>
 
       {error && (
         <div className="glass-panel mb-6 border-wc-red/30 bg-wc-red/10 p-6 text-wc-red">

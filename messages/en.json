@@ -10,15 +10,22 @@
     "compare": "Compare",
     "simulate": "Simulate",
     "about": "About",
-    "language": "Language"
+    "language": "Language",
+    "rankingSnapshot": "FIFA ranking snapshot"
   },
   "rankingMode": {
-    "label": "Ranking mode",
     "live": "Live",
     "june11": "11 June",
     "april": "1 April",
     "january": "19 January",
-    "november19": "19 November 2025"
+    "november19": "19 November 2025",
+    "short": {
+      "live": "Live",
+      "june11": "Jun 11",
+      "april": "Apr 1",
+      "january": "Jan 19",
+      "november19": "Nov 19"
+    }
   },
   "teamSelector": {
     "label": "Select team",
@@ -57,7 +64,6 @@
   "analysis": {
     "title": "World Cup path analysis",
     "subtitle": "See how tough a team's road to the final is, based on FIFA ranking points of every opponent faced.",
-    "rankingSnapshot": "FIFA ranking snapshot",
     "advanced": {
       "title": "Advanced statistics",
       "subtitle": "Deeper opponent distribution and cohort ordering metrics for statistical comparison.",
@@ -101,7 +107,6 @@
   "compare": {
     "title": "Path difficulty comparison",
     "subtitle": "Rank teams by opponent strength. # ranks peers at the furthest round included in averages.",
-    "rankingSnapshot": "FIFA ranking snapshot",
     "subtitleByPoints": "Sorted by average opponent FIFA points (higher = harder path)",
     "subtitleByRank": "Sorted by average opponent FIFA rank (lower = harder path)",
     "rankCohortHint": "# ranks among {count} teams at {stage} or beyond",
@@ -179,7 +184,6 @@
   "groups": {
     "title": "World Cup groups",
     "subtitle": "All 48 teams in their draw groups with FIFA ranking and group standings",
-    "rankingSnapshot": "FIFA ranking snapshot",
     "groupComplete": "Group complete",
     "groupAvgPosition": "Avg position",
     "groupAvgFifaPoints": "Avg FIFA points",
@@ -294,7 +298,6 @@
   "home": {
     "title": "Tournament snapshot",
     "subtitle": "Interesting facts from the World Cup draw and results — average strength by round, path difficulty, upsets, and teams beating expectations.",
-    "rankingSnapshot": "FIFA ranking snapshot",
     "snapshot": {
       "avgFifaPoints": "Avg FIFA points (all teams)",
       "medianFifaRank": "Median FIFA rank",
@@ -579,7 +582,6 @@
   "simulate": {
     "title": "Path simulation",
     "subtitle": "Pick alternate knockout winners to see how a team's path difficulty would change. Each side shows its bracket slot (e.g. 1J · Argentina vs 2H · Cape Verde).",
-    "rankingSnapshot": "FIFA ranking snapshot",
     "pathComparison": "Path difficulty comparison",
     "actualPath": "Actual path",
     "simulatedPath": "Simulated path",

@@ -3,12 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseSelectedGroupLetter } from "@/lib/client/group-selection";
-import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { GroupsView } from "@/components/groups-view";
 import { ComparisonGroupsSkeleton } from "@/components/loading-skeletons";
+import { useRankingMode } from "@/components/ranking-mode-provider";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
-import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
 import type { GroupsAnalysisResult } from "@/lib/api/responses";
 import { useTranslations } from "next-intl";
 
@@ -19,7 +18,7 @@ export function GroupsPageClient() {
   const selectedTeamId = searchParams.get("team")?.toUpperCase() ?? null;
   const urlGroup = searchParams.get("group")?.toUpperCase() ?? null;
 
-  const [mode, setMode] = useSyncedRankingMode(searchParams);
+  const { mode } = useRankingMode();
   const [selectedGroupLetter, setSelectedGroupLetter] = useState("A");
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [detailScrollTrigger, setDetailScrollTrigger] = useState(0);
@@ -58,14 +57,14 @@ export function GroupsPageClient() {
     );
   }, [groupCards, urlGroup, selectedTeamId]);
 
-  useUrlParamsSync(
+  useRankingModeUrlSync(
     "/groups",
     () => {
-      const params = new URLSearchParams({ mode, group: selectedGroupLetter });
+      const params = new URLSearchParams({ group: selectedGroupLetter });
       if (selectedTeamId) params.set("team", selectedTeamId);
       return params;
     },
-    [mode, selectedGroupLetter, selectedTeamId, groupCards.length],
+    [selectedGroupLetter, selectedTeamId, groupCards.length],
   );
 
   function handleSelectGroup(groupLetter: string) {
@@ -84,15 +83,6 @@ export function GroupsPageClient() {
           {groupsT("subtitle")}
         </p>
       </header>
-
-      <div className="glass-panel mb-6 p-5 sm:p-6">
-        <section className="space-y-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {groupsT("rankingSnapshot")}
-          </p>
-          <RankingModeToggle value={mode} onChange={setMode} variant="compact" />
-        </section>
-      </div>
 
       <div className="glass-panel p-5 sm:p-6">
         {loading && groupCards.length === 0 && !error && (

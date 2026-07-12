@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Geist_Mono } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { RankingModeProvider } from "@/components/ranking-mode-provider";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
@@ -41,11 +43,15 @@ export default async function RootLayout({
     >
       <body className="min-h-full bg-background font-sans text-foreground antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <div className="relative flex min-h-screen flex-col">
-            <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wc-mesh-bg" />
-            <SiteHeader />
-            <main className="flex-1">{children}</main>
-          </div>
+          <Suspense fallback={null}>
+            <RankingModeProvider>
+              <div className="relative flex min-h-screen flex-col">
+                <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wc-mesh-bg" />
+                <SiteHeader />
+                <main className="flex-1">{children}</main>
+              </div>
+            </RankingModeProvider>
+          </Suspense>
         </NextIntlClientProvider>
       </body>
     </html>

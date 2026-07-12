@@ -10,15 +10,22 @@
     "compare": "Comparar",
     "simulate": "Simular",
     "about": "Acerca de",
-    "language": "Idioma"
+    "language": "Idioma",
+    "rankingSnapshot": "Instantánea del ranking FIFA"
   },
   "rankingMode": {
-    "label": "Modo de ranking",
     "live": "En vivo",
     "june11": "11 de junio",
     "april": "1 de abril",
     "january": "19 de enero",
-    "november19": "19 de noviembre de 2025"
+    "november19": "19 de noviembre de 2025",
+    "short": {
+      "live": "Vivo",
+      "june11": "11 jun",
+      "april": "1 abr",
+      "january": "19 ene",
+      "november19": "19 nov"
+    }
   },
   "teamSelector": {
     "label": "Seleccionar equipo",
@@ -57,7 +64,6 @@
   "analysis": {
     "title": "Análisis del camino en el Mundial",
     "subtitle": "Mide qué tan difícil es el camino de un equipo hacia la final, según los puntos FIFA de cada rival enfrentado.",
-    "rankingSnapshot": "Instantánea del ranking FIFA",
     "advanced": {
       "title": "Estadísticas avanzadas",
       "subtitle": "Distribución más detallada de rivales y métricas de concordancia del grupo comparable.",
@@ -101,7 +107,6 @@
   "compare": {
     "title": "Comparación de dificultad del camino",
     "subtitle": "Ordena equipos por fuerza del rival. El # compara pares en la fase más avanzada incluida en los promedios.",
-    "rankingSnapshot": "Instantánea del ranking FIFA",
     "subtitleByPoints": "Ordenado por promedio de puntos FIFA del rival (más alto = camino más duro)",
     "subtitleByRank": "Ordenado por ranking FIFA promedio del rival (más bajo = camino más duro)",
     "rankCohortHint": "El # rankea entre {count} equipos en {stage} o más",
@@ -179,7 +184,6 @@
   "groups": {
     "title": "Grupos del Mundial",
     "subtitle": "Los 48 equipos en sus grupos del sorteo con ranking FIFA y posiciones",
-    "rankingSnapshot": "Instantánea del ranking FIFA",
     "groupComplete": "Grupo completo",
     "groupAvgPosition": "Posición promedio",
     "groupAvgFifaPoints": "Promedio pts. FIFA",
@@ -294,7 +298,6 @@
   "home": {
     "title": "Panorama del torneo",
     "subtitle": "Datos interesantes del sorteo y los resultados: fuerza promedio por fase, dificultad de camino, sorpresas y equipos que superan lo esperado.",
-    "rankingSnapshot": "Instantánea del ranking FIFA",
     "snapshot": {
       "avgFifaPoints": "Promedio pts. FIFA (todos)",
       "medianFifaRank": "Ranking FIFA promedio",
@@ -579,7 +582,6 @@
   "simulate": {
     "title": "Simulación de camino",
     "subtitle": "Elige ganadores alternativos en el cuadro para ver cómo cambiaría la dificultad del camino. Cada lado muestra su casilla (ej. 1J · Argentina vs 2H · Cabo Verde).",
-    "rankingSnapshot": "Instantánea del ranking FIFA",
     "pathComparison": "Comparación de dificultad",
     "actualPath": "Camino actual",
     "simulatedPath": "Camino simulado",

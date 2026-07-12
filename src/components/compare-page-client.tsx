@@ -11,7 +11,6 @@ import {
   stagesThrough,
   syncTeamRoundToStages,
 } from "@/lib/domain/match-stages";
-import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import {
   PathStageFilters,
   serializePathStages,
@@ -20,9 +19,9 @@ import { TeamRoundSelector } from "@/components/team-round-selector";
 import { ComparisonTable } from "@/components/comparison-table";
 import { TeamHeadToHeadPanel } from "@/components/team-head-to-head-panel";
 import { CompareLoadingSkeleton } from "@/components/loading-skeletons";
+import { useRankingMode } from "@/components/ranking-mode-provider";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
-import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
 import { usePersistedPathStages } from "@/hooks/use-persisted-path-stages";
 import {
   readInitialTeamRound,
@@ -38,7 +37,7 @@ export function ComparePageClient() {
   const initialTeamA = searchParams.get("team")?.toUpperCase() ?? "";
   const initialTeamB = searchParams.get("vs")?.toUpperCase() ?? "";
 
-  const [mode, setMode] = useSyncedRankingMode(searchParams);
+  const { mode } = useRankingMode();
   const [stages, setStages, stagesHydrated] = usePersistedPathStages("compare");
   const [teamRound, setTeamRound] = useState<PathStage>(() => parseTeamRound(null));
   const [filtersHydrated, setFiltersHydrated] = useState(false);
@@ -152,15 +151,15 @@ export function ComparePageClient() {
     setMaxStageReached(undefined);
   }, [bothTeamsSelected, teamAId, teamBId]);
 
-  useUrlParamsSync(
+  useRankingModeUrlSync(
     "/compare",
     () => {
-      const params = new URLSearchParams({ mode });
+      const params = new URLSearchParams();
       if (teamAId) params.set("team", teamAId);
       if (teamBId) params.set("vs", teamBId);
       return params;
     },
-    [mode, teamAId, teamBId],
+    [teamAId, teamBId],
   );
 
   return (
@@ -175,13 +174,6 @@ export function ComparePageClient() {
       </header>
 
       <div className="glass-panel mb-6 space-y-6 p-5 sm:p-6">
-        <section className="space-y-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {compare("rankingSnapshot")}
-          </p>
-          <RankingModeToggle value={mode} onChange={setMode} variant="compact" />
-        </section>
-
         <div className="grid gap-6 lg:grid-cols-2">
           <section>
             <TeamRoundSelector

@@ -4,12 +4,12 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import type { SimulationResult, SimulationScenario, Team } from "@/lib/types";
-import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { TeamSelector } from "@/components/team-selector";
 import { BracketTree } from "@/components/bracket-tree";
 import { GroupFinishEditor } from "@/components/group-finish-editor";
 import { TeamPathImpactPanel } from "@/components/team-path-impact-panel";
 import { PageShellSkeleton } from "@/components/loading-skeletons";
+import { useRankingMode } from "@/components/ranking-mode-provider";
 import {
   compactGroupFinishes,
   groupFinishesDifferFromBaseline,
@@ -25,8 +25,7 @@ import {
   writeSimulationScenarioPreference,
 } from "@/lib/client/simulation-scenario-preference";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
-import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
 import { useTranslations } from "next-intl";
 
 function scenarioHasOverrides(
@@ -121,7 +120,7 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
   const initialComparisonTeam =
     searchParams.get("compareTeam")?.toUpperCase() ?? "";
 
-  const [mode, setMode] = useSyncedRankingMode(searchParams);
+  const { mode } = useRankingMode();
   const [teamId, setTeamId] = useState(initialTeam);
   const [comparisonTeamId, setComparisonTeamId] = useState(initialComparisonTeam);
   const [scenario, setScenario] = useState<SimulationScenario>(
@@ -172,16 +171,16 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
     writeSimulationScenarioPreference(scenario);
   }, [scenario, scenarioHydrated]);
 
-  useUrlParamsSync(
+  useRankingModeUrlSync(
     "/simulate",
     () => {
-      const params = new URLSearchParams({ mode, team: teamId });
+      const params = new URLSearchParams({ team: teamId });
       if (comparisonTeamId) {
         params.set("compareTeam", comparisonTeamId);
       }
       return params;
     },
-    [mode, teamId, comparisonTeamId],
+    [teamId, comparisonTeamId],
   );
 
   function handleSelectWinner(matchNum: number, winnerId: string) {
@@ -281,13 +280,7 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
         </p>
       </header>
 
-      <div className="glass-panel mb-6 space-y-6 p-5 sm:p-6">
-        <section className="space-y-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {t("rankingSnapshot")}
-          </p>
-          <RankingModeToggle value={mode} onChange={setMode} variant="compact" />
-        </section>
+      <div className="glass-panel mb-6 p-5 sm:p-6">
         <TeamSelector teams={teams} value={teamId} onChange={setTeamId} />
       </div>
 

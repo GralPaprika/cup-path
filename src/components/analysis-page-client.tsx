@@ -7,15 +7,14 @@ import {
   clampPathStages,
   isStageWithinReach,
 } from "@/lib/domain/match-stages";
-import { RankingModeToggle } from "@/components/ranking-mode-toggle";
 import { TeamSelector } from "@/components/team-selector";
 import {
   PathStageFilters,
   serializePathStages,
 } from "@/components/path-stage-filters";
+import { useRankingMode } from "@/components/ranking-mode-provider";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
-import { useSyncedRankingMode } from "@/hooks/use-synced-ranking-mode";
+import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
 import { usePersistedPathStages } from "@/hooks/use-persisted-path-stages";
 import type { TeamAnalysisResult, TeamsResponse } from "@/lib/api/responses";
 import { AdvancedStatsPanel } from "@/components/advanced-stats-panel";
@@ -38,7 +37,7 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
   const initialTeam = searchParams.get("team")?.toUpperCase() ?? teams[0]?.id ?? "ARG";
 
   const [teamId, setTeamId] = useState(initialTeam);
-  const [mode, setMode] = useSyncedRankingMode(searchParams);
+  const { mode } = useRankingMode();
   const [stages, setStages, stagesHydrated] = usePersistedPathStages("team-analysis");
   const [data, setData] = useState<TeamAnalysisResult | null>(null);
   const [maxStageReached, setMaxStageReached] = useState<PathStage | undefined>();
@@ -78,14 +77,10 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
     setData(rawData);
   }, [rawData, stages]);
 
-  useUrlParamsSync(
+  useRankingModeUrlSync(
     "/team-analysis",
-    () =>
-      new URLSearchParams({
-        team: teamId,
-        mode,
-      }),
-    [teamId, mode],
+    () => ({ team: teamId }),
+    [teamId],
   );
 
   return (
@@ -103,14 +98,6 @@ export function AnalysisPageClient({ teams }: { teams: Team[] }) {
         <aside className="glass-panel h-fit space-y-6 p-5 lg:sticky lg:top-20">
           <section>
             <TeamSelector teams={teamList} value={teamId} onChange={setTeamId} />
-          </section>
-
-          <section>
-            <RankingModeToggle
-              value={mode}
-              onChange={setMode}
-              variant="sidebar"
-            />
           </section>
 
           <section>

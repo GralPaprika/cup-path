@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { RankingModeSwitcher } from "@/components/ranking-mode-switcher";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -76,6 +77,7 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
+          <RankingModeSwitcher />
           <LocaleSwitcher />
         </div>
       </div>

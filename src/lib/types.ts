@@ -431,6 +431,7 @@ export interface GroupStageDifficultyEntry {
   team: Team;
   groupLetter: string;
   avgOpponentPoints: number;
+  teamFifaPoints: number;
   qualified: boolean;
 }
 
@@ -473,6 +474,7 @@ export interface KnockoutOpponentDifficultyEntry {
   team: Team;
   opponent: Team;
   opponentFifaPoints: number;
+  teamFifaPoints: number;
   qualified: boolean;
   matchNum: number | null;
 }

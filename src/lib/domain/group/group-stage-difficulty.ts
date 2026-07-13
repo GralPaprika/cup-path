@@ -4,6 +4,7 @@ import type {
   GroupStageDifficultyInsights,
   GroupStageDifficultySpotlight,
   GroupStageDifficultyStrip,
+  RankingEntry,
 } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
 import { computeNumericStats } from "@/lib/domain/group/group-stats";
@@ -61,6 +62,7 @@ function buildGroupStageDifficultyInsights(
 export function buildGroupStageDifficultyStrip(
   ctx: TournamentContext,
   comparison: ComparisonEntry[],
+  rankings: Map<string, RankingEntry>,
 ): GroupStageDifficultyStrip | null {
   const groupNames = getGroupNames();
   const groupMatches = ctx.matches.filter((match) => match.group);
@@ -68,12 +70,20 @@ export function buildGroupStageDifficultyStrip(
 
   const entries: GroupStageDifficultyEntry[] = comparison
     .filter((entry) => entry.avgOpponentPoints !== null)
-    .map((entry) => ({
-      team: entry.team,
-      groupLetter: entry.team.group,
-      avgOpponentPoints: entry.avgOpponentPoints!,
-      qualified: advancing.has(entry.team.id),
-    }))
+    .flatMap((entry) => {
+      const teamFifaPoints = rankings.get(entry.team.id)?.points;
+      if (teamFifaPoints === undefined) return [];
+
+      return [
+        {
+          team: entry.team,
+          groupLetter: entry.team.group,
+          avgOpponentPoints: entry.avgOpponentPoints!,
+          teamFifaPoints,
+          qualified: advancing.has(entry.team.id),
+        },
+      ];
+    })
     .sort((a, b) => b.avgOpponentPoints - a.avgOpponentPoints);
 
   if (entries.length === 0) return null;

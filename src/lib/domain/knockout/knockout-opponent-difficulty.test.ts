@@ -41,8 +41,10 @@ describe("buildKnockoutOpponentDifficultyStrip", () => {
     assert.ok(mar);
     assert.equal(ned.qualified, true);
     assert.equal(ned.opponentFifaPoints, 1713);
+    assert.equal(ned.teamFifaPoints, 1756);
     assert.equal(mar.qualified, false);
     assert.equal(mar.opponentFifaPoints, 1756);
+    assert.equal(mar.teamFifaPoints, 1713);
   });
 
   it("sorts entries by opponent FIFA points descending", () => {

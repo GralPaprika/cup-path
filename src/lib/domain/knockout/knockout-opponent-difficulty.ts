@@ -74,6 +74,7 @@ export function buildKnockoutOpponentDifficultyStrip(
       team: fixture.team1,
       opponent: fixture.team2,
       opponentFifaPoints: fixture.team2FifaPoints,
+      teamFifaPoints: fixture.team1FifaPoints,
       qualified: team1Qualified,
       matchNum: fixture.matchNum,
     });
@@ -81,6 +82,7 @@ export function buildKnockoutOpponentDifficultyStrip(
       team: fixture.team2,
       opponent: fixture.team1,
       opponentFifaPoints: fixture.team1FifaPoints,
+      teamFifaPoints: fixture.team2FifaPoints,
       qualified: !team1Qualified,
       matchNum: fixture.matchNum,
     });

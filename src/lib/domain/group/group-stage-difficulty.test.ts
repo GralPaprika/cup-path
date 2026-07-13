@@ -28,7 +28,7 @@ describe("buildGroupStageDifficultyStrip", () => {
       rankings,
     );
 
-    const strip = buildGroupStageDifficultyStrip(ctx, comparison);
+    const strip = buildGroupStageDifficultyStrip(ctx, comparison, rankings);
 
     assert.ok(strip);
     assert.ok(strip.entries.length >= 4);
@@ -63,7 +63,7 @@ describe("buildGroupStageDifficultyStrip", () => {
       rankings,
     );
 
-    const strip = buildGroupStageDifficultyStrip(ctx, comparison);
+    const strip = buildGroupStageDifficultyStrip(ctx, comparison, rankings);
     assert.ok(strip);
 
     const { insights } = strip;

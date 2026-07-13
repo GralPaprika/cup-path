@@ -158,7 +158,6 @@ export function KnockoutStagePanel({
             <KnockoutStageOpponentDifficultyChart
               strip={analysis.opponentDifficulty}
               mode={mode}
-              wideBars={round.wideOpponentDifficultyBars}
               opponentDifficultyTitle={stage("opponentDifficultyTitle")}
               opponentDifficultySubtitle={stage("opponentDifficultySubtitle", {
                 count: analysis.opponentDifficulty.entries.length,

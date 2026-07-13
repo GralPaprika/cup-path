@@ -41,7 +41,11 @@ export async function getTournamentFacts(
   return {
     ...base,
     groupExpectedAnalysis: buildGroupExpectedAnalysis(ctx, rankings),
-    groupStageDifficulty: buildGroupStageDifficultyStrip(ctx, allComparison),
+    groupStageDifficulty: buildGroupStageDifficultyStrip(
+      ctx,
+      allComparison,
+      rankings,
+    ),
     knockoutAnalyses: buildKnockoutFactsAnalyses(ctx, rankings),
     matchOutcomeGap: buildMatchOutcomeGapDataset(ctx, rankings),
   };

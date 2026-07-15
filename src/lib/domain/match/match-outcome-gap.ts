@@ -3,10 +3,12 @@ import type {
   MatchOutcomeGapDataset,
   MatchOutcomeGapEntry,
   OpenFootballMatch,
+  PathStage,
   RankingEntry,
 } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
 import { isKnockoutRound, isMatchPlayed } from "@/lib/data/worldcup-loader";
+import { isMeanPlusStdDevOutlier } from "@/lib/domain/core/stats-helpers";
 import { computeNumericStats } from "@/lib/domain/group/group-stats";
 import { buildMatchScoreBreakdown } from "@/lib/domain/match/match-score";
 import { getMatchStage } from "@/lib/domain/match/match-stages";
@@ -94,20 +96,6 @@ function formatScoreLabel(match: OpenFootballMatch): string {
   return label;
 }
 
-function isDrawGapOutlier(
-  gapPoints: number,
-  mean: number | null,
-  stdDev: number | null,
-): boolean {
-  return (
-    gapPoints > 0 &&
-    mean !== null &&
-    stdDev !== null &&
-    stdDev > 0 &&
-    gapPoints >= mean + stdDev
-  );
-}
-
 function buildMatchEntry(
   ctx: TournamentContext,
   match: OpenFootballMatch,
@@ -176,27 +164,47 @@ function buildMatchEntry(
 
 function annotateOutliers(
   entries: MatchOutcomeGapEntry[],
-  drawMean: number | null,
-  drawStdDev: number | null,
-  upsetMean: number | null,
-  upsetStdDev: number | null,
 ): MatchOutcomeGapEntry[] {
+  const byStage = new Map<PathStage, MatchOutcomeGapEntry[]>();
+  for (const entry of entries) {
+    const list = byStage.get(entry.stage) ?? [];
+    list.push(entry);
+    byStage.set(entry.stage, list);
+  }
+
+  const stageStats = new Map<
+    PathStage,
+    { mean: number | null; stdDev: number | null }
+  >();
+  for (const [stage, stageEntries] of byStage) {
+    const stats = computeNumericStats(
+      stageEntries.map((entry) => entry.gapPoints),
+    );
+    stageStats.set(stage, { mean: stats.mean, stdDev: stats.stdDev });
+  }
+
   return entries.map((entry) => {
-    if (entry.favoriteResult === "D" && entry.gapPoints > 0) {
-      const isOutlier = isDrawGapOutlier(entry.gapPoints, drawMean, drawStdDev);
-      return isOutlier
-        ? { ...entry, isOutlier: true, outlierKind: "draw" as const }
-        : entry;
-    }
+    const isSurpriseResult =
+      (entry.favoriteResult === "D" || entry.favoriteResult === "L") &&
+      entry.gapPoints > 0;
+    if (!isSurpriseResult) return entry;
 
-    if (entry.favoriteResult === "L" && entry.gapPoints > 0) {
-      const isOutlier = isDrawGapOutlier(entry.gapPoints, upsetMean, upsetStdDev);
-      return isOutlier
-        ? { ...entry, isOutlier: true, outlierKind: "upset" as const }
-        : entry;
-    }
+    const stats = stageStats.get(entry.stage);
+    if (!stats) return entry;
 
-    return entry;
+    const isOutlier = isMeanPlusStdDevOutlier(
+      entry.gapPoints,
+      stats.mean,
+      stats.stdDev,
+      "high",
+    );
+    if (!isOutlier) return entry;
+
+    return {
+      ...entry,
+      isOutlier: true,
+      outlierKind: entry.favoriteResult === "D" ? ("draw" as const) : ("upset" as const),
+    };
   });
 }
 
@@ -217,14 +225,7 @@ export function buildMatchOutcomeGapDataset(
 
   const drawStats = computeNumericStats(drawGaps);
   const upsetStats = computeNumericStats(upsetGaps);
-
-  const matches = annotateOutliers(
-    rawEntries,
-    drawStats.mean,
-    drawStats.stdDev,
-    upsetStats.mean,
-    upsetStats.stdDev,
-  );
+  const matches = annotateOutliers(rawEntries);
 
   return {
     matches,

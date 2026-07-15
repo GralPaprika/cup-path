@@ -100,6 +100,8 @@ export function MatchOutcomeGapChartOverlay({
 
   if (!mounted || !open) return null;
 
+  const zoomPercent = Math.round((dotTransform?.scale ?? 1) * 100);
+
   return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
@@ -143,6 +145,12 @@ export function MatchOutcomeGapChartOverlay({
             >
               <Minus />
             </Button>
+            <span
+              className="min-w-12 text-center font-mono text-xs font-medium tabular-nums text-white/90"
+              aria-live="polite"
+            >
+              {zoomPercent}%
+            </span>
             <Button
               type="button"
               variant="outline"

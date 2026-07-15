@@ -359,7 +359,8 @@
       "zoomOut": "Zoom out",
       "resetZoom": "Reset zoom",
       "interactionHint": "Scroll to zoom match dots. Drag to pan.",
-      "footnote": "From the higher-rated team's view. Group matches use full-time score only. In knockout ties, extra-time wins count as wins; matches decided on penalties count as draws."
+      "footnote": "From the higher-rated team's view. Group matches use full-time score only. In knockout ties, extra-time wins count as wins; matches decided on penalties count as draws.",
+      "outlierFootnote": "Outlier rings mark draws or upsets whose FIFA points gap is at or above that stage's mean + 1 SD — the same idea as each round's deep dive. Small rounds make that threshold noisy."
     },
     "highlights": {
       "title": "Highlights",

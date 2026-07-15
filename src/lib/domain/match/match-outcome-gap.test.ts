@@ -136,7 +136,7 @@ describe("buildMatchOutcomeGapDataset", () => {
     assert.equal(dataset.matches.length, 0);
   });
 
-  it("flags draw and upset gap outliers using stable thresholds", () => {
+  it("flags stage-local draw outliers using that stage's mean + 1 SD", () => {
     const matches = [
       playedGroupMatch("Mexico", "South Africa", 1, 1),
       playedGroupMatch("Mexico", "Czechia", 1, 1),
@@ -158,6 +158,45 @@ describe("buildMatchOutcomeGapDataset", () => {
     assert.equal(highGapDraw?.favoriteResult, "D");
     assert.equal(highGapDraw?.isOutlier, true);
     assert.equal(highGapDraw?.outlierKind, "draw");
+  });
+
+  it("judges upset outliers only against the same stage's gap distribution", () => {
+    const ctx = createTestContext([
+      // Small-gap group upsets would pull a global upset threshold below 200.
+      playedGroupMatch("South Africa", "Mexico", 1, 0),
+      playedGroupMatch("Czechia", "Korea Republic", 1, 0),
+      playedGroupMatch("South Africa", "Korea Republic", 1, 0),
+      playedGroupMatch("Czechia", "Mexico", 1, 0),
+      knockoutMatch("Belgium", "Senegal", { ft: [0, 1] }, "Round of 16"),
+      knockoutMatch("Germany", "Paraguay", { ft: [2, 0] }, "Round of 16"),
+      knockoutMatch("France", "Canada", { ft: [1, 0] }, "Round of 16"),
+      knockoutMatch("Spain", "Morocco", { ft: [3, 0] }, "Round of 16"),
+    ]);
+    const rankings = rankingsMap([
+      { teamId: "MEX", rank: 10, points: 1800 },
+      { teamId: "KOR", rank: 20, points: 1720 },
+      { teamId: "CZE", rank: 25, points: 1650 },
+      { teamId: "RSA", rank: 50, points: 1550 },
+      { teamId: "BEL", rank: 8, points: 1850 },
+      { teamId: "SEN", rank: 30, points: 1650 },
+      { teamId: "GER", rank: 5, points: 1900 },
+      { teamId: "PAR", rank: 40, points: 1550 },
+      { teamId: "FRA", rank: 4, points: 1920 },
+      { teamId: "CAN", rank: 45, points: 1500 },
+      { teamId: "ESP", rank: 3, points: 1950 },
+      { teamId: "MAR", rank: 15, points: 1750 },
+    ]);
+
+    const dataset = buildMatchOutcomeGapDataset(ctx, rankings);
+    const r16Upset = dataset.matches.find(
+      (entry) => entry.team1.id === "BEL" && entry.team2.id === "SEN",
+    );
+
+    assert.equal(r16Upset?.stage, "r16");
+    assert.equal(r16Upset?.favoriteResult, "L");
+    assert.equal(r16Upset?.gapPoints, 200);
+    // R16 all-tie gaps: 200, 350, 420, 200 → threshold ≈ 388, so 200 is not an R16 outlier.
+    assert.equal(r16Upset?.isOutlier, false);
   });
 });
 

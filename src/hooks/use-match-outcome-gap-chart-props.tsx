@@ -86,7 +86,10 @@ export function useMatchOutcomeGapChartProps(
       xAxisLabel: t("xAxisLabel"),
       yAxisLabel: t("yAxisLabel"),
       footnotes: (
-        <p className="text-xs text-muted-foreground">{t("footnote")}</p>
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">{t("footnote")}</p>
+          <p className="text-xs text-muted-foreground">{t("outlierFootnote")}</p>
+        </div>
       ),
       getBinAriaLabel: (bin: MatchOutcomeGapBinStats) =>
         t("binTooltip", {

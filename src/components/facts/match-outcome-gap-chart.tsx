@@ -112,16 +112,20 @@ const CHART_LAYOUTS: Record<MatchOutcomeGapChartLayout, ChartLayoutConfig> = {
     barAreaHeight: 0,
     barGap: 0,
     maxRowStep: 18,
-    dotRadius: 9,
-    dotRadiusHovered: 11.5,
-    hitRadius: 16,
-    outlierRadius: 12,
+    dotRadius: 10.5,
+    dotRadiusHovered: 13,
+    hitRadius: 18,
+    outlierRadius: 13.5,
   },
 };
 
 const MIN_DOT_SCALE = 1;
-const MAX_DOT_SCALE = 8;
-const ZOOM_STEP = 0.35;
+const MAX_DOT_SCALE = 15;
+/** Above this scale, gaps still open but point size stops growing. */
+const MAX_DOT_SIZE_SCALE = 10;
+const ZOOM_STEP = 0.5;
+/** Visual radius grows as scale^power while positions grow as scale^1. */
+const DOT_SIZE_ZOOM_POWER = 0.4;
 
 const RESULT_DOT_CLASS: Record<GroupMatchResult, string> = {
   W: "fill-wc-green/85",
@@ -740,9 +744,10 @@ export const MatchOutcomeGapChart = forwardRef<
     return Math.max(...dotRows.map((row) => row.row)) + 1;
   }, [dotRows]);
   const rowStep = useMemo(() => {
+    const bottomPad = layoutConfig.outlierRadius + 2;
     const availableHeight = centerDotsVertically
       ? dotRegionHeight - 24
-      : dotBaselineY - dotAreaTop - 8;
+      : Math.max(dotBaselineY - dotAreaTop - bottomPad - 4, bottomPad);
     return Math.min(
       maxRowStep,
       availableHeight / Math.max(rowCount, 1),
@@ -752,6 +757,7 @@ export const MatchOutcomeGapChart = forwardRef<
     dotAreaTop,
     dotBaselineY,
     dotRegionHeight,
+    layoutConfig.outlierRadius,
     maxRowStep,
     rowCount,
   ]);
@@ -762,9 +768,18 @@ export const MatchOutcomeGapChart = forwardRef<
         const stackTop = dotPlotCenterY - stackHeight / 2;
         return stackTop + row * rowStep;
       }
-      return dotBaselineY - 8 - row * rowStep;
+      return (
+        dotBaselineY - (layoutConfig.outlierRadius + 2) - row * rowStep
+      );
     },
-    [centerDotsVertically, dotBaselineY, dotPlotCenterY, rowStep, stackHeight],
+    [
+      centerDotsVertically,
+      dotBaselineY,
+      dotPlotCenterY,
+      layoutConfig.outlierRadius,
+      rowStep,
+      stackHeight,
+    ],
   );
 
   const defaultCenteredTransform = useMemo(() => {
@@ -868,6 +883,14 @@ export const MatchOutcomeGapChart = forwardRef<
     </>
   );
 
+  const zoomScale = interactiveDots ? Math.max(dotTransform.scale, 0.001) : 1;
+  // Positions spread with zoomScale; radii grow slower, then freeze after 1000%.
+  const sizeZoom = Math.pow(
+    Math.min(zoomScale, MAX_DOT_SIZE_SCALE),
+    DOT_SIZE_ZOOM_POWER,
+  );
+  const screenLength = (value: number) => (value * sizeZoom) / zoomScale;
+
   const dotNodes = dotRows.map(({ entry, row }) => {
     const cx = xForGapInBinSlot(
       entry.gapPoints,
@@ -879,6 +902,9 @@ export const MatchOutcomeGapChart = forwardRef<
     const isHovered =
       hoveredTarget?.kind === "match" &&
       hoveredTarget.entry.id === entry.id;
+    const dotRadius = screenLength(
+      isHovered ? layoutConfig.dotRadiusHovered : layoutConfig.dotRadius,
+    );
 
     return (
       <g
@@ -920,26 +946,31 @@ export const MatchOutcomeGapChart = forwardRef<
           <circle
             cx={cx}
             cy={cy}
-            r={layoutConfig.outlierRadius}
+            r={screenLength(layoutConfig.outlierRadius)}
             fill="none"
             className={cn(
               "stroke-wc-orange transition-opacity",
               isHovered ? "opacity-100" : "opacity-80",
             )}
-            strokeWidth={2}
+            strokeWidth={screenLength(2)}
           />
         )}
-        <circle cx={cx} cy={cy} r={layoutConfig.hitRadius} fill="transparent" />
         <circle
           cx={cx}
           cy={cy}
-          r={isHovered ? layoutConfig.dotRadiusHovered : layoutConfig.dotRadius}
+          r={screenLength(layoutConfig.hitRadius)}
+          fill="transparent"
+        />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={dotRadius}
           className={cn(
             RESULT_DOT_CLASS[entry.favoriteResult],
-            "transition-all duration-150",
+            "transition-[stroke-opacity] duration-150",
             isHovered && "stroke-white/70",
           )}
-          strokeWidth={isHovered ? 1.5 : 0}
+          strokeWidth={isHovered ? screenLength(1.5) : 0}
         />
       </g>
     );
@@ -970,6 +1001,8 @@ export const MatchOutcomeGapChart = forwardRef<
         );
       })
     : null;
+
+  const clipPadY = layoutConfig.outlierRadius + 3;
 
   return (
     <figure className="space-y-2">
@@ -1004,10 +1037,16 @@ export const MatchOutcomeGapChart = forwardRef<
             <clipPath id={clipId}>
               <rect
                 x={margin.left}
-                y={dotRegionTop - (centerDotsVertically ? 4 : 0)}
+                y={
+                  dotRegionTop -
+                  (centerDotsVertically ? 4 : clipPadY)
+                }
                 width={chartWidth}
                 height={
-                  dotRegionHeight + (centerDotsVertically ? layoutConfig.hitRadius + 8 : 0)
+                  dotRegionHeight +
+                  (centerDotsVertically
+                    ? layoutConfig.hitRadius + 8
+                    : clipPadY * 2)
                 }
               />
             </clipPath>
@@ -1063,7 +1102,7 @@ export const MatchOutcomeGapChart = forwardRef<
                     x={cx}
                     y={binLabelY}
                     textAnchor="middle"
-                    className="fill-muted-foreground text-[10px]"
+                    className="fill-muted-foreground text-[8px]"
                   >
                     {bin.label}
                   </text>
@@ -1144,7 +1183,7 @@ export const MatchOutcomeGapChart = forwardRef<
                   x={cx}
                   y={binLabelY}
                   textAnchor="middle"
-                  className="fill-muted-foreground text-[10px]"
+                  className="fill-muted-foreground text-[8px]"
                 >
                   {bin.label}
                 </text>
@@ -1152,7 +1191,7 @@ export const MatchOutcomeGapChart = forwardRef<
                   x={cx}
                   y={binCountY}
                   textAnchor="middle"
-                  className="fill-muted-foreground text-[9px]"
+                  className="fill-muted-foreground text-[7px]"
                 >
                   n={bin.total}
                 </text>

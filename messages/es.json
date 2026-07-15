@@ -359,7 +359,8 @@
       "zoomOut": "Alejar",
       "resetZoom": "Restablecer zoom",
       "interactionHint": "Desplázate para acercar los puntos. Arrastra para mover.",
-      "footnote": "Desde la perspectiva del mejor clasificado. En fase de grupos solo cuenta el marcador al 90. En eliminatorias, victoria en prórroga cuenta como triunfo; partidos definidos en penales cuentan como empate."
+      "footnote": "Desde la perspectiva del mejor clasificado. En fase de grupos solo cuenta el marcador al 90. En eliminatorias, victoria en prórroga cuenta como triunfo; partidos definidos en penales cuentan como empate.",
+      "outlierFootnote": "Los anillos atípicos marcan empates o sorpresas cuya brecha FIFA está en o por encima del promedio + 1 DE de esa fase — la misma idea que en el detalle de cada ronda. En rondas pequeñas ese umbral puede ser ruidoso."
     },
     "highlights": {
       "title": "Destacados",

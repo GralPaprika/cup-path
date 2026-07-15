@@ -49,7 +49,7 @@ export function AdvancedStatsPanel({
   selectedTeam,
   selectedTeamPoints,
 }: AdvancedStatsPanelProps) {
-  const t = useTranslations("analysis.advanced");
+  const t = useTranslations("teamAnalysis.advanced");
   const stages = useTranslations("compare.stages");
   const stageLabel = stages(COMPARE_STAGE_I18N_KEYS[cohortStage]);
 

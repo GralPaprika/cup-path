@@ -19,7 +19,7 @@ export function OpponentPointsChart({
   selectedTeam,
   selectedTeamPoints,
 }: OpponentPointsChartProps) {
-  const t = useTranslations("analysis.advanced");
+  const t = useTranslations("teamAnalysis.advanced");
 
   if (stats.mean === null || stats.stdDev === null) {
     return null;

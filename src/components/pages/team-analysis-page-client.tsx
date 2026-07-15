@@ -30,10 +30,10 @@ function stagesNeedClamp(stages: Set<PathStage>, maxStage: PathStage): boolean {
   return [...stages].some((stage) => !isStageWithinReach(stage, maxStage));
 }
 
-export function AnalysisPageClient({ teams }: { teams: Team[] }) {
+export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
   const searchParams = useSearchParams();
   const t = useTranslations("common");
-  const analysis = useTranslations("analysis");
+  const analysis = useTranslations("teamAnalysis");
   const initialTeam = searchParams.get("team")?.toUpperCase() ?? teams[0]?.id ?? "ARG";
 
   const [teamId, setTeamId] = useState(initialTeam);

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/", key: "home" as const },
-  { href: "/team-analysis", key: "analysis" as const },
+  { href: "/team-analysis", key: "teamAnalysis" as const },
   { href: "/groups", key: "groups" as const },
   { href: "/compare", key: "compare" as const },
   { href: "/simulate", key: "simulate" as const },

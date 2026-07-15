@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getAllTeamsEnriched } from "@/lib/data/team-registry";
-import { AnalysisPageClient } from "@/components/pages/analysis-page-client";
+import { TeamAnalysisPageClient } from "@/components/pages/team-analysis-page-client";
 import { PageShellSkeleton } from "@/components/loading-skeletons";
 
 export default async function TeamAnalysisPage() {
@@ -8,7 +8,7 @@ export default async function TeamAnalysisPage() {
 
   return (
     <Suspense fallback={<PageShellSkeleton />}>
-      <AnalysisPageClient teams={teams} />
+      <TeamAnalysisPageClient teams={teams} />
     </Suspense>
   );
 }

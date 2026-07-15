@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Geist_Mono } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { RankingModeProvider } from "@/components/layout/ranking-mode-provider";
 import { SiteHeader } from "@/components/layout/site-header";
+import { RANKING_MODE_COOKIE } from "@/lib/client/ranking-mode-preference";
+import { parseRankingMode } from "@/lib/data/ranking-modes";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -35,6 +38,10 @@ export default async function RootLayout({
 }>) {
   const messages = await getMessages();
   const locale = await getLocale();
+  const cookieStore = await cookies();
+  const initialMode = parseRankingMode(
+    cookieStore.get(RANKING_MODE_COOKIE)?.value ?? null,
+  );
 
   return (
     <html
@@ -44,7 +51,7 @@ export default async function RootLayout({
       <body className="min-h-full bg-background font-sans text-foreground antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Suspense fallback={null}>
-            <RankingModeProvider>
+            <RankingModeProvider initialMode={initialMode}>
               <div className="relative flex min-h-screen flex-col">
                 <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wc-mesh-bg" />
                 <SiteHeader />

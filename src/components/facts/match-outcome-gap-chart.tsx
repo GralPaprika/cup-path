@@ -106,16 +106,16 @@ const CHART_LAYOUTS: Record<MatchOutcomeGapChartLayout, ChartLayoutConfig> = {
     outlierRadius: 8,
   },
   expanded: {
-    width: 1280,
-    height: 400,
-    margin: { top: 20, right: 24, bottom: 40, left: 56 },
+    width: 1440,
+    height: 340,
+    margin: { top: 16, right: 28, bottom: 36, left: 40 },
     barAreaHeight: 0,
     barGap: 0,
-    maxRowStep: 16,
-    dotRadius: 7,
-    dotRadiusHovered: 9,
-    hitRadius: 14,
-    outlierRadius: 10,
+    maxRowStep: 18,
+    dotRadius: 9,
+    dotRadiusHovered: 11.5,
+    hitRadius: 16,
+    outlierRadius: 12,
   },
 };
 
@@ -1166,7 +1166,6 @@ export const MatchOutcomeGapChart = forwardRef<
                 transform={`translate(${dotTransform.translateX} ${dotTransform.translateY}) scale(${dotTransform.scale})`}
               >
                 {gridLines}
-                {zoomedBinLabels}
                 {dotNodes}
               </g>
             </g>
@@ -1182,6 +1181,8 @@ export const MatchOutcomeGapChart = forwardRef<
               </g>
             </>
           )}
+
+          {zoomedBinLabels}
 
           <text
             x={margin.left + chartWidth / 2}

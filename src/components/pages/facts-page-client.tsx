@@ -47,6 +47,10 @@ export function FactsPageClient() {
 
       {facts && (
         <div className="space-y-6">
+          {facts.matchOutcomeGap && facts.matchOutcomeGap.matches.length > 0 && (
+            <MatchOutcomeGapPanel dataset={facts.matchOutcomeGap} />
+          )}
+
           <ParticipantPoolSection
             title={t("groupStagePool.title")}
             subtitle={t("groupStagePool.subtitle", {
@@ -73,10 +77,6 @@ export function FactsPageClient() {
             }
             mode={mode}
           />
-
-          {facts.matchOutcomeGap && facts.matchOutcomeGap.matches.length > 0 && (
-            <MatchOutcomeGapPanel dataset={facts.matchOutcomeGap} />
-          )}
 
           {facts.groupExpectedAnalysis && (
             <GroupExpectedFinishesPanel

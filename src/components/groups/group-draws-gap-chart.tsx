@@ -4,6 +4,8 @@ import type { GroupExpectedMatchEntry } from "@/lib/types";
 import { GapDistributionChart } from "@/components/facts/gap-distribution-chart";
 import { formatFifaPoints } from "@/lib/format";
 import { CHART_COLORS } from "@/lib/chart-colors";
+import { groupMatchPointId } from "@/components/groups/group-gap-match-tooltip";
+import { useGroupGapMatchTooltip } from "@/hooks/use-group-gap-match-tooltip";
 import { useTranslations } from "next-intl";
 
 interface GroupDrawsGapChartProps {
@@ -18,9 +20,10 @@ export function GroupDrawsGapChart({
   stdDev,
 }: GroupDrawsGapChartProps) {
   const t = useTranslations("home.groupExpectedFinishes");
+  const renderPointTooltip = useGroupGapMatchTooltip(drawMatches, "draw");
 
   const points = drawMatches.map((entry) => ({
-    id: `${entry.groupLetter}-${entry.team1.id}-${entry.team2.id}-${entry.scoreLabel}`,
+    id: groupMatchPointId(entry),
     gapPoints: entry.gapPoints,
     dotClassName: "fill-wc-sky/85",
     showOutlierRing: entry.isDrawGapOutlier,
@@ -39,6 +42,7 @@ export function GroupDrawsGapChart({
       mean={mean}
       stdDev={stdDev}
       ariaLabel={t("drawGapChartCaption")}
+      renderPointTooltip={renderPointTooltip}
       legend={
         <>
           <span className="flex items-center gap-1.5">

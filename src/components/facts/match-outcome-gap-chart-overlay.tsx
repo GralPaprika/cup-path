@@ -94,14 +94,9 @@ export function MatchOutcomeGapChartOverlay({
     };
   }, [open, onClose]);
 
-  const handleBackdropClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      if (event.target === event.currentTarget) {
-        onClose();
-      }
-    },
-    [onClose],
-  );
+  const handleBackdropClick = useCallback(() => {
+    onClose();
+  }, [onClose]);
 
   if (!mounted || !open) return null;
 
@@ -109,11 +104,11 @@ export function MatchOutcomeGapChartOverlay({
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
       role="presentation"
-      onMouseDown={handleBackdropClick}
     >
       <div
         className="absolute inset-0 bg-black/65 backdrop-blur-sm"
         aria-hidden
+        onMouseDown={handleBackdropClick}
       />
 
       <div
@@ -122,9 +117,8 @@ export function MatchOutcomeGapChartOverlay({
         aria-modal="true"
         aria-labelledby="match-outcome-gap-overlay-title"
         className={cn(
-          "glass-panel relative z-[101] flex w-full max-w-[min(1280px,calc(100vw-2rem))] flex-col overflow-hidden",
+          "glass-panel relative z-[101] flex w-full max-w-[min(1440px,calc(100vw-2rem))] flex-col overflow-hidden",
         )}
-        onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-4 py-3 sm:px-5">
           <div className="min-w-0">
@@ -202,6 +196,7 @@ export function MatchOutcomeGapChartOverlay({
               interactiveDots
               hideBars
               hideLegend
+              hideFootnotes
               footnotes={footnotes}
               dotTransform={dotTransform}
               onDotTransformChange={setDotTransform}

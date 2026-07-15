@@ -13,6 +13,7 @@ import { useSearchParams } from "next/navigation";
 import { parseRankingMode } from "@/lib/data/ranking-modes";
 import type { RankingMode } from "@/lib/types";
 import {
+  readRankingModePreference,
   resolveRankingMode,
   writeRankingModePreference,
 } from "@/lib/client/ranking-mode-preference";
@@ -24,10 +25,16 @@ interface RankingModeContextValue {
 
 const RankingModeContext = createContext<RankingModeContextValue | null>(null);
 
-export function RankingModeProvider({ children }: { children: ReactNode }) {
+export function RankingModeProvider({
+  children,
+  initialMode = "live",
+}: {
+  children: ReactNode;
+  initialMode?: RankingMode;
+}) {
   const searchParams = useSearchParams();
   const [mode, setModeState] = useState<RankingMode>(() =>
-    resolveRankingMode(searchParams.get("mode")),
+    resolveRankingMode(searchParams.get("mode"), initialMode),
   );
 
   useEffect(() => {
@@ -39,6 +46,17 @@ export function RankingModeProvider({ children }: { children: ReactNode }) {
           writeRankingModePreference(resolved);
         }
         return resolved;
+      });
+      return;
+    }
+
+    // Recover localStorage preference after hydration when the cookie was absent.
+    const preferred = readRankingModePreference();
+    if (preferred) {
+      setModeState((current) => {
+        if (current === preferred) return current;
+        writeRankingModePreference(preferred);
+        return preferred;
       });
     }
   }, [searchParams]);

@@ -35,11 +35,12 @@ export function FactsPageSkeleton() {
       </header>
 
       <div className="space-y-6">
-        <ParticipantPoolSectionSkeleton />
-
-        <CollapsibleSectionSkeleton>
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-full max-w-md bg-white/10" />
+        <div className="glass-panel overflow-hidden">
+          <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
+            <Skeleton className="h-6 w-56 bg-white/10" />
+            <Skeleton className="mt-1 h-4 w-80 max-w-full bg-white/10" />
+          </div>
+          <div className="space-y-4 p-5 sm:p-6">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, index) => (
                 <Skeleton key={index} className="h-16 rounded-lg bg-white/10" />
@@ -47,7 +48,9 @@ export function FactsPageSkeleton() {
             </div>
             <Skeleton className="h-52 w-full rounded-xl bg-white/10" />
           </div>
-        </CollapsibleSectionSkeleton>
+        </div>
+
+        <ParticipantPoolSectionSkeleton />
 
         <CollapsibleSectionSkeleton>
           <div className="space-y-4">

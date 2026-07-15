@@ -27,7 +27,10 @@ export function writeRankingModePreference(mode: RankingMode): void {
   document.cookie = `${RANKING_MODE_COOKIE}=${mode};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
 }
 
-export function resolveRankingMode(urlMode: string | null): RankingMode {
+export function resolveRankingMode(
+  urlMode: string | null,
+  storedMode: RankingMode | null = null,
+): RankingMode {
   if (urlMode) return parseRankingMode(urlMode);
-  return readRankingModePreference() ?? "live";
+  return storedMode ?? "live";
 }

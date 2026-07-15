@@ -1,15 +1,27 @@
 "use client";
 
-import type { MatchOutcomeGapEntry } from "@/lib/types";
+import type { GroupMatchResult, Team } from "@/lib/types";
 import { TeamFlag } from "@/components/team/team-flag";
-import {
-  matchResultBadgeClass,
-} from "@/components/shared/match-result-label";
+import { matchResultBadgeClass } from "@/components/shared/match-result-label";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
+export interface GapMatchTooltipEntry {
+  team1: Team;
+  team2: Team;
+  team1FifaPoints: number | null;
+  team2FifaPoints: number | null;
+  gapPoints: number;
+  favoriteTeamId: string | null;
+  favoriteResult: GroupMatchResult;
+  isEqualRating: boolean;
+  scoreLabel: string;
+  isOutlier: boolean;
+  groupLetter: string | null;
+}
+
 interface MatchOutcomeGapMatchTooltipProps {
-  entry: MatchOutcomeGapEntry;
+  entry: GapMatchTooltipEntry;
   roundLabel: string;
   favoriteWinLabel: string;
   drawLabel: string;
@@ -28,7 +40,7 @@ const RESULT_BORDER_CLASS = {
 } as const;
 
 function resultLabel(
-  result: MatchOutcomeGapEntry["favoriteResult"],
+  result: GroupMatchResult,
   labels: {
     favoriteWinLabel: string;
     drawLabel: string;
@@ -46,7 +58,7 @@ function TeamRow({
   isFavorite,
   favoriteLabel,
 }: {
-  team: MatchOutcomeGapEntry["team1"];
+  team: Team;
   points: number | null;
   isFavorite: boolean;
   favoriteLabel: string;

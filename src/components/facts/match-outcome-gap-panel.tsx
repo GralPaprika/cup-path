@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { Maximize2 } from "lucide-react";
 import type { MatchOutcomeGapDataset, PathStage } from "@/lib/types";
-import { CollapsibleSection } from "@/components/shared/collapsible-section";
 import { PathStageFilters } from "@/components/path/path-stage-filters";
 import {
   computeOutcomeShares,
@@ -78,8 +77,12 @@ export function MatchOutcomeGapPanel({
   ) : null;
 
   return (
-    <CollapsibleSection title={t("title")} subtitle={t("subtitle")}>
-      <div className="space-y-5">
+    <section className="glass-panel overflow-hidden">
+      <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
+        <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
+      </div>
+      <div className="space-y-5 p-5 sm:p-6">
         {!hydrated ? null : filteredMatches.length === 0 ? (
           <>
             {stageFilters}
@@ -148,7 +151,7 @@ export function MatchOutcomeGapPanel({
           </>
         )}
       </div>
-    </CollapsibleSection>
+    </section>
   );
 }
 

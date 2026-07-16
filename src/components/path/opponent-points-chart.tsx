@@ -5,6 +5,7 @@ import type { NumericStats, Team } from "@/lib/types";
 import type { OpponentPointsObservation } from "@/lib/domain/path/path-opponent-stats";
 import { FifaPointsBarChart } from "@/components/path/fifa-points-bar-chart";
 import { formatFifaPoints } from "@/lib/format";
+import { CHART_COLORS } from "@/lib/chart-colors";
 
 interface OpponentPointsChartProps {
   observations: OpponentPointsObservation[];
@@ -47,6 +48,7 @@ export function OpponentPointsChart({
       })}
       selectedTeam={selectedTeam}
       selectedTeamPoints={selectedTeamPoints}
+      barColor={CHART_COLORS.opponentBar}
       selectedTeamLegend={
         selectedTeamPoints !== null
           ? `${selectedTeam.id} ${formatFifaPoints(selectedTeamPoints)}`

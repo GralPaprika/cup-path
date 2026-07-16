@@ -78,8 +78,8 @@ describe("computeFilteredAverages", () => {
     assert.equal(result.avgOpponentRank, 5);
   });
 
-  it("maps third-place match to the final stage bucket", () => {
-    assert.equal(getMatchStage("Match for third place"), "final");
+  it("excludes the third-place match from path stages", () => {
+    assert.equal(getMatchStage("Match for third place"), null);
   });
 });
 

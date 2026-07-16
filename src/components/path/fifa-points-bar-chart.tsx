@@ -33,6 +33,7 @@ interface FifaPointsBarChartProps {
   selectedTeam?: Pick<Team, "id" | "flagUrl" | "displayName"> | null;
   selectedTeamPoints?: number | null;
   selectedTeamLegend?: string | null;
+  barColor?: string;
   className?: string;
 }
 
@@ -52,6 +53,7 @@ export function FifaPointsBarChart({
   selectedTeam = null,
   selectedTeamPoints = null,
   selectedTeamLegend = null,
+  barColor = CHART_COLORS.bar,
   className = "mt-4",
 }: FifaPointsBarChartProps) {
   if (
@@ -181,7 +183,7 @@ export function FifaPointsBarChart({
                   fill={
                     isSelectedTeam
                       ? CHART_COLORS.selectedTeam
-                      : CHART_COLORS.bar
+                      : barColor
                   }
                   fillOpacity={0.82}
                 >

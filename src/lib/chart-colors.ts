@@ -8,8 +8,10 @@ export const CHART_COLORS = {
   comparisonTeam: "var(--color-wc-purple)",
   /** Comparison team average rivals reference. */
   comparisonAvg: "var(--color-wc-orchid)",
-  /** Default bar fill for opponent observations (selected team's path — same as Compare Team A). */
+  /** Default bar fill for general FIFA-points observations. */
   bar: "var(--color-wc-sky)",
+  /** Opponent bars on a selected team's path, dimmed by chart fill opacity. */
+  opponentBar: "var(--color-wc-orange)",
   /** Standard deviation band around a mean (neutral lavender). */
   stdDevBand: "var(--color-wc-lavender)",
   /** Tournament weakest-group benchmark. */

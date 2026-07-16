@@ -56,7 +56,6 @@ export function getMatchStage(round: string): PathStage | null {
   if (round === "Quarter-final") return "qf";
   if (round === "Semi-final") return "sf";
   if (round === "Final") return "final";
-  if (round === "Match for third place") return "final";
   return null;
 }
 

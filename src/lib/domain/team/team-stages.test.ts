@@ -52,6 +52,41 @@ describe("getTeamMaxStageReached", () => {
 
     assert.equal(getTeamMaxStageReached(ctx, "MEX"), "r16");
   });
+
+  it("treats semi-final losers as eliminated before the final", () => {
+    const ctx = createTestContext([
+      {
+        team1: "Mexico",
+        team2: "Czechia",
+        round: "Semi-final",
+        date: "2026-07-14",
+        num: 101,
+        score: { ft: [2, 0] },
+      },
+      {
+        team1: "Canada",
+        team2: "Switzerland",
+        round: "Semi-final",
+        date: "2026-07-15",
+        num: 102,
+        score: { ft: [1, 0] },
+      },
+      scheduledMatch("Czechia", "Switzerland", "Match for third place", {
+        num: 103,
+        date: "2026-07-18",
+      }),
+      scheduledMatch("Mexico", "Canada", "Final", {
+        num: 104,
+        date: "2026-07-19",
+      }),
+    ]);
+
+    assert.equal(getTeamMaxStageReached(ctx, "MEX"), "final");
+    assert.equal(getTeamMaxStageReached(ctx, "CAN"), "final");
+    assert.equal(getTeamMaxStageReached(ctx, "CZE"), "sf");
+    assert.equal(getTeamMaxStageReached(ctx, "SUI"), "sf");
+    assert.deepEqual([...getTeamsAtStage(ctx, "final")].sort(), ["CAN", "MEX"]);
+  });
 });
 
 describe("getCompareMaxStageReached", () => {

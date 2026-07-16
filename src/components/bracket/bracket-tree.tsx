@@ -10,6 +10,7 @@ import {
   getBracketGridRows,
   getMatchLayout,
 } from "@/components/bracket/bracket-tree-layout";
+import { isThirdPlaceMatch } from "@/lib/domain/match/match-stages";
 import { cn } from "@/lib/utils";
 
 interface BracketTreeProps {
@@ -33,6 +34,7 @@ function BracketSide({
   isWinner,
   isFocus,
   compact,
+  selectable,
   onClick,
 }: {
   side: ResolvedBracketMatch["home"];
@@ -40,6 +42,7 @@ function BracketSide({
   isWinner: boolean;
   isFocus: boolean;
   compact?: boolean;
+  selectable: boolean;
   onClick: () => void;
 }) {
   const teamNames = useTranslations("teams");
@@ -47,19 +50,20 @@ function BracketSide({
     ? teams.find((entry) => entry.id === side.teamId)
     : null;
   const name = team ? getTeamDisplayName(teamNames, team) : null;
+  const canSelect = selectable && Boolean(side.teamId);
 
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={!side.teamId}
+      disabled={!canSelect}
       className={cn(
         "flex w-full items-center gap-1.5 rounded border px-1.5 py-1 text-left transition-colors",
         compact ? "text-[10px]" : "text-xs",
-        side.teamId && "hover:border-wc-sky/40 hover:bg-white/5",
+        canSelect && "hover:border-wc-sky/40 hover:bg-white/5",
         isWinner && "border-wc-sky/40 bg-wc-sky/10",
         isFocus && "ring-1 ring-wc-orange/60",
-        !side.teamId && "cursor-default opacity-50",
+        !canSelect && "cursor-default opacity-50",
       )}
     >
       <span className="shrink-0 font-mono text-[9px] font-semibold text-wc-orange">
@@ -102,7 +106,8 @@ function BracketMatchCard({
   const stages = useTranslations("compare.stages");
   const involvesFocus = focusTeamMatchNums.includes(match.num);
   const isCenter = match.num === 103 || match.num === 104;
-  const isThirdPlace = match.num === 103;
+  const isThirdPlace = isThirdPlaceMatch(match.round);
+  const canPickWinner = !isThirdPlace;
 
   return (
     <div
@@ -146,8 +151,11 @@ function BracketMatchCard({
           isWinner={selectedWinnerId === match.home.teamId}
           isFocus={focusTeamId === match.home.teamId}
           compact
+          selectable={canPickWinner}
           onClick={() =>
-            match.home.teamId && onSelectWinner(match.num, match.home.teamId)
+            canPickWinner &&
+            match.home.teamId &&
+            onSelectWinner(match.num, match.home.teamId)
           }
         />
         <BracketSide
@@ -156,8 +164,11 @@ function BracketMatchCard({
           isWinner={selectedWinnerId === match.away.teamId}
           isFocus={focusTeamId === match.away.teamId}
           compact
+          selectable={canPickWinner}
           onClick={() =>
-            match.away.teamId && onSelectWinner(match.num, match.away.teamId)
+            canPickWinner &&
+            match.away.teamId &&
+            onSelectWinner(match.num, match.away.teamId)
           }
         />
       </div>

@@ -12,6 +12,7 @@ import { getMatchWinner, isMatchPlayed } from "@/lib/data/worldcup-loader";
 import { computeGroupStandings } from "@/lib/domain/group/group-standings";
 import { getGroupNames } from "@/lib/domain/path/path-builder";
 import { buildStandingsByGroupFromFinishes } from "@/lib/domain/group/group-finishes";
+import { isThirdPlaceMatch } from "@/lib/domain/match/match-stages";
 
 export function formatSlotLabel(spec: BracketSlotSpec): string {
   if (spec.kind === "groupPosition" && spec.group && spec.position) {
@@ -307,6 +308,7 @@ export function computePendingWinnerMatchNums(
   return bracket
     .filter(
       (match) =>
+        !isThirdPlaceMatch(match.round) &&
         suppressMatchNums.has(match.num) &&
         match.isPlayed &&
         Boolean(match.home.teamId) &&

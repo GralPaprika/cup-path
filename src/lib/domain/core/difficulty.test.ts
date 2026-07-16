@@ -8,7 +8,7 @@ import {
   rankTeamInCohort,
 } from "@/lib/domain/path/path-ranking";
 import { computeMean, computeNumericStats } from "@/lib/domain/group/group-stats";
-import { getMatchStage } from "@/lib/domain/match/match-stages";
+import { getMatchStage, isThirdPlaceMatch } from "@/lib/domain/match/match-stages";
 
 function match(
   round: string,
@@ -80,6 +80,8 @@ describe("computeFilteredAverages", () => {
 
   it("excludes the third-place match from path stages", () => {
     assert.equal(getMatchStage("Match for third place"), null);
+    assert.equal(isThirdPlaceMatch("Match for third place"), true);
+    assert.equal(isThirdPlaceMatch("Final"), false);
   });
 });
 

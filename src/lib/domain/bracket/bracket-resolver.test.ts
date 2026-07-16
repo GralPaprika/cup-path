@@ -66,6 +66,7 @@ describe("computePendingWinnerMatchNums", () => {
     const bracket = [
       {
         num: 73,
+        round: "Round of 32",
         isPlayed: true,
         home: { teamId: "MEX" },
         away: { teamId: "CAN" },
@@ -77,6 +78,31 @@ describe("computePendingWinnerMatchNums", () => {
       {},
     );
     assert.deepEqual(pending, [73]);
+  });
+
+  it("skips the third-place consolation match", () => {
+    const bracket = [
+      {
+        num: 103,
+        round: "Match for third place",
+        isPlayed: true,
+        home: { teamId: "FRA" },
+        away: { teamId: "ENG" },
+      },
+      {
+        num: 104,
+        round: "Final",
+        isPlayed: true,
+        home: { teamId: "ESP" },
+        away: { teamId: "ARG" },
+      },
+    ] as ResolvedBracketMatch[];
+    const pending = computePendingWinnerMatchNums(
+      bracket,
+      new Set([103, 104]),
+      {},
+    );
+    assert.deepEqual(pending, [104]);
   });
 });
 

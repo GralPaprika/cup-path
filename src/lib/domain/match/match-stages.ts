@@ -59,6 +59,11 @@ export function getMatchStage(round: string): PathStage | null {
   return null;
 }
 
+/** Consolation match — shown in the bracket but ignored for path difficulty. */
+export function isThirdPlaceMatch(round: string): boolean {
+  return round === "Match for third place";
+}
+
 export function parsePathStages(value: string | null): Set<PathStage> {
   if (!value) return new Set(DEFAULT_PATH_STAGES);
 

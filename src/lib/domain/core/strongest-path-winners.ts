@@ -1,6 +1,7 @@
 import type { SimulationScenario } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
 import { resolveBracket } from "@/lib/domain/bracket/bracket-resolver";
+import { isThirdPlaceMatch } from "@/lib/domain/match/match-stages";
 
 export type StrongestWinnerScope = "all" | "simulated";
 
@@ -74,7 +75,7 @@ export function buildStrongestKnockoutWinners(
     );
 
     for (const match of bracket) {
-      if (!match.isPlayed) continue;
+      if (!match.isPlayed || isThirdPlaceMatch(match.round)) continue;
 
       const homeId = match.home.teamId;
       const awayId = match.away.teamId;
@@ -117,7 +118,7 @@ export function buildStrongestKnockoutWinners(
   );
 
   for (const match of finalBracket) {
-    if (!match.isPlayed) continue;
+    if (!match.isPlayed || isThirdPlaceMatch(match.round)) continue;
 
     const homeId = match.home.teamId;
     const awayId = match.away.teamId;

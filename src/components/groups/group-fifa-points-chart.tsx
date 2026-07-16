@@ -80,30 +80,22 @@ export function GroupFifaPointsChart({
     ? buildGroupBenchmarkLines(pointsBenchmarks, t)
     : [];
 
-  if (stats.mean === null || stats.stdDev === null) {
+  if (stats.mean === null) {
     return null;
   }
-
-  const lowerDeviation = Math.max(0, stats.mean - stats.stdDev);
-  const upperDeviation = stats.mean + stats.stdDev;
 
   return (
     <FifaPointsBarChart
       observations={observations}
       stats={stats}
       title={t("fifaPointsChartTitle")}
-      standardDeviationBandLabel={t("standardDeviationBand")}
       meanLegendLabel={t("meanValue", {
         value: formatFifaPoints(stats.mean),
       })}
-      hintLabel={t("fifaPointsChartHint", {
-        lower: formatFifaPoints(lowerDeviation),
-        upper: formatFifaPoints(upperDeviation),
-      })}
+      hintLabel={t("fifaPointsChartHint")}
       ariaLabel={t("fifaPointsChartAria", {
         group: group.groupLetter,
         mean: formatFifaPoints(stats.mean),
-        deviation: formatFifaPoints(stats.stdDev),
       })}
       referenceLines={referenceLines}
       selectedTeam={selectedEntry?.team ?? null}

@@ -25,7 +25,8 @@ interface FifaPointsBarChartProps {
   observations: FifaPointsObservation[];
   stats: NumericStats;
   title: string;
-  standardDeviationBandLabel: string;
+  /** When set with a valid stdDev, draws the mean ± 1 SD band and legend entry. */
+  standardDeviationBandLabel?: string;
   meanLegendLabel: string;
   hintLabel: string;
   ariaLabel: string;
@@ -56,22 +57,31 @@ export function FifaPointsBarChart({
   barColor = CHART_COLORS.bar,
   className = "mt-4",
 }: FifaPointsBarChartProps) {
-  if (
-    observations.length === 0 ||
-    stats.mean === null ||
-    stats.stdDev === null
-  ) {
+  const showStdDevBand =
+    Boolean(standardDeviationBandLabel) && stats.stdDev !== null;
+
+  if (observations.length === 0 || stats.mean === null) {
+    return null;
+  }
+
+  if (standardDeviationBandLabel && stats.stdDev === null) {
     return null;
   }
 
   const chartWidth = WIDTH - MARGIN.left - MARGIN.right;
   const chartHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
-  const upperDeviation = stats.mean + stats.stdDev;
-  const lowerDeviation = Math.max(0, stats.mean - stats.stdDev);
+  const upperDeviation =
+    showStdDevBand && stats.stdDev !== null
+      ? stats.mean + stats.stdDev
+      : null;
+  const lowerDeviation =
+    showStdDevBand && stats.stdDev !== null
+      ? Math.max(0, stats.mean - stats.stdDev)
+      : null;
   const observedMax = Math.max(...observations.map(({ points }) => points));
   const scaleMax = Math.max(
     observedMax,
-    upperDeviation,
+    upperDeviation ?? 0,
     selectedTeamPoints ?? 0,
     ...referenceLines.map((line) => line.value),
   );
@@ -92,10 +102,12 @@ export function FifaPointsBarChart({
       <figcaption className="mb-2 flex flex-wrap items-center justify-between gap-2 px-1">
         <span className="text-sm font-semibold text-white">{title}</span>
         <span className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-lavender/25" />
-            {standardDeviationBandLabel}
-          </span>
+          {showStdDevBand && standardDeviationBandLabel && (
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-lavender/25" />
+              {standardDeviationBandLabel}
+            </span>
+          )}
           <span className="flex items-center gap-1.5">
             <span className="inline-block w-5 border-t border-dashed border-wc-orange" />
             {meanLegendLabel}
@@ -135,14 +147,16 @@ export function FifaPointsBarChart({
           role="img"
           aria-label={ariaLabel}
         >
-          <rect
-            x={MARGIN.left}
-            y={y(upperDeviation)}
-            width={chartWidth}
-            height={y(lowerDeviation) - y(upperDeviation)}
-            fill={CHART_COLORS.stdDevBand}
-            fillOpacity={0.18}
-          />
+          {upperDeviation !== null && lowerDeviation !== null && (
+            <rect
+              x={MARGIN.left}
+              y={y(upperDeviation)}
+              width={chartWidth}
+              height={y(lowerDeviation) - y(upperDeviation)}
+              fill={CHART_COLORS.stdDevBand}
+              fillOpacity={0.18}
+            />
+          )}
 
           {ticks.map((tick) => (
             <g key={tick}>

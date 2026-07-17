@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ComparisonEntry, PathStage, Team } from "@/lib/types";
 import {
@@ -68,22 +68,30 @@ export function ComparePageClient() {
   const bothTeamsSelected =
     Boolean(teamAId) && Boolean(teamBId) && teamAId !== teamBId;
 
-  const comparisonParams = new URLSearchParams({
-    mode,
-    stages: serializePathStages(stages),
-    teamRound,
-  });
-  if (teamAId) comparisonParams.set("team", teamAId);
-  if (bothTeamsSelected) comparisonParams.set("vs", teamBId);
+  const comparisonBody = useMemo(
+    () => ({
+      mode,
+      stages: serializePathStages(stages),
+      teamRound,
+      team: teamAId || undefined,
+      vs: bothTeamsSelected ? teamBId : undefined,
+    }),
+    [mode, stages, teamRound, teamAId, teamBId, bothTeamsSelected],
+  );
 
   const {
     data: rawComparison,
     loading,
     error,
   } = useApiQuery<ComparisonAnalysisResult & { teamRound: PathStage }>(
-    `/api/comparison?${comparisonParams.toString()}`,
+    "/api/comparison",
     [mode, stages, teamRound, teamAId, teamBId, filtersHydrated],
-    { errorMessage: t("error"), enabled: filtersHydrated },
+    {
+      method: "POST",
+      body: comparisonBody,
+      errorMessage: t("error"),
+      enabled: filtersHydrated,
+    },
   );
 
   useEffect(() => {

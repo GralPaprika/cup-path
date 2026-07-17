@@ -149,18 +149,22 @@ export function TeamHeadToHeadPanel({
     let cancelled = false;
     setChartLoading(true);
 
-    const params = new URLSearchParams({
-      mode,
-      stages: serializePathStages(stages),
-    });
+    const requestAnalysis = (team: string) =>
+      fetch("/api/analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          team,
+          mode,
+          stages: serializePathStages(stages),
+        }),
+      }).then((res) =>
+        res.ok ? (res.json() as Promise<TeamAnalysisResult>) : null,
+      );
 
     Promise.all([
-      fetch(`/api/analysis?team=${teamAId}&${params.toString()}`).then((res) =>
-        res.ok ? (res.json() as Promise<TeamAnalysisResult>) : null,
-      ),
-      fetch(`/api/analysis?team=${teamBId}&${params.toString()}`).then((res) =>
-        res.ok ? (res.json() as Promise<TeamAnalysisResult>) : null,
-      ),
+      requestAnalysis(teamAId),
+      requestAnalysis(teamBId),
     ])
       .then(([nextA, nextB]) => {
         if (cancelled) return;

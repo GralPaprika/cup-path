@@ -178,8 +178,8 @@ Legacy URL params `yearStart` and `tournamentStart` map to `january` and `june11
 |---|---|
 | `GET /api/teams?mode=live` | World Cup teams with flags |
 | `GET /api/facts?mode=live` | Tournament snapshot, stage cohorts, highlights |
-| `GET /api/analysis?team=ENG&mode=live&stages=...` | Full path analysis for one team |
-| `GET /api/comparison?mode=live&stages=...&teamRound=...` | All-team difficulty leaderboard + team counts by stage |
+| `POST /api/analysis` | Full path analysis (body: `{ team, mode, stages }`) |
+| `POST /api/comparison` | All-team difficulty leaderboard + team counts (body: `{ mode, stages, teamRound, team?, vs? }`) |
 | `GET /api/groups?mode=live` | Group cards, strength ordering, points benchmarks |
 | `POST /api/simulation` | Simulation state (body: `{ mode, team, compareTeam?, scenario }`) |
 | `POST /api/simulation/strongest-winners` | Pick strongest winners for bracket |

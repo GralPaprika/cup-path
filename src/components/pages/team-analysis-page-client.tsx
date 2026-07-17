@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { PathStage, Team } from "@/lib/types";
 import {
@@ -48,19 +48,27 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
   );
   const teamList = teamsData?.teams ?? teams;
 
-  const analysisParams = new URLSearchParams({
-    team: teamId,
-    mode,
-    stages: serializePathStages(stages),
-  });
+  const analysisBody = useMemo(
+    () => ({
+      team: teamId,
+      mode,
+      stages: serializePathStages(stages),
+    }),
+    [teamId, mode, stages],
+  );
   const {
     data: rawData,
     loading,
     error,
   } = useApiQuery<TeamAnalysisResult>(
-    `/api/analysis?${analysisParams.toString()}`,
+    "/api/analysis",
     [teamId, mode, stages, stagesHydrated],
-    { errorMessage: t("error"), enabled: stagesHydrated },
+    {
+      method: "POST",
+      body: analysisBody,
+      errorMessage: t("error"),
+      enabled: stagesHydrated,
+    },
   );
 
   useEffect(() => {

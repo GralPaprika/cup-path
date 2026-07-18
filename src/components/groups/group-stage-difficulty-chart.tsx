@@ -20,9 +20,11 @@ export function GroupStageDifficultyChart({
   const { entries } = strip;
   if (entries.length === 0) return null;
 
+  const meanPoints = strip.meanAvgOpponentPoints;
+
   const referenceLines = [
     {
-      value: strip.meanAvgOpponentPoints,
+      value: meanPoints,
       stroke: CHART_COLORS.mean,
       dash: "4 4",
       label: t("groupDifficultyLegendMean"),
@@ -45,6 +47,21 @@ export function GroupStageDifficultyChart({
   ].filter(
     (line): line is typeof line & { value: number } => line.value !== null,
   );
+
+  // Same tournament-average value on both axes so the cross reads as
+  // one shared reference, not two different averages.
+  const verticalReferenceLines =
+    meanPoints === null
+      ? []
+      : [
+          {
+            value: meanPoints,
+            stroke: CHART_COLORS.mean,
+            dash: "4 4",
+            label: t("groupDifficultyLegendMean"),
+            className: "text-wc-orange",
+          },
+        ];
 
   const points = entries.map((entry) => ({
     id: entry.team.id,
@@ -82,6 +99,7 @@ export function GroupStageDifficultyChart({
       <OpponentDifficultyScatterChart
         points={points}
         referenceLines={referenceLines}
+        verticalReferenceLines={verticalReferenceLines}
         ariaLabel={t("groupDifficultyCaption")}
         xAxisLabel={t("groupDifficultyAxisTeamPoints")}
         yAxisLabel={t("groupDifficultyAxisRivalDifficulty")}
@@ -113,13 +131,32 @@ export function GroupStageDifficultyChart({
                 key={line.label}
                 className={`flex items-center gap-1.5 ${line.className}`}
               >
-                <span
-                  className="inline-block w-5 border-t"
-                  style={{
-                    borderColor: line.stroke,
-                    borderTopStyle: "dashed",
-                  }}
-                />
+                {line.value === meanPoints ? (
+                  <span className="relative inline-flex h-3 w-3 items-center justify-center">
+                    <span
+                      className="absolute h-3 border-l"
+                      style={{
+                        borderColor: line.stroke,
+                        borderLeftStyle: "dashed",
+                      }}
+                    />
+                    <span
+                      className="absolute w-3 border-t"
+                      style={{
+                        borderColor: line.stroke,
+                        borderTopStyle: "dashed",
+                      }}
+                    />
+                  </span>
+                ) : (
+                  <span
+                    className="inline-block w-5 border-t"
+                    style={{
+                      borderColor: line.stroke,
+                      borderTopStyle: "dashed",
+                    }}
+                  />
+                )}
                 {line.label}
               </span>
             ))}

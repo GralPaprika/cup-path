@@ -22,6 +22,13 @@ interface KnockoutStagePanelProps {
   mode: string;
 }
 
+/**
+ * Below this many ties a mean ± SD distribution is statistically
+ * meaningless (semi-finals and the final), so the gap chart is hidden
+ * and the fixtures table tells the story on its own.
+ */
+const MIN_TIES_FOR_GAP_CHART = 4;
+
 function AtGlanceStatTile({
   label,
   value,
@@ -151,12 +158,14 @@ export function KnockoutStagePanel({
 
           <KnockoutStageTable fixtures={analysis.fixtures} mode={mode} />
 
-          <KnockoutStageGapChart
-            fixtures={analysis.fixtures}
-            mean={analysis.meanGap}
-            stdDev={analysis.stdDevGap}
-            gapChartCaption={stage("gapChartCaption")}
-          />
+          {analysis.matchCount >= MIN_TIES_FOR_GAP_CHART && (
+            <KnockoutStageGapChart
+              fixtures={analysis.fixtures}
+              mean={analysis.meanGap}
+              stdDev={analysis.stdDevGap}
+              gapChartCaption={stage("gapChartCaption")}
+            />
+          )}
         </div>
 
         {analysis.opponentDifficulty && (

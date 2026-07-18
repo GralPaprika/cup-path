@@ -29,6 +29,7 @@ export interface OpponentDifficultyReferenceLine {
 export interface OpponentDifficultyScatterChartProps<TTooltip = unknown> {
   points: OpponentDifficultyScatterPoint<TTooltip>[];
   referenceLines: OpponentDifficultyReferenceLine[];
+  verticalReferenceLines?: OpponentDifficultyReferenceLine[];
   ariaLabel: string;
   legend: ReactNode;
   footnote: ReactNode;
@@ -95,6 +96,7 @@ function svgCoordsToScreen(
 export function OpponentDifficultyScatterChart<TTooltip>({
   points,
   referenceLines,
+  verticalReferenceLines = [],
   ariaLabel,
   legend,
   footnote,
@@ -135,7 +137,11 @@ export function OpponentDifficultyScatterChart<TTooltip>({
 
   if (points.length === 0) return null;
 
-  const xDomain = fifaPointsDomain(points.map((point) => point.teamFifaPoints));
+  const xValues = [
+    ...points.map((point) => point.teamFifaPoints),
+    ...verticalReferenceLines.map((line) => line.value),
+  ];
+  const xDomain = fifaPointsDomain(xValues);
   const yValues = [
     ...points.map((point) => point.rivalDifficultyPoints),
     ...referenceLines.map((line) => line.value),
@@ -234,12 +240,26 @@ export function OpponentDifficultyScatterChart<TTooltip>({
           ))}
 
           {referenceLines.map((line) => (
-            <g key={line.label}>
+            <g key={`h-${line.label}`}>
               <line
                 x1={baselineX}
                 x2={WIDTH - MARGIN.right}
                 y1={yScale(line.value)}
                 y2={yScale(line.value)}
+                stroke={line.stroke}
+                strokeWidth={1}
+                strokeDasharray={line.dash}
+              />
+            </g>
+          ))}
+
+          {verticalReferenceLines.map((line) => (
+            <g key={`v-${line.label}`}>
+              <line
+                x1={xScale(line.value)}
+                x2={xScale(line.value)}
+                y1={MARGIN.top}
+                y2={baselineY}
                 stroke={line.stroke}
                 strokeWidth={1}
                 strokeDasharray={line.dash}

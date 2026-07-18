@@ -297,6 +297,19 @@
   "home": {
     "title": "Tournament snapshot",
     "subtitle": "Interesting facts from the World Cup draw and results — average strength by round, path difficulty, upsets, and teams beating expectations.",
+    "sectionNav": {
+      "label": "Overview sections",
+      "overviewGroup": "Overview",
+      "knockoutGroup": "Knockout",
+      "snapshot": "Tournament snapshot",
+      "snapshotEmpty": "No played-match results are available for this snapshot yet.",
+      "groupRound": "Group round",
+      "roundOf32": "Round of 32",
+      "roundOf16": "Round of 16",
+      "quarterFinals": "Quarter-finals",
+      "semiFinals": "Semi-finals",
+      "final": "Final"
+    },
     "snapshot": {
       "avgFifaPoints": "Avg FIFA points (all teams)",
       "medianFifaRank": "Median FIFA rank",
@@ -630,6 +643,32 @@
       "opponentDifficultyCaption": "Quarter-final team strength vs opponent difficulty",
       "opponentDifficultyFootnote": "Each dot is one team. X = team FIFA points; Y = quarter-final opponent FIFA points. Green = victory; red = defeat.",
       "distributionSummary": "{count} ties · {qualified} qualified · mean {mean} · SD {stdDev} · min–max {min}–{max}"
+    },
+    "semiFinal": {
+      "title": "Semi-finals",
+      "subtitle": "FIFA strength and rival difficulty across the {count} teams in the semi-finals.",
+      "deepDiveTitle": "Semi-finals deep dive",
+      "poolLowestRankedQualifierHint": "Qualified for the final against {opponent}.",
+      "storyTitle": "Every semi-final tie",
+      "gapChartCaption": "FIFA points gap distribution for semi-final ties",
+      "opponentDifficultyTitle": "Semi-final rival difficulty",
+      "opponentDifficultySubtitle": "{count} teams · team FIFA points vs opponent difficulty",
+      "opponentDifficultyCaption": "Semi-final team strength vs opponent difficulty",
+      "opponentDifficultyFootnote": "Each dot is one team. X = team FIFA points; Y = semi-final opponent FIFA points. Green = victory; red = defeat.",
+      "distributionSummary": "{count} ties · {qualified} qualified · mean {mean} · SD {stdDev} · min–max {min}–{max}"
+    },
+    "final": {
+      "title": "Final",
+      "subtitle": "FIFA strength and rival difficulty across the {count} finalists.",
+      "deepDiveTitle": "Final deep dive",
+      "poolLowestRankedQualifierHint": "Won the World Cup against {opponent}.",
+      "storyTitle": "The World Cup final",
+      "gapChartCaption": "FIFA points gap for the final",
+      "opponentDifficultyTitle": "Final rival difficulty",
+      "opponentDifficultySubtitle": "{count} teams · team FIFA points vs opponent difficulty",
+      "opponentDifficultyCaption": "Finalist strength vs opponent difficulty",
+      "opponentDifficultyFootnote": "Each dot is one finalist. X = team FIFA points; Y = final opponent FIFA points. Green = victory; red = defeat.",
+      "distributionSummary": "{count} tie · {qualified} champion · mean {mean} · SD {stdDev} · min–max {min}–{max}"
     }
   },
   "simulate": {

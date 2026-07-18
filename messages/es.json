@@ -297,6 +297,19 @@
   "home": {
     "title": "Panorama del torneo",
     "subtitle": "Datos interesantes del sorteo y los resultados: fuerza promedio por fase, dificultad de camino, sorpresas y equipos que superan lo esperado.",
+    "sectionNav": {
+      "label": "Secciones del panorama",
+      "overviewGroup": "Panorama",
+      "knockoutGroup": "Eliminatorias",
+      "snapshot": "Panorama del torneo",
+      "snapshotEmpty": "Aún no hay resultados de partidos jugados para esta instantánea.",
+      "groupRound": "Fase de grupos",
+      "roundOf32": "Dieciseisavos",
+      "roundOf16": "Octavos",
+      "quarterFinals": "Cuartos de final",
+      "semiFinals": "Semifinales",
+      "final": "Final"
+    },
     "snapshot": {
       "avgFifaPoints": "Promedio pts. FIFA (todos)",
       "medianFifaRank": "Ranking FIFA promedio",
@@ -630,6 +643,32 @@
       "opponentDifficultyCaption": "Fuerza del equipo vs dificultad del rival en cuartos",
       "opponentDifficultyFootnote": "Cada punto es un equipo. X = puntos FIFA del equipo; Y = puntos FIFA del rival en cuartos. Verde = victoria; rojo = derrota.",
       "distributionSummary": "{count} cruces · {qualified} clasificados · prom. {mean} · DE {stdDev} · min–max {min}–{max}"
+    },
+    "semiFinal": {
+      "title": "Semifinales",
+      "subtitle": "Fuerza FIFA y dificultad de rivales entre los {count} equipos de semifinales.",
+      "deepDiveTitle": "Semifinales en detalle",
+      "poolLowestRankedQualifierHint": "Clasificó a la final ante {opponent}.",
+      "storyTitle": "Todos los cruces de semifinales",
+      "gapChartCaption": "Distribución de brecha FIFA en semifinales",
+      "opponentDifficultyTitle": "Dificultad del rival en semifinales",
+      "opponentDifficultySubtitle": "{count} equipos · puntos FIFA del equipo vs dificultad del rival",
+      "opponentDifficultyCaption": "Fuerza del equipo vs dificultad del rival en semifinales",
+      "opponentDifficultyFootnote": "Cada punto es un equipo. X = puntos FIFA del equipo; Y = puntos FIFA del rival en semifinales. Verde = victoria; rojo = derrota.",
+      "distributionSummary": "{count} cruces · {qualified} clasificados · prom. {mean} · DE {stdDev} · min–max {min}–{max}"
+    },
+    "final": {
+      "title": "Final",
+      "subtitle": "Fuerza FIFA y dificultad de rivales entre los {count} finalistas.",
+      "deepDiveTitle": "Final en detalle",
+      "poolLowestRankedQualifierHint": "Ganó la Copa del Mundo ante {opponent}.",
+      "storyTitle": "La final de la Copa del Mundo",
+      "gapChartCaption": "Brecha de puntos FIFA en la final",
+      "opponentDifficultyTitle": "Dificultad del rival en la final",
+      "opponentDifficultySubtitle": "{count} equipos · puntos FIFA del equipo vs dificultad del rival",
+      "opponentDifficultyCaption": "Fuerza de los finalistas vs dificultad del rival",
+      "opponentDifficultyFootnote": "Cada punto es un finalista. X = puntos FIFA del equipo; Y = puntos FIFA del rival en la final. Verde = victoria; rojo = derrota.",
+      "distributionSummary": "{count} cruce · {qualified} campeón · prom. {mean} · DE {stdDev} · min–max {min}–{max}"
     }
   },
   "simulate": {

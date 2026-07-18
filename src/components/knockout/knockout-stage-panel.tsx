@@ -1,7 +1,6 @@
 "use client";
 
 import type {
-  AvgPointsContext,
   KnockoutFactsRoundDefinition,
   KnockoutFixtureEntry,
   KnockoutStageAnalysis,
@@ -59,10 +58,16 @@ export function KnockoutStagePanel({
   const stage = useTranslations(homeFactsRoundNamespace(round.id));
 
   return (
-    <>
+    <div className="glass-panel space-y-6 p-5 sm:p-6">
+      <div>
+        <h2 className="text-lg font-semibold text-white">{stage("title")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {stage("subtitle", { count: analysis.participantCount })}
+        </p>
+      </div>
+
       <ParticipantPoolSection
-        title={stage("title")}
-        subtitle={stage("subtitle", { count: analysis.participantCount })}
+        embedded
         avgFifaPointsLabel={shared("poolAvgFifaPoints")}
         medianFifaRankLabel={shared("poolMedianFifaRank")}
         lowestRankedQualifierLabel={shared("poolLowestRankedQualifier")}
@@ -85,6 +90,7 @@ export function KnockoutStagePanel({
       />
 
       <CollapsibleSection
+        embedded
         title={stage("deepDiveTitle")}
         contentClassName="space-y-6"
       >
@@ -168,6 +174,6 @@ export function KnockoutStagePanel({
           </div>
         )}
       </CollapsibleSection>
-    </>
+    </div>
   );
 }

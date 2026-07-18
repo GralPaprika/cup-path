@@ -16,6 +16,8 @@ export const HOME_FACTS_ROUND_I18N_KEYS: Record<KnockoutFactsRoundId, string> =
     r32: "roundOf32",
     r16: "roundOf16",
     qf: "quarterFinal",
+    sf: "semiFinal",
+    final: "final",
   };
 
 export type HomeFactsRoundNamespace =

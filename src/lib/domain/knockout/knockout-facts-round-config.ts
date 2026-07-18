@@ -16,4 +16,14 @@ export const KNOCKOUT_FACTS_ROUNDS: KnockoutFactsRoundDefinition[] = [
     roundName: "Quarter-final",
     wideOpponentDifficultyBars: true,
   },
+  {
+    id: "sf",
+    roundName: "Semi-final",
+    wideOpponentDifficultyBars: true,
+  },
+  {
+    id: "final",
+    roundName: "Final",
+    wideOpponentDifficultyBars: true,
+  },
 ];

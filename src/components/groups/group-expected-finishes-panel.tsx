@@ -19,6 +19,8 @@ interface GroupExpectedFinishesPanelProps {
   analysis: GroupExpectedAnalysis;
   groupStageDifficulty: GroupStageDifficultyStrip | null;
   mode: string;
+  /** Renders as a nested sub-panel instead of a standalone glass panel. */
+  embedded?: boolean;
 }
 
 function AtGlanceStatTile({
@@ -52,6 +54,7 @@ export function GroupExpectedFinishesPanel({
   analysis,
   groupStageDifficulty,
   mode,
+  embedded = false,
 }: GroupExpectedFinishesPanelProps) {
   const t = useTranslations("home.groupExpectedFinishes");
 
@@ -63,7 +66,11 @@ export function GroupExpectedFinishesPanel({
     analysis.eliminatedUnderperformers.length > 0;
 
   return (
-    <CollapsibleSection title={t("title")} subtitle={t("subtitle")}>
+    <CollapsibleSection
+      embedded={embedded}
+      title={t("title")}
+      subtitle={t("subtitle")}
+    >
       <div className="space-y-4">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           {t("atGlanceTitle")}

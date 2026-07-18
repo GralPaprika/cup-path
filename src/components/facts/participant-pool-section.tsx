@@ -8,8 +8,8 @@ import { StatTile } from "@/components/facts/stat-tile";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 
 interface ParticipantPoolSectionProps {
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   avgFifaPointsLabel: string;
   medianFifaRankLabel: string;
   lowestRankedQualifierLabel: string;
@@ -23,6 +23,8 @@ interface ParticipantPoolSectionProps {
     hint: string;
   } | null;
   mode: string;
+  /** Renders only the stat tiles, for embedding inside a parent panel. */
+  embedded?: boolean;
 }
 
 export function ParticipantPoolSection({
@@ -36,13 +38,24 @@ export function ParticipantPoolSection({
   medianFifaRank,
   lowestRankedQualifier,
   mode,
+  embedded = false,
 }: ParticipantPoolSectionProps) {
   return (
-    <section className="glass-panel space-y-4 p-5 sm:p-6">
-      <div>
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
-      </div>
+    <section
+      className={
+        embedded ? "space-y-4" : "glass-panel space-y-4 p-5 sm:p-6"
+      }
+    >
+      {(title || subtitle) && (
+        <div>
+          {title && (
+            <h2 className="text-lg font-semibold text-white">{title}</h2>
+          )}
+          {subtitle && (
+            <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <StatTile

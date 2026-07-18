@@ -553,7 +553,7 @@ export interface KnockoutStageAnalysis {
   opponentDifficulty: KnockoutOpponentDifficultyStrip | null;
 }
 
-export type KnockoutFactsRoundId = "r32" | "r16" | "qf";
+export type KnockoutFactsRoundId = "r32" | "r16" | "qf" | "sf" | "final";
 
 export interface KnockoutFactsRoundDefinition {
   id: KnockoutFactsRoundId;

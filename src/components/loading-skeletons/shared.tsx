@@ -76,13 +76,23 @@ export function StatTileSkeleton({
   );
 }
 
-export function ParticipantPoolSectionSkeleton() {
+export function ParticipantPoolSectionSkeleton({
+  embedded = false,
+}: {
+  embedded?: boolean;
+} = {}) {
   return (
-    <section className="glass-panel space-y-4 p-5 sm:p-6">
-      <div>
-        <Skeleton className="h-6 w-48 bg-white/10" />
-        <Skeleton className="mt-1 h-4 w-72 max-w-full bg-white/10" />
-      </div>
+    <section
+      className={
+        embedded ? "space-y-4" : "glass-panel space-y-4 p-5 sm:p-6"
+      }
+    >
+      {!embedded && (
+        <div>
+          <Skeleton className="h-6 w-48 bg-white/10" />
+          <Skeleton className="mt-1 h-4 w-72 max-w-full bg-white/10" />
+        </div>
+      )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <StatTileSkeleton variant="simple" />
         <StatTileSkeleton />
@@ -94,19 +104,39 @@ export function ParticipantPoolSectionSkeleton() {
 
 export function CollapsibleSectionSkeleton({
   children,
+  embedded = false,
 }: {
   children: ReactNode;
+  embedded?: boolean;
 }) {
   return (
-    <div className="glass-panel overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-5 py-4">
+    <div
+      className={
+        embedded
+          ? "overflow-hidden rounded-xl border border-white/8 bg-white/[0.02]"
+          : "glass-panel overflow-hidden"
+      }
+    >
+      <div
+        className={
+          embedded
+            ? "flex items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-4 py-3"
+            : "flex items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-5 py-4"
+        }
+      >
         <div>
-          <Skeleton className="h-6 w-56 bg-white/10" />
+          <Skeleton
+            className={
+              embedded ? "h-5 w-48 bg-white/10" : "h-6 w-56 bg-white/10"
+            }
+          />
           <Skeleton className="mt-1 h-4 w-80 max-w-full bg-white/10" />
         </div>
         <Skeleton className="size-5 shrink-0 rounded bg-white/10" />
       </div>
-      <div className="space-y-6 p-5 sm:p-6">{children}</div>
+      <div className={embedded ? "space-y-6 p-4 sm:p-5" : "space-y-6 p-5 sm:p-6"}>
+        {children}
+      </div>
     </div>
   );
 }

@@ -1275,8 +1275,48 @@ export function computeOutcomeShares(matches: MatchOutcomeGapEntry[]) {
   };
 }
 
-export function computeCloseGapInsight(matches: MatchOutcomeGapEntry[]) {
-  const close = matches.filter((entry) => entry.gapPoints <= 100);
-  if (close.length < 3) return null;
-  return computeOutcomeShares(close);
+export interface GapStoryInsight {
+  closeCount: number;
+  closeUnderdogWins: number;
+  closeDraws: number;
+  closePointPct: number;
+  wideCount: number;
+  wideUnderdogWins: number;
+  wideDraws: number;
+}
+
+/** Underdog-framed close (0–100) vs wide (251+) gap story for the Overview callout. */
+export function computeGapStoryInsight(
+  matches: MatchOutcomeGapEntry[],
+): GapStoryInsight | null {
+  const close = matches.filter(
+    (entry) => gapBinForPoints(entry.gapPoints) === "0-100",
+  );
+  const wide = matches.filter(
+    (entry) => gapBinForPoints(entry.gapPoints) === "251+",
+  );
+  if (close.length < 3 || wide.length < 3) return null;
+
+  const closeUnderdogWins = close.filter(
+    (entry) => entry.favoriteResult === "L",
+  ).length;
+  const closeDraws = close.filter(
+    (entry) => entry.favoriteResult === "D",
+  ).length;
+  const wideUnderdogWins = wide.filter(
+    (entry) => entry.favoriteResult === "L",
+  ).length;
+  const wideDraws = wide.filter((entry) => entry.favoriteResult === "D").length;
+
+  return {
+    closeCount: close.length,
+    closeUnderdogWins,
+    closeDraws,
+    closePointPct: Math.round(
+      ((closeUnderdogWins + closeDraws) / close.length) * 100,
+    ),
+    wideCount: wide.length,
+    wideUnderdogWins,
+    wideDraws,
+  };
 }

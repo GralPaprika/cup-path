@@ -356,7 +356,7 @@
       "bin0to100": "0–100",
       "bin101to250": "101–250",
       "bin251plus": "251+",
-      "closeGapInsight": "Dentro de 100 puntos FIFA ({count} partidos): {winPct}% victorias favorito, {drawPct}% empates, {lossPct}% sorpresas.",
+      "gapStoryInsight": "Cuando dos equipos con una diferencia de 100 puntos FIFA o menos ({closeCount} partidos) se enfrentaron, el conjunto con menos puntos aún sacó victoria o empate más veces que no: {closeUnderdogWins} victorias y {closeDraws} empates ({closePointPct}%). Cuando la brecha era de 251 puntos o más ({wideCount} partidos), no hubo manera: {wideUnderdogWins} victorias del desfavorecido, y los empates fueron escasos ({wideDraws} de {wideCount}).",
       "chartAria": "Frecuencias apiladas y puntos por partido para {count} partidos según brecha de puntos FIFA.",
       "tooltipGap": "Brecha",
       "tooltipFavorite": "Fav",

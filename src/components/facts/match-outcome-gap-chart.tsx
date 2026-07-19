@@ -1276,7 +1276,7 @@ export function computeOutcomeShares(matches: MatchOutcomeGapEntry[]) {
 }
 
 export function computeCloseGapInsight(matches: MatchOutcomeGapEntry[]) {
-  const close = matches.filter((entry) => entry.gapPoints <= 25);
+  const close = matches.filter((entry) => entry.gapPoints <= 100);
   if (close.length < 3) return null;
   return computeOutcomeShares(close);
 }

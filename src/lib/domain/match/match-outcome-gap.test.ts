@@ -202,12 +202,10 @@ describe("buildMatchOutcomeGapDataset", () => {
 
 describe("gapBinForPoints", () => {
   it("maps gaps into fixed bins", () => {
-    assert.equal(gapBinForPoints(0), "0-25");
-    assert.equal(gapBinForPoints(25), "0-25");
-    assert.equal(gapBinForPoints(26), "26-50");
-    assert.equal(gapBinForPoints(50), "26-50");
-    assert.equal(gapBinForPoints(51), "51-100");
-    assert.equal(gapBinForPoints(100), "51-100");
+    assert.equal(gapBinForPoints(0), "0-100");
+    assert.equal(gapBinForPoints(25), "0-100");
+    assert.equal(gapBinForPoints(50), "0-100");
+    assert.equal(gapBinForPoints(100), "0-100");
     assert.equal(gapBinForPoints(101), "101-250");
     assert.equal(gapBinForPoints(120), "101-250");
     assert.equal(gapBinForPoints(250), "101-250");
@@ -216,9 +214,9 @@ describe("gapBinForPoints", () => {
   });
 
   it("maps fractional FIFA gaps into the correct bin", () => {
-    assert.equal(gapBinForPoints(100.38), "51-100");
-    assert.equal(gapBinForPoints(50.5), "26-50");
-    assert.equal(gapBinForPoints(100.99), "51-100");
+    assert.equal(gapBinForPoints(50.5), "0-100");
+    assert.equal(gapBinForPoints(100.38), "0-100");
+    assert.equal(gapBinForPoints(100.99), "0-100");
     assert.equal(gapBinForPoints(101), "101-250");
     assert.equal(gapBinForPoints(250.99), "101-250");
     assert.equal(gapBinForPoints(251), "251+");

@@ -237,9 +237,7 @@ export function buildMatchOutcomeGapDataset(
 }
 
 export const MATCH_OUTCOME_GAP_BINS = [
-  { id: "0-25", min: 0, max: 25 },
-  { id: "26-50", min: 26, max: 50 },
-  { id: "51-100", min: 51, max: 100 },
+  { id: "0-100", min: 0, max: 100 },
   { id: "101-250", min: 101, max: 250 },
   { id: "251+", min: 251, max: Number.POSITIVE_INFINITY },
 ] as const;

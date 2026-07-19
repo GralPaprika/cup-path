@@ -61,9 +61,7 @@ export function useMatchOutcomeGapBinLabels(): Record<
 
   return useMemo(
     () => ({
-      "0-25": t("bin0to25"),
-      "26-50": t("bin26to50"),
-      "51-100": t("bin51to100"),
+      "0-100": t("bin0to100"),
       "101-250": t("bin101to250"),
       "251+": t("bin251plus"),
     }),

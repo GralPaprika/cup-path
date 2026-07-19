@@ -1,9 +1,21 @@
 import { getTranslations } from "next-intl/server";
 
+const FIFA_RANKING_METHODOLOGY_URL =
+  "https://digitalhub.fifa.com/m/f99da4f73212220/original/edbm045h0udbwkqew35a-pdf.pdf";
+
 export default async function AboutPage() {
   const t = await getTranslations("about");
 
   const sections = [
+    { title: t("whyTitle"), body: t("whyBody") },
+    {
+      title: t("metricTitle"),
+      body: t("metricBody"),
+      source: {
+        href: FIFA_RANKING_METHODOLOGY_URL,
+        label: t("metricSource"),
+      },
+    },
     { title: t("methodologyTitle"), body: t("methodologyBody") },
     { title: t("pointsVsRankTitle"), body: t("pointsVsRankBody") },
     { title: t("comparisonTitle"), body: t("comparisonBody") },
@@ -35,6 +47,18 @@ export default async function AboutPage() {
             {section.body.split("\n\n").map((paragraph, index) => (
               <p key={index}>{paragraph}</p>
             ))}
+            {section.source && (
+              <p>
+                <a
+                  href={section.source.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-wc-sky hover:underline"
+                >
+                  {section.source.label}
+                </a>
+              </p>
+            )}
           </div>
         </section>
       ))}

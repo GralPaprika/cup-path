@@ -18,22 +18,19 @@ export function teamTierBadgeClass(tier: TeamTierId): string {
   return TIER_BADGE_CLASS[tier];
 }
 
-type TeamTierBadgeProps = {
+type TeamTierBadgeBase = {
   size?: "sm" | "md";
   className?: string;
-} & (
-  | { tier: TeamTierId; points?: never }
-  | { points: number; tier?: never }
-);
+};
 
-export function TeamTierBadge({
-  size = "md",
-  className,
-  ...props
-}: TeamTierBadgeProps) {
+type TeamTierBadgeProps =
+  | (TeamTierBadgeBase & { tier: TeamTierId })
+  | (TeamTierBadgeBase & { points: number });
+
+export function TeamTierBadge(props: TeamTierBadgeProps) {
+  const { size = "md", className } = props;
   const t = useTranslations("teamTiers");
-  const tier =
-    "points" in props ? classifyTeamTier(props.points) : props.tier;
+  const tier = "points" in props ? classifyTeamTier(props.points) : props.tier;
   const noteKey = `${tier}Note` as const;
   const note = t.has(noteKey) ? t(noteKey) : "";
 

@@ -1283,6 +1283,7 @@ export interface GapStoryInsight {
   wideCount: number;
   wideUnderdogWins: number;
   wideDraws: number;
+  [key: string]: number;
 }
 
 /** Underdog-framed close (0–100) vs wide (251+) gap story for the Overview callout. */

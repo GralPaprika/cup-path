@@ -1,7 +1,7 @@
 import type {
   RankingEntry,
   Team,
-  TeamTierDataset,
+  TeamTiersDataset,
   TeamTierId,
   TeamTierMember,
 } from "@/lib/types";

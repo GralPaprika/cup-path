@@ -27,7 +27,8 @@ const RUNTIME_DIR = path.join(process.cwd(), "data", "worldcup", "runtime");
 const LOCAL_SEED: WorldCupBundle = {
   fetchedAt: "1970-01-01T00:00:00.000Z",
   name: (bundledWorldcup as { name?: string }).name ?? "World Cup 2026",
-  matches: (bundledWorldcup as { matches: WorldCupBundle["matches"] }).matches,
+  matches: (bundledWorldcup as unknown as { matches: WorldCupBundle["matches"] })
+    .matches,
   teams: bundledTeams as WorldCupBundle["teams"],
   groups: bundledGroups as WorldCupBundle["groups"],
 };

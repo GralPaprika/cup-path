@@ -155,13 +155,13 @@ export function MatchOutcomeGapPanel({
               />
             </div>
 
+            {chartProps.footnotes}
+
             {gapStory && (
-              <p className="text-sm leading-6 text-muted-foreground">
+              <p className="text-base leading-7 text-muted-foreground">
                 {t("gapStoryInsight", gapStory)}
               </p>
             )}
-
-            {chartProps.footnotes}
           </>
         )}
       </div>

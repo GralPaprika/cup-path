@@ -54,6 +54,7 @@ export function FactsSectionNav({
     {
       heading: t("sectionNav.overviewGroup"),
       items: [
+        { id: "introduction", label: t("sectionNav.introduction") },
         { id: "tournament-snapshot", label: t("sectionNav.snapshot") },
         { id: "group-round", label: t("sectionNav.groupRound") },
       ],

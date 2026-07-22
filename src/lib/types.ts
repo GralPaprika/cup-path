@@ -599,10 +599,28 @@ export interface MatchOutcomeGapDataset {
   upsetGapStdDev: number | null;
 }
 
+export type TeamTierId =
+  | "titleFavorites"
+  | "contenders"
+  | "darkHorses"
+  | "outsiders"
+  | "makeweights";
+
+export interface TeamTierMember {
+  team: Team;
+  fifaRank: number;
+  fifaPoints: number;
+}
+
+export interface TeamTiersDataset {
+  tiers: Record<TeamTierId, TeamTierMember[]>;
+}
+
 export interface TournamentFacts {
   snapshot: TournamentSnapshot;
   groupStagePool: GroupStagePoolFact;
   highlights: TournamentHighlights;
+  teamTiers: TeamTiersDataset;
   groupExpectedAnalysis: GroupExpectedAnalysis | null;
   groupStageDifficulty: GroupStageDifficultyStrip | null;
   knockoutAnalyses: Partial<Record<KnockoutFactsRoundId, KnockoutStageAnalysis>>;

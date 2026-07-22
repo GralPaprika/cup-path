@@ -4,6 +4,7 @@ import Link from "next/link";
 import { GroupExpectedFinishesPanel } from "@/components/groups/group-expected-finishes-panel";
 import { KnockoutStagePanel } from "@/components/knockout/knockout-stage-panel";
 import { ParticipantPoolSection } from "@/components/facts/participant-pool-section";
+import { IntroductionSection } from "@/components/facts/introduction-section";
 import { MatchOutcomeGapPanel } from "@/components/facts/match-outcome-gap-panel";
 import {
   FactsSectionNav,
@@ -70,6 +71,13 @@ export function FactsPageClient() {
           />
 
           <div className="space-y-6">
+            <section
+              id="introduction"
+              className={`${SECTION_SCROLL_MT} glass-panel p-5 sm:p-6`}
+            >
+              <IntroductionSection teamTiers={facts.teamTiers} />
+            </section>
+
             <section id="tournament-snapshot" className={SECTION_SCROLL_MT}>
               {facts.matchOutcomeGap &&
               facts.matchOutcomeGap.matches.length > 0 ? (

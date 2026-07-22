@@ -14,6 +14,7 @@ import type {
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
 import { computeMean, computeNumericStats } from "@/lib/domain/group/group-stats";
 import { buildParticipantPoolStats } from "@/lib/domain/core/participant-pool";
+import { buildTeamTiersDataset } from "@/lib/domain/team/team-tiers";
 import { getAdvancingTeamIds } from "@/lib/domain/group/group-standings";
 import {
   PATH_STAGES,
@@ -343,5 +344,10 @@ export function buildTournamentFacts(
     groupOfDeath: buildGroupOfDeath(groupCards),
   };
 
-  return { snapshot, groupStagePool, highlights };
+  return {
+    snapshot,
+    groupStagePool,
+    highlights,
+    teamTiers: buildTeamTiersDataset(ctx, rankings),
+  };
 }

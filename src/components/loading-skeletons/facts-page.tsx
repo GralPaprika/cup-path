@@ -43,7 +43,7 @@ export function FactsPageSkeleton() {
           {Array.from({ length: 2 }).map((_, groupIndex) => (
             <div key={groupIndex} className="space-y-3">
               <Skeleton className="h-2.5 w-20 bg-white/10" />
-              {Array.from({ length: groupIndex === 0 ? 2 : 4 }).map(
+              {Array.from({ length: groupIndex === 0 ? 3 : 4 }).map(
                 (__, itemIndex) => (
                   <Skeleton
                     key={itemIndex}
@@ -56,6 +56,17 @@ export function FactsPageSkeleton() {
         </aside>
 
         <div className="space-y-6">
+          <div className="glass-panel space-y-4 p-5 sm:p-6">
+            <Skeleton className="h-6 w-40 bg-white/10" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full bg-white/10" />
+              <Skeleton className="h-4 w-[92%] bg-white/10" />
+              <Skeleton className="h-4 w-full bg-white/10" />
+              <Skeleton className="h-4 w-[80%] bg-white/10" />
+            </div>
+            <Skeleton className="h-40 w-full rounded-xl bg-white/10" />
+          </div>
+
           <div className="glass-panel overflow-hidden">
             <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
               <Skeleton className="h-6 w-56 bg-white/10" />

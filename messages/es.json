@@ -302,10 +302,34 @@
   "home": {
     "title": "Panorama del torneo",
     "subtitle": "Un amigo decía que a Argentina le habían dado el camino fácil hacia la final. CupPath hace esa pregunta para cada selección: con los puntos del ranking FIFA, ¿qué tan duro se ve cada camino sobre el papel? Explora la fuerza por fase, las sorpresas y quién tuvo los rivales más duros.",
+    "intro": {
+      "title": "Introducción",
+      "lead": "Antes que nada: si estás viendo esto, se viene un análisis algo matemático de lo que ocurrió en la Copa del Mundo 2026. Esta parte la traté de hacer lo mejor que pude, usando el ranking FIFA, que es la herramienta más objetiva que tengo para comparar los equipos.",
+      "terms": "Así que en lo siguiente voy a usar palabras como favorito, caballo negro, etc., que no son muy científicas, pero creo que es más fácil de entender que solo hablar de puntos FIFA y matemáticas. Pero para que todos estemos en la misma página, empecemos por definir lo que significa cada término:",
+      "tierCol": "Término",
+      "pointsCol": "Puntos FIFA",
+      "teamsCol": "Equipos",
+      "titleFavorites": "Favoritos",
+      "titleFavoritesPoints": "≥ 1800",
+      "titleFavoritesNote": "",
+      "contenders": "Contendientes",
+      "contendersPoints": "≥ 1700",
+      "contendersNote": "",
+      "darkHorses": "Caballo negro",
+      "darkHorsesPoints": "≥ 1580",
+      "darkHorsesNote": "¿Y si sí?",
+      "outsiders": "Luchadores",
+      "outsidersPoints": "≥ 1450",
+      "outsidersNote": "Está difícil",
+      "makeweights": "Sin pretensiones",
+      "makeweightsPoints": "< 1450",
+      "makeweightsNote": "Fuimos al Mundial 😁"
+    },
     "sectionNav": {
       "label": "Secciones del panorama",
       "overviewGroup": "Panorama",
       "knockoutGroup": "Eliminatorias",
+      "introduction": "Introducción",
       "snapshot": "Panorama del torneo",
       "snapshotEmpty": "Aún no hay resultados de partidos jugados para esta instantánea.",
       "groupRound": "Fase de grupos",
@@ -374,8 +398,8 @@
       "zoomOut": "Alejar",
       "resetZoom": "Restablecer zoom",
       "interactionHint": "Desplázate para acercar los puntos. Arrastra para mover.",
-      "footnote": "Desde la perspectiva del mejor clasificado. En fase de grupos solo cuenta el marcador al 90. En eliminatorias, victoria en prórroga cuenta como triunfo; partidos definidos en penales cuentan como empate.",
-      "outlierFootnote": "Los anillos atípicos marcan empates o sorpresas cuya brecha FIFA está en o por encima del promedio + 1 DE de esa fase — la misma idea que en el detalle de cada ronda. En rondas pequeñas ese umbral puede ser ruidoso."
+      "footnote": "Los colores indican la perspectiva del mejor clasificado. En fase de grupos solo cuenta el marcador al 90. En eliminatorias, victoria en prórroga cuenta como triunfo; partidos definidos en penales cuentan como empate.",
+      "outlierFootnote": "Los contornos naranjos marcan resultados inesperados cuya brecha FIFA está en o por encima del promedio + 1 DE de esa fase — la misma idea que en el detalle de cada ronda. En rondas pequeñas ese umbral puede ser ruidoso."
     },
     "highlights": {
       "title": "Destacados",

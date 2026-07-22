@@ -2,6 +2,7 @@
 
 import type { GroupMatchResult, Team } from "@/lib/types";
 import { TeamFlag } from "@/components/team/team-flag";
+import { TeamTierBadge } from "@/components/team/team-tier-badge";
 import { matchResultBadgeClass } from "@/components/shared/match-result-label";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -70,6 +71,7 @@ function TeamRow({
         <span className="font-mono text-sm font-semibold text-white">
           {team.id}
         </span>
+        {points !== null ? <TeamTierBadge points={points} size="sm" /> : null}
         {isFavorite ? (
           <span className="rounded-full border border-wc-orange/30 bg-wc-orange/10 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-wc-orange">
             {favoriteLabel}

@@ -33,6 +33,18 @@
     "searchPlaceholder": "Buscar por nombre o código FIFA…",
     "noResults": "Ningún equipo coincide con tu búsqueda"
   },
+  "teamTiers": {
+    "titleFavorites": "Favorito",
+    "titleFavoritesNote": "",
+    "contenders": "Contendiente",
+    "contendersNote": "",
+    "darkHorses": "Caballo negro",
+    "darkHorsesNote": "¿Y si sí?",
+    "outsiders": "Luchador",
+    "outsidersNote": "Está difícil",
+    "makeweights": "Sin pretensiones",
+    "makeweightsNote": "Fuimos al Mundial 😁"
+  },
   "pointsAnchor": {
     "harderThan": "Más duro que el {percent}% de equipos",
     "comparable": "{team} ({points})",

@@ -1,6 +1,7 @@
 "use client";
 
 import { TeamFlag } from "@/components/team/team-flag";
+import { TeamTierBadge } from "@/components/team/team-tier-badge";
 import { formatFifaPoints } from "@/lib/format";
 import type { TeamTierId, TeamTiersDataset } from "@/lib/types";
 import { useTranslations } from "next-intl";
@@ -58,9 +59,9 @@ export function IntroductionSection({
                   className="border-b border-white/6 last:border-b-0"
                 >
                   <td className="align-top px-4 py-3">
-                    <p className="font-medium text-white">{t(tier)}</p>
+                    <TeamTierBadge tier={tier} />
                     {note ? (
-                      <p className="mt-0.5 text-xs text-muted-foreground/70">
+                      <p className="mt-1.5 text-xs text-muted-foreground/70">
                         {note}
                       </p>
                     ) : null}

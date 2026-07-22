@@ -4,6 +4,7 @@ import type { MatchDifficulty, PathStage } from "@/lib/types";
 import { getMatchStage } from "@/lib/domain/match/match-stages";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team/team-flag";
+import { TeamTierBadge } from "@/components/team/team-tier-badge";
 import { Badge } from "@/components/ui/badge";
 import {
   matchResultBadgeClass,
@@ -114,7 +115,15 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
                     <div className="text-xs text-muted-foreground">{match.date}</div>
                   </TableCell>
                   <TableCell>
-                    <TeamLabel team={match.opponent} showCode flagSize="sm" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <TeamLabel team={match.opponent} showCode flagSize="sm" />
+                      {match.opponentPoints !== null ? (
+                        <TeamTierBadge
+                          points={match.opponentPoints}
+                          size="sm"
+                        />
+                      ) : null}
+                    </div>
                   </TableCell>
                   <TableCell className="text-right font-mono text-sm text-wc-orange">
                     {match.opponentPoints !== null

@@ -4,6 +4,7 @@ import type { AvgPointsContext, PathStage, TeamPathSummary } from "@/lib/types";
 import { getMatchStage, PATH_STAGES } from "@/lib/domain/match/match-stages";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team/team-flag";
+import { TeamTierBadge } from "@/components/team/team-tier-badge";
 import { DifficultyGauge } from "@/components/shared/difficulty-gauge";
 import {
   AvgPointsContextFootnote,
@@ -84,6 +85,8 @@ export function SummaryCard({
     hardestPathRankByAvgRank !== undefined &&
     hardestPathRankByAvgRank !== hardestPathRank;
 
+  const nextMatch = summary.matches.find((match) => match.isNext);
+
   return (
     <div className="glass-panel">
       <div className="border-b border-white/8 px-5 py-5 sm:px-6">
@@ -94,6 +97,9 @@ export function SummaryCard({
             flagSize="lg"
             nameClassName="text-xl font-bold text-white sm:text-2xl"
           />
+          {summary.teamPoints !== null ? (
+            <TeamTierBadge points={summary.teamPoints} />
+          ) : null}
           <Badge
             variant="outline"
             className="border-wc-sky/30 bg-wc-sky/10 text-wc-sky"
@@ -188,12 +194,17 @@ export function SummaryCard({
           </p>
           <div className="mt-2">
             {summary.nextOpponent ? (
-              <TeamLabel
-                team={summary.nextOpponent}
-                showCode
-                flagSize="md"
-                nameClassName="text-lg font-semibold text-white"
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <TeamLabel
+                  team={summary.nextOpponent}
+                  showCode
+                  flagSize="md"
+                  nameClassName="text-lg font-semibold text-white"
+                />
+                {nextMatch?.opponentPoints != null ? (
+                  <TeamTierBadge points={nextMatch.opponentPoints} size="sm" />
+                ) : null}
+              </div>
             ) : (
               <p className="text-2xl font-bold text-white/40">
                 {t("noNextOpponent")}

@@ -2,6 +2,7 @@
 
 import type { Team } from "@/lib/types";
 import { TeamFlag } from "@/components/team/team-flag";
+import { TeamTierBadge } from "@/components/team/team-tier-badge";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ function TeamPointsRow({
         <span className="font-mono text-sm font-semibold text-white">
           {team.id}
         </span>
+        <TeamTierBadge points={points} size="sm" />
       </div>
       <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
         {formatFifaPoints(points)}

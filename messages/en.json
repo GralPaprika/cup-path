@@ -33,6 +33,18 @@
     "searchPlaceholder": "Search by name or FIFA code…",
     "noResults": "No teams match your search"
   },
+  "teamTiers": {
+    "titleFavorites": "Title favorite",
+    "titleFavoritesNote": "",
+    "contenders": "Contender",
+    "contendersNote": "",
+    "darkHorses": "Dark horse",
+    "darkHorsesNote": "What if they pull it off?",
+    "outsiders": "Outsider",
+    "outsidersNote": "Uphill battle",
+    "makeweights": "Makeweight",
+    "makeweightsNote": "Just happy to be here 😁"
+  },
   "pointsAnchor": {
     "harderThan": "Harder than {percent}% of teams",
     "comparable": "{team} ({points})",

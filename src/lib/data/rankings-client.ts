@@ -113,7 +113,7 @@ export function normalizeApiResponse(
   }
 
   return {
-    mode: "live",
+    mode: "snapshot",
     fetchedAt: new Date().toISOString(),
     sourceDate: resolvedDate,
     entries,
@@ -177,18 +177,6 @@ async function resolveHistoricalRankingId(
   }
 
   return match;
-}
-
-export async function fetchLiveRankings(): Promise<RankingsSnapshot> {
-  const payload = await rapidApiFetch("/current-ranking.php?type=live");
-  const snapshot = normalizeApiResponse(
-    payload,
-    new Date().toISOString().slice(0, 10),
-  );
-  if (snapshot.entries.length === 0) {
-    throw new Error("Unable to fetch live rankings from RapidAPI");
-  }
-  return snapshot;
 }
 
 export async function fetchRankingsByDate(

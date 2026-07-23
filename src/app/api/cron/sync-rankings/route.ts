@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  syncLiveRankings,
-  syncSnapshotRankings,
-} from "@/lib/services/rankings-sync-service";
+import { syncSnapshotRankings } from "@/lib/services/rankings-sync-service";
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
@@ -12,21 +9,8 @@ function isAuthorized(request: NextRequest): boolean {
   return authHeader === `Bearer ${secret}`;
 }
 
-function syncAction(request: NextRequest): "live" | "snapshots" {
-  const action = request.nextUrl.searchParams.get("action");
-  if (action === "snapshots" || action === "seed-snapshots") {
-    return "snapshots";
-  }
-  return "live";
-}
-
-async function runSync(request: NextRequest) {
-  if (syncAction(request) === "snapshots") {
-    const result = await syncSnapshotRankings();
-    return NextResponse.json({ ok: true, ...result });
-  }
-
-  const result = await syncLiveRankings();
+async function runSync() {
+  const result = await syncSnapshotRankings();
   return NextResponse.json({ ok: true, ...result });
 }
 
@@ -36,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return await runSync(request);
+    return await runSync();
   } catch (error) {
     return NextResponse.json(
       {
@@ -54,7 +38,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    return await runSync(request);
+    return await runSync();
   } catch (error) {
     return NextResponse.json(
       {

@@ -4,7 +4,7 @@ import { TeamAnalysisPageClient } from "@/components/pages/team-analysis-page-cl
 import { PageShellSkeleton } from "@/components/loading-skeletons";
 
 export default async function TeamAnalysisPage() {
-  const teams = await getAllTeamsEnriched("live");
+  const teams = await getAllTeamsEnriched("july20");
 
   return (
     <Suspense fallback={<PageShellSkeleton />}>

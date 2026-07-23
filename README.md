@@ -2,7 +2,7 @@
 
 World Cup opponent difficulty analysis based on FIFA ranking points.
 
-Analyze each team's tournament path from the group stage through the final, compare average opponent difficulty across all 48 teams, and toggle between FIFA ranking snapshots or live rankings.
+Analyze each team's tournament path from the group stage through the final, compare average opponent difficulty across all 48 teams, and toggle between FIFA ranking snapshots.
 
 ## Features
 
@@ -22,7 +22,7 @@ Analyze each team's tournament path from the group stage through the final, comp
 - **Advanced statistics:** opponent points chart (mean ± 1 SD, selected-team line), distribution stats, Spearman/Kendall cohort agreement
 - **Summary context:** percentile vs all nations and closest anchor team
 - **Cohort `#` rank** among teams at the furthest included stage
-- **Five ranking modes:** pot-draw cutoff (19 Nov 2025), 19 Jan, 1 Apr, 11 Jun 2026 snapshots, plus live
+- **Five ranking modes:** pot-draw cutoff (19 Nov 2025), 19 Jan, 1 Apr, 11 Jun 2026, and post-tournament 20 Jul 2026 (default)
 - Ranking mode persists across Overview, Team path, Groups, Compare, and Simulate
 - FIFA flag images and localized team names (Spanish default, English available)
 - Responsive UI with next-intl (ES/EN)
@@ -54,7 +54,7 @@ npm run sync:rankings
 | `npm run build` | Sync worldcup data and build |
 | `npm run test` | Run domain unit tests (81 tests) |
 | `npm run sync:worldcup` | Fetch latest 2026 data from openfootball |
-| `npm run sync:rankings` | Fetch all ranking snapshots + live from RapidAPI into local runtime cache |
+| `npm run sync:rankings` | Fetch all FIFA ranking snapshots from RapidAPI into local runtime cache |
 | `npm run seed:rankings` | Upload ranking snapshots to Vercel Blob |
 | `npm run validate:teams` | Verify all 48 teams map to rankings |
 
@@ -98,9 +98,7 @@ RapidAPI rankings ──► Vercel Cron ──► Vercel Blob (rankings)
 | **Vercel cron (Hobby)** | Once daily at 12:00 UTC (`vercel.json`) | `GET /api/cron/sync-scheduled` |
 | **Manual** | Anytime | `POST /api/cron/sync-scheduled` with `Authorization: Bearer CRON_SECRET` |
 
-`vercel.json` defines one daily cron (Hobby limit: once per day). It syncs live rankings, snapshots, and match data. View or trigger it under **Settings → Cron Jobs** after production deploy.
-
-**Pro plan:** add more crons in `vercel.json` (e.g. hourly `/api/cron/sync-rankings`).
+`vercel.json` defines one daily cron (Hobby limit: once per day). It syncs ranking snapshots and match data. View or trigger it under **Settings → Cron Jobs** after production deploy.
 
 Bundled JSON in `data/` is the fallback when Blob is empty or unavailable.
 
@@ -140,19 +138,19 @@ Vercel Blob / bundled JSON
 
 | Mode | FIFA release date | Role | Refresh |
 |---|---|---|---|
-| `november19` | 19 November 2025 | Pot-draw cutoff (groups seeded from this ranking) | Daily (cron) |
-| `january` | 19 January 2026 | Early-year snapshot | Daily (cron) |
-| `april` | 1 April 2026 | Pre-tournament snapshot | Daily (cron) |
-| `june11` | 11 June 2026 | Tournament-start snapshot | Daily (cron) |
-| `live` | Current | Current FIFA ranking | Daily on Hobby; hourly on Pro if configured |
+| `july20` | 20 July 2026 | Post-tournament ranking (default) | Fixed snapshot |
+| `june11` | 11 June 2026 | Tournament-start snapshot | Fixed snapshot |
+| `april` | 1 April 2026 | Pre-tournament snapshot | Fixed snapshot |
+| `january` | 19 January 2026 | Early-year snapshot | Fixed snapshot |
+| `november19` | 19 November 2025 | Pot-draw cutoff (groups seeded from this ranking) | Fixed snapshot |
 
-Legacy URL params `yearStart` and `tournamentStart` map to `january` and `june11`.
+Legacy URL params `live`, `yearStart`, and `tournamentStart` map to `july20`, `january`, and `june11`.
 
 ## Project structure
 
 ```
 ├── data/
-│   ├── rankings/           # Seed ranking snapshots (live + 4 historical dates)
+│   ├── rankings/           # Seed ranking snapshots (fixed FIFA release dates)
 │   └── worldcup/2026/      # Synced openfootball match data
 ├── messages/
 │   ├── en.json, es.json    # UI strings
@@ -176,15 +174,15 @@ Legacy URL params `yearStart` and `tournamentStart` map to `january` and `june11
 
 | Route | Purpose |
 |---|---|
-| `GET /api/teams?mode=live` | World Cup teams with flags |
-| `GET /api/facts?mode=live` | Tournament snapshot, stage cohorts, highlights |
+| `GET /api/teams?mode=july20` | World Cup teams with flags |
+| `GET /api/facts?mode=july20` | Tournament snapshot, stage cohorts, highlights |
 | `POST /api/analysis` | Full path analysis (body: `{ team, mode, stages }`) |
 | `POST /api/comparison` | All-team difficulty leaderboard + team counts (body: `{ mode, stages, teamRound, team?, vs? }`) |
-| `GET /api/groups?mode=live` | Group cards, strength ordering, points benchmarks |
+| `GET /api/groups?mode=july20` | Group cards, strength ordering, points benchmarks |
 | `POST /api/simulation` | Simulation state (body: `{ mode, team, compareTeam?, scenario }`) |
 | `POST /api/simulation/strongest-winners` | Pick strongest winners for bracket |
 | `GET /api/cron/sync-scheduled` | Refresh all data in Blob (daily cron on Hobby) |
-| `GET /api/cron/sync-rankings` | Refresh live rankings only (manual, or Pro cron) |
+| `GET /api/cron/sync-rankings` | Refresh ranking snapshots only (manual) |
 | `GET /api/cron/sync-worldcup` | Refresh match data only (manual) |
 
 ### Notable response fields

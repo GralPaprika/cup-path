@@ -21,6 +21,7 @@ export default async function AboutPage() {
     { title: t("comparisonTitle"), body: t("comparisonBody") },
     { title: t("pointsGapTitle"), body: t("pointsGapBody") },
     { title: t("rankGapTitle"), body: t("rankGapBody") },
+    { title: t("overviewTitle"), body: t("overviewBody") },
     { title: t("advancedStatsTitle"), body: t("advancedStatsBody") },
     { title: t("headToHeadTitle"), body: t("headToHeadBody") },
     { title: t("groupsTitle"), body: t("groupsBody") },

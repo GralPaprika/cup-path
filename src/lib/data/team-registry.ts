@@ -120,7 +120,7 @@ export async function getAllTeamsEnriched(
   await ensureWorldCupData();
 
   const { getRankingsSnapshot } = await import("@/lib/data/rankings-store");
-  const snapshot = await getRankingsSnapshot(mode ?? "live");
+  const snapshot = await getRankingsSnapshot(mode ?? "july20");
   return enrichTeamsFromSnapshot(getAllTeams(), snapshot);
 }
 

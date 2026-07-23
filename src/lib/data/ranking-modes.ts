@@ -1,7 +1,7 @@
 import type { RankingMode } from "@/lib/types";
 
 export const RANKING_MODES: RankingMode[] = [
-  "live",
+  "july20",
   "june11",
   "april",
   "january",
@@ -9,6 +9,7 @@ export const RANKING_MODES: RankingMode[] = [
 ];
 
 export const SNAPSHOT_MODES = [
+  "july20",
   "june11",
   "april",
   "january",
@@ -18,6 +19,7 @@ export const SNAPSHOT_MODES = [
 export type SnapshotMode = (typeof SNAPSHOT_MODES)[number];
 
 export const SNAPSHOT_DATES: Record<SnapshotMode, string> = {
+  july20: "2026-07-20",
   january: "2026-01-19",
   april: "2026-04-01",
   june11: "2026-06-11",
@@ -25,6 +27,7 @@ export const SNAPSHOT_DATES: Record<SnapshotMode, string> = {
 };
 
 const LEGACY_MODES: Record<string, RankingMode> = {
+  live: "july20",
   yearStart: "january",
   tournamentStart: "june11",
 };
@@ -36,9 +39,9 @@ export function parseRankingMode(value: string | null): RankingMode {
   if (value && RANKING_MODES.includes(value as RankingMode)) {
     return value as RankingMode;
   }
-  return "live";
+  return "july20";
 }
 
 export function isSnapshotMode(mode: RankingMode): mode is SnapshotMode {
-  return mode !== "live";
+  return SNAPSHOT_MODES.includes(mode as SnapshotMode);
 }

@@ -1,32 +1,11 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from "node:fs";
 import path from "node:path";
-import type { RankingMode, RankingsSnapshot } from "../src/lib/types";
+import { fetchRankingsByDate } from "../src/lib/data/rankings-client";
 import {
   SNAPSHOT_DATES,
   SNAPSHOT_MODES,
-  type SnapshotMode,
 } from "../src/lib/data/ranking-modes";
-import {
-  fetchLiveRankings,
-  fetchSnapshotRankings,
-} from "../src/lib/data/rankings-client";
-import {
-  saveRankingsSnapshot,
-  writeRuntimeSnapshot,
-} from "../src/lib/data/rankings-store";
-import { hasBlobStorage } from "../src/lib/data/blob-config";
-
-import januarySeed from "../data/rankings/seed-january.json";
-import aprilSeed from "../data/rankings/seed-april.json";
-import june11Seed from "../data/rankings/seed-june11.json";
-import november19Seed from "../data/rankings/seed-november19.json";
-
-const SEED_FALLBACKS: Record<SnapshotMode, RankingsSnapshot> = {
-  january: januarySeed as RankingsSnapshot,
-  april: aprilSeed as RankingsSnapshot,
-  june11: june11Seed as RankingsSnapshot,
-  november19: november19Seed as RankingsSnapshot,
-};
+import { RUNTIME_FILES } from "../src/lib/data/rankings-paths";
 
 function loadEnvFile(fileName: string): void {
   const filePath = path.join(process.cwd(), fileName);
@@ -47,39 +26,7 @@ function loadEnvFile(fileName: string): void {
   }
 }
 
-async function persistSnapshot(
-  mode: RankingMode,
-  snapshot: RankingsSnapshot,
-): Promise<void> {
-  const filePath = await writeRuntimeSnapshot(mode, snapshot);
-  console.log(`  Wrote runtime cache: ${filePath}`);
-
-  if (hasBlobStorage()) {
-    await saveRankingsSnapshot(mode, snapshot);
-    console.log("  Uploaded to Vercel Blob.");
-  }
-}
-
-async function syncSnapshot(mode: SnapshotMode): Promise<void> {
-  const label = SNAPSHOT_DATES[mode];
-  console.log(`Fetching ${mode} snapshot (${label})...`);
-
-  let snapshot: RankingsSnapshot;
-  try {
-    snapshot = await fetchSnapshotRankings(mode);
-  } catch {
-    console.warn(`  API unavailable for ${mode}; using bundled seed.`);
-    snapshot = SEED_FALLBACKS[mode];
-  }
-
-  await persistSnapshot(mode, {
-    ...snapshot,
-    mode: "snapshot",
-    sourceDate: SNAPSHOT_DATES[mode],
-  });
-}
-
-async function syncRankings() {
+async function main() {
   loadEnvFile(".env.local");
   loadEnvFile(".env");
 
@@ -87,23 +34,32 @@ async function syncRankings() {
     throw new Error("RAPIDAPI_KEY is required. Add it to .env.local.");
   }
 
+  const runtimeDir = path.join(process.cwd(), "data", "rankings", "runtime");
+  mkdirSync(runtimeDir, { recursive: true });
+
   for (const mode of SNAPSHOT_MODES) {
-    await syncSnapshot(mode);
+    console.log(`Fetching ${mode} (${SNAPSHOT_DATES[mode]})...`);
+    const snapshot = await fetchRankingsByDate(SNAPSHOT_DATES[mode]);
+    const payload = {
+      ...snapshot,
+      mode: "snapshot" as const,
+      sourceDate: SNAPSHOT_DATES[mode],
+    };
+    const filePath = path.join(runtimeDir, RUNTIME_FILES[mode]);
+    writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`);
+    console.log(`  Wrote ${filePath} (${payload.entries.length} entries)`);
   }
 
-  console.log("Fetching live rankings...");
-  const live = await fetchLiveRankings();
-  await persistSnapshot("live", live);
-
-  console.log("\nRankings synced.");
-  if (!hasBlobStorage()) {
-    console.log(
-      "Tip: set BLOB_STORE_ID (Vercel linked store) or BLOB_READ_WRITE_TOKEN to upload snapshots to Blob.",
-    );
+  const staleLive = path.join(runtimeDir, "live.json");
+  if (existsSync(staleLive)) {
+    unlinkSync(staleLive);
+    console.log("Removed stale runtime/live.json");
   }
+
+  console.log("\nRankings synced to local runtime cache.");
 }
 
-syncRankings().catch((error) => {
+main().catch((error) => {
   console.error(error);
   process.exit(1);
 });

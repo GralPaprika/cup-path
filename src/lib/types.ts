@@ -1,5 +1,5 @@
 export type RankingMode =
-  | "live"
+  | "july20"
   | "june11"
   | "april"
   | "january"
@@ -75,7 +75,7 @@ export interface RankingsSnapshot {
 }
 
 export interface RankingsMeta {
-  liveLastUpdated: string | null;
+  july20Date: string | null;
   januaryDate: string | null;
   aprilDate: string | null;
   june11Date: string | null;

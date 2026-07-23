@@ -21,8 +21,9 @@ import {
   hasBlobStorage,
   readJsonBlob,
 } from "@/lib/data/blob-config";
+import { RANKING_MODES } from "@/lib/data/ranking-modes";
 
-import liveSeed from "../../../data/rankings/seed-live.json";
+import july20Seed from "../../../data/rankings/seed-july20.json";
 import januarySeed from "../../../data/rankings/seed-january.json";
 import aprilSeed from "../../../data/rankings/seed-april.json";
 import june11Seed from "../../../data/rankings/seed-june11.json";
@@ -31,25 +32,14 @@ import november19Seed from "../../../data/rankings/seed-november19.json";
 const RUNTIME_DIR = path.join(process.cwd(), "data", "rankings", "runtime");
 
 const LOCAL_SEEDS: Record<RankingMode, RankingsSnapshot> = {
-  live: liveSeed as RankingsSnapshot,
+  july20: july20Seed as RankingsSnapshot,
   january: januarySeed as RankingsSnapshot,
   april: aprilSeed as RankingsSnapshot,
   june11: june11Seed as RankingsSnapshot,
   november19: november19Seed as RankingsSnapshot,
 };
 
-const REVALIDATE_SECONDS: Record<RankingMode, number | false> = {
-  live: 3600,
-  january: false,
-  april: false,
-  june11: false,
-  november19: false,
-};
-
-function normalizeSnapshot(
-  snapshot: RankingsSnapshot,
-  mode: RankingMode,
-): RankingsSnapshot {
+function normalizeSnapshot(snapshot: RankingsSnapshot): RankingsSnapshot {
   const entries: RankingEntry[] = [];
 
   for (const entry of snapshot.entries) {
@@ -66,7 +56,7 @@ function normalizeSnapshot(
 
   return {
     ...snapshot,
-    mode: mode === "live" ? "live" : "snapshot",
+    mode: "snapshot",
     entries,
   };
 }
@@ -92,12 +82,12 @@ export async function loadRankingsSnapshot(
   mode: RankingMode,
 ): Promise<RankingsSnapshot> {
   const blobData = await readFromBlob(BLOB_PATHS[mode]);
-  if (blobData) return normalizeSnapshot(blobData, mode);
+  if (blobData) return normalizeSnapshot(blobData);
 
   const runtimeData = await readRuntimeCache(mode);
-  if (runtimeData) return normalizeSnapshot(runtimeData, mode);
+  if (runtimeData) return normalizeSnapshot(runtimeData);
 
-  return normalizeSnapshot(LOCAL_SEEDS[mode], mode);
+  return normalizeSnapshot(LOCAL_SEEDS[mode]);
 }
 
 export function getRankingsSnapshot(
@@ -113,7 +103,7 @@ export function getRankingsSnapshot(
     () => loadRankingsSnapshot(mode),
     ["rankings-snapshot", mode],
     {
-      revalidate: REVALIDATE_SECONDS[mode],
+      revalidate: false,
       tags: [rankingsCacheTag(mode)],
     },
   )();
@@ -149,18 +139,21 @@ export async function saveRankingsSnapshot(
 }
 
 export async function getRankingsMeta(): Promise<RankingsMeta> {
-  const live = await getRankingsSnapshot("live");
-  const january = await getRankingsSnapshot("january");
-  const april = await getRankingsSnapshot("april");
-  const june11 = await getRankingsSnapshot("june11");
-  const november19 = await getRankingsSnapshot("november19");
+  const snapshots = Object.fromEntries(
+    await Promise.all(
+      RANKING_MODES.map(async (mode) => {
+        const snapshot = await getRankingsSnapshot(mode);
+        return [mode, snapshot] as const;
+      }),
+    ),
+  ) as Record<RankingMode, RankingsSnapshot>;
 
   return {
-    liveLastUpdated: live.fetchedAt,
-    januaryDate: january.sourceDate,
-    aprilDate: april.sourceDate,
-    june11Date: june11.sourceDate,
-    november19Date: november19.sourceDate,
+    july20Date: snapshots.july20.sourceDate,
+    januaryDate: snapshots.january.sourceDate,
+    aprilDate: snapshots.april.sourceDate,
+    june11Date: snapshots.june11.sourceDate,
+    november19Date: snapshots.november19.sourceDate,
   };
 }
 

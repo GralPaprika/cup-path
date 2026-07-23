@@ -27,7 +27,7 @@ const RankingModeContext = createContext<RankingModeContextValue | null>(null);
 
 export function RankingModeProvider({
   children,
-  initialMode = "live",
+  initialMode = "july20",
 }: {
   children: ReactNode;
   initialMode?: RankingMode;

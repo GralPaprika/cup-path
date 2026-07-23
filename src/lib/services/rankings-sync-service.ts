@@ -1,10 +1,7 @@
 import "server-only";
 
 import { revalidateTag } from "next/cache";
-import {
-  fetchLiveRankings,
-  fetchSnapshotRankings,
-} from "@/lib/data/rankings-client";
+import { fetchSnapshotRankings } from "@/lib/data/rankings-client";
 import { rankingsCacheTag } from "@/lib/data/rankings-paths";
 import {
   SNAPSHOT_DATES,
@@ -14,27 +11,9 @@ import {
 import { saveRankingsSnapshot } from "@/lib/data/rankings-store";
 import type { RankingsSnapshot } from "@/lib/types";
 
-export interface SyncLiveResult {
-  mode: "live";
-  entries: number;
-  fetchedAt: string;
-}
-
 export interface SyncSnapshotsResult {
   mode: "snapshots";
   snapshots: Record<SnapshotMode, number>;
-}
-
-export async function syncLiveRankings(): Promise<SyncLiveResult> {
-  const live = await fetchLiveRankings();
-  await saveRankingsSnapshot("live", live);
-  revalidateTag(rankingsCacheTag("live"), "max");
-
-  return {
-    mode: "live",
-    entries: live.entries.length,
-    fetchedAt: live.fetchedAt,
-  };
 }
 
 export async function syncSnapshotRankings(): Promise<SyncSnapshotsResult> {

@@ -32,5 +32,5 @@ export function resolveRankingMode(
   storedMode: RankingMode | null = null,
 ): RankingMode {
   if (urlMode) return parseRankingMode(urlMode);
-  return storedMode ?? "live";
+  return storedMode ?? "july20";
 }

@@ -1,33 +1,33 @@
 {
-  "mode": "live",
-  "fetchedAt": "2026-07-08T04:59:23.658Z",
-  "sourceDate": "2026-07-08",
+  "mode": "snapshot",
+  "fetchedAt": "2026-07-23T03:54:19.134Z",
+  "sourceDate": "2026-07-20",
   "entries": [
     {
-      "teamId": "FRA",
-      "rank": 1,
-      "points": 1925.861276,
-      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/FRA",
-      "previousRank": 3
-    },
-    {
-      "teamId": "ARG",
-      "rank": 2,
-      "points": 1925.148536,
-      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/ARG",
-      "previousRank": 1
-    },
-    {
       "teamId": "ESP",
-      "rank": 3,
-      "points": 1912.339223,
+      "rank": 1,
+      "points": 1995.881879,
       "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/ESP",
       "previousRank": 2
     },
     {
+      "teamId": "ARG",
+      "rank": 2,
+      "points": 1970.36539,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/ARG",
+      "previousRank": 1
+    },
+    {
+      "teamId": "FRA",
+      "rank": 3,
+      "points": 1948.970817,
+      "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/FRA",
+      "previousRank": 3
+    },
+    {
       "teamId": "ENG",
       "rank": 4,
-      "points": 1871.385083,
+      "points": 1922.831632,
       "flagUrl": "https://api.fifa.com/api/v3/picture/flags-sq-2/ENG",
       "previousRank": 4
     },

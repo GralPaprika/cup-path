@@ -18,10 +18,9 @@ import { useTranslations } from "next-intl";
 
 interface KnockoutStageTableProps {
   fixtures: KnockoutFixtureEntry[];
-  mode: string;
 }
 
-export function KnockoutStageTable({ fixtures, mode }: KnockoutStageTableProps) {
+export function KnockoutStageTable({ fixtures }: KnockoutStageTableProps) {
   const shared = useTranslations("home.knockoutStage");
   const tables = useTranslations("home.factsTables");
   const [gapSort, setGapSort] = useState<SortDirection>("asc");
@@ -94,7 +93,6 @@ export function KnockoutStageTable({ fixtures, mode }: KnockoutStageTableProps) 
                     <FactsMatchCell
                       team1={fixture.team1}
                       team2={fixture.team2}
-                      mode={mode}
                       vsLabel={tables("vs")}
                       score={
                         <MatchScoreBreakdown
@@ -125,7 +123,7 @@ export function KnockoutStageTable({ fixtures, mode }: KnockoutStageTableProps) 
                   </td>
                   <td className="px-3 py-2.5">
                     <Link
-                      href={`/team-analysis?team=${winner.id}&mode=${mode}`}
+                      href={`/team-analysis?team=${winner.id}`}
                       className="inline-flex items-center gap-1.5 transition-colors hover:text-wc-sky"
                     >
                       <TeamFlag team={winner} size="sm" />

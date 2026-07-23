@@ -51,10 +51,7 @@ export function ComparePageClient() {
     null,
   );
 
-  const { data: teamsData } = useApiQuery<TeamsResponse>(
-    `/api/teams?mode=${mode}`,
-    [mode],
-  );
+  const { data: teamsData } = useApiQuery<TeamsResponse>("/api/teams", [mode]);
   const teamList = teamsData?.teams ?? [];
 
   useEffect(() => {
@@ -227,7 +224,6 @@ export function ComparePageClient() {
             ) : (
               <ComparisonTable
                 entries={entries}
-                mode={mode}
                 compareTeamAId={teamAId || undefined}
                 compareTeamBId={teamBId || undefined}
                 cohortStage={cohortStage}

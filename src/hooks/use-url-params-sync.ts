@@ -9,7 +9,8 @@ export function useUrlParamsSync(
 ) {
   useEffect(() => {
     const params = buildParams();
-    const nextUrl = `${pathname}?${params.toString()}`;
+    const query = params.toString();
+    const nextUrl = query ? `${pathname}?${query}` : pathname;
     const currentUrl = `${window.location.pathname}${window.location.search}`;
 
     if (currentUrl !== nextUrl) {

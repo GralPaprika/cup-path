@@ -13,18 +13,15 @@ import { useTranslations } from "next-intl";
 interface GroupStageDifficultyInsightsProps {
   insights: GroupStageDifficultyInsights;
   meanAvgOpponentPoints: number | null;
-  mode: string;
 }
 
 function SpotlightCard({
   title,
   spotlight,
-  mode,
   sdOutlierLabel,
 }: {
   title: string;
   spotlight: GroupStageDifficultySpotlight;
-  mode: string;
   sdOutlierLabel: string;
 }) {
   const t = useTranslations("home.groupExpectedFinishes");
@@ -32,7 +29,7 @@ function SpotlightCard({
 
   return (
     <Link
-      href={`/team-analysis?team=${spotlight.team.id}&mode=${mode}`}
+      href={`/team-analysis?team=${spotlight.team.id}`}
       className="group block rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
     >
       <div className="flex items-start justify-between gap-3">
@@ -71,7 +68,6 @@ function SpotlightCard({
 export function GroupStageDifficultyInsightsPanel({
   insights,
   meanAvgOpponentPoints,
-  mode,
 }: GroupStageDifficultyInsightsProps) {
   const t = useTranslations("home.groupExpectedFinishes");
 
@@ -125,7 +121,6 @@ export function GroupStageDifficultyInsightsPanel({
           <SpotlightCard
             title={t("groupDifficultyHardestSurvivor")}
             spotlight={insights.hardestDrawSurvivor}
-            mode={mode}
             sdOutlierLabel={t("groupDifficultySdOutlier")}
           />
         ) : undefined
@@ -135,7 +130,6 @@ export function GroupStageDifficultyInsightsPanel({
           <SpotlightCard
             title={t("groupDifficultyEasiestCasualty")}
             spotlight={insights.easiestDrawCasualty}
-            mode={mode}
             sdOutlierLabel={t("groupDifficultySdOutlier")}
           />
         ) : undefined

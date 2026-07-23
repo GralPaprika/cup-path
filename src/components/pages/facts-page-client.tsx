@@ -38,11 +38,12 @@ export function FactsPageClient() {
   const { mode } = useRankingMode();
 
   const { data: facts, loading, error } = useApiQuery<TournamentFacts>(
-    `/api/facts?mode=${mode}`,
+    "/api/facts",
     [mode],
     { errorMessage: common("error") },
   );
 
+  // Strip legacy ?mode= query params; ranking mode lives in a cookie.
   useRankingModeUrlSync("/");
 
   if (loading && !facts) {
@@ -130,7 +131,6 @@ export function FactsPageClient() {
                       }
                     : null
                 }
-                mode={mode}
               />
 
               {facts.groupExpectedAnalysis && (
@@ -138,7 +138,6 @@ export function FactsPageClient() {
                   embedded
                   analysis={facts.groupExpectedAnalysis}
                   groupStageDifficulty={facts.groupStageDifficulty}
-                  mode={mode}
                 />
               )}
             </section>
@@ -155,7 +154,6 @@ export function FactsPageClient() {
                   <KnockoutStagePanel
                     round={round}
                     analysis={analysis}
-                    mode={mode}
                   />
                 </section>
               );

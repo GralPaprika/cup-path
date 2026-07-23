@@ -8,12 +8,10 @@ import { useTranslations } from "next-intl";
 
 interface GroupStageDifficultyChartProps {
   strip: GroupStageDifficultyStrip;
-  mode: string;
 }
 
 export function GroupStageDifficultyChart({
   strip,
-  mode,
 }: GroupStageDifficultyChartProps) {
   const t = useTranslations("home.groupExpectedFinishes");
 
@@ -68,7 +66,7 @@ export function GroupStageDifficultyChart({
     teamFifaPoints: entry.teamFifaPoints,
     rivalDifficultyPoints: entry.avgOpponentPoints,
     won: entry.qualified,
-    href: `/team-analysis?team=${entry.team.id}&mode=${mode}`,
+    href: `/team-analysis?team=${entry.team.id}`,
     tooltipData: {
       team: entry.team,
       teamFifaPoints: entry.teamFifaPoints,

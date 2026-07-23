@@ -14,7 +14,6 @@ import { ArrowDown } from "lucide-react";
 interface GroupPaperPositionCardsProps {
   positionMisses: GroupExpectedFinishEntry[];
   eliminatedUnderperformers: GroupExpectedUnderperformer[];
-  mode: string;
 }
 
 function mergePositionMisses(
@@ -83,18 +82,16 @@ function PositionLadder({
 
 function PositionMissCard({
   entry,
-  mode,
   eliminated,
 }: {
   entry: PositionEntry;
-  mode: string;
   eliminated?: boolean;
 }) {
   const t = useTranslations("home.groupExpectedFinishes");
 
   return (
     <Link
-      href={`/team-analysis?team=${entry.team.id}&mode=${mode}`}
+      href={`/team-analysis?team=${entry.team.id}`}
       className={cn(
         "group flex flex-col gap-3 rounded-xl border p-4 transition-all",
         eliminated
@@ -174,7 +171,6 @@ function PositionMissCard({
 export function GroupPaperPositionCards({
   positionMisses,
   eliminatedUnderperformers,
-  mode,
 }: GroupPaperPositionCardsProps) {
   const t = useTranslations("home.groupExpectedFinishes");
 
@@ -204,7 +200,6 @@ export function GroupPaperPositionCards({
           <PositionMissCard
             key={entry.team.id}
             entry={entry}
-            mode={mode}
             eliminated={eliminated}
           />
         ))}

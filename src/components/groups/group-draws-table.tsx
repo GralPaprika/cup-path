@@ -16,7 +16,6 @@ import { useTranslations } from "next-intl";
 interface GroupDrawsTableProps {
   drawMatches: GroupExpectedMatchEntry[];
   meanGap: number | null;
-  mode: string;
 }
 
 function isAboveMeanGap(gapPoints: number, meanGap: number | null): boolean {
@@ -26,7 +25,6 @@ function isAboveMeanGap(gapPoints: number, meanGap: number | null): boolean {
 export function GroupDrawsTable({
   drawMatches,
   meanGap,
-  mode,
 }: GroupDrawsTableProps) {
   const t = useTranslations("home.groupExpectedFinishes");
   const [gapSort, setGapSort] = useState<SortDirection>("desc");
@@ -94,7 +92,6 @@ export function GroupDrawsTable({
                     <FactsMatchCell
                       team1={entry.team1}
                       team2={entry.team2}
-                      mode={mode}
                       vsLabel={t("vs")}
                       score={
                         <span className="font-mono tabular-nums text-muted-foreground">

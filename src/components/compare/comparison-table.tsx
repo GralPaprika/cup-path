@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, Search } from "lucide-react";
-import type { ComparisonEntry, PathStage, RankingMode } from "@/lib/types";
+import type { ComparisonEntry, PathStage } from "@/lib/types";
 import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team/team-flag";
@@ -24,7 +24,6 @@ export type ComparisonSortKey = "points" | "rank";
 
 interface ComparisonTableProps {
   entries: ComparisonEntry[];
-  mode: RankingMode;
   selectedTeamId?: string;
   compareTeamAId?: string;
   compareTeamBId?: string;
@@ -96,7 +95,6 @@ function SortButton({
 
 export function ComparisonTable({
   entries,
-  mode,
   selectedTeamId,
   compareTeamAId,
   compareTeamBId,
@@ -206,7 +204,7 @@ export function ComparisonTable({
             const isLegacyCompare = compareTeamIds?.includes(entry.team.id);
             const isSelected =
               entry.team.id === selectedTeamId || isTeamA || isTeamB || isLegacyCompare;
-            const analysisHref = `/team-analysis?team=${entry.team.id}&mode=${mode}`;
+            const analysisHref = `/team-analysis?team=${entry.team.id}`;
 
             return (
               <TableRow

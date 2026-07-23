@@ -15,12 +15,10 @@ import { useTranslations } from "next-intl";
 
 interface GroupWinLossTableProps {
   winLossMatches: GroupExpectedMatchEntry[];
-  mode: string;
 }
 
 export function GroupWinLossTable({
   winLossMatches,
-  mode,
 }: GroupWinLossTableProps) {
   const t = useTranslations("home.groupExpectedFinishes");
   const [gapSort, setGapSort] = useState<SortDirection>("asc");
@@ -85,7 +83,6 @@ export function GroupWinLossTable({
                   <FactsMatchCell
                     team1={entry.team1}
                     team2={entry.team2}
-                    mode={mode}
                     vsLabel={t("vs")}
                     score={
                       <span className="font-mono tabular-nums text-muted-foreground">

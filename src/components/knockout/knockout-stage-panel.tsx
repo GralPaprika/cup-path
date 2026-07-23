@@ -19,7 +19,6 @@ import { useTranslations } from "next-intl";
 interface KnockoutStagePanelProps {
   round: KnockoutFactsRoundDefinition;
   analysis: KnockoutStageAnalysis;
-  mode: string;
 }
 
 /**
@@ -59,7 +58,6 @@ function AtGlanceStatTile({
 export function KnockoutStagePanel({
   round,
   analysis,
-  mode,
 }: KnockoutStagePanelProps) {
   const shared = useTranslations("home.knockoutStage");
   const stage = useTranslations(homeFactsRoundNamespace(round.id));
@@ -93,7 +91,6 @@ export function KnockoutStagePanel({
               }
             : null
         }
-        mode={mode}
       />
 
       <CollapsibleSection
@@ -156,7 +153,7 @@ export function KnockoutStagePanel({
             </p>
           </div>
 
-          <KnockoutStageTable fixtures={analysis.fixtures} mode={mode} />
+          <KnockoutStageTable fixtures={analysis.fixtures} />
 
           {analysis.matchCount >= MIN_TIES_FOR_GAP_CHART && (
             <KnockoutStageGapChart
@@ -172,7 +169,6 @@ export function KnockoutStagePanel({
           <div className="space-y-4 border-t border-white/8 pt-6">
             <KnockoutStageOpponentDifficultyChart
               strip={analysis.opponentDifficulty}
-              mode={mode}
               opponentDifficultyTitle={stage("opponentDifficultyTitle")}
               opponentDifficultySubtitle={stage("opponentDifficultySubtitle", {
                 count: analysis.opponentDifficulty.entries.length,

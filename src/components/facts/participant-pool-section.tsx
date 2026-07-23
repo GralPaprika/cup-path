@@ -22,7 +22,6 @@ interface ParticipantPoolSectionProps {
     fifaPoints: number | null;
     hint: string;
   } | null;
-  mode: string;
   /** Renders only the stat tiles, for embedding inside a parent panel. */
   embedded?: boolean;
 }
@@ -37,7 +36,6 @@ export function ParticipantPoolSection({
   avgFifaPointsContext,
   medianFifaRank,
   lowestRankedQualifier,
-  mode,
   embedded = false,
 }: ParticipantPoolSectionProps) {
   return (
@@ -75,7 +73,7 @@ export function ParticipantPoolSection({
         />
         {lowestRankedQualifier ? (
           <Link
-            href={`/team-analysis?team=${lowestRankedQualifier.team.id}&mode=${mode}`}
+            href={`/team-analysis?team=${lowestRankedQualifier.team.id}`}
             className="block rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
           >
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">

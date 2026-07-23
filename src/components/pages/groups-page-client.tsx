@@ -25,12 +25,11 @@ export function GroupsPageClient() {
   const userPickedGroup = useRef(false);
   const deepLinkScrollPending = useRef(Boolean(selectedTeamId));
 
-  const groupsUrl = `/api/groups?mode=${mode}`;
   const {
     data: groupsData,
     loading,
     error,
-  } = useApiQuery<GroupsAnalysisResult>(groupsUrl, [mode], {
+  } = useApiQuery<GroupsAnalysisResult>("/api/groups", [mode], {
     errorMessage: t("error"),
   });
 

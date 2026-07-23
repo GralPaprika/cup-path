@@ -1,6 +1,5 @@
 "use client";
 
-import { useRankingMode } from "@/components/layout/ranking-mode-provider";
 import { useUrlParamsSync } from "@/hooks/use-url-params-sync";
 
 type ExtraParams = URLSearchParams | Record<string, string>;
@@ -25,22 +24,21 @@ function mergeExtraParams(
   return params;
 }
 
+/** Sync non-mode page state into the URL. Ranking mode lives in a cookie. */
 export function useRankingModeUrlSync(
   pathname: string,
   buildExtraParams?: () => ExtraParams,
   deps: unknown[] = [],
 ) {
-  const { mode } = useRankingMode();
-
   useUrlParamsSync(
     pathname,
     () => {
-      const params = new URLSearchParams({ mode });
+      const params = new URLSearchParams();
       if (buildExtraParams) {
         mergeExtraParams(params, buildExtraParams());
       }
       return params;
     },
-    [mode, ...deps],
+    deps,
   );
 }

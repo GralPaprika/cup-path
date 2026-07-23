@@ -13,18 +13,15 @@ import { useTranslations } from "next-intl";
 interface KnockoutStageOpponentDifficultyInsightsProps {
   insights: KnockoutOpponentDifficultyInsights;
   meanOpponentPoints: number | null;
-  mode: string;
 }
 
 function SpotlightCard({
   title,
   spotlight,
-  mode,
   sdOutlierLabel,
 }: {
   title: string;
   spotlight: KnockoutOpponentDifficultySpotlight;
-  mode: string;
   sdOutlierLabel: string;
 }) {
   const shared = useTranslations("home.knockoutStage");
@@ -32,7 +29,7 @@ function SpotlightCard({
 
   return (
     <Link
-      href={`/team-analysis?team=${spotlight.team.id}&mode=${mode}`}
+      href={`/team-analysis?team=${spotlight.team.id}`}
       className="group block rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
     >
       <div className="flex items-start justify-between gap-3">
@@ -71,7 +68,6 @@ function SpotlightCard({
 export function KnockoutStageOpponentDifficultyInsightsPanel({
   insights,
   meanOpponentPoints,
-  mode,
 }: KnockoutStageOpponentDifficultyInsightsProps) {
   const shared = useTranslations("home.knockoutStage");
 
@@ -125,7 +121,6 @@ export function KnockoutStageOpponentDifficultyInsightsPanel({
           <SpotlightCard
             title={shared("opponentDifficultyHardestQualifier")}
             spotlight={insights.hardestOpponentQualifier}
-            mode={mode}
             sdOutlierLabel={shared("opponentDifficultySdOutlier")}
           />
         ) : undefined
@@ -135,7 +130,6 @@ export function KnockoutStageOpponentDifficultyInsightsPanel({
           <SpotlightCard
             title={shared("opponentDifficultyEasiestEliminated")}
             spotlight={insights.easiestOpponentEliminated}
-            mode={mode}
             sdOutlierLabel={shared("opponentDifficultySdOutlier")}
           />
         ) : undefined

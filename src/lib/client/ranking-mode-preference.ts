@@ -26,11 +26,3 @@ export function writeRankingModePreference(mode: RankingMode): void {
   localStorage.setItem(RANKING_MODE_STORAGE_KEY, mode);
   document.cookie = `${RANKING_MODE_COOKIE}=${mode};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
 }
-
-export function resolveRankingMode(
-  urlMode: string | null,
-  storedMode: RankingMode | null = null,
-): RankingMode {
-  if (urlMode) return parseRankingMode(urlMode);
-  return storedMode ?? "july20";
-}

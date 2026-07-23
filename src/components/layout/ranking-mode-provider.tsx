@@ -9,12 +9,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useSearchParams } from "next/navigation";
-import { parseRankingMode } from "@/lib/data/ranking-modes";
+import { DEFAULT_RANKING_MODE } from "@/lib/data/ranking-modes";
 import type { RankingMode } from "@/lib/types";
 import {
   readRankingModePreference,
-  resolveRankingMode,
   writeRankingModePreference,
 } from "@/lib/client/ranking-mode-preference";
 
@@ -27,29 +25,14 @@ const RankingModeContext = createContext<RankingModeContextValue | null>(null);
 
 export function RankingModeProvider({
   children,
-  initialMode = "july20",
+  initialMode = DEFAULT_RANKING_MODE,
 }: {
   children: ReactNode;
   initialMode?: RankingMode;
 }) {
-  const searchParams = useSearchParams();
-  const [mode, setModeState] = useState<RankingMode>(() =>
-    resolveRankingMode(searchParams.get("mode"), initialMode),
-  );
+  const [mode, setModeState] = useState<RankingMode>(initialMode);
 
   useEffect(() => {
-    const urlMode = searchParams.get("mode");
-    if (urlMode) {
-      const resolved = parseRankingMode(urlMode);
-      setModeState((current) => {
-        if (current !== resolved) {
-          writeRankingModePreference(resolved);
-        }
-        return resolved;
-      });
-      return;
-    }
-
     // Recover localStorage preference after hydration when the cookie was absent.
     const preferred = readRankingModePreference();
     if (preferred) {
@@ -58,8 +41,11 @@ export function RankingModeProvider({
         writeRankingModePreference(preferred);
         return preferred;
       });
+      return;
     }
-  }, [searchParams]);
+
+    writeRankingModePreference(initialMode);
+  }, [initialMode]);
 
   const setMode = useCallback((next: RankingMode) => {
     writeRankingModePreference(next);

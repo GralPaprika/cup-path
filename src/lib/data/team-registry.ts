@@ -1,5 +1,6 @@
 import type { OpenFootballTeam, RankingMode, RankingsSnapshot, Team } from "@/lib/types";
 import { getFifaFlagUrl } from "@/lib/data/flag-utils";
+import { DEFAULT_RANKING_MODE } from "@/lib/data/ranking-modes";
 import bundledTeams from "../../../data/worldcup/2026/worldcup.teams.json";
 
 const EXTRA_ALIASES: Record<string, string[]> = {
@@ -120,7 +121,7 @@ export async function getAllTeamsEnriched(
   await ensureWorldCupData();
 
   const { getRankingsSnapshot } = await import("@/lib/data/rankings-store");
-  const snapshot = await getRankingsSnapshot(mode ?? "july20");
+  const snapshot = await getRankingsSnapshot(mode ?? DEFAULT_RANKING_MODE);
   return enrichTeamsFromSnapshot(getAllTeams(), snapshot);
 }
 

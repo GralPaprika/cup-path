@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 
 interface KnockoutStageOpponentDifficultyChartProps {
   strip: KnockoutOpponentDifficultyStrip;
-  mode: string;
   opponentDifficultyTitle: string;
   opponentDifficultySubtitle: string;
   opponentDifficultyCaption: string;
@@ -17,7 +16,6 @@ interface KnockoutStageOpponentDifficultyChartProps {
 
 export function KnockoutStageOpponentDifficultyChart({
   strip,
-  mode,
   opponentDifficultyTitle,
   opponentDifficultySubtitle,
   opponentDifficultyCaption,
@@ -76,7 +74,7 @@ export function KnockoutStageOpponentDifficultyChart({
     teamFifaPoints: entry.teamFifaPoints,
     rivalDifficultyPoints: entry.opponentFifaPoints,
     won: entry.qualified,
-    href: `/team-analysis?team=${entry.team.id}&mode=${mode}`,
+    href: `/team-analysis?team=${entry.team.id}`,
     tooltipData: {
       team: entry.team,
       teamFifaPoints: entry.teamFifaPoints,

@@ -42,10 +42,7 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
   const [data, setData] = useState<TeamAnalysisResult | null>(null);
   const [maxStageReached, setMaxStageReached] = useState<PathStage | undefined>();
 
-  const { data: teamsData } = useApiQuery<TeamsResponse>(
-    `/api/teams?mode=${mode}`,
-    [mode],
-  );
+  const { data: teamsData } = useApiQuery<TeamsResponse>("/api/teams", [mode]);
   const teamList = teamsData?.teams ?? teams;
 
   const analysisBody = useMemo(

@@ -18,7 +18,6 @@ import { useTranslations } from "next-intl";
 interface GroupExpectedFinishesPanelProps {
   analysis: GroupExpectedAnalysis;
   groupStageDifficulty: GroupStageDifficultyStrip | null;
-  mode: string;
   /** Renders as a nested sub-panel instead of a standalone glass panel. */
   embedded?: boolean;
 }
@@ -53,7 +52,6 @@ function AtGlanceStatTile({
 export function GroupExpectedFinishesPanel({
   analysis,
   groupStageDifficulty,
-  mode,
   embedded = false,
 }: GroupExpectedFinishesPanelProps) {
   const t = useTranslations("home.groupExpectedFinishes");
@@ -157,7 +155,6 @@ export function GroupExpectedFinishesPanel({
 
           <GroupWinLossTable
             winLossMatches={analysis.winLossMatches}
-            mode={mode}
           />
 
           <GroupWinLossGapChart
@@ -183,7 +180,6 @@ export function GroupExpectedFinishesPanel({
           <GroupDrawsTable
             drawMatches={analysis.drawMatches}
             meanGap={analysis.meanPointsGapOnDraws}
-            mode={mode}
           />
 
           <GroupDrawsGapChart
@@ -203,7 +199,6 @@ export function GroupExpectedFinishesPanel({
           <GroupPaperPositionCards
             positionMisses={positionMisses}
             eliminatedUnderperformers={analysis.eliminatedUnderperformers}
-            mode={mode}
           />
         </StorySection>
       )}
@@ -215,7 +210,6 @@ export function GroupExpectedFinishesPanel({
         >
           <GroupStageDifficultyChart
             strip={groupStageDifficulty}
-            mode={mode}
           />
         </StorySection>
       )}

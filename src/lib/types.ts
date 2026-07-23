@@ -606,6 +606,19 @@ export type TeamTierId =
   | "outsiders"
   | "makeweights";
 
+export interface EvenMatchesByTierRow {
+  tier: TeamTierId;
+  count: number;
+}
+
+export interface EvenMatchesByTierInsight {
+  groupStagePct: number;
+  groupMatchCount: number;
+  totalMatchCount: number;
+  evenMatchCount: number;
+  rows: EvenMatchesByTierRow[];
+}
+
 export interface TeamTierMember {
   team: Team;
   fifaRank: number;
@@ -625,6 +638,8 @@ export interface TournamentFacts {
   groupStageDifficulty: GroupStageDifficultyStrip | null;
   knockoutAnalyses: Partial<Record<KnockoutFactsRoundId, KnockoutStageAnalysis>>;
   matchOutcomeGap: MatchOutcomeGapDataset | null;
+  /** Group-stage even matches (≤100 pts), bucketed by the higher of the two tiers. */
+  evenMatchesByTier: EvenMatchesByTierInsight | null;
 }
 
 export interface GroupStanding {

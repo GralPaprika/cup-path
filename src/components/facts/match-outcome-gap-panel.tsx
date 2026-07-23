@@ -5,7 +5,6 @@ import { Maximize2 } from "lucide-react";
 import type { MatchOutcomeGapDataset, PathStage } from "@/lib/types";
 import { PathStageFilters } from "@/components/path/path-stage-filters";
 import {
-  computeGapStoryInsight,
   computeOutcomeShares,
   MatchOutcomeGapChart,
 } from "@/components/facts/match-outcome-gap-chart";
@@ -57,11 +56,6 @@ export function MatchOutcomeGapPanel({
 
   const shares = useMemo(
     () => computeOutcomeShares(filteredMatches),
-    [filteredMatches],
-  );
-
-  const gapStory = useMemo(
-    () => computeGapStoryInsight(filteredMatches),
     [filteredMatches],
   );
 
@@ -156,12 +150,6 @@ export function MatchOutcomeGapPanel({
             </div>
 
             {chartProps.footnotes}
-
-            {gapStory && (
-              <p className="text-base leading-7 text-muted-foreground">
-                {t("gapStoryInsight", gapStory)}
-              </p>
-            )}
           </>
         )}
       </div>

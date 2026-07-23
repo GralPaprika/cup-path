@@ -323,6 +323,7 @@ export function buildTournamentFacts(
   | "groupStageDifficulty"
   | "knockoutAnalyses"
   | "matchOutcomeGap"
+  | "evenMatchesByTier"
 > {
   const snapshot = buildSnapshot(rankings, teamCounts);
   const groupStagePool = buildGroupStagePool(ctx, summaries, rankings, teamCounts);

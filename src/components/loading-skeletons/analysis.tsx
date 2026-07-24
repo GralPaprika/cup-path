@@ -22,25 +22,29 @@ export function SummaryCardSkeleton() {
   return (
     <div className="glass-panel">
       <div className="border-b border-white/8 px-5 py-5 sm:px-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <Skeleton className="size-9 rounded-full bg-white/10" />
-          <Skeleton className="h-7 w-44 bg-white/10" />
-          <Skeleton className="h-6 w-20 rounded-full bg-white/10" />
-          <Skeleton className="h-6 w-24 rounded-full bg-white/10" />
-          <Skeleton className="h-6 w-28 rounded-full bg-white/10" />
+        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
+          <div className="flex min-w-0 flex-col items-center justify-center">
+            <Skeleton className="aspect-[300/168] w-full max-w-[300px] bg-white/10" />
+            <Skeleton className="mt-2 h-3 w-28 bg-white/10" />
+          </div>
+          <div className="flex min-w-0 flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <Skeleton className="size-9 rounded-full bg-white/10" />
+              <Skeleton className="h-7 w-44 bg-white/10" />
+              <Skeleton className="h-6 w-20 rounded-full bg-white/10" />
+              <Skeleton className="h-6 w-24 rounded-full bg-white/10" />
+              <Skeleton className="h-6 w-16 rounded-full bg-white/10" />
+            </div>
+            <Skeleton className="h-4 w-40 bg-white/10" />
+            <Skeleton className="h-14 w-full max-w-sm rounded-2xl bg-white/10" />
+          </div>
         </div>
-        <Skeleton className="mt-2 h-4 w-48 bg-white/10" />
       </div>
-      <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-8">
-        <div className="grid min-w-[17.5rem] grid-cols-2 gap-3 sm:min-w-[19rem]">
-          <StatBlockSkeleton />
-          <StatBlockSkeleton />
-          <StatBlockSkeleton />
-          <StatBlockSkeleton />
-        </div>
-        <div className="order-first flex min-w-0 flex-col items-center justify-center lg:order-none lg:min-w-[320px]">
-          <Skeleton className="aspect-[300/168] w-full max-w-[300px] bg-white/10" />
-        </div>
+      <div className="grid grid-cols-2 gap-3 p-5 sm:p-6 lg:grid-cols-4">
+        <StatBlockSkeleton />
+        <StatBlockSkeleton />
+        <StatBlockSkeleton />
+        <StatBlockSkeleton />
       </div>
       <div className="border-t border-white/8 px-5 py-4 sm:px-6">
         <Skeleton className="h-3 w-64 max-w-full bg-white/10" />

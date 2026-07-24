@@ -162,7 +162,7 @@ export function SummaryCard({
         ? t("outcomeRunnerUp")
         : outcome.kind === "thirdPlace"
           ? t("outcomeThirdPlace")
-          : outcome.kind === "eliminated"
+          : outcome.kind === "eliminated" && eliminatedRoundLabel != null
             ? t("outcomeEliminatedIn", { round: eliminatedRoundLabel })
             : t("active");
   const outcomeClassName =
@@ -201,132 +201,142 @@ export function SummaryCard({
       ? t("outcomeSeeRoundOnOverview", { round: overviewRoundPrompt })
       : null;
 
+  const outcomeChip =
+    overviewHref && overviewLinkLabel ? (
+      <Link
+        href={overviewHref}
+        aria-label={overviewLinkLabel}
+        className={cn(
+          "inline-flex w-fit max-w-full shrink-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5 self-start rounded-2xl border px-3.5 py-2 transition-colors",
+          outcomeClassName,
+          outcomeChipHoverClassName,
+        )}
+      >
+        <span className="whitespace-nowrap text-sm font-semibold leading-tight">
+          {outcomeLabel}
+        </span>
+        <span className="whitespace-nowrap text-xs font-medium leading-tight opacity-80">
+          {overviewLinkLabel} →
+        </span>
+      </Link>
+    ) : (
+      <Badge variant="outline" className={cn("h-auto px-3 py-1.5", outcomeClassName)}>
+        {outcomeLabel}
+      </Badge>
+    );
+
   return (
     <div className="glass-panel">
       <div className="border-b border-white/8 px-5 py-5 sm:px-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <TeamLabel
-            team={summary.team}
-            showCode
-            flagSize="lg"
-            nameClassName="text-xl font-bold text-white sm:text-2xl"
-          />
-          {summary.teamPoints !== null ? (
-            <TeamTierBadge points={summary.teamPoints} />
-          ) : null}
-          <Link
-            href={`/groups?group=${summary.team.group}&team=${summary.team.id}`}
-            className="inline-flex"
-          >
-            <Badge
-              variant="outline"
-              className="border-wc-sky/30 bg-wc-sky/10 text-wc-sky transition-colors hover:border-wc-sky/50 hover:bg-wc-sky/20"
-            >
-              {common("group", { group: summary.team.group })}
-            </Badge>
-          </Link>
-          <Badge
-            variant="outline"
-            className="border-white/15 bg-white/5 text-muted-foreground"
-          >
-            {summary.team.confederation}
-          </Badge>
-          {overviewHref && overviewLinkLabel ? (
-            <Link
-              href={overviewHref}
-              aria-label={overviewLinkLabel}
-              className={cn(
-                "inline-flex flex-col items-start gap-0.5 rounded-4xl border px-2.5 py-1.5 transition-colors",
-                outcomeClassName,
-                outcomeChipHoverClassName,
+        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
+          <div className="flex min-w-0 flex-col items-center justify-center">
+            <DifficultyGauge
+              value={summary.avgOpponentPoints}
+              hardestPathRank={hardestPathRank}
+              cohortSize={cohortSize}
+              label={t("avgDifficulty")}
+              rankTitle={hardestPathRank ? t("hardestPathRank") : undefined}
+              rankValue={
+                hardestPathRank
+                  ? t("hardestPathRankOf", {
+                      rank: hardestPathRank,
+                      total: cohortSize,
+                    })
+                  : undefined
+              }
+              rankMeta={
+                hardestPathRank
+                  ? stages(COMPARE_STAGE_I18N_KEYS[cohortStage])
+                  : undefined
+              }
+              rankAltNote={
+                showAltRankByAvgRank
+                  ? t("hardestPathRankAltByAvgRank", {
+                      rank: hardestPathRankByAvgRank,
+                    })
+                  : undefined
+              }
+            />
+            {hardestPathRank !== null && (
+              <p className="mt-2 text-center text-xs text-muted-foreground">
+                <Link href="/compare" className="text-wc-sky hover:underline">
+                  {t("seeFullRanking")}
+                </Link>
+              </p>
+            )}
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-5">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <TeamLabel
+                team={summary.team}
+                showCode
+                flagSize="xl"
+                nameClassName="text-3xl font-bold leading-snug text-white sm:text-4xl"
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                {summary.teamPoints !== null ? (
+                  <TeamTierBadge points={summary.teamPoints} />
+                ) : null}
+                <Link
+                  href={`/groups?group=${summary.team.group}&team=${summary.team.id}`}
+                  className="inline-flex"
+                >
+                  <Badge
+                    variant="outline"
+                    className="border-wc-sky/30 bg-wc-sky/10 text-wc-sky transition-colors hover:border-wc-sky/50 hover:bg-wc-sky/20"
+                  >
+                    {common("group", { group: summary.team.group })}
+                  </Badge>
+                </Link>
+                <Badge
+                  variant="outline"
+                  className="border-white/15 bg-white/5 text-muted-foreground"
+                >
+                  {summary.team.confederation}
+                </Badge>
+              </div>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              {t("matchesPlayed")}: {summary.playedCount}/{summary.totalCount}
+              {!allStagesSelected && (
+                <span>
+                  {" "}
+                  · {t("averagesFrom", { count: includedMatches.length })}
+                </span>
               )}
-            >
-              <span className="text-xs font-medium leading-tight">
-                {outcomeLabel}
-              </span>
-              <span className="text-[10px] font-medium leading-tight opacity-75">
-                {overviewLinkLabel} →
-              </span>
-            </Link>
-          ) : (
-            <Badge variant="outline" className={outcomeClassName}>
-              {outcomeLabel}
-            </Badge>
-          )}
+            </p>
+
+            {outcomeChip}
+          </div>
         </div>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("matchesPlayed")}: {summary.playedCount}/{summary.totalCount}
-          {!allStagesSelected && (
-            <span> · {t("averagesFrom", { count: includedMatches.length })}</span>
-          )}
-        </p>
       </div>
 
-      <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-8">
-        <div className="grid min-w-[17.5rem] grid-cols-2 gap-3 sm:min-w-[19rem]">
-          <StatTile
-            label={t("fifaPoints")}
-            value={formatFifaPoints(summary.teamPoints)}
-            valueClassName="tabular-nums"
-          />
-          <StatTile
-            label={t("fifaRank")}
-            value={formatWholeNumber(summary.teamRank)}
-            className="px-5"
-            valueClassName="tabular-nums"
-          />
-          <StatTile
-            label={t("avgDifficulty")}
-            value={formatFifaPoints(summary.avgOpponentPoints)}
-            hint={
-              <AvgPointsContextHint context={avgPointsContext} align="left" />
-            }
-            valueClassName="tabular-nums text-wc-orange"
-          />
-          <StatTile
-            label={t("avgRank")}
-            value={formatStatValue(summary.avgOpponentRank, 1)}
-            className="px-5"
-            valueClassName="tabular-nums"
-          />
-        </div>
-
-        <div className="order-first flex min-w-0 flex-col items-center justify-center lg:order-none lg:min-w-[320px]">
-          <DifficultyGauge
-            value={summary.avgOpponentPoints}
-            hardestPathRank={hardestPathRank}
-            cohortSize={cohortSize}
-            label={t("avgDifficulty")}
-            rankTitle={hardestPathRank ? t("hardestPathRank") : undefined}
-            rankValue={
-              hardestPathRank
-                ? t("hardestPathRankOf", {
-                    rank: hardestPathRank,
-                    total: cohortSize,
-                  })
-                : undefined
-            }
-            rankMeta={
-              hardestPathRank
-                ? stages(COMPARE_STAGE_I18N_KEYS[cohortStage])
-                : undefined
-            }
-            rankAltNote={
-              showAltRankByAvgRank
-                ? t("hardestPathRankAltByAvgRank", {
-                    rank: hardestPathRankByAvgRank,
-                  })
-                : undefined
-            }
-          />
-          {hardestPathRank !== null && (
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              <Link href="/compare" className="text-wc-sky hover:underline">
-                {t("seeFullRanking")}
-              </Link>
-            </p>
-          )}
-        </div>
+      <div className="grid grid-cols-2 gap-3 p-5 sm:p-6 lg:grid-cols-4">
+        <StatTile
+          label={t("fifaPoints")}
+          value={formatFifaPoints(summary.teamPoints)}
+          valueClassName="tabular-nums"
+        />
+        <StatTile
+          label={t("fifaRank")}
+          value={formatWholeNumber(summary.teamRank)}
+          valueClassName="tabular-nums"
+        />
+        <StatTile
+          label={t("avgDifficulty")}
+          value={formatFifaPoints(summary.avgOpponentPoints)}
+          hint={
+            <AvgPointsContextHint context={avgPointsContext} align="left" />
+          }
+          valueClassName="tabular-nums text-wc-orange"
+        />
+        <StatTile
+          label={t("avgRank")}
+          value={formatStatValue(summary.avgOpponentRank, 1)}
+          valueClassName="tabular-nums"
+        />
       </div>
 
       {avgPointsContext && (

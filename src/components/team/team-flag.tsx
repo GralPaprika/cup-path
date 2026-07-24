@@ -7,7 +7,7 @@ import Link from "next/link";
 
 interface TeamFlagProps {
   team: Pick<Team, "id" | "flagUrl" | "displayName">;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
 }
 
@@ -15,6 +15,7 @@ const sizeClasses = {
   sm: "h-4 w-6",
   md: "h-5 w-7",
   lg: "h-8 w-11",
+  xl: "h-12 w-16",
 };
 
 export function TeamFlag({ team, size = "md", className = "" }: TeamFlagProps) {
@@ -31,7 +32,7 @@ export function TeamFlag({ team, size = "md", className = "" }: TeamFlagProps) {
 interface TeamLabelProps {
   team: Pick<Team, "id" | "flagUrl" | "displayName">;
   showCode?: boolean;
-  flagSize?: "sm" | "md" | "lg";
+  flagSize?: "sm" | "md" | "lg" | "xl";
   className?: string;
   nameClassName?: string;
   href?: string;
@@ -47,16 +48,21 @@ export function TeamLabel({
 }: TeamLabelProps) {
   const teamNames = useTranslations("teams");
   const displayName = getTeamDisplayName(teamNames, team);
+  const codeClassName =
+    flagSize === "xl"
+      ? "shrink-0 font-mono text-base font-semibold tracking-wide text-muted-foreground"
+      : "shrink-0 font-mono text-xs font-semibold tracking-wide text-muted-foreground";
+
+  const nameClasses =
+    flagSize === "xl"
+      ? `min-w-0 leading-snug ${nameClassName}`
+      : `min-w-0 truncate leading-snug ${nameClassName}`;
 
   const content = (
     <>
       <TeamFlag team={team} size={flagSize} />
-      {showCode && (
-        <span className="shrink-0 font-mono text-xs font-semibold tracking-wide text-muted-foreground">
-          {team.id}
-        </span>
-      )}
-      <span className={`min-w-0 truncate ${nameClassName}`}>{displayName}</span>
+      {showCode && <span className={codeClassName}>{team.id}</span>}
+      <span className={nameClasses}>{displayName}</span>
     </>
   );
 
@@ -72,7 +78,9 @@ export function TeamLabel({
   }
 
   return (
-    <span className={`inline-flex min-w-0 max-w-full items-center gap-2 ${className}`}>
+    <span
+      className={`inline-flex min-w-0 max-w-full items-center gap-2 ${className}`}
+    >
       {content}
     </span>
   );

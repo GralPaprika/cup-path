@@ -25,43 +25,54 @@ function SpotlightCard({
   sdOutlierLabel: string;
 }) {
   const t = useTranslations("home.groupExpectedFinishes");
+  const home = useTranslations("home");
   const deltaPrefix = spotlight.deltaFromMean >= 0 ? "+" : "";
 
   return (
-    <Link
-      href={`/team-analysis?team=${spotlight.team.id}`}
-      className="group block rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          {title}
-        </p>
-        {spotlight.isSdOutlier ? (
-          <span className="shrink-0 rounded-full bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
-            {sdOutlierLabel}
+    <div className="space-y-2">
+      <Link
+        href={`/?team=${spotlight.team.id}`}
+        className="group block rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {title}
+          </p>
+          {spotlight.isSdOutlier ? (
+            <span className="shrink-0 rounded-full bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
+              {sdOutlierLabel}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="mt-3 flex items-center gap-2">
+          <TeamFlag team={spotlight.team} size="sm" />
+          <span className="font-mono text-sm font-semibold text-white group-hover:text-wc-sky">
+            {spotlight.team.id}
           </span>
-        ) : null}
-      </div>
+          <span className="text-xs text-muted-foreground">
+            {t("groupLabel", { letter: spotlight.groupLetter })}
+          </span>
+        </div>
 
-      <div className="mt-3 flex items-center gap-2">
-        <TeamFlag team={spotlight.team} size="sm" />
-        <span className="font-mono text-sm font-semibold text-white group-hover:text-wc-sky">
-          {spotlight.team.id}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {t("groupLabel", { letter: spotlight.groupLetter })}
-        </span>
-      </div>
-
-      <p className="mt-2 font-mono text-lg font-semibold tabular-nums text-white">
-        {formatFifaPoints(spotlight.avgOpponentPoints)}
+        <p className="mt-2 font-mono text-lg font-semibold tabular-nums text-white">
+          {formatFifaPoints(spotlight.avgOpponentPoints)}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t("groupDifficultyDeltaFromMean", {
+            delta: `${deltaPrefix}${formatFifaPoints(spotlight.deltaFromMean)}`,
+          })}
+        </p>
+      </Link>
+      <p className="px-1">
+        <Link
+          href={`/groups?group=${spotlight.groupLetter}&team=${spotlight.team.id}`}
+          className="text-xs text-wc-sky hover:underline"
+        >
+          {home("openGroup", { letter: spotlight.groupLetter })}
+        </Link>
       </p>
-      <p className="mt-1 text-xs text-muted-foreground">
-        {t("groupDifficultyDeltaFromMean", {
-          delta: `${deltaPrefix}${formatFifaPoints(spotlight.deltaFromMean)}`,
-        })}
-      </p>
-    </Link>
+    </div>
   );
 }
 

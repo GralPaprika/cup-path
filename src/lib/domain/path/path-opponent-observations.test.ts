@@ -31,6 +31,7 @@ function pathMatch(round: string, opponentId: string): MatchDifficulty {
     pointsGap: -100,
     result: null,
     scoreLabel: null,
+    scorePensLabel: null,
     isNext: false,
     isPlayed: false,
   };
@@ -52,7 +53,6 @@ function summary(matches: MatchDifficulty[]): TeamPathSummary {
     avgOpponentPoints: 1700,
     avgOpponentRank: 10,
     isEliminated: false,
-    nextOpponent: null,
     playedCount: matches.length,
     totalCount: matches.length,
   };

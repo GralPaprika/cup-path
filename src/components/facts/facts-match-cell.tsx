@@ -15,7 +15,7 @@ interface FactsMatchCellProps {
 function TeamLink({ team }: { team: Team }) {
   return (
     <Link
-      href={`/team-analysis?team=${team.id}`}
+      href={`/?team=${team.id}`}
       className="inline-flex items-center gap-1 transition-colors hover:text-wc-sky"
     >
       <TeamFlag team={team} size="sm" />

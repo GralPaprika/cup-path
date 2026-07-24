@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 const FIFA_RANKING_METHODOLOGY_URL =
@@ -6,7 +7,13 @@ const FIFA_RANKING_METHODOLOGY_URL =
 export default async function AboutPage() {
   const t = await getTranslations("about");
 
-  const sections = [
+  const sections: Array<{
+    title: string;
+    body: string;
+    openHref?: string;
+    openLabel?: string;
+    source?: { href: string; label: string };
+  }> = [
     { title: t("whyTitle"), body: t("whyBody") },
     {
       title: t("metricTitle"),
@@ -21,12 +28,37 @@ export default async function AboutPage() {
     { title: t("comparisonTitle"), body: t("comparisonBody") },
     { title: t("pointsGapTitle"), body: t("pointsGapBody") },
     { title: t("rankGapTitle"), body: t("rankGapBody") },
-    { title: t("overviewTitle"), body: t("overviewBody") },
-    { title: t("advancedStatsTitle"), body: t("advancedStatsBody") },
-    { title: t("headToHeadTitle"), body: t("headToHeadBody") },
-    { title: t("groupsTitle"), body: t("groupsBody") },
+    {
+      title: t("overviewTitle"),
+      body: t("overviewBody"),
+      openHref: "/overview",
+      openLabel: t("overviewOpen"),
+    },
+    {
+      title: t("advancedStatsTitle"),
+      body: t("advancedStatsBody"),
+      openHref: "/",
+      openLabel: t("teamPathOpen"),
+    },
+    {
+      title: t("headToHeadTitle"),
+      body: t("headToHeadBody"),
+      openHref: "/compare",
+      openLabel: t("compareOpen"),
+    },
+    {
+      title: t("groupsTitle"),
+      body: t("groupsBody"),
+      openHref: "/groups",
+      openLabel: t("groupsOpen"),
+    },
     { title: t("stagesTitle"), body: t("stagesBody") },
-    { title: t("simulationTitle"), body: t("simulationBody") },
+    {
+      title: t("simulationTitle"),
+      body: t("simulationBody"),
+      openHref: "/simulate",
+      openLabel: t("simulateOpen"),
+    },
     { title: t("rankingModesTitle"), body: t("rankingModesBody") },
     { title: t("dataTitle"), body: t("dataBody") },
   ];
@@ -48,6 +80,16 @@ export default async function AboutPage() {
             {section.body.split("\n\n").map((paragraph, index) => (
               <p key={index}>{paragraph}</p>
             ))}
+            {section.openHref && section.openLabel && (
+              <p>
+                <Link
+                  href={section.openHref}
+                  className="text-wc-sky hover:underline"
+                >
+                  {section.openLabel}
+                </Link>
+              </p>
+            )}
             {section.source && (
               <p>
                 <a

@@ -8,12 +8,14 @@ Analyze each team's tournament path from the group stage through the final, comp
 
 ### Pages
 
-- **Overview** (`/`) — Tournament snapshot, strength by stage, highlights (upsets, over/under performers)
-- **Team path** (`/team-analysis`) — Team path summary, difficulty gauge, tournament path table, advanced statistics
+- **Team path** (`/`) — Origin story, team path summary, difficulty gauge, tournament path table, advanced statistics
+- **Tournament overview** (`/overview`) — Tournament snapshot, strength by stage, group and knockout deep dives
 - **Groups** (`/groups`) — Group strength comparison, standings, path averages per team
 - **Compare** (`/compare`) — Sortable leaderboard, head-to-head two-team comparison
 - **Simulate** (`/simulate`) — What-if path exploration (group swaps, knockout overrides)
 - **About** (`/about`) — Methodology and data sources
+
+Legacy URLs `/team-analysis` and `/analysis` redirect to `/`.
 
 ### Metrics and UI
 
@@ -23,7 +25,7 @@ Analyze each team's tournament path from the group stage through the final, comp
 - **Summary context:** percentile vs all nations and closest anchor team
 - **Cohort `#` rank** among teams at the furthest included stage
 - **Five ranking modes:** pot-draw cutoff (19 Nov 2025), 19 Jan, 1 Apr, 11 Jun 2026, and post-tournament 20 Jul 2026 (default)
-- Ranking mode persists across Overview, Team path, Groups, Compare, and Simulate
+- Ranking mode persists across Team path, Tournament overview, Groups, Compare, and Simulate
 - FIFA flag images and localized team names (Spanish default, English available)
 - Responsive UI with next-intl (ES/EN)
 

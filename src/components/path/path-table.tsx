@@ -116,7 +116,13 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap items-center gap-2">
-                      <TeamLabel team={match.opponent} showCode flagSize="sm" />
+                      <TeamLabel
+                        team={match.opponent}
+                        showCode
+                        flagSize="sm"
+                        href={`/?team=${match.opponent.id}`}
+                        nameClassName="text-white hover:text-wc-sky"
+                      />
                       {match.opponentPoints !== null ? (
                         <TeamTierBadge
                           points={match.opponentPoints}
@@ -153,9 +159,21 @@ export function PathTable({ matches, includedStages }: PathTableProps) {
                     {match.isPlayed && match.result ? (
                       <Badge
                         variant="outline"
-                        className={matchResultBadgeClass(match.result)}
+                        className={cn(
+                          matchResultBadgeClass(match.result),
+                          "flex flex-col items-end gap-0 leading-tight",
+                          match.scorePensLabel &&
+                            "h-auto whitespace-normal py-1",
+                        )}
                       >
-                        {results(match.result)} {match.scoreLabel}
+                        <span>
+                          {results(match.result)} {match.scoreLabel}
+                        </span>
+                        {match.scorePensLabel ? (
+                          <span className="text-[10px] font-normal opacity-90">
+                            {match.scorePensLabel}
+                          </span>
+                        ) : null}
                       </Badge>
                     ) : (
                       <Badge

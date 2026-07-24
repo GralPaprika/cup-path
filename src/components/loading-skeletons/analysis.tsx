@@ -27,26 +27,19 @@ export function SummaryCardSkeleton() {
           <Skeleton className="h-7 w-44 bg-white/10" />
           <Skeleton className="h-6 w-20 rounded-full bg-white/10" />
           <Skeleton className="h-6 w-24 rounded-full bg-white/10" />
+          <Skeleton className="h-6 w-28 rounded-full bg-white/10" />
         </div>
         <Skeleton className="mt-2 h-4 w-48 bg-white/10" />
       </div>
-      <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(17.5rem,1fr)_auto_minmax(14rem,1fr)] lg:items-center lg:gap-8">
-        <div className="grid min-w-[17.5rem] grid-cols-[minmax(0,0.85fr)_minmax(0,1.25fr)] gap-3 sm:min-w-[19rem]">
+      <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-8">
+        <div className="grid min-w-[17.5rem] grid-cols-2 gap-3 sm:min-w-[19rem]">
           <StatBlockSkeleton />
           <StatBlockSkeleton />
           <StatBlockSkeleton />
           <StatBlockSkeleton />
-          <StatBlockSkeleton className="col-span-2" />
         </div>
         <div className="order-first flex min-w-0 flex-col items-center justify-center lg:order-none lg:min-w-[320px]">
           <Skeleton className="aspect-[300/168] w-full max-w-[300px] bg-white/10" />
-        </div>
-        <div className="glass-panel-subtle flex min-h-[9.5rem] flex-col justify-center px-6 py-5 sm:px-7 sm:py-6">
-          <Skeleton className="h-2.5 w-24 bg-white/10" />
-          <div className="mt-3 flex items-center gap-2">
-            <Skeleton className="size-7 rounded-full bg-white/10" />
-            <Skeleton className="h-6 w-28 bg-white/10" />
-          </div>
         </div>
       </div>
       <div className="border-t border-white/8 px-5 py-4 sm:px-6">

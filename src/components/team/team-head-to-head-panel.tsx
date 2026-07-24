@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { ComparisonEntry, PathStage, RankingMode, Team } from "@/lib/types";
 import type { TeamAnalysisResult } from "@/lib/services/analysis-service";
 import { useTranslations } from "next-intl";
@@ -375,6 +376,17 @@ export function TeamHeadToHeadPanel({
             team: harderTeam.displayName,
             gap: formatFifaPoints(pointsGap),
           })}
+        </p>
+      )}
+
+      {showComparison && teamAId && teamBId && teamAId !== teamBId && (
+        <p className="text-xs text-muted-foreground">
+          <Link
+            href={`/simulate?team=${teamAId}&compareTeam=${teamBId}`}
+            className="text-wc-sky hover:underline"
+          >
+            {t("simulateWhatIf")}
+          </Link>
         </p>
       )}
 

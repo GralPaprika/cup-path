@@ -3,6 +3,7 @@
 import type { Team } from "@/lib/types";
 import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 interface TeamFlagProps {
   team: Pick<Team, "id" | "flagUrl" | "displayName">;
@@ -33,6 +34,7 @@ interface TeamLabelProps {
   flagSize?: "sm" | "md" | "lg";
   className?: string;
   nameClassName?: string;
+  href?: string;
 }
 
 export function TeamLabel({
@@ -41,12 +43,13 @@ export function TeamLabel({
   flagSize = "md",
   className = "",
   nameClassName = "",
+  href,
 }: TeamLabelProps) {
   const teamNames = useTranslations("teams");
   const displayName = getTeamDisplayName(teamNames, team);
 
-  return (
-    <span className={`inline-flex min-w-0 max-w-full items-center gap-2 ${className}`}>
+  const content = (
+    <>
       <TeamFlag team={team} size={flagSize} />
       {showCode && (
         <span className="shrink-0 font-mono text-xs font-semibold tracking-wide text-muted-foreground">
@@ -54,6 +57,23 @@ export function TeamLabel({
         </span>
       )}
       <span className={`min-w-0 truncate ${nameClassName}`}>{displayName}</span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={`inline-flex min-w-0 max-w-full items-center gap-2 transition-colors hover:opacity-90 ${className}`}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <span className={`inline-flex min-w-0 max-w-full items-center gap-2 ${className}`}>
+      {content}
     </span>
   );
 }

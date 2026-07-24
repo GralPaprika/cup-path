@@ -4,7 +4,7 @@ type AnalysisRedirectPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-/** Legacy URL; prefer `/team-analysis`. */
+/** Legacy URL; prefer `/`. */
 export default async function AnalysisRedirectPage({
   searchParams,
 }: AnalysisRedirectPageProps) {
@@ -16,5 +16,5 @@ export default async function AnalysisRedirectPage({
   }
 
   const suffix = query.toString();
-  redirect(suffix ? `/team-analysis?${suffix}` : "/team-analysis");
+  redirect(suffix ? `/?${suffix}` : "/");
 }

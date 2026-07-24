@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,8 @@ interface CollapsibleSectionProps {
   contentClassName?: string;
   /** Renders as a nested sub-panel instead of a standalone glass panel. */
   embedded?: boolean;
+  /** Whether the section starts expanded. Defaults to collapsed. */
+  defaultOpen?: boolean;
 }
 
 export function CollapsibleSection({
@@ -19,7 +21,10 @@ export function CollapsibleSection({
   children,
   contentClassName,
   embedded = false,
+  defaultOpen = false,
 }: CollapsibleSectionProps) {
+  const [open, setOpen] = useState(defaultOpen);
+
   return (
     <details
       className={cn(
@@ -28,7 +33,10 @@ export function CollapsibleSection({
           ? "rounded-xl border border-white/8 bg-white/[0.02]"
           : "glass-panel",
       )}
-      open
+      open={open}
+      onToggle={(event) => {
+        setOpen((event.currentTarget as HTMLDetailsElement).open);
+      }}
     >
       <summary
         className={cn(

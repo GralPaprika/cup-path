@@ -34,6 +34,7 @@ function match(
     pointsGap: null,
     result: isPlayed ? "W" : null,
     scoreLabel: isPlayed ? "1-0" : null,
+    scorePensLabel: null,
     isNext: false,
     isPlayed,
   };

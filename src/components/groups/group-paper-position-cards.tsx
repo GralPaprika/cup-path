@@ -91,7 +91,7 @@ function PositionMissCard({
 
   return (
     <Link
-      href={`/team-analysis?team=${entry.team.id}`}
+      href={`/?team=${entry.team.id}`}
       className={cn(
         "group flex flex-col gap-3 rounded-xl border p-4 transition-all",
         eliminated

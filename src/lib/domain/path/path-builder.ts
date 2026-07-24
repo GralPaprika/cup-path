@@ -9,6 +9,7 @@ import {
   getAdvancingTeamIds,
   isTeamEliminatedFromGroup,
 } from "@/lib/domain/group/group-standings";
+import { isThirdPlaceMatch } from "@/lib/domain/match/match-stages";
 
 const GROUP_NAMES = [
   "Group A",
@@ -42,13 +43,13 @@ function getTeamGoals(
   ctx: TournamentContext,
   match: OpenFootballMatch,
   teamId: string,
+  pair: [number, number],
 ): [number, number] | null {
-  if (!match.score?.ft) return null;
   const home = ctx.resolveTeam(match.team1);
   const away = ctx.resolveTeam(match.team2);
   if (!home || !away) return null;
 
-  const [homeGoals, awayGoals] = match.score.ft;
+  const [homeGoals, awayGoals] = pair;
   if (home.id === teamId) return [homeGoals, awayGoals];
   if (away.id === teamId) return [awayGoals, homeGoals];
   return null;
@@ -69,24 +70,36 @@ function getMatchResult(
   return winnerTeam.id === teamId ? "W" : "L";
 }
 
+interface FormattedPathScore {
+  scoreLabel: string;
+  scorePensLabel: string | null;
+}
+
 function formatScore(
   ctx: TournamentContext,
   match: OpenFootballMatch,
   teamId: string,
-): string | null {
-  const goals = getTeamGoals(ctx, match, teamId);
+): FormattedPathScore | null {
+  if (!match.score?.ft) return null;
+
+  const hasPens = Boolean(match.score.p);
+  const pair =
+    !hasPens && match.score.et ? match.score.et : match.score.ft;
+  const goals = getTeamGoals(ctx, match, teamId, pair);
   if (!goals) return null;
 
   const [forGoals, againstGoals] = goals;
-  let label = `${forGoals}-${againstGoals}`;
+  let scoreLabel = `${forGoals}-${againstGoals}`;
+  let scorePensLabel: string | null = null;
 
-  if (match.score?.p) {
-    label += " (pens)";
-  } else if (match.score?.et) {
-    label += " (aet)";
+  if (hasPens && match.score.p) {
+    const [homePens, awayPens] = match.score.p;
+    scorePensLabel = `(${homePens}-${awayPens} pens)`;
+  } else if (match.score.et) {
+    scoreLabel += " (aet)";
   }
 
-  return label;
+  return { scoreLabel, scorePensLabel };
 }
 
 export function getTeamMatches(
@@ -144,6 +157,7 @@ export interface TeamPathMatch {
   opponent: Team;
   result: MatchResult;
   scoreLabel: string | null;
+  scorePensLabel: string | null;
   isPlayed: boolean;
   isNext: boolean;
 }
@@ -165,11 +179,13 @@ export function buildTeamPath(
     const isPlayed = isMatchPlayed(match);
     const isNext = !eliminated && nextMatch === match;
 
+    const formatted = formatScore(ctx, match, teamId);
     path.push({
       match,
       opponent,
       result: getMatchResult(ctx, match, teamId),
-      scoreLabel: formatScore(ctx, match, teamId),
+      scoreLabel: formatted?.scoreLabel ?? null,
+      scorePensLabel: formatted?.scorePensLabel ?? null,
       isPlayed,
       isNext,
     });
@@ -177,9 +193,14 @@ export function buildTeamPath(
     if (
       isPlayed &&
       getMatchResult(ctx, match, teamId) === "L" &&
-      isKnockoutRound(match.round)
+      isKnockoutRound(match.round) &&
+      !isThirdPlaceMatch(match.round)
     ) {
-      break;
+      // SF losers may still play the third-place match — keep going when later
+      // fixtures remain on this team's schedule.
+      const matchIndex = matches.indexOf(match);
+      if (matchIndex < 0 || matchIndex === matches.length - 1) break;
+      continue;
     }
   }
 

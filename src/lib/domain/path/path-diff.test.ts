@@ -30,6 +30,7 @@ function pathMatch(
     pointsGap: -100,
     result: null,
     scoreLabel: null,
+    scorePensLabel: null,
     isNext: false,
     isPlayed: false,
   };

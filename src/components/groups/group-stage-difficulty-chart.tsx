@@ -4,6 +4,7 @@ import { OpponentDifficultyPointTooltip } from "@/components/facts/opponent-diff
 import { OpponentDifficultyScatterChart } from "@/components/facts/opponent-difficulty-scatter-chart";
 import type { GroupStageDifficultyStrip } from "@/lib/types";
 import { CHART_COLORS } from "@/lib/chart-colors";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 interface GroupStageDifficultyChartProps {
@@ -66,7 +67,7 @@ export function GroupStageDifficultyChart({
     teamFifaPoints: entry.teamFifaPoints,
     rivalDifficultyPoints: entry.avgOpponentPoints,
     won: entry.qualified,
-    href: `/team-analysis?team=${entry.team.id}`,
+    href: `/?team=${entry.team.id}`,
     tooltipData: {
       team: entry.team,
       teamFifaPoints: entry.teamFifaPoints,
@@ -108,6 +109,11 @@ export function GroupStageDifficultyChart({
             </p>
             <p className="text-xs text-muted-foreground">
               {t("groupDifficultyReadingFootnote")}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              <Link href="/groups" className="text-wc-sky hover:underline">
+                {t("groupDifficultyGroupsLink")}
+              </Link>
             </p>
           </>
         }

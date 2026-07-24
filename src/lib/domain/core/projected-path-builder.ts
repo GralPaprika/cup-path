@@ -31,6 +31,7 @@ function toMatchDifficulty(
   rankings: Map<string, RankingEntry>,
   result: MatchResult,
   scoreLabel: string | null,
+  scorePensLabel: string | null,
   isPlayed: boolean,
   isNext: boolean,
 ): MatchDifficulty {
@@ -59,6 +60,7 @@ function toMatchDifficulty(
         : null,
     result,
     scoreLabel,
+    scorePensLabel,
     isNext,
     isPlayed,
   };
@@ -82,7 +84,15 @@ export function buildProjectedTeamPathSummary(
   );
 
   const matches: MatchDifficulty[] = groupEntries.map(
-    ({ match, opponent, result, scoreLabel, isPlayed, isNext }) =>
+    ({
+      match,
+      opponent,
+      result,
+      scoreLabel,
+      scorePensLabel,
+      isPlayed,
+      isNext,
+    }) =>
       toMatchDifficulty(
         teamId,
         match.round,
@@ -91,6 +101,7 @@ export function buildProjectedTeamPathSummary(
         rankings,
         result,
         scoreLabel,
+        scorePensLabel,
         isPlayed,
         isNext,
       ),
@@ -132,6 +143,7 @@ export function buildProjectedTeamPathSummary(
         rankings,
         result,
         scoreLabel,
+        null,
         isPlayed,
         false,
       ),
@@ -162,8 +174,6 @@ export function buildProjectedTeamPathSummary(
     ALL_PATH_STAGES,
   );
 
-  const nextMatch = finalMatches.find((match) => match.isNext);
-
   return {
     team,
     teamRank: teamRanking?.rank ?? null,
@@ -172,7 +182,6 @@ export function buildProjectedTeamPathSummary(
     avgOpponentPoints,
     avgOpponentRank,
     isEliminated: eliminated,
-    nextOpponent: nextMatch?.opponent ?? null,
     playedCount: finalMatches.filter((match) => match.isPlayed).length,
     totalCount: finalMatches.length,
   };

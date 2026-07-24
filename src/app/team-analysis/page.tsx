@@ -1,21 +1,20 @@
-import { Suspense } from "react";
-import { cookies } from "next/headers";
-import { getAllTeamsEnriched } from "@/lib/data/team-registry";
-import { TeamAnalysisPageClient } from "@/components/pages/team-analysis-page-client";
-import { PageShellSkeleton } from "@/components/loading-skeletons";
-import { RANKING_MODE_COOKIE } from "@/lib/client/ranking-mode-preference";
-import { parseRankingMode } from "@/lib/data/ranking-modes";
+import { redirect } from "next/navigation";
 
-export default async function TeamAnalysisPage() {
-  const cookieStore = await cookies();
-  const mode = parseRankingMode(
-    cookieStore.get(RANKING_MODE_COOKIE)?.value ?? null,
-  );
-  const teams = await getAllTeamsEnriched(mode);
+type TeamAnalysisRedirectPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-  return (
-    <Suspense fallback={<PageShellSkeleton />}>
-      <TeamAnalysisPageClient teams={teams} />
-    </Suspense>
-  );
+/** Legacy URL; Team path now lives at `/`. */
+export default async function TeamAnalysisRedirectPage({
+  searchParams,
+}: TeamAnalysisRedirectPageProps) {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(params)) {
+    if (typeof value === "string") query.set(key, value);
+  }
+
+  const suffix = query.toString();
+  redirect(suffix ? `/?${suffix}` : "/");
 }

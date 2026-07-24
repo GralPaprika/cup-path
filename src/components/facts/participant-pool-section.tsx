@@ -73,7 +73,7 @@ export function ParticipantPoolSection({
         />
         {lowestRankedQualifier ? (
           <Link
-            href={`/team-analysis?team=${lowestRankedQualifier.team.id}`}
+            href={`/?team=${lowestRankedQualifier.team.id}`}
             className="block rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
           >
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">

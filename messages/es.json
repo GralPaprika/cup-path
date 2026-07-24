@@ -4,8 +4,8 @@
     "tagline": "Análisis de dificultad de rivales en el Mundial"
   },
   "nav": {
-    "home": "Resumen",
     "teamAnalysis": "Camino",
+    "overview": "Resumen del torneo",
     "groups": "Grupos",
     "compare": "Comparar",
     "simulate": "Simular",
@@ -67,15 +67,22 @@
     "status": "Estado",
     "active": "Activo",
     "eliminated": "Eliminado",
-    "nextOpponent": "Próximo rival",
-    "noNextOpponent": "Ninguno",
+    "outcomeChampion": "Campeón",
+    "outcomeRunnerUp": "Subcampeón",
+    "outcomeThirdPlace": "Tercer puesto",
+    "outcomeGroupStage": "ronda de grupos",
+    "outcomeEliminatedIn": "Eliminado en {round}",
+    "outcomeSeeRoundOnOverview": "Ver cómo se jugó {round}",
     "points": "pts",
     "matchesPlayed": "Partidos",
-    "averagesFrom": "promedios de {count} partidos"
+    "averagesFrom": "promedios de {count} partidos",
+    "seeFullRanking": "Ver ranking completo"
   },
   "teamAnalysis": {
     "title": "Análisis del camino del equipo",
-    "subtitle": "Mide qué tan difícil es el camino de un equipo hacia la final, según los puntos FIFA de cada rival enfrentado.",
+    "originStory": "Un amigo decía que a Argentina le habían dado el camino fácil hacia la final. CupPath hace esa pregunta para cada selección: con los puntos del ranking FIFA, ¿qué tan duro se ve cada camino sobre el papel?",
+    "subtitle": "Elige un equipo para ver la dificultad del camino según los puntos FIFA de cada rival enfrentado.",
+    "seeFullRanking": "Ver ranking completo",
     "advanced": {
       "title": "Estadísticas avanzadas",
       "subtitle": "Distribución más detallada de rivales y métricas de concordancia del grupo comparable.",
@@ -153,6 +160,7 @@
       "harderPathSummary": "El camino de {team} es {gap} más duro por el promedio de puntos del rival.",
       "rankUnavailable": "Camino # no está disponible cuando ningún equipo pertenece al grupo comparable de tu filtro de fases.",
       "rankCohortNote": "Camino # ordena equipos en {stage} o más usando el promedio de puntos del rival.",
+      "simulateWhatIf": "Probar este enfrentamiento en Simular",
       "chartTitle": "Puntos del rival por partido",
       "chartLoading": "Cargando gráfico del camino…",
       "teamPointsLegend": "Pts equipo",
@@ -262,7 +270,8 @@
       "groupOrderingIntro": "Cada grupo se puntúa por la fuerza FIFA promedio de sus cuatro equipos. El puesto 1 es el grupo más fuerte en esa escala.",
       "spearmanBody": "Spearman ρ mide qué tan parecido es el orden de los grupos por puntos promedio frente a ranking promedio. 1 significa orden idéntico; 0 significa sin relación; valores cercanos a 1 indican que ambos métodos coinciden en qué grupos son más fuertes.",
       "kendallBody": "Kendall τ-b cuenta los acuerdos por pares entre los dos ordenamientos de grupos, ajustando por empates. τ = 1 significa que todos los pares coinciden; τ = 0 significa acuerdo mixto.",
-      "footnotePrimary": "Las tarjetas de grupo muestran el puesto de fuerza de cada uno. La dificultad de camino por equipo está en la tabla de detalle y en Camino."
+      "footnotePrimary": "Las tarjetas de grupo muestran el puesto de fuerza de cada uno. La dificultad de camino por equipo está en la tabla de detalle y en",
+      "footnoteTeamPathLink": "Camino"
     }
   },
   "about": {
@@ -282,16 +291,21 @@
     "pointsGapBody": "La diferencia de puntos es los puntos FIFA del rival menos los del equipo. Una diferencia positiva indica un rival más difícil (más fuerte sobre el papel). Una negativa indica un rival más accesible. Es la señal principal de dificultad por partido en la tabla de recorrido.",
     "rankGapTitle": "Diferencia de ranking",
     "rankGapBody": "La diferencia de ranking es el ranking del rival menos el del equipo. Una diferencia negativa indica un rival más difícil (mejor posicionado). Una positiva indica un rival más accesible.",
-    "overviewTitle": "Resumen",
-    "overviewBody": "Resumen es la página de inicio: una lectura del Mundial 2026 a escala de torneo a través de los puntos del ranking FIFA.\n\nEmpieza con una introducción que ordena a las 48 selecciones en niveles informales por puntos FIFA (favoritos al título, contendientes, caballos negros, outsiders, makeweights), y luego recorre las pools de grupos y eliminatorias —fuerza promedio, dificultad de rivales y con qué frecuencia los favoritos ganaron, empataron o cayeron según la brecha de puntos. Las secciones de grupos y eliminatoria profundizan en clasificaciones, puestos esperados y dificultad de camino por ronda.\n\nUsa el selector de modo de ranking para releer las mismas historias con distintas instantáneas FIFA (por ejemplo el corte del sorteo frente al ranking post-torneo).",
+    "overviewTitle": "Resumen del torneo",
+    "overviewBody": "Resumen del torneo es una lectura del Mundial 2026 a escala de torneo a través de los puntos del ranking FIFA.\n\nEmpieza con una introducción que ordena a las 48 selecciones en niveles informales por puntos FIFA (favoritos al título, contendientes, caballos negros, outsiders, makeweights), y luego recorre las pools de grupos y eliminatorias —fuerza promedio, dificultad de rivales y con qué frecuencia los favoritos ganaron, empataron o cayeron según la brecha de puntos. Las secciones de grupos y eliminatoria profundizan en clasificaciones, puestos esperados y dificultad de camino por ronda.\n\nUsa el selector de modo de ranking para releer las mismas historias con distintas instantáneas FIFA (por ejemplo el corte del sorteo frente al ranking post-torneo).",
+    "overviewOpen": "Abrir resumen del torneo",
+    "teamPathOpen": "Abrir camino del equipo",
+    "groupsOpen": "Abrir grupos",
+    "compareOpen": "Abrir comparar",
+    "simulateOpen": "Abrir simular",
     "advancedStatsTitle": "Estadísticas avanzadas",
-    "advancedStatsBody": "En Camino, la sección Estadísticas avanzadas siempre está visible debajo de la tabla de recorrido. Empieza con un gráfico de puntos del rival: una barra por oponente (bandera y código FIFA abajo), con los valores al pie de cada barra.\n\nEl gráfico incluye una franja sombreada de promedio ± una desviación estándar poblacional sobre los partidos incluidos, una línea naranja discontinua para el promedio y una línea azul sólida para los puntos FIFA del equipo seleccionado — así puedes ver cada rival respecto al promedio del camino y al propio equipo.\n\nDebajo del gráfico, tablas compactas resumen los puntos y el ranking FIFA de los rivales (mediana, desviación estándar, mín, máx). Un bloque de concordancia del grupo muestra Spearman ρ y Kendall τ-b: qué tan parecidos son los ordenamientos por puntos y por ranking entre equipos comparables en la fase seleccionada.\n\nLas estadísticas de distribución usan varianza poblacional sobre los partidos del filtro de fases (n es el número de partidos). El medidor principal y el # del camino siguen usando el promedio de puntos FIFA del rival.\n\nEn Grupos, un panel avanzado plegable aparte muestra métricas similares para el orden de fuerza de los doce grupos.",
+    "advancedStatsBody": "En Camino, Estadísticas avanzadas está en una sección plegable debajo de la tabla de recorrido. Expándela para ver un gráfico de puntos del rival: una barra por oponente (bandera y código FIFA abajo), con los valores al pie de cada barra.\n\nEl gráfico incluye una franja sombreada de promedio ± una desviación estándar poblacional sobre los partidos incluidos, una línea naranja discontinua para el promedio y una línea azul sólida para los puntos FIFA del equipo seleccionado — así puedes ver cada rival respecto al promedio del camino y al propio equipo.\n\nDebajo del gráfico, tablas compactas resumen los puntos y el ranking FIFA de los rivales (mediana, desviación estándar, mín, máx). Un bloque de concordancia del grupo muestra Spearman ρ y Kendall τ-b: qué tan parecidos son los ordenamientos por puntos y por ranking entre equipos comparables en la fase seleccionada.\n\nLas estadísticas de distribución usan varianza poblacional sobre los partidos del filtro de fases (n es el número de partidos). El medidor principal y el # del camino siguen usando el promedio de puntos FIFA del rival.\n\nEn Grupos, un panel avanzado plegable aparte muestra métricas similares para el orden de fuerza de los doce grupos.",
     "headToHeadTitle": "Comparar cara a cara",
     "headToHeadBody": "En Comparar, el panel cara a cara permite elegir dos equipos y ver su dificultad de camino lado a lado: promedio de puntos del rival, ranking promedio del rival, # del camino y estado.\n\nLa columna Δ muestra Equipo A menos Equipo B. Un delta positivo en puntos significa que A enfrentó rivales más duros en promedio. El # del camino solo aparece cuando ambos equipos pertenecen al grupo comparable de tu filtro de fases; si no, el panel indica que el puesto no está disponible.",
     "groupsTitle": "Grupos",
     "groupsBody": "La página Grupos ordena los doce grupos del Mundial por la fuerza FIFA promedio de sus cuatro equipos. Cada tarjeta muestra un puesto de fuerza (# / 12) por puntos promedio y por ranking promedio, más una mini tabla con colores de clasificación (1.º, 2.º, mejor tercero).\n\nAl seleccionar un grupo se abre una tabla detallada con la clasificación, puntos y ranking FIFA, y los promedios de camino de cada equipo (pts. promedio del rival, ranking promedio del rival, # del camino entre los 48 equipos). Bloques de estadísticas del grupo muestran la distribución de puntos y ranking FIFA entre los cuatro equipos.",
     "stagesTitle": "Filtros por fase",
-    "stagesBody": "Contar partidos desde te permite elegir qué rondas alimentan los promedios —solo grupos, hasta la final, o cualquier punto intermedio. La fase más avanzada seleccionada define el grupo de comparación para el #.\n\nEn Comparar, Mostrar equipos reduce la tabla a selecciones que llegaron al menos a esa ronda. No puedes mostrar equipos eliminados antes de la fase más avanzada en tus promedios, porque nunca jugaron esos partidos. El modo de ranking que elijas se recuerda al cambiar entre Resumen, Camino, Grupos, Comparar y Simular.",
+    "stagesBody": "Contar partidos desde te permite elegir qué rondas alimentan los promedios —solo grupos, hasta la final, o cualquier punto intermedio. La fase más avanzada seleccionada define el grupo de comparación para el #.\n\nEn Comparar, Mostrar equipos reduce la tabla a selecciones que llegaron al menos a esa ronda. No puedes mostrar equipos eliminados antes de la fase más avanzada en tus promedios, porque nunca jugaron esos partidos. El modo de ranking que elijas se recuerda al cambiar entre Camino, Resumen del torneo, Grupos, Comparar y Simular.",
     "simulationTitle": "Simulación de camino — qué hace y qué no hace",
     "simulationBody": "Simular es una herramienta exploratoria. Permite intercambiar posiciones en los grupos, elegir ganadores alternativos en el cuadro y ver cómo podría cambiar la dificultad promedio del camino de un equipo. No es un predictor de partidos y no modela forma, lesiones ni desempates cara a cara más allá de lo descrito abajo.\n\nLos cambios en grupos reordenan equipos solo dentro de su grupo —no puedes mover una selección a otro grupo. Al intercambiar posiciones, cada equipo conserva su récord real de fase de grupos (puntos, diferencia de goles, goles a favor). El simulador no vuelve a jugar partidos de grupo para inventar nuevas estadísticas.\n\nLa clasificación de mejores terceros ordena los doce terceros por récord en grupos: puntos, luego diferencia de goles, luego goles a favor, y código del equipo como último desempate. Es una versión simplificada de las reglas FIFA. No se modelan fair play, enfrentamientos directos entre terceros ni sorteo.\n\nLa pestaña Ranking de mejores terceros muestra quién avanzaría con esas reglas. El cuadro eliminatorio, sin embargo, sigue llenando cada casilla de tercero (3A, 3D, etc.) con quien quede tercero en ese grupo —aún no reasigna qué tercero clasificado va a qué partido de dieciseisavos según la matriz completa de FIFA. Así, un tercero marcado como Eliminado en el ranking puede seguir apareciendo en una casilla del cuadro, y viceversa.\n\nLos cambios en eliminatoria sustituyen ganadores partido a partido. Los rivales futuros no jugados siguen usando puntos FIFA de la instantánea elegida —no los resultados de tu cuadro simulado. Toma la dificultad simulada como un qué pasaría si cambiaran los rivales, no como un pronóstico del torneo.",
     "dataTitle": "Fuentes de datos",
@@ -315,7 +329,7 @@
   },
   "home": {
     "title": "Panorama del torneo",
-    "subtitle": "Un amigo decía que a Argentina le habían dado el camino fácil hacia la final. CupPath hace esa pregunta para cada selección: con los puntos del ranking FIFA, ¿qué tan duro se ve cada camino sobre el papel?",
+    "subtitle": "Una lectura fase a fase del Mundial 2026 a través de los puntos del ranking FIFA: fuerza de las pools, resultados frente a la brecha de puntos y dificultad de rivales desde grupos hasta la final.",
     "intro": {
       "title": "Introducción",
       "lead": "Antes que nada: si estás viendo esto, se viene un análisis algo matemático de lo que ocurrió en la Copa del Mundo 2026. Esta parte la traté de hacer lo mejor que pude, usando el ranking FIFA, que es la herramienta más objetiva que tengo para comparar los equipos.",
@@ -450,6 +464,9 @@
     },
     "methodologyNote": "Las métricas usan la instantánea FIFA seleccionada y el cuadro actual.",
     "methodologyLink": "Ver metodología",
+    "compareAllPaths": "Comparar todos los caminos",
+    "openGroups": "Explorar grupos",
+    "openGroup": "Abrir grupo {letter}",
     "groupExpectedFinishes": {
       "title": "Fase de grupos en detalle",
       "subtitle": "De victorias/derrotas y empates, pasando por las tablas finales, hasta quién tuvo los rivales más duros.",
@@ -550,6 +567,7 @@
       "groupDifficultyCaption": "Fuerza del equipo vs dificultad promedio del rival en fase de grupos",
       "groupDifficultyFootnote": "Cada punto es un equipo. X = puntos FIFA del equipo; Y = promedio FIFA de sus tres rivales de grupo. Verde = avanzó; rojo = eliminado.",
       "groupDifficultyReadingFootnote": "Más a la derecha = equipo más fuerte; más arriba en el gráfico = rival más fuerte. El promedio naranja del torneo se dibuja en ambos ejes para cruzar en cuadrantes: arriba-izquierda = equipos más débiles con grupos duros; abajo-derecha = equipos más fuertes con grupos más fáciles.",
+      "groupDifficultyGroupsLink": "Abre la página Grupos para clasificaciones y detalle por grupo.",
       "groupDifficultyLegendVictory": "Avanzó",
       "groupDifficultyLegendDefeat": "Eliminado",
       "groupDifficultyAxisTeamPoints": "Puntos FIFA del equipo",

@@ -74,7 +74,7 @@ export function KnockoutStageOpponentDifficultyChart({
     teamFifaPoints: entry.teamFifaPoints,
     rivalDifficultyPoints: entry.opponentFifaPoints,
     won: entry.qualified,
-    href: `/team-analysis?team=${entry.team.id}`,
+    href: `/?team=${entry.team.id}`,
     tooltipData: {
       team: entry.team,
       teamFifaPoints: entry.teamFifaPoints,

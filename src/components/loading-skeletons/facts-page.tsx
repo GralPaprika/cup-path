@@ -1,13 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { KNOCKOUT_FACTS_ROUNDS } from "@/lib/domain/knockout/knockout-facts-round-config";
 import {
-  AT_GLANCE_MATCH_TILES,
-  AtGlanceRowSkeleton,
   CollapsibleSectionSkeleton,
   ParticipantPoolSectionSkeleton,
 } from "@/components/loading-skeletons/shared";
 
-function KnockoutRoundSkeleton({ glanceRows = 1 }: { glanceRows?: number }) {
+function KnockoutRoundSkeleton() {
   return (
     <div className="glass-panel space-y-6 p-5 sm:p-6">
       <div>
@@ -15,17 +13,7 @@ function KnockoutRoundSkeleton({ glanceRows = 1 }: { glanceRows?: number }) {
         <Skeleton className="mt-1 h-4 w-72 max-w-full bg-white/10" />
       </div>
       <ParticipantPoolSectionSkeleton embedded />
-      <CollapsibleSectionSkeleton embedded>
-        <div className="space-y-4">
-          <Skeleton className="h-2.5 w-24 bg-white/10" />
-          {Array.from({ length: glanceRows }).map((_, index) => (
-            <AtGlanceRowSkeleton
-              key={index}
-              tileVariants={AT_GLANCE_MATCH_TILES}
-            />
-          ))}
-        </div>
-      </CollapsibleSectionSkeleton>
+      <CollapsibleSectionSkeleton embedded />
     </div>
   );
 }
@@ -88,13 +76,7 @@ export function FactsPageSkeleton() {
               <Skeleton className="mt-1 h-4 w-72 max-w-full bg-white/10" />
             </div>
             <ParticipantPoolSectionSkeleton embedded />
-            <CollapsibleSectionSkeleton embedded>
-              <div className="space-y-4">
-                <Skeleton className="h-2.5 w-24 bg-white/10" />
-                <AtGlanceRowSkeleton tileVariants={AT_GLANCE_MATCH_TILES} />
-                <AtGlanceRowSkeleton tileVariants={AT_GLANCE_MATCH_TILES} />
-              </div>
-            </CollapsibleSectionSkeleton>
+            <CollapsibleSectionSkeleton embedded />
           </div>
 
           {KNOCKOUT_FACTS_ROUNDS.map((round) => (

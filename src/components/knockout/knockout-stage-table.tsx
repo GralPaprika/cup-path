@@ -123,7 +123,7 @@ export function KnockoutStageTable({ fixtures }: KnockoutStageTableProps) {
                   </td>
                   <td className="px-3 py-2.5">
                     <Link
-                      href={`/team-analysis?team=${winner.id}`}
+                      href={`/?team=${winner.id}`}
                       className="inline-flex items-center gap-1.5 transition-colors hover:text-wc-sky"
                     >
                       <TeamFlag team={winner} size="sm" />

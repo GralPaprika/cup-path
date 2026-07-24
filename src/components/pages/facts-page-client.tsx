@@ -44,7 +44,7 @@ export function FactsPageClient() {
   );
 
   // Strip legacy ?mode= query params; ranking mode lives in a cookie.
-  useRankingModeUrlSync("/");
+  useRankingModeUrlSync("/overview");
 
   if (loading && !facts) {
     return <FactsPageSkeleton />;
@@ -163,6 +163,10 @@ export function FactsPageClient() {
               {t("methodologyNote")}{" "}
               <Link href="/about" className="text-wc-sky hover:underline">
                 {t("methodologyLink")}
+              </Link>
+              {" · "}
+              <Link href="/compare" className="text-wc-sky hover:underline">
+                {t("compareAllPaths")}
               </Link>
             </p>
           </div>

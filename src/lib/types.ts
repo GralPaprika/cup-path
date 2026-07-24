@@ -233,6 +233,7 @@ export interface MatchDifficulty {
   pointsGap: number | null;
   result: MatchResult;
   scoreLabel: string | null;
+  scorePensLabel: string | null;
   isNext: boolean;
   isPlayed: boolean;
 }
@@ -245,7 +246,6 @@ export interface TeamPathSummary {
   avgOpponentPoints: number | null;
   avgOpponentRank: number | null;
   isEliminated: boolean;
-  nextOpponent: Team | null;
   playedCount: number;
   totalCount: number;
 }

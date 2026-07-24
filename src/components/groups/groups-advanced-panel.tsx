@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import type {
   GroupComparisonCard,
@@ -381,7 +382,13 @@ export function GroupsAdvancedPanel({
           <p>{t("groupOrderingIntro")}</p>
           <p>{t("spearmanBody")}</p>
           <p>{t("kendallBody")}</p>
-          <p>{t("footnotePrimary")}</p>
+          <p>
+            {t("footnotePrimary")}{" "}
+            <Link href="/" className="text-wc-sky hover:underline">
+              {t("footnoteTeamPathLink")}
+            </Link>
+            .
+          </p>
         </div>
       </div>
     </details>

@@ -29,7 +29,7 @@ function SpotlightCard({
 
   return (
     <Link
-      href={`/team-analysis?team=${spotlight.team.id}`}
+      href={`/?team=${spotlight.team.id}`}
       className="group block rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
     >
       <div className="flex items-start justify-between gap-3">

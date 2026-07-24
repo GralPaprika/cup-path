@@ -85,7 +85,6 @@ describe("buildTournamentFacts", () => {
         avgOpponentPoints: 1900,
         avgOpponentRank: 5,
         isEliminated: false,
-        nextOpponent: null,
         playedCount: 1,
         totalCount: 1,
       },

@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import type { AvgPointsContext, PathStage, TeamPathSummary } from "@/lib/types";
-import { getMatchStage, PATH_STAGES } from "@/lib/domain/match/match-stages";
+import { getMatchStage, isThirdPlaceMatch, PATH_STAGES } from "@/lib/domain/match/match-stages";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team/team-flag";
 import { TeamTierBadge } from "@/components/team/team-tier-badge";
@@ -10,8 +11,10 @@ import {
   AvgPointsContextFootnote,
   AvgPointsContextHint,
 } from "@/components/shared/avg-points-context";
+import { KNOCKOUT_SECTION_IDS } from "@/components/facts/facts-section-nav";
 import { Badge } from "@/components/ui/badge";
 import { formatFifaPoints, formatStatValue, formatWholeNumber } from "@/lib/format";
+import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
 import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +26,66 @@ interface SummaryCardProps {
   cohortSize: number;
   cohortStage: PathStage;
   includedStages?: Set<PathStage>;
+}
+
+type PathOutcome =
+  | { kind: "champion" }
+  | { kind: "runnerUp" }
+  | { kind: "thirdPlace" }
+  | { kind: "eliminated"; round: string }
+  | { kind: "active" };
+
+function getPathOutcome(summary: TeamPathSummary): PathOutcome {
+  const finalMatch = summary.matches.find(
+    (match) => match.isPlayed && getMatchStage(match.round) === "final",
+  );
+  if (finalMatch?.result === "W") return { kind: "champion" };
+  if (finalMatch?.result === "L") return { kind: "runnerUp" };
+
+  const thirdPlaceMatch = summary.matches.find(
+    (match) => match.isPlayed && isThirdPlaceMatch(match.round),
+  );
+  if (thirdPlaceMatch?.result === "W") return { kind: "thirdPlace" };
+
+  if (summary.isEliminated) {
+    const loss = [...summary.matches]
+      .reverse()
+      .find(
+        (match) =>
+          match.isPlayed &&
+          match.result === "L" &&
+          !isThirdPlaceMatch(match.round),
+      );
+    return {
+      kind: "eliminated",
+      round: loss?.round ?? summary.matches.at(-1)?.round ?? "",
+    };
+  }
+
+  return { kind: "active" };
+}
+
+function getOverviewHrefForOutcome(outcome: PathOutcome): string | null {
+  if (outcome.kind === "champion" || outcome.kind === "runnerUp") {
+    return `/overview#${KNOCKOUT_SECTION_IDS.final}`;
+  }
+  if (outcome.kind === "thirdPlace") {
+    return `/overview#${KNOCKOUT_SECTION_IDS.sf}`;
+  }
+  if (outcome.kind === "eliminated") {
+    const stage = getMatchStage(outcome.round);
+    if (stage === "group") return "/overview#group-round";
+    if (
+      stage === "r32" ||
+      stage === "r16" ||
+      stage === "qf" ||
+      stage === "sf" ||
+      stage === "final"
+    ) {
+      return `/overview#${KNOCKOUT_SECTION_IDS[stage]}`;
+    }
+  }
+  return null;
 }
 
 function StatTile({
@@ -85,7 +148,58 @@ export function SummaryCard({
     hardestPathRankByAvgRank !== undefined &&
     hardestPathRankByAvgRank !== hardestPathRank;
 
-  const nextMatch = summary.matches.find((match) => match.isNext);
+  const outcome = getPathOutcome(summary);
+  const eliminatedRoundLabel =
+    outcome.kind === "eliminated"
+      ? getMatchStage(outcome.round) === "group"
+        ? t("outcomeGroupStage")
+        : getRoundDisplayName(stages, outcome.round)
+      : null;
+  const outcomeLabel =
+    outcome.kind === "champion"
+      ? t("outcomeChampion")
+      : outcome.kind === "runnerUp"
+        ? t("outcomeRunnerUp")
+        : outcome.kind === "thirdPlace"
+          ? t("outcomeThirdPlace")
+          : outcome.kind === "eliminated"
+            ? t("outcomeEliminatedIn", { round: eliminatedRoundLabel })
+            : t("active");
+  const outcomeClassName =
+    outcome.kind === "champion"
+      ? "border-wc-orange/40 bg-wc-orange/15 text-wc-orange"
+      : outcome.kind === "runnerUp"
+        ? "border-white/20 bg-white/10 text-white"
+        : outcome.kind === "thirdPlace"
+          ? "border-amber-500/40 bg-amber-500/15 text-amber-200"
+          : outcome.kind === "eliminated"
+            ? "border-wc-red/30 bg-wc-red/20 text-wc-red"
+            : "border-wc-green/30 bg-wc-green/20 text-wc-green";
+
+  const outcomeChipHoverClassName =
+    outcome.kind === "champion"
+      ? "hover:border-wc-orange/60 hover:bg-wc-orange/25"
+      : outcome.kind === "runnerUp"
+        ? "hover:border-white/35 hover:bg-white/15"
+        : outcome.kind === "thirdPlace"
+          ? "hover:border-amber-500/60 hover:bg-amber-500/25"
+          : outcome.kind === "eliminated"
+            ? "hover:border-wc-red/50 hover:bg-wc-red/30"
+            : "";
+
+  const overviewHref = getOverviewHrefForOutcome(outcome);
+  const overviewRoundPrompt =
+    outcome.kind === "eliminated"
+      ? eliminatedRoundLabel
+      : outcome.kind === "champion" || outcome.kind === "runnerUp"
+        ? getRoundDisplayName(stages, "Final")
+        : outcome.kind === "thirdPlace"
+          ? getRoundDisplayName(stages, "Semi-final")
+          : null;
+  const overviewLinkLabel =
+    overviewRoundPrompt != null
+      ? t("outcomeSeeRoundOnOverview", { round: overviewRoundPrompt })
+      : null;
 
   return (
     <div className="glass-panel">
@@ -100,18 +214,45 @@ export function SummaryCard({
           {summary.teamPoints !== null ? (
             <TeamTierBadge points={summary.teamPoints} />
           ) : null}
-          <Badge
-            variant="outline"
-            className="border-wc-sky/30 bg-wc-sky/10 text-wc-sky"
+          <Link
+            href={`/groups?group=${summary.team.group}&team=${summary.team.id}`}
+            className="inline-flex"
           >
-            {common("group", { group: summary.team.group })}
-          </Badge>
+            <Badge
+              variant="outline"
+              className="border-wc-sky/30 bg-wc-sky/10 text-wc-sky transition-colors hover:border-wc-sky/50 hover:bg-wc-sky/20"
+            >
+              {common("group", { group: summary.team.group })}
+            </Badge>
+          </Link>
           <Badge
             variant="outline"
             className="border-white/15 bg-white/5 text-muted-foreground"
           >
             {summary.team.confederation}
           </Badge>
+          {overviewHref && overviewLinkLabel ? (
+            <Link
+              href={overviewHref}
+              aria-label={overviewLinkLabel}
+              className={cn(
+                "inline-flex flex-col items-start gap-0.5 rounded-4xl border px-2.5 py-1.5 transition-colors",
+                outcomeClassName,
+                outcomeChipHoverClassName,
+              )}
+            >
+              <span className="text-xs font-medium leading-tight">
+                {outcomeLabel}
+              </span>
+              <span className="text-[10px] font-medium leading-tight opacity-75">
+                {overviewLinkLabel} →
+              </span>
+            </Link>
+          ) : (
+            <Badge variant="outline" className={outcomeClassName}>
+              {outcomeLabel}
+            </Badge>
+          )}
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           {t("matchesPlayed")}: {summary.playedCount}/{summary.totalCount}
@@ -121,8 +262,8 @@ export function SummaryCard({
         </p>
       </div>
 
-      <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(17.5rem,1fr)_auto_minmax(14rem,1fr)] lg:items-center lg:gap-8">
-        <div className="grid min-w-[17.5rem] grid-cols-[minmax(0,0.85fr)_minmax(0,1.25fr)] gap-3 sm:min-w-[19rem]">
+      <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-8">
+        <div className="grid min-w-[17.5rem] grid-cols-2 gap-3 sm:min-w-[19rem]">
           <StatTile
             label={t("fifaPoints")}
             value={formatFifaPoints(summary.teamPoints)}
@@ -147,14 +288,6 @@ export function SummaryCard({
             value={formatStatValue(summary.avgOpponentRank, 1)}
             className="px-5"
             valueClassName="tabular-nums"
-          />
-          <StatTile
-            label={t("status")}
-            value={summary.isEliminated ? t("eliminated") : t("active")}
-            className="col-span-2"
-            valueClassName={
-              summary.isEliminated ? "text-wc-red" : "text-wc-green"
-            }
           />
         </div>
 
@@ -186,31 +319,13 @@ export function SummaryCard({
                 : undefined
             }
           />
-        </div>
-
-        <div className="glass-panel-subtle flex min-h-[9.5rem] flex-col justify-center px-6 py-5 sm:px-7 sm:py-6">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {t("nextOpponent")}
-          </p>
-          <div className="mt-2">
-            {summary.nextOpponent ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <TeamLabel
-                  team={summary.nextOpponent}
-                  showCode
-                  flagSize="md"
-                  nameClassName="text-lg font-semibold text-white"
-                />
-                {nextMatch?.opponentPoints != null ? (
-                  <TeamTierBadge points={nextMatch.opponentPoints} size="sm" />
-                ) : null}
-              </div>
-            ) : (
-              <p className="text-2xl font-bold text-white/40">
-                {t("noNextOpponent")}
-              </p>
-            )}
-          </div>
+          {hardestPathRank !== null && (
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              <Link href="/compare" className="text-wc-sky hover:underline">
+                {t("seeFullRanking")}
+              </Link>
+            </p>
+          )}
         </div>
       </div>
 

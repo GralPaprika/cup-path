@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { TeamFlag } from "@/components/team/team-flag";
 import { TeamTierBadge } from "@/components/team/team-tier-badge";
 import { formatFifaPoints } from "@/lib/format";
@@ -72,16 +73,17 @@ export function IntroductionSection({
                   <td className="align-top px-4 py-3">
                     <div className="flex flex-wrap gap-x-2.5 gap-y-2">
                       {members.map((member) => (
-                        <span
+                        <Link
                           key={member.team.id}
+                          href={`/?team=${member.team.id}`}
                           title={`#${member.fifaRank} · ${formatFifaPoints(member.fifaPoints)}`}
-                          className="inline-flex flex-col items-center gap-0.5"
+                          className="inline-flex flex-col items-center gap-0.5 transition-opacity hover:opacity-80"
                         >
                           <TeamFlag team={member.team} size="sm" />
-                          <span className="font-mono text-[10px] font-semibold tracking-wide text-muted-foreground">
+                          <span className="font-mono text-[10px] font-semibold tracking-wide text-muted-foreground group-hover:text-wc-sky">
                             {member.team.id}
                           </span>
-                        </span>
+                        </Link>
                       ))}
                     </div>
                   </td>

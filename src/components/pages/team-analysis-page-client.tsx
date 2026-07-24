@@ -6,6 +6,7 @@ import type { PathStage, Team } from "@/lib/types";
 import {
   clampPathStages,
   isStageWithinReach,
+  stagesThrough,
 } from "@/lib/domain/match/match-stages";
 import { TeamSelector } from "@/components/team/team-selector";
 import {
@@ -34,7 +35,7 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
   const searchParams = useSearchParams();
   const t = useTranslations("common");
   const analysis = useTranslations("teamAnalysis");
-  const initialTeam = searchParams.get("team")?.toUpperCase() ?? teams[0]?.id ?? "ARG";
+  const initialTeam = searchParams.get("team")?.toUpperCase() ?? "ESP";
 
   const [teamId, setTeamId] = useState(initialTeam);
   const { mode } = useRankingMode();
@@ -74,16 +75,18 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
 
   useEffect(() => {
     if (!rawData) return;
-    if (stagesNeedClamp(stages, rawData.maxStageReached)) {
+    if (maxStageReached === undefined) {
+      setStages(stagesThrough(rawData.maxStageReached));
+    } else if (stagesNeedClamp(stages, rawData.maxStageReached)) {
       setStages(clampPathStages(stages, rawData.maxStageReached));
       return;
     }
     setMaxStageReached(rawData.maxStageReached);
     setData(rawData);
-  }, [rawData, stages]);
+  }, [rawData, stages, maxStageReached, setStages]);
 
   useRankingModeUrlSync(
-    "/team-analysis",
+    "/",
     () => ({ team: teamId }),
     [teamId],
   );
@@ -94,7 +97,10 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
         <h1 className="text-2xl font-bold text-white sm:text-3xl">
           {analysis("title")}
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground sm:text-base">
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground sm:text-base">
+          {analysis("originStory")}
+        </p>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground/90">
           {analysis("subtitle")}
         </p>
       </header>

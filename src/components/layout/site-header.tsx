@@ -9,8 +9,8 @@ import { RankingModeSwitcher } from "@/components/layout/ranking-mode-switcher";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/", key: "home" as const },
-  { href: "/team-analysis", key: "teamAnalysis" as const },
+  { href: "/", key: "teamAnalysis" as const },
+  { href: "/overview", key: "overview" as const },
   { href: "/groups", key: "groups" as const },
   { href: "/compare", key: "compare" as const },
   { href: "/simulate", key: "simulate" as const },

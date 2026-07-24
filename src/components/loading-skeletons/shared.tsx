@@ -103,10 +103,10 @@ export function ParticipantPoolSectionSkeleton({
 }
 
 export function CollapsibleSectionSkeleton({
-  children,
+  children: _children,
   embedded = false,
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   embedded?: boolean;
 }) {
   return (
@@ -120,8 +120,8 @@ export function CollapsibleSectionSkeleton({
       <div
         className={
           embedded
-            ? "flex items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-4 py-3"
-            : "flex items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-5 py-4"
+            ? "flex items-center justify-between gap-3 bg-white/[0.03] px-4 py-3"
+            : "flex items-center justify-between gap-3 bg-white/[0.03] px-5 py-4"
         }
       >
         <div>
@@ -133,9 +133,6 @@ export function CollapsibleSectionSkeleton({
           <Skeleton className="mt-1 h-4 w-80 max-w-full bg-white/10" />
         </div>
         <Skeleton className="size-5 shrink-0 rounded bg-white/10" />
-      </div>
-      <div className={embedded ? "space-y-6 p-4 sm:p-5" : "space-y-6 p-5 sm:p-6"}>
-        {children}
       </div>
     </div>
   );

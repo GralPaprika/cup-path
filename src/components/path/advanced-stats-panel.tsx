@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import type { PathStage, Team } from "@/lib/types";
 import type { CohortOrderingCorrelation } from "@/lib/domain/core/rank-correlation";
 import type { PathOpponentStats } from "@/lib/domain/path/path-opponent-stats";
@@ -8,6 +10,7 @@ import { OpponentPointsChart } from "@/components/path/opponent-points-chart";
 import { StatsBlock } from "@/components/shared/stats-block";
 import { formatStatValue } from "@/lib/format";
 import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
+import { cn } from "@/lib/utils";
 
 interface AdvancedStatsPanelProps {
   pathStats: PathOpponentStats;
@@ -52,16 +55,31 @@ export function AdvancedStatsPanel({
   const t = useTranslations("teamAnalysis.advanced");
   const stages = useTranslations("compare.stages");
   const stageLabel = stages(COMPARE_STAGE_I18N_KEYS[cohortStage]);
+  const [open, setOpen] = useState(false);
 
   const formatCorrelation = (value: number | null) =>
     value === null ? "—" : formatStatValue(value, 3);
 
   return (
-    <section className="glass-panel overflow-hidden">
-      <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
-        <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
-      </div>
+    <details
+      className="glass-panel group overflow-hidden"
+      open={open}
+      onToggle={(event) => {
+        setOpen((event.currentTarget as HTMLDetailsElement).open);
+      }}
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-5 py-4 marker:content-none [&::-webkit-details-marker]:hidden">
+        <div>
+          <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
+        </div>
+        <ChevronDown
+          className={cn(
+            "size-5 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </summary>
 
       <div className="space-y-6 px-5 py-5">
         <section>
@@ -144,6 +162,6 @@ export function AdvancedStatsPanel({
           <p>{t("footnotePrimary")}</p>
         </div>
       </div>
-    </section>
+    </details>
   );
 }

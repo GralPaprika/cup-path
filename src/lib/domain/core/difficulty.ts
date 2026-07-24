@@ -8,7 +8,6 @@ import type {
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
 import {
   buildTeamPath,
-  getNextOpponent,
   isTeamEliminated,
 } from "@/lib/domain/path/path-builder";
 import {
@@ -114,7 +113,15 @@ export function buildTeamPathSummary(
   const path = buildTeamPath(ctx, teamId);
 
   const matches: MatchDifficulty[] = path.map(
-    ({ match, opponent, result, scoreLabel, isPlayed, isNext }) => {
+    ({
+      match,
+      opponent,
+      result,
+      scoreLabel,
+      scorePensLabel,
+      isPlayed,
+      isNext,
+    }) => {
       const opponentRanking = rankings.get(opponent.id);
       const opponentRank = opponentRanking?.rank ?? null;
       const opponentPoints = opponentRanking?.points ?? null;
@@ -139,6 +146,7 @@ export function buildTeamPathSummary(
             : null,
         result,
         scoreLabel,
+        scorePensLabel,
         isNext,
         isPlayed,
       };
@@ -150,8 +158,6 @@ export function buildTeamPathSummary(
     ALL_PATH_STAGES,
   );
 
-  const nextOpponent = getNextOpponent(ctx, teamId);
-
   return {
     team,
     teamRank: teamRanking?.rank ?? null,
@@ -160,9 +166,6 @@ export function buildTeamPathSummary(
     avgOpponentPoints,
     avgOpponentRank,
     isEliminated: isTeamEliminated(ctx, teamId),
-    nextOpponent: nextOpponent
-      ? withFlag(nextOpponent, rankings.get(nextOpponent.id))
-      : null,
     playedCount: matches.filter((match) => match.isPlayed).length,
     totalCount: matches.length,
   };

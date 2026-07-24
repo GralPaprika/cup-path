@@ -4,8 +4,8 @@
     "tagline": "World Cup opponent difficulty analysis"
   },
   "nav": {
-    "home": "Overview",
     "teamAnalysis": "Team path",
+    "overview": "Tournament overview",
     "groups": "Groups",
     "compare": "Compare",
     "simulate": "Simulate",
@@ -67,15 +67,22 @@
     "status": "Status",
     "active": "Active",
     "eliminated": "Eliminated",
-    "nextOpponent": "Next opponent",
-    "noNextOpponent": "None",
+    "outcomeChampion": "Champion",
+    "outcomeRunnerUp": "Runner-up",
+    "outcomeThirdPlace": "Third place",
+    "outcomeGroupStage": "group stage",
+    "outcomeEliminatedIn": "Eliminated in {round}",
+    "outcomeSeeRoundOnOverview": "See how {round} played out",
     "points": "pts",
     "matchesPlayed": "Matches",
-    "averagesFrom": "averages from {count} matches"
+    "averagesFrom": "averages from {count} matches",
+    "seeFullRanking": "See full ranking"
   },
   "teamAnalysis": {
     "title": "Team path analysis",
-    "subtitle": "See how tough a team's road to the final is, based on FIFA ranking points of every opponent faced.",
+    "originStory": "A friend once argued Argentina had been handed the easy road to the final. CupPath asks that question for every side: using FIFA ranking points, how hard does each path look on paper?",
+    "subtitle": "Pick a team to see path difficulty from the FIFA ranking points of every opponent they faced.",
+    "seeFullRanking": "See full ranking",
     "advanced": {
       "title": "Advanced statistics",
       "subtitle": "Deeper opponent distribution and cohort ordering metrics for statistical comparison.",
@@ -153,6 +160,7 @@
       "harderPathSummary": "{team}'s path is {gap} harder by average opponent points.",
       "rankUnavailable": "Path # is unavailable when neither team belongs to the comparison cohort for your stage filter.",
       "rankCohortNote": "Path # ranks teams at {stage} or beyond using average opponent points.",
+      "simulateWhatIf": "What-if this matchup in Simulate",
       "chartTitle": "Opponent points by match",
       "chartLoading": "Loading path chart…",
       "teamPointsLegend": "Team pts",
@@ -262,7 +270,8 @@
       "groupOrderingIntro": "Each group is scored by the average FIFA strength of its four teams. Rank 1 is the strongest group on that scale.",
       "spearmanBody": "Spearman ρ measures how similarly groups are ordered by average points versus average rank. 1 means identical order; 0 means unrelated; values near 1 mean both methods agree on which groups are strongest.",
       "kendallBody": "Kendall τ-b counts pairwise agreement between the two group orderings, adjusting for ties. τ = 1 means every pair of groups ranks the same way under both metrics; τ = 0 means mixed agreement.",
-      "footnotePrimary": "Group cards show each group's strength rank. Path difficulty per team is in the detail table and on Team path."
+      "footnotePrimary": "Group cards show each group's strength rank. Path difficulty per team is in the detail table and on",
+      "footnoteTeamPathLink": "Team path"
     }
   },
   "about": {
@@ -282,16 +291,21 @@
     "pointsGapBody": "Points gap is opponent FIFA points minus team FIFA points. A positive gap means a harder opponent (stronger on paper). A negative gap means an easier opponent. This is the primary per-match difficulty signal on the path table.",
     "rankGapTitle": "Rank gap",
     "rankGapBody": "Rank gap is opponent rank minus team rank. A negative gap means a harder opponent (they are ranked higher). A positive gap means an easier opponent.",
-    "overviewTitle": "Overview",
-    "overviewBody": "Overview is the home page: a tournament-wide read of the 2026 World Cup through FIFA ranking points.\n\nIt opens with an introduction that sorts the 48 teams into informal tiers by FIFA points (title favorites, contenders, dark horses, outsiders, makeweights), then walks through group-stage and knockout pools—average strength, rival difficulty, and how often favorites won, drew, or were upset by points gap. Group and knockout sections dig into standings, expected finishes, and path difficulty by round.\n\nUse the ranking-mode switcher to re-read the same stories under different FIFA snapshots (for example the pot-draw cutoff versus the post-tournament ranking).",
+    "overviewTitle": "Tournament overview",
+    "overviewBody": "Tournament overview is a tournament-wide read of the 2026 World Cup through FIFA ranking points.\n\nIt opens with an introduction that sorts the 48 teams into informal tiers by FIFA points (title favorites, contenders, dark horses, outsiders, makeweights), then walks through group-stage and knockout pools—average strength, rival difficulty, and how often favorites won, drew, or were upset by points gap. Group and knockout sections dig into standings, expected finishes, and path difficulty by round.\n\nUse the ranking-mode switcher to re-read the same stories under different FIFA snapshots (for example the pot-draw cutoff versus the post-tournament ranking).",
+    "overviewOpen": "Open tournament overview",
+    "teamPathOpen": "Open team path",
+    "groupsOpen": "Open groups",
+    "compareOpen": "Open compare",
+    "simulateOpen": "Open simulate",
     "advancedStatsTitle": "Advanced statistics",
-    "advancedStatsBody": "On Team path, the Advanced statistics section is always visible below the path table. It opens with an opponent points chart: one bar per opponent (flag and FIFA code below), with values shown at the bottom of each bar.\n\nThe chart includes a shaded band for mean ± one population standard deviation over the included matches, a dashed orange line for the mean, and a solid blue line for the selected team's own FIFA points — so you can see each opponent relative to the path average and to the team itself.\n\nBelow the chart, compact tables summarize opponent FIFA points and opponent FIFA rank (median, standard deviation, min, max). A cohort ordering block shows Spearman ρ and Kendall τ-b: how closely the points-based and rank-based path orderings agree among comparable teams at your selected stage.\n\nDistribution stats use population variance over the matches in your stage filter (n is the match count). The primary difficulty gauge and path # still use average opponent FIFA points.\n\nOn Groups, a separate collapsible advanced panel shows similar correlation metrics for group strength ordering among the twelve groups.",
+    "advancedStatsBody": "On Team path, Advanced statistics sits in a collapsible section below the path table. Expand it for an opponent points chart: one bar per opponent (flag and FIFA code below), with values shown at the bottom of each bar.\n\nThe chart includes a shaded band for mean ± one population standard deviation over the included matches, a dashed orange line for the mean, and a solid blue line for the selected team's own FIFA points — so you can see each opponent relative to the path average and to the team itself.\n\nBelow the chart, compact tables summarize opponent FIFA points and opponent FIFA rank (median, standard deviation, min, max). A cohort ordering block shows Spearman ρ and Kendall τ-b: how closely the points-based and rank-based path orderings agree among comparable teams at your selected stage.\n\nDistribution stats use population variance over the matches in your stage filter (n is the match count). The primary difficulty gauge and path # still use average opponent FIFA points.\n\nOn Groups, a separate collapsible advanced panel shows similar correlation metrics for group strength ordering among the twelve groups.",
     "headToHeadTitle": "Compare head-to-head",
     "headToHeadBody": "On Compare, the head-to-head panel lets you pick any two teams and see their path difficulty side by side: average opponent points, average opponent rank, path #, and status.\n\nThe Δ column shows Team A minus Team B. A positive points delta means Team A faced tougher opponents on average. Path # is only shown when both teams belong to the comparison cohort for your stage filter — otherwise the panel explains that the rank is unavailable.",
     "groupsTitle": "Groups",
     "groupsBody": "The Groups page ranks all twelve World Cup groups by average FIFA strength of their four teams. Each group card shows a strength rank (# / 12) by average points and by average rank, plus a mini table with qualification colors (1st, 2nd, best third).\n\nSelecting a group opens a detail table with standings, FIFA points and rank, and each team's path averages (avg opponent points, avg opponent rank, path # among all 48 teams). Group-level statistics blocks show FIFA points and rank distributions across the four teams.",
     "stagesTitle": "Stage filters",
-    "stagesBody": "Count matches from lets you choose which rounds feed the averages—group only, through the final, or anything in between. The furthest round selected defines the comparison cohort for the # rank.\n\nOn Compare, Show teams narrows the table to sides that reached at least that round. You cannot show teams eliminated before the furthest round in your averages, because they never played those matches. Your ranking-mode choice is remembered when you switch between Overview, Team path, Groups, Compare, and Simulate.",
+    "stagesBody": "Count matches from lets you choose which rounds feed the averages—group only, through the final, or anything in between. The furthest round selected defines the comparison cohort for the # rank.\n\nOn Compare, Show teams narrows the table to sides that reached at least that round. You cannot show teams eliminated before the furthest round in your averages, because they never played those matches. Your ranking-mode choice is remembered when you switch between Team path, Tournament overview, Groups, Compare, and Simulate.",
     "simulationTitle": "Path simulation — what it does and what it does not",
     "simulationBody": "Simulate is an exploratory tool. It lets you swap group positions, pick alternate knockout winners, and see how a team's average opponent difficulty might change. It is not a match predictor and does not model form, injuries, or head-to-head tiebreakers beyond what is described below.\n\nGroup edits reorder teams within their existing group only—you cannot move a nation into a different group. When you swap positions, each team keeps its actual group-stage record (points, goal difference, goals scored). The simulator does not replay group matches to invent new stats.\n\nBest third-place qualification ranks all twelve third-place teams by group-stage record: points, then goal difference, then goals scored, then team code as a final tie-break. This is a simplified version of FIFA rules. Fair-play points, head-to-head among thirds, and drawing of lots are not modeled.\n\nThe Best thirds ranking tab shows who would advance under those rules. The knockout bracket, however, still fills each third-place slot (3A, 3D, etc.) from whoever sits third in that group—it does not yet reassign which qualifying third goes to which Round of 32 fixture using FIFA's full assignment matrix. So a third marked Out in the ranking tab may still appear in a bracket slot, and vice versa.\n\nKnockout overrides change winners match by match. Unplayed future opponents still use FIFA ranking points from your selected snapshot—not results from your simulated bracket. Treat simulated path difficulty as a what-if on opponent identity, not as a forecast of tournament outcomes.",
     "dataTitle": "Data sources",
@@ -315,7 +329,7 @@
   },
   "home": {
     "title": "Tournament snapshot",
-    "subtitle": "A friend once argued Argentina had been handed the easy road to the final. CupPath asks that question for every side: using FIFA ranking points, how hard does each path look on paper?",
+    "subtitle": "A stage-by-stage read of the 2026 World Cup through FIFA ranking points: pool strength, results versus points gap, and rival difficulty from the group phase through the final.",
     "intro": {
       "title": "Introduction",
       "lead": "First things first: if you're reading this, you're about to get a somewhat mathematical look at what happened at the 2026 World Cup. I did my best with this part, using the FIFA ranking — the most even-handed tool I have for comparing teams.",
@@ -450,6 +464,9 @@
     },
     "methodologyNote": "Metrics use the selected FIFA snapshot and current bracket state.",
     "methodologyLink": "Read the methodology",
+    "compareAllPaths": "Compare all paths",
+    "openGroups": "Explore groups",
+    "openGroup": "Open Group {letter}",
     "groupExpectedFinishes": {
       "title": "Group stage deep dive",
       "subtitle": "From win/loss and draws, through the final tables, to who drew the toughest rivals.",
@@ -550,6 +567,7 @@
       "groupDifficultyCaption": "Group-stage team strength vs average rival difficulty",
       "groupDifficultyFootnote": "Each dot is one team. X = team FIFA points; Y = mean FIFA points of that team's three group opponents. Green = advanced; red = eliminated.",
       "groupDifficultyReadingFootnote": "Further right = stronger team; higher on the chart = stronger rival. The orange tournament average is drawn on both axes so the lines cross into quadrants: top-left = weaker teams with hard groups; bottom-right = stronger teams with easier groups.",
+      "groupDifficultyGroupsLink": "Open the Groups page for standings and per-group detail.",
       "groupDifficultyLegendVictory": "Advanced",
       "groupDifficultyLegendDefeat": "Eliminated",
       "groupDifficultyAxisTeamPoints": "Team FIFA points",

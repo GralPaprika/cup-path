@@ -54,7 +54,8 @@ export function GroupTeamTableRow({
           showCode
           flagSize="sm"
           className="w-full"
-          nameClassName="text-sm font-medium text-white"
+          nameClassName="text-sm font-medium text-white hover:text-wc-sky"
+          href={`/?team=${entry.team.id}`}
         />
       </TableCell>
       {variant === "full" ? (

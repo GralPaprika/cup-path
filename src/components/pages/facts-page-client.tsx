@@ -15,9 +15,11 @@ import { FactsPageSkeleton } from "@/components/loading-skeletons";
 import { useRankingMode } from "@/components/layout/ranking-mode-provider";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
+import { scrollIntoViewRespectingMotion } from "@/lib/client/scroll-into-view";
 import type { TournamentFacts } from "@/lib/api/responses";
 import type { KnockoutFactsRoundId } from "@/lib/types";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 
 const SECTION_SCROLL_MT =
   "scroll-mt-[calc(var(--site-header-height)+1rem)]";
@@ -45,6 +47,16 @@ export function FactsPageClient() {
 
   // Strip legacy ?mode= query params; ranking mode lives in a cookie.
   useRankingModeUrlSync("/overview");
+
+  // Sections mount after the facts fetch; re-scroll once the hash target exists.
+  useEffect(() => {
+    if (!facts) return;
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    requestAnimationFrame(() => {
+      scrollIntoViewRespectingMotion(document.getElementById(id));
+    });
+  }, [facts]);
 
   if (loading && !facts) {
     return <FactsPageSkeleton />;

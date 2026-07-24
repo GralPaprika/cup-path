@@ -1,6 +1,6 @@
 import type { RankingMode } from "@/lib/types";
 
-export const DEFAULT_RANKING_MODE: RankingMode = "june11";
+export const DEFAULT_RANKING_MODE: RankingMode = "july20";
 
 export const RANKING_MODES: RankingMode[] = [
   "july20",

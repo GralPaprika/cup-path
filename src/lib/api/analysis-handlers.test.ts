@@ -148,7 +148,7 @@ describe("comparison API handler", () => {
 
     assert.equal(response.status, 200);
     assert.deepEqual(received, {
-      mode: "june11",
+      mode: "july20",
       stages: ["group"],
       teamRound: "group",
     });

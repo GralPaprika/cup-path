@@ -35,9 +35,9 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
   const searchParams = useSearchParams();
   const t = useTranslations("common");
   const analysis = useTranslations("teamAnalysis");
-  const initialTeam = searchParams.get("team")?.toUpperCase() ?? "ESP";
+  const urlTeam = searchParams.get("team")?.toUpperCase() ?? "ESP";
 
-  const [teamId, setTeamId] = useState(initialTeam);
+  const [teamId, setTeamId] = useState(urlTeam);
   const { mode } = useRankingMode();
   const [stages, setStages, stagesHydrated] = usePersistedPathStages("team-analysis");
   const [data, setData] = useState<TeamAnalysisResult | null>(null);
@@ -68,6 +68,10 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
       enabled: stagesHydrated,
     },
   );
+
+  useEffect(() => {
+    setTeamId(urlTeam);
+  }, [urlTeam]);
 
   useEffect(() => {
     setMaxStageReached(undefined);

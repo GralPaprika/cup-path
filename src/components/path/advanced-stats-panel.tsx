@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import type { PathStage, Team } from "@/lib/types";
 import type { CohortOrderingCorrelation } from "@/lib/domain/core/rank-correlation";
@@ -21,6 +20,8 @@ interface AdvancedStatsPanelProps {
   cohortStage: PathStage;
   selectedTeam: Pick<Team, "id" | "flagUrl" | "displayName">;
   selectedTeamPoints: number | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 function CorrelationTile({
@@ -51,11 +52,12 @@ export function AdvancedStatsPanel({
   cohortStage,
   selectedTeam,
   selectedTeamPoints,
+  open,
+  onOpenChange,
 }: AdvancedStatsPanelProps) {
   const t = useTranslations("teamAnalysis.advanced");
   const stages = useTranslations("compare.stages");
   const stageLabel = stages(COMPARE_STAGE_I18N_KEYS[cohortStage]);
-  const [open, setOpen] = useState(false);
 
   const formatCorrelation = (value: number | null) =>
     value === null ? "—" : formatStatValue(value, 3);
@@ -65,7 +67,7 @@ export function AdvancedStatsPanel({
       className="glass-panel group overflow-hidden"
       open={open}
       onToggle={(event) => {
-        setOpen((event.currentTarget as HTMLDetailsElement).open);
+        onOpenChange(event.currentTarget.open);
       }}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-5 py-4 marker:content-none [&::-webkit-details-marker]:hidden">

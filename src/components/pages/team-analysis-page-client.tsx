@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { TeamSelector } from "@/components/team/team-selector";
 import { PathStageFilters } from "@/components/path/path-stage-filters";
 import { usePageUrlParamsSync } from "@/hooks/use-page-url-params-sync";
@@ -27,6 +28,7 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
     error,
     maxStageReached,
   } = useTeamAnalysisQuery(teams);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   usePageUrlParamsSync("/");
 
@@ -74,39 +76,31 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
           )}
           {data && (
             <>
-              {loading ? (
-                <SummaryCardSkeleton />
-              ) : (
-                <SummaryCard
-                  summary={data.summary}
-                  avgPointsContext={data.avgPointsContext}
-                  hardestPathRank={data.hardestPathRank}
-                  hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
-                  cohortSize={data.cohortSize}
-                  cohortStage={data.cohortStage}
-                  includedStages={stages}
-                />
-              )}
-              {loading ? (
-                <PathTableSkeleton />
-              ) : (
-                <PathTable
-                  matches={data.summary.matches}
-                  includedStages={stages}
-                />
-              )}
-              {!loading && (
-                <AdvancedStatsPanel
-                  pathStats={data.advanced.pathStats}
-                  cohortCorrelation={data.advanced.cohortCorrelation}
-                  hardestPathRank={data.hardestPathRank}
-                  hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
-                  cohortSize={data.cohortSize}
-                  cohortStage={data.cohortStage}
-                  selectedTeam={data.summary.team}
-                  selectedTeamPoints={data.summary.teamPoints}
-                />
-              )}
+              <SummaryCard
+                summary={data.summary}
+                avgPointsContext={data.avgPointsContext}
+                hardestPathRank={data.hardestPathRank}
+                hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
+                cohortSize={data.cohortSize}
+                cohortStage={data.cohortStage}
+                includedStages={stages}
+              />
+              <PathTable
+                matches={data.summary.matches}
+                includedStages={stages}
+              />
+              <AdvancedStatsPanel
+                pathStats={data.advanced.pathStats}
+                cohortCorrelation={data.advanced.cohortCorrelation}
+                hardestPathRank={data.hardestPathRank}
+                hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
+                cohortSize={data.cohortSize}
+                cohortStage={data.cohortStage}
+                selectedTeam={data.summary.team}
+                selectedTeamPoints={data.summary.teamPoints}
+                open={advancedOpen}
+                onOpenChange={setAdvancedOpen}
+              />
             </>
           )}
         </div>

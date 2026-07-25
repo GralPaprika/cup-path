@@ -87,23 +87,16 @@ See [`.env.example`](.env.example).
 ### Data flow (production)
 
 ```
-openfootball JSON ──► Vercel Cron ──► Vercel Blob (match data)
-RapidAPI rankings ──► Vercel Cron ──► Vercel Blob (rankings)
-                              │
-                              ▼
-                        Next.js app
+openfootball JSON ──► manual sync ──► Vercel Blob (match data)
+fixed ranking snapshots ──► seed/manual sync ──► Vercel Blob (rankings)
+                                             │
+                                             ▼
+                                       Next.js app
 ```
 
-**Data refresh (production)**
-
-| Method | Schedule | Route |
-|---|---|---|
-| **Vercel cron (Hobby)** | Once daily at 12:00 UTC (`vercel.json`) | `GET /api/cron/sync-scheduled` |
-| **Manual** | Anytime | `POST /api/cron/sync-scheduled` with `Authorization: Bearer CRON_SECRET` |
-
-`vercel.json` defines one daily cron (Hobby limit: once per day). It syncs ranking snapshots and match data. View or trigger it under **Settings → Cron Jobs** after production deploy.
-
-Bundled JSON in `data/` is the fallback when Blob is empty or unavailable.
+Production data is fixed and has no scheduled refresh. Use the protected sync
+routes or npm scripts for a one-off Blob refresh. Bundled JSON in `data/` is the
+fallback when Blob is empty or unavailable.
 
 ### Application layers
 
@@ -170,7 +163,6 @@ Legacy URL params `live`, `yearStart`, and `tournamentStart` map to `july20`, `j
 │       ├── data/           # Team registry, rankings client/store, tournament context loader
 │       ├── domain/         # Pure logic (path builder, standings, difficulty, correlation)
 │       └── services/       # Analysis, simulation, facts, tournament-runtime
-└── vercel.json             # Vercel cron (once daily on Hobby)
 ```
 
 ## API routes
@@ -184,7 +176,7 @@ Legacy URL params `live`, `yearStart`, and `tournamentStart` map to `july20`, `j
 | `GET /api/groups?mode=july20` | Group cards, strength ordering, points benchmarks |
 | `POST /api/simulation` | Simulation state (body: `{ mode, team, compareTeam?, scenario }`) |
 | `POST /api/simulation/strongest-winners` | Pick strongest winners for bracket |
-| `GET /api/cron/sync-scheduled` | Refresh all data in Blob (daily cron on Hobby) |
+| `GET /api/cron/sync-scheduled` | Refresh all data in Blob (manual) |
 | `GET /api/cron/sync-rankings` | Refresh ranking snapshots only (manual) |
 | `GET /api/cron/sync-worldcup` | Refresh match data only (manual) |
 
@@ -203,10 +195,9 @@ Legacy URL params `live`, `yearStart`, and `tournamentStart` map to `july20`, `j
 1. Import the repository on Vercel
 2. Enable **Vercel Blob** in project storage settings
 3. Set environment variables from `.env.example`
-4. Deploy (`vercel.json` registers the daily cron on production)
-5. Confirm under **Settings → Cron Jobs** that `/api/cron/sync-scheduled` is listed
-6. Seed Blob on first deploy: `npm run seed:rankings` and `POST /api/cron/sync-scheduled` (with `CRON_SECRET`)
-7. Run `npm run validate:teams` to confirm all 48 teams map correctly
+4. Deploy
+5. Seed Blob on first deploy: `npm run seed:rankings` and `POST /api/cron/sync-scheduled` (with `CRON_SECRET`)
+6. Run `npm run validate:teams` to confirm all 48 teams map correctly
 
 ## Tech stack
 

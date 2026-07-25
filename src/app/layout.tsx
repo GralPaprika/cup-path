@@ -47,7 +47,10 @@ export default async function RootLayout({
       lang={locale}
       className={`${plusJakarta.variable} ${geistMono.variable} dark h-full`}
     >
-      <body className="min-h-full bg-background font-sans text-foreground antialiased">
+      <body
+        className="min-h-full bg-background font-sans text-foreground antialiased"
+        suppressHydrationWarning
+      >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RankingModeProvider initialMode={initialMode}>
             <div className="relative flex min-h-screen flex-col">

@@ -1,9 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { OpponentDifficultyPointTooltip } from "@/components/charts/opponent-difficulty-point-tooltip";
 import { OpponentDifficultyScatterChart } from "@/components/charts/opponent-difficulty-scatter-chart";
 import type { GroupStageDifficultyStrip } from "@/lib/types";
 import { CHART_COLORS } from "@/lib/chart-colors";
+import {
+  DEFAULT_OVERVIEW_SCATTER_PREFS,
+  OVERVIEW_SCATTER_STORAGE_KEY,
+} from "@/lib/client/overview-ui-preference";
+import { filterOpponentDifficultyScatterPoints } from "@/lib/domain/match/opponent-difficulty-scatter-filter";
+import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
+import { usePersistedUiState } from "@/hooks/use-persisted-ui-state";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -15,6 +23,15 @@ export function GroupStageDifficultyChart({
   strip,
 }: GroupStageDifficultyChartProps) {
   const t = useTranslations("home.groupExpectedFinishes");
+  const scatter = useTranslations("home.opponentDifficultyScatter");
+  const teamNames = useTranslations("teams");
+
+  const [scatterPrefs, setScatterPrefs] = usePersistedUiState(
+    OVERVIEW_SCATTER_STORAGE_KEY,
+    DEFAULT_OVERVIEW_SCATTER_PREFS,
+  );
+  const { showWon, showLost, showFifaLabels } = scatterPrefs;
+  const [query, setQuery] = useState("");
 
   const { entries } = strip;
   if (entries.length === 0) return null;
@@ -62,27 +79,39 @@ export function GroupStageDifficultyChart({
           },
         ];
 
-  const points = entries.map((entry) => ({
-    id: entry.team.id,
-    teamFifaPoints: entry.teamFifaPoints,
-    rivalDifficultyPoints: entry.avgOpponentPoints,
-    won: entry.qualified,
-    href: `/?team=${entry.team.id}`,
-    tooltipData: {
-      team: entry.team,
+  const allPoints = entries.map((entry) => {
+    const displayName = getTeamDisplayName(teamNames, entry.team);
+    return {
+      id: entry.team.id,
+      fifaCode: entry.team.id,
+      teamId: entry.team.id,
+      displayName,
       teamFifaPoints: entry.teamFifaPoints,
       rivalDifficultyPoints: entry.avgOpponentPoints,
       won: entry.qualified,
-      statusLabel: entry.qualified
-        ? t("groupDifficultyQualified")
-        : t("groupDifficultyEliminated"),
-      rivalDifficultyLabel: t("groupDifficultyAxisRivalDifficulty"),
-      gapLabel: t("groupDifficultyTooltipGap"),
-      subtitle: t("groupDifficultyTooltipGroup", {
-        letter: entry.groupLetter,
-      }),
-    },
-  }));
+      href: `/?team=${entry.team.id}`,
+      tooltipData: {
+        team: entry.team,
+        teamFifaPoints: entry.teamFifaPoints,
+        rivalDifficultyPoints: entry.avgOpponentPoints,
+        won: entry.qualified,
+        statusLabel: entry.qualified
+          ? t("groupDifficultyQualified")
+          : t("groupDifficultyEliminated"),
+        rivalDifficultyLabel: t("groupDifficultyAxisRivalDifficulty"),
+        gapLabel: t("groupDifficultyTooltipGap"),
+        subtitle: t("groupDifficultyTooltipGroup", {
+          letter: entry.groupLetter,
+        }),
+      },
+    };
+  });
+
+  const points = filterOpponentDifficultyScatterPoints(allPoints, {
+    showWon,
+    showLost,
+    query,
+  });
 
   return (
     <div className="space-y-3">
@@ -91,17 +120,38 @@ export function GroupStageDifficultyChart({
           {t("groupDifficultyTitle")}
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t("groupDifficultySubtitle", { count: entries.length })}
+          {t("groupDifficultySubtitle", { count: points.length })}
         </p>
       </div>
 
       <OpponentDifficultyScatterChart
         points={points}
+        domainPoints={allPoints}
         referenceLines={referenceLines}
         verticalReferenceLines={verticalReferenceLines}
         ariaLabel={t("groupDifficultyCaption")}
         xAxisLabel={t("groupDifficultyAxisTeamPoints")}
         yAxisLabel={t("groupDifficultyAxisRivalDifficulty")}
+        wonLabel={t("groupDifficultyLegendVictory")}
+        lostLabel={t("groupDifficultyLegendDefeat")}
+        showWon={showWon}
+        showLost={showLost}
+        onToggleWon={() =>
+          setScatterPrefs((prefs) => ({ ...prefs, showWon: !prefs.showWon }))
+        }
+        onToggleLost={() =>
+          setScatterPrefs((prefs) => ({ ...prefs, showLost: !prefs.showLost }))
+        }
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder={scatter("searchPlaceholder")}
+        searchLabel={scatter("searchLabel")}
+        showFifaLabels={showFifaLabels}
+        onShowFifaLabelsChange={(value) =>
+          setScatterPrefs((prefs) => ({ ...prefs, showFifaLabels: value }))
+        }
+        fifaLabelsLabel={scatter("showFifaCodes")}
+        emptyFilteredMessage={scatter("emptyFiltered")}
         footnote={
           <>
             <p className="text-xs text-muted-foreground">
@@ -120,16 +170,8 @@ export function GroupStageDifficultyChart({
         renderPointTooltip={(data) => (
           <OpponentDifficultyPointTooltip {...data} />
         )}
-        legend={
+        referenceLegend={
           <>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-wc-green/85" />
-              {t("groupDifficultyLegendVictory")}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-wc-red/80" />
-              {t("groupDifficultyLegendDefeat")}
-            </span>
             {referenceLines.map((line) => (
               <span
                 key={line.label}

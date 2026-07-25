@@ -108,9 +108,9 @@ function resolveSlotTeamId(
 
 function formatMatchScoreLabel(match: OpenFootballMatch): string | null {
   if (!match.score?.ft) return null;
-  const [homeGoals, awayGoals] = match.score.ft;
+  const [homeGoals, awayGoals] = match.score.et ?? match.score.ft;
   let label = `${homeGoals}-${awayGoals}`;
-  if (match.score.p) label += " (pens)";
+  if (match.score.p) label += ` (pens ${match.score.p[0]}-${match.score.p[1]})`;
   else if (match.score.et) label += " (aet)";
   return label;
 }

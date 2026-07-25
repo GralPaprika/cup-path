@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
+import { usePersistedUiState } from "@/hooks/use-persisted-ui-state";
 import { cn } from "@/lib/utils";
 
 interface CollapsibleSectionProps {
@@ -13,6 +14,8 @@ interface CollapsibleSectionProps {
   embedded?: boolean;
   /** Whether the section starts expanded. Defaults to collapsed. */
   defaultOpen?: boolean;
+  /** When set, open/closed state is restored from localStorage. */
+  persistKey?: string;
 }
 
 export function CollapsibleSection({
@@ -22,8 +25,9 @@ export function CollapsibleSection({
   contentClassName,
   embedded = false,
   defaultOpen = false,
+  persistKey,
 }: CollapsibleSectionProps) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = usePersistedUiState(persistKey ?? null, defaultOpen);
 
   return (
     <details

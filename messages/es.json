@@ -599,6 +599,12 @@
       "groupDifficultyAtMeanNote": "{count} equipos en el promedio del torneo ({mean}); {qualified} avanzaron.",
       "tiebreakerFootnote": "En papel: mayor puntaje FIFA gana; igualdad = empate. La tabla en papel usa puntos esperados y luego puntos FIFA, sin inventar marcadores. Las tablas reales usan puntos, diferencia y goles a favor; los desempates FIFA (enfrentamiento directo, etc.) pueden diferir."
     },
+    "opponentDifficultyScatter": {
+      "searchPlaceholder": "Equipo o código FIFA",
+      "searchLabel": "Filtrar puntos del gráfico por equipo o código FIFA",
+      "showFifaCodes": "Códigos FIFA",
+      "emptyFiltered": "Ningún equipo coincide con estos filtros."
+    },
     "knockoutStage": {
       "poolAvgFifaPoints": "Promedio pts. FIFA",
       "poolMedianFifaRank": "Ranking FIFA promedio",
@@ -673,7 +679,12 @@
       "next": "Siguiente",
       "vs": "vs",
       "gapChartLegendMean": "Brecha media",
-      "gapChartLegendBand": "Promedio ± 1 DE"
+      "gapChartLegendBand": "Promedio ± 1 DE",
+      "searchLabel": "Buscar partidos",
+      "searchPlaceholder": "Buscar país, código FIFA o marcador…",
+      "searchPlaceholderKnockout": "Buscar país, código FIFA, marcador, prórroga o penales…",
+      "searchNoResults": "Ningún partido coincide con tu búsqueda",
+      "searchShowing": "Mostrando {shown} de {total} partidos"
     },
     "roundOf32": {
       "title": "Dieciseisavos de final",

@@ -1,15 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { OpponentDifficultyPointTooltip } from "@/components/charts/opponent-difficulty-point-tooltip";
 import { OpponentDifficultyScatterChart } from "@/components/charts/opponent-difficulty-scatter-chart";
 import type { KnockoutOpponentDifficultyStrip } from "@/lib/types";
 import { CHART_COLORS } from "@/lib/chart-colors";
+import {
+  DEFAULT_OVERVIEW_SCATTER_PREFS,
+  OVERVIEW_SCATTER_STORAGE_KEY,
+} from "@/lib/client/overview-ui-preference";
+import { filterOpponentDifficultyScatterPoints } from "@/lib/domain/match/opponent-difficulty-scatter-filter";
+import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
+import { usePersistedUiState } from "@/hooks/use-persisted-ui-state";
 import { useTranslations } from "next-intl";
 
 interface KnockoutStageOpponentDifficultyChartProps {
   strip: KnockoutOpponentDifficultyStrip;
   opponentDifficultyTitle: string;
-  opponentDifficultySubtitle: string;
+  opponentDifficultySubtitle: (count: number) => string;
   opponentDifficultyCaption: string;
   opponentDifficultyFootnote: string;
 }
@@ -22,6 +30,15 @@ export function KnockoutStageOpponentDifficultyChart({
   opponentDifficultyFootnote,
 }: KnockoutStageOpponentDifficultyChartProps) {
   const shared = useTranslations("home.knockoutStage");
+  const scatter = useTranslations("home.opponentDifficultyScatter");
+  const teamNames = useTranslations("teams");
+
+  const [scatterPrefs, setScatterPrefs] = usePersistedUiState(
+    OVERVIEW_SCATTER_STORAGE_KEY,
+    DEFAULT_OVERVIEW_SCATTER_PREFS,
+  );
+  const { showWon, showLost, showFifaLabels } = scatterPrefs;
+  const [query, setQuery] = useState("");
 
   const { entries } = strip;
   if (entries.length === 0) return null;
@@ -69,27 +86,39 @@ export function KnockoutStageOpponentDifficultyChart({
           },
         ];
 
-  const points = entries.map((entry) => ({
-    id: `${entry.team.id}-${entry.opponent.id}-${entry.matchNum ?? "na"}`,
-    teamFifaPoints: entry.teamFifaPoints,
-    rivalDifficultyPoints: entry.opponentFifaPoints,
-    won: entry.qualified,
-    href: `/?team=${entry.team.id}`,
-    tooltipData: {
-      team: entry.team,
+  const allPoints = entries.map((entry) => {
+    const displayName = getTeamDisplayName(teamNames, entry.team);
+    return {
+      id: `${entry.team.id}-${entry.opponent.id}-${entry.matchNum ?? "na"}`,
+      fifaCode: entry.team.id,
+      teamId: entry.team.id,
+      displayName,
       teamFifaPoints: entry.teamFifaPoints,
       rivalDifficultyPoints: entry.opponentFifaPoints,
       won: entry.qualified,
-      statusLabel: entry.qualified
-        ? shared("opponentDifficultyVictory")
-        : shared("opponentDifficultyDefeat"),
-      rivalDifficultyLabel: shared("opponentDifficultyAxisRivalDifficulty"),
-      rival: entry.opponent,
-      rivalLabel: shared("opponentDifficultyTooltipRival"),
-      rivalPointsLabel: shared("opponentDifficultyTooltipRivalPoints"),
-      gapLabel: shared("opponentDifficultyTooltipGap"),
-    },
-  }));
+      href: `/?team=${entry.team.id}`,
+      tooltipData: {
+        team: entry.team,
+        teamFifaPoints: entry.teamFifaPoints,
+        rivalDifficultyPoints: entry.opponentFifaPoints,
+        won: entry.qualified,
+        statusLabel: entry.qualified
+          ? shared("opponentDifficultyVictory")
+          : shared("opponentDifficultyDefeat"),
+        rivalDifficultyLabel: shared("opponentDifficultyAxisRivalDifficulty"),
+        rival: entry.opponent,
+        rivalLabel: shared("opponentDifficultyTooltipRival"),
+        rivalPointsLabel: shared("opponentDifficultyTooltipRivalPoints"),
+        gapLabel: shared("opponentDifficultyTooltipGap"),
+      },
+    };
+  });
+
+  const points = filterOpponentDifficultyScatterPoints(allPoints, {
+    showWon,
+    showLost,
+    query,
+  });
 
   return (
     <div className="space-y-3">
@@ -98,17 +127,38 @@ export function KnockoutStageOpponentDifficultyChart({
           {opponentDifficultyTitle}
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          {opponentDifficultySubtitle}
+          {opponentDifficultySubtitle(points.length)}
         </p>
       </div>
 
       <OpponentDifficultyScatterChart
         points={points}
+        domainPoints={allPoints}
         referenceLines={referenceLines}
         verticalReferenceLines={verticalReferenceLines}
         ariaLabel={opponentDifficultyCaption}
         xAxisLabel={shared("opponentDifficultyAxisTeamPoints")}
         yAxisLabel={shared("opponentDifficultyAxisRivalDifficulty")}
+        wonLabel={shared("opponentDifficultyLegendVictory")}
+        lostLabel={shared("opponentDifficultyLegendDefeat")}
+        showWon={showWon}
+        showLost={showLost}
+        onToggleWon={() =>
+          setScatterPrefs((prefs) => ({ ...prefs, showWon: !prefs.showWon }))
+        }
+        onToggleLost={() =>
+          setScatterPrefs((prefs) => ({ ...prefs, showLost: !prefs.showLost }))
+        }
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder={scatter("searchPlaceholder")}
+        searchLabel={scatter("searchLabel")}
+        showFifaLabels={showFifaLabels}
+        onShowFifaLabelsChange={(value) =>
+          setScatterPrefs((prefs) => ({ ...prefs, showFifaLabels: value }))
+        }
+        fifaLabelsLabel={scatter("showFifaCodes")}
+        emptyFilteredMessage={scatter("emptyFiltered")}
         footnote={
           <>
             <p className="text-xs text-muted-foreground">
@@ -122,16 +172,8 @@ export function KnockoutStageOpponentDifficultyChart({
         renderPointTooltip={(data) => (
           <OpponentDifficultyPointTooltip {...data} />
         )}
-        legend={
+        referenceLegend={
           <>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-wc-green/85" />
-              {shared("opponentDifficultyLegendVictory")}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-wc-red/80" />
-              {shared("opponentDifficultyLegendDefeat")}
-            </span>
             {referenceLines.map((line) => (
               <span
                 key={line.label}

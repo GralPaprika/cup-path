@@ -7,10 +7,16 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { OpponentDifficultyScatterFifaLabels } from "@/components/charts/opponent-difficulty-scatter-fifa-labels";
+import { TableSearchInput } from "@/components/tables/table-search-input";
+import { Switch } from "@/components/ui/switch";
 import { formatWholeNumber } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export interface OpponentDifficultyScatterPoint<TTooltip = unknown> {
   id: string;
+  /** FIFA code shown when showFifaLabels is on (may differ from id in knockout). */
+  fifaCode: string;
   teamFifaPoints: number;
   rivalDifficultyPoints: number;
   won: boolean;
@@ -27,15 +33,33 @@ export interface OpponentDifficultyReferenceLine {
 }
 
 export interface OpponentDifficultyScatterChartProps<TTooltip = unknown> {
+  /** Visible (filtered) points drawn as dots. */
   points: OpponentDifficultyScatterPoint<TTooltip>[];
+  /** Full point set used only for fixed X/Y domains. */
+  domainPoints: OpponentDifficultyScatterPoint<TTooltip>[];
   referenceLines: OpponentDifficultyReferenceLine[];
   verticalReferenceLines?: OpponentDifficultyReferenceLine[];
   ariaLabel: string;
-  legend: ReactNode;
+  referenceLegend: ReactNode;
   footnote: ReactNode;
   xAxisLabel: string;
   yAxisLabel: string;
   renderPointTooltip: (data: TTooltip) => ReactNode;
+  wonLabel: string;
+  lostLabel: string;
+  showWon: boolean;
+  showLost: boolean;
+  onToggleWon: () => void;
+  onToggleLost: () => void;
+  query: string;
+  onQueryChange: (query: string) => void;
+  searchPlaceholder: string;
+  searchLabel: string;
+  /** Removable: FIFA code labels on dots. Default off. */
+  showFifaLabels: boolean;
+  onShowFifaLabelsChange: (show: boolean) => void;
+  fifaLabelsLabel: string;
+  emptyFilteredMessage?: string;
 }
 
 const WIDTH = 600;
@@ -95,14 +119,29 @@ function svgCoordsToScreen(
 
 export function OpponentDifficultyScatterChart<TTooltip>({
   points,
+  domainPoints,
   referenceLines,
   verticalReferenceLines = [],
   ariaLabel,
-  legend,
+  referenceLegend,
   footnote,
   xAxisLabel,
   yAxisLabel,
   renderPointTooltip,
+  wonLabel,
+  lostLabel,
+  showWon,
+  showLost,
+  onToggleWon,
+  onToggleLost,
+  query,
+  onQueryChange,
+  searchPlaceholder,
+  searchLabel,
+  showFifaLabels,
+  onShowFifaLabelsChange,
+  fifaLabelsLabel,
+  emptyFilteredMessage,
 }: OpponentDifficultyScatterChartProps<TTooltip>) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoveredPoint, setHoveredPoint] = useState<{
@@ -135,15 +174,15 @@ export function OpponentDifficultyScatterChart<TTooltip>({
     setHoveredPoint(null);
   }, []);
 
-  if (points.length === 0) return null;
+  if (domainPoints.length === 0) return null;
 
   const xValues = [
-    ...points.map((point) => point.teamFifaPoints),
+    ...domainPoints.map((point) => point.teamFifaPoints),
     ...verticalReferenceLines.map((line) => line.value),
   ];
   const xDomain = fifaPointsDomain(xValues);
   const yValues = [
-    ...points.map((point) => point.rivalDifficultyPoints),
+    ...domainPoints.map((point) => point.rivalDifficultyPoints),
     ...referenceLines.map((line) => line.value),
   ];
   const yDomain = fifaPointsDomain(yValues);
@@ -169,8 +208,62 @@ export function OpponentDifficultyScatterChart<TTooltip>({
 
   return (
     <figure className="overflow-hidden rounded-xl border border-white/8 bg-black/10 p-3">
-      <figcaption className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-        {legend}
+      <figcaption className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showWon}
+            onClick={onToggleWon}
+            className={cn(
+              "flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 font-medium transition-colors",
+              showWon
+                ? "border-wc-green/40 bg-wc-green/15 text-white hover:bg-wc-green/25"
+                : "border-white/10 bg-transparent text-muted-foreground/50 opacity-60 hover:border-white/20 hover:opacity-100",
+            )}
+          >
+            <span className="inline-block h-2 w-2 rounded-full bg-wc-green/85" />
+            {wonLabel}
+          </button>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showLost}
+            onClick={onToggleLost}
+            className={cn(
+              "flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 font-medium transition-colors",
+              showLost
+                ? "border-wc-red/40 bg-wc-red/15 text-white hover:bg-wc-red/25"
+                : "border-white/10 bg-transparent text-muted-foreground/50 opacity-60 hover:border-white/20 hover:opacity-100",
+            )}
+          >
+            <span className="inline-block h-2 w-2 rounded-full bg-wc-red/80" />
+            {lostLabel}
+          </button>
+          {referenceLegend}
+        </div>
+
+        <div className="ml-auto flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* Removable: FIFA label toggle — delete with scatter-fifa-labels.tsx */}
+          <label className="flex cursor-pointer items-center gap-2 text-[11px] text-muted-foreground">
+            <Switch
+              checked={showFifaLabels}
+              onChange={() => onShowFifaLabelsChange(!showFifaLabels)}
+              size="sm"
+              accent="sky"
+            />
+            <span>{fifaLabelsLabel}</span>
+          </label>
+          <div className="w-40 max-w-full shrink-0">
+            <TableSearchInput
+              value={query}
+              onChange={onQueryChange}
+              placeholder={searchPlaceholder}
+              label={searchLabel}
+              size="sm"
+            />
+          </div>
+        </div>
       </figcaption>
 
       <div className="relative">
@@ -306,6 +399,17 @@ export function OpponentDifficultyScatterChart<TTooltip>({
             );
           })}
 
+          {showFifaLabels ? (
+            <OpponentDifficultyScatterFifaLabels
+              points={points.map((point) => ({
+                id: point.id,
+                fifaCode: point.fifaCode,
+                cx: xScale(point.teamFifaPoints),
+                cy: yScale(point.rivalDifficultyPoints),
+              }))}
+            />
+          ) : null}
+
           <text
             x={baselineX + chartWidth / 2}
             y={HEIGHT - 6}
@@ -324,6 +428,12 @@ export function OpponentDifficultyScatterChart<TTooltip>({
             {yAxisLabel}
           </text>
         </svg>
+
+        {points.length === 0 && emptyFilteredMessage ? (
+          <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
+            {emptyFilteredMessage}
+          </p>
+        ) : null}
 
         {hoveredPoint && typeof document !== "undefined"
           ? createPortal(

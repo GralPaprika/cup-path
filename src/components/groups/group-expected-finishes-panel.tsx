@@ -2,6 +2,7 @@
 
 import type { GroupExpectedAnalysis, GroupExpectedMatchEntry } from "@/lib/types";
 import { CollapsibleSection } from "@/components/shared/collapsible-section";
+import { OVERVIEW_COLLAPSE_GROUP_EXPECTED_FINISHES_KEY } from "@/lib/client/overview-ui-preference";
 import { GroupDrawsTable } from "@/components/groups/group-draws-table";
 import { GroupDrawsGapChart } from "@/components/groups/group-draws-gap-chart";
 import { GroupWinLossTable } from "@/components/groups/group-win-loss-table";
@@ -68,6 +69,7 @@ export function GroupExpectedFinishesPanel({
       embedded={embedded}
       title={t("title")}
       subtitle={t("subtitle")}
+      persistKey={OVERVIEW_COLLAPSE_GROUP_EXPECTED_FINISHES_KEY}
     >
       <div className="space-y-4">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">

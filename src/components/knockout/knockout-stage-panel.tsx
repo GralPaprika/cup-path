@@ -12,6 +12,10 @@ import { StatTile } from "@/components/shared/stat-tile";
 import { KnockoutStageTable } from "@/components/knockout/knockout-stage-table";
 import { KnockoutStageGapChart } from "@/components/knockout/knockout-stage-gap-chart";
 import { KnockoutStageOpponentDifficultyChart } from "@/components/knockout/knockout-stage-opponent-difficulty-chart";
+import {
+  overviewCollapseKnockoutKey,
+  overviewSortKnockoutKey,
+} from "@/lib/client/overview-ui-preference";
 import { formatFifaPoints } from "@/lib/format";
 import { homeFactsRoundNamespace } from "@/lib/i18n/stage-keys";
 import { useTranslations } from "next-intl";
@@ -97,6 +101,7 @@ export function KnockoutStagePanel({
         embedded
         title={stage("deepDiveTitle")}
         contentClassName="space-y-6"
+        persistKey={overviewCollapseKnockoutKey(round.id)}
       >
         <div className="space-y-4">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -153,7 +158,10 @@ export function KnockoutStagePanel({
             </p>
           </div>
 
-          <KnockoutStageTable fixtures={analysis.fixtures} />
+          <KnockoutStageTable
+            fixtures={analysis.fixtures}
+            sortPersistKey={overviewSortKnockoutKey(round.id)}
+          />
 
           {analysis.matchCount >= MIN_TIES_FOR_GAP_CHART && (
             <KnockoutStageGapChart
@@ -170,9 +178,9 @@ export function KnockoutStagePanel({
             <KnockoutStageOpponentDifficultyChart
               strip={analysis.opponentDifficulty}
               opponentDifficultyTitle={stage("opponentDifficultyTitle")}
-              opponentDifficultySubtitle={stage("opponentDifficultySubtitle", {
-                count: analysis.opponentDifficulty.entries.length,
-              })}
+              opponentDifficultySubtitle={(count) =>
+                stage("opponentDifficultySubtitle", { count })
+              }
               opponentDifficultyCaption={stage("opponentDifficultyCaption")}
               opponentDifficultyFootnote={stage("opponentDifficultyFootnote")}
             />

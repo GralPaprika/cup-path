@@ -599,6 +599,12 @@
       "groupDifficultyAtMeanNote": "{count} teams sat on the tournament avg ({mean}); {qualified} advanced.",
       "tiebreakerFootnote": "Paper results: higher FIFA points expected to win; equal points expected to draw. Paper standings use expected points, then FIFA points — no invented scorelines. Actual tables use points, goal difference, and goals scored; real FIFA tiebreakers (head-to-head, etc.) may differ."
     },
+    "opponentDifficultyScatter": {
+      "searchPlaceholder": "Team or FIFA code",
+      "searchLabel": "Filter chart points by team or FIFA code",
+      "showFifaCodes": "FIFA codes",
+      "emptyFiltered": "No teams match these filters."
+    },
     "knockoutStage": {
       "poolAvgFifaPoints": "Avg FIFA pts",
       "poolMedianFifaRank": "Median FIFA rank",
@@ -673,7 +679,12 @@
       "next": "Next",
       "vs": "vs",
       "gapChartLegendMean": "Mean gap",
-      "gapChartLegendBand": "Mean ± 1 SD"
+      "gapChartLegendBand": "Mean ± 1 SD",
+      "searchLabel": "Search matches",
+      "searchPlaceholder": "Search country, FIFA code or score…",
+      "searchPlaceholderKnockout": "Search country, FIFA code, score, ET or pens…",
+      "searchNoResults": "No matches for your search",
+      "searchShowing": "Showing {shown} of {total} matches"
     },
     "roundOf32": {
       "title": "Round of 32",

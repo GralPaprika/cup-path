@@ -136,7 +136,7 @@
     "group": "Grupo",
     "confederation": "Confederación",
     "avgRank": "Ranking prom. riv.",
-    "status": "Estado",
+    "furthestRound": "Fase más alta",
     "delta": "Delta vs seleccionado",
     "searchPlaceholder": "Buscar equipo…",
     "noSearchResults": "Ningún equipo coincide con tu búsqueda",

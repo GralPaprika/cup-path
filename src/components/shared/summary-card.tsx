@@ -1,8 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import type { AvgPointsContext, PathStage, TeamPathSummary } from "@/lib/types";
+import type {
+  AvgPointsContext,
+  PathStage,
+  PodiumFinish,
+  TeamPathSummary,
+} from "@/lib/types";
 import { getMatchStage, isThirdPlaceMatch, PATH_STAGES } from "@/lib/domain/match/match-stages";
+import { getPodiumFinish } from "@/lib/domain/path/path-outcome";
 import { useTranslations } from "next-intl";
 import { TeamLabel } from "@/components/team/team-flag";
 import { TeamTierBadge } from "@/components/team/team-tier-badge";
@@ -12,6 +18,14 @@ import {
   AvgPointsContextHint,
 } from "@/components/shared/avg-points-context";
 import { KNOCKOUT_SECTION_IDS } from "@/components/facts/facts-section-nav";
+import {
+  ACTIVE_BADGE_STYLE,
+  ELIMINATED_BADGE_HOVER_STYLE,
+  ELIMINATED_BADGE_STYLE,
+  PODIUM_BADGE_HOVER_STYLES,
+  PODIUM_BADGE_STYLES,
+  PODIUM_LABEL_KEYS,
+} from "@/components/shared/path-outcome-styles";
 import { Badge } from "@/components/ui/badge";
 import { formatFifaPoints, formatStatValue, formatWholeNumber } from "@/lib/format";
 import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
@@ -29,23 +43,13 @@ interface SummaryCardProps {
 }
 
 type PathOutcome =
-  | { kind: "champion" }
-  | { kind: "runnerUp" }
-  | { kind: "thirdPlace" }
+  | { kind: PodiumFinish }
   | { kind: "eliminated"; round: string }
   | { kind: "active" };
 
 function getPathOutcome(summary: TeamPathSummary): PathOutcome {
-  const finalMatch = summary.matches.find(
-    (match) => match.isPlayed && getMatchStage(match.round) === "final",
-  );
-  if (finalMatch?.result === "W") return { kind: "champion" };
-  if (finalMatch?.result === "L") return { kind: "runnerUp" };
-
-  const thirdPlaceMatch = summary.matches.find(
-    (match) => match.isPlayed && isThirdPlaceMatch(match.round),
-  );
-  if (thirdPlaceMatch?.result === "W") return { kind: "thirdPlace" };
+  const podium = getPodiumFinish(summary.matches);
+  if (podium) return { kind: podium };
 
   if (summary.isEliminated) {
     const loss = [...summary.matches]
@@ -156,36 +160,26 @@ export function SummaryCard({
         : getRoundDisplayName(stages, outcome.round)
       : null;
   const outcomeLabel =
-    outcome.kind === "champion"
-      ? t("outcomeChampion")
-      : outcome.kind === "runnerUp"
-        ? t("outcomeRunnerUp")
-        : outcome.kind === "thirdPlace"
-          ? t("outcomeThirdPlace")
-          : outcome.kind === "eliminated" && eliminatedRoundLabel != null
-            ? t("outcomeEliminatedIn", { round: eliminatedRoundLabel })
-            : t("active");
+    outcome.kind === "eliminated"
+      ? eliminatedRoundLabel != null
+        ? t("outcomeEliminatedIn", { round: eliminatedRoundLabel })
+        : t("active")
+      : outcome.kind === "active"
+        ? t("active")
+        : t(PODIUM_LABEL_KEYS[outcome.kind]);
   const outcomeClassName =
-    outcome.kind === "champion"
-      ? "border-wc-orange/40 bg-wc-orange/15 text-wc-orange"
-      : outcome.kind === "runnerUp"
-        ? "border-white/20 bg-white/10 text-white"
-        : outcome.kind === "thirdPlace"
-          ? "border-amber-500/40 bg-amber-500/15 text-amber-200"
-          : outcome.kind === "eliminated"
-            ? "border-wc-red/30 bg-wc-red/20 text-wc-red"
-            : "border-wc-green/30 bg-wc-green/20 text-wc-green";
+    outcome.kind === "eliminated"
+      ? ELIMINATED_BADGE_STYLE
+      : outcome.kind === "active"
+        ? ACTIVE_BADGE_STYLE
+        : PODIUM_BADGE_STYLES[outcome.kind];
 
   const outcomeChipHoverClassName =
-    outcome.kind === "champion"
-      ? "hover:border-wc-orange/60 hover:bg-wc-orange/25"
-      : outcome.kind === "runnerUp"
-        ? "hover:border-white/35 hover:bg-white/15"
-        : outcome.kind === "thirdPlace"
-          ? "hover:border-amber-500/60 hover:bg-amber-500/25"
-          : outcome.kind === "eliminated"
-            ? "hover:border-wc-red/50 hover:bg-wc-red/30"
-            : "";
+    outcome.kind === "eliminated"
+      ? ELIMINATED_BADGE_HOVER_STYLE
+      : outcome.kind === "active"
+        ? ""
+        : PODIUM_BADGE_HOVER_STYLES[outcome.kind];
 
   const overviewHref = getOverviewHrefForOutcome(outcome);
   const overviewRoundPrompt =

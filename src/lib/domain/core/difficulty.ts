@@ -22,6 +22,8 @@ import {
   rankTeamInCohort,
 } from "@/lib/domain/path/path-ranking";
 import { enrichTeam } from "@/lib/domain/team/team-enrich";
+import { getPodiumFinish } from "@/lib/domain/path/path-outcome";
+import { getTeamMaxStageReached } from "@/lib/domain/team/team-stage-logic";
 import { buildAvgPointsContext } from "@/lib/domain/core/points-anchor";
 
 const ALL_PATH_STAGES = new Set(PATH_STAGES);
@@ -271,6 +273,8 @@ export function buildComparison(
       avgOpponentPoints,
       avgOpponentRank,
       isEliminated: summary.isEliminated,
+      maxStageReached: getTeamMaxStageReached(ctx, summary.team.id),
+      podiumFinish: getPodiumFinish(summary.matches),
     };
   });
 

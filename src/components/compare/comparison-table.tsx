@@ -19,6 +19,12 @@ import {
 import { cn } from "@/lib/utils";
 import { formatFifaPoints } from "@/lib/format";
 import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
+import {
+  ACTIVE_BADGE_STYLE,
+  ELIMINATED_BADGE_STYLE,
+  PODIUM_BADGE_STYLES,
+  PODIUM_LABEL_KEYS,
+} from "@/components/shared/path-outcome-styles";
 
 export type ComparisonSortKey = "points" | "rank";
 
@@ -110,7 +116,7 @@ export function ComparisonTable({
   const t = useTranslations("compare");
   const teamNames = useTranslations("teams");
   const stageLabels = useTranslations("compare.stages");
-  const summary = useTranslations("summary");
+  const summaryLabels = useTranslations("summary");
   const common = useTranslations("common");
   const [sortKey, setSortKey] = useState<ComparisonSortKey>("points");
   const [query, setQuery] = useState("");
@@ -158,7 +164,7 @@ export function ComparisonTable({
             <TableHead className="w-[1%] px-4 text-center text-muted-foreground">
               {t("group")}
             </TableHead>
-            <TableHead className="w-[1%] px-4 text-muted-foreground">
+            <TableHead className="w-[1%] px-2 text-muted-foreground">
               {t("confederation")}
             </TableHead>
             <TableHead className="w-[1%] px-4 text-right">
@@ -188,7 +194,7 @@ export function ComparisonTable({
               )}
             </TableHead>
             <TableHead className="w-[1%] px-4 text-center text-muted-foreground">
-              {t("status")}
+              {t("furthestRound")}
             </TableHead>
             {showDelta && (
               <TableHead className="w-[1%] px-4 text-right text-muted-foreground">
@@ -256,7 +262,7 @@ export function ComparisonTable({
                 <TableCell className="w-[1%] whitespace-nowrap px-4 py-3 text-center font-mono text-sm text-muted-foreground">
                   {common("group", { group: entry.team.group })}
                 </TableCell>
-                <TableCell className="w-[1%] whitespace-nowrap px-4 py-3 text-sm text-muted-foreground">
+                <TableCell className="w-[1%] whitespace-nowrap px-2 py-3 text-sm text-muted-foreground">
                   {entry.team.confederation}
                 </TableCell>
                 <TableCell className="w-[1%] whitespace-nowrap px-4 py-3 text-right font-mono text-base font-semibold tabular-nums text-wc-orange">
@@ -274,15 +280,19 @@ export function ComparisonTable({
                   <Badge
                     variant="outline"
                     className={cn(
-                      "min-w-[5.5rem] justify-center",
-                      entry.isEliminated
-                        ? "border-wc-red/30 bg-wc-red/20 text-wc-red"
-                        : "border-wc-green/30 bg-wc-green/20 text-wc-green",
+                      "justify-center",
+                      entry.podiumFinish
+                        ? PODIUM_BADGE_STYLES[entry.podiumFinish]
+                        : entry.isEliminated
+                          ? ELIMINATED_BADGE_STYLE
+                          : ACTIVE_BADGE_STYLE,
                     )}
                   >
-                    {entry.isEliminated
-                      ? summary("eliminated")
-                      : summary("active")}
+                    {entry.podiumFinish
+                      ? summaryLabels(PODIUM_LABEL_KEYS[entry.podiumFinish])
+                      : stageLabels(
+                          COMPARE_STAGE_I18N_KEYS[entry.maxStageReached],
+                        )}
                   </Badge>
                 </TableCell>
                 {showDelta && (

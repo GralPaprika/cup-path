@@ -2,6 +2,8 @@ export type PathStage = "group" | "r32" | "r16" | "qf" | "sf" | "final";
 
 export type MatchResult = "W" | "D" | "L" | null;
 
+export type PodiumFinish = "champion" | "runnerUp" | "thirdPlace";
+
 export interface Team {
   id: string;
   displayName: string;
@@ -71,6 +73,8 @@ export interface ComparisonEntry {
   avgOpponentRank: number | null;
   avgPointsContext: AvgPointsContext | null;
   isEliminated: boolean;
+  maxStageReached: PathStage;
+  podiumFinish: PodiumFinish | null;
   rankAmongTeams: number | null;
   deltaVsSelected: number | null;
 }

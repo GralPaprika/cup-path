@@ -136,7 +136,7 @@
     "group": "Group",
     "confederation": "Confederation",
     "avgRank": "Avg opp. rank",
-    "status": "Status",
+    "furthestRound": "Furthest round",
     "delta": "Delta vs selected",
     "searchPlaceholder": "Search team…",
     "noSearchResults": "No teams match your search",

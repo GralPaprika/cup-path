@@ -12,6 +12,8 @@ export function usePaginatedRows<T>(
   const [page, setPage] = useState(0);
 
   useEffect(() => {
+    // A changed dataset starts a new pagination session.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(0);
   }, [rows, resetToken]);
 

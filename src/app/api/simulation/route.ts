@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseRankingMode } from "@/lib/data/ranking-modes";
+import { resolveRankingMode } from "@/lib/api/ranking-mode";
 import { emptySimulationScenario } from "@/lib/domain/core/simulation-scenario";
 import { getSimulationAnalysis } from "@/lib/services/simulation-service";
 import type { SimulationScenario } from "@/lib/types";
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
   const teamId = body.team;
   const comparisonTeamId = body.compareTeam;
-  const mode = parseRankingMode(body.mode ?? null);
+  const mode = resolveRankingMode(request, body.mode);
   const scenario = body.scenario ?? emptySimulationScenario();
 
   if (!teamId) {

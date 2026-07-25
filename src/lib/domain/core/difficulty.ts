@@ -21,7 +21,7 @@ import {
   buildCompetitionRankMap,
   rankTeamInCohort,
 } from "@/lib/domain/path/path-ranking";
-import { enrichTeam } from "@/lib/data/team-registry";
+import { enrichTeam } from "@/lib/domain/team/team-enrich";
 import { buildAvgPointsContext } from "@/lib/domain/core/points-anchor";
 
 const ALL_PATH_STAGES = new Set(PATH_STAGES);

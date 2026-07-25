@@ -3,10 +3,7 @@ import type {
   GroupPointsBenchmarks,
   GroupStrengthOrdering,
 } from "@/lib/types";
-import {
-  computeCohortOrderingCorrelation,
-  type CohortOrderingCorrelation,
-} from "@/lib/domain/core/rank-correlation";
+import { computeCohortOrderingCorrelation } from "@/lib/domain/core/rank-correlation";
 import { buildCompetitionRankMap } from "@/lib/domain/path/path-ranking";
 
 export type { GroupPointsBenchmarks, GroupStrengthOrdering } from "@/lib/types";

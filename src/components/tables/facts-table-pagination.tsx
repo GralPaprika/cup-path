@@ -1,7 +1,6 @@
 "use client";
 
 interface FactsTablePaginationProps {
-  pageStart: number;
   pageSize: number;
   totalItems: number;
   safePage: number;
@@ -15,7 +14,6 @@ interface FactsTablePaginationProps {
 }
 
 export function FactsTablePagination({
-  pageStart,
   pageSize,
   totalItems,
   safePage,

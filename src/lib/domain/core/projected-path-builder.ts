@@ -7,8 +7,8 @@ import type {
   TeamPathSummary,
 } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
-import { enrichTeam } from "@/lib/data/team-registry";
-import { isKnockoutRound } from "@/lib/data/worldcup-loader";
+import { enrichTeam } from "@/lib/domain/team/team-enrich";
+import { isKnockoutRound } from "@/lib/domain/match/match-result";
 import {
   resolveBracket,
   type ResolveBracketOptions,

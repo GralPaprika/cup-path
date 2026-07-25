@@ -1,4 +1,4 @@
-import { parseRankingMode } from "@/lib/data/ranking-modes";
+import { resolveRankingMode } from "@/lib/api/ranking-mode";
 import {
   parsePathStages,
   parseTeamRound,
@@ -56,7 +56,10 @@ export async function handleAnalysisRequest(
 
   const body = rawBody as AnalysisRequestBody;
   const teamId = typeof body.team === "string" ? body.team : undefined;
-  const mode = parseRankingMode(typeof body.mode === "string" ? body.mode : null);
+  const mode = resolveRankingMode(
+    request,
+    typeof body.mode === "string" ? body.mode : null,
+  );
   const stages = parsePathStages(
     typeof body.stages === "string" ? body.stages : null,
   );
@@ -83,7 +86,10 @@ export async function handleComparisonRequest(
   }
 
   const body = rawBody as ComparisonRequestBody;
-  const mode = parseRankingMode(typeof body.mode === "string" ? body.mode : null);
+  const mode = resolveRankingMode(
+    request,
+    typeof body.mode === "string" ? body.mode : null,
+  );
   const selectedTeamId =
     typeof body.team === "string" ? body.team.toUpperCase() : undefined;
   const compareTeamId =

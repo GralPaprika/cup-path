@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import type { GapChartPoint } from "@/components/facts/gap-distribution-chart";
+import type { GapChartPoint } from "@/components/charts/gap-distribution-chart";
 import { MatchOutcomeGapMatchTooltip } from "@/components/facts/match-outcome-gap-match-tooltip";
 import {
   groupMatchPointId,

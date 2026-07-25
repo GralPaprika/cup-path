@@ -7,9 +7,11 @@ import { GroupsView } from "@/components/groups-view";
 import { ComparisonGroupsSkeleton } from "@/components/loading-skeletons";
 import { useRankingMode } from "@/components/layout/ranking-mode-provider";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
+import { usePageUrlParamsSync } from "@/hooks/use-page-url-params-sync";
 import type { GroupsAnalysisResult } from "@/lib/api/responses";
 import { useTranslations } from "next-intl";
+
+const EMPTY_GROUP_CARDS: GroupsAnalysisResult["groups"] = [];
 
 export function GroupsPageClient() {
   const t = useTranslations("common");
@@ -33,7 +35,7 @@ export function GroupsPageClient() {
     errorMessage: t("error"),
   });
 
-  const groupCards = groupsData?.groups ?? [];
+  const groupCards = groupsData?.groups ?? EMPTY_GROUP_CARDS;
   const strengthOrdering = groupsData?.strengthOrdering;
   const pointsBenchmarks = groupsData?.pointsBenchmarks ?? null;
 
@@ -56,7 +58,7 @@ export function GroupsPageClient() {
     );
   }, [groupCards, urlGroup, selectedTeamId]);
 
-  useRankingModeUrlSync(
+  usePageUrlParamsSync(
     "/groups",
     () => {
       const params = new URLSearchParams({ group: selectedGroupLetter });
@@ -64,6 +66,7 @@ export function GroupsPageClient() {
       return params;
     },
     [selectedGroupLetter, selectedTeamId, groupCards.length],
+    ["group", "team"],
   );
 
   function handleSelectGroup(groupLetter: string) {

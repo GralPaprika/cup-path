@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { GroupExpectedFinishesPanel } from "@/components/groups/group-expected-finishes-panel";
 import { KnockoutStagePanel } from "@/components/knockout/knockout-stage-panel";
-import { ParticipantPoolSection } from "@/components/facts/participant-pool-section";
+import { ParticipantPoolSection } from "@/components/shared/participant-pool-section";
 import { IntroductionSection } from "@/components/facts/introduction-section";
 import { MatchOutcomeGapPanel } from "@/components/facts/match-outcome-gap-panel";
 import {
@@ -14,12 +14,12 @@ import { KNOCKOUT_FACTS_ROUNDS } from "@/lib/domain/knockout/knockout-facts-roun
 import { FactsPageSkeleton } from "@/components/loading-skeletons";
 import { useRankingMode } from "@/components/layout/ranking-mode-provider";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
+import { usePageUrlParamsSync } from "@/hooks/use-page-url-params-sync";
 import { scrollIntoViewRespectingMotion } from "@/lib/client/scroll-into-view";
 import type { TournamentFacts } from "@/lib/api/responses";
 import type { KnockoutFactsRoundId } from "@/lib/types";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const SECTION_SCROLL_MT =
   "scroll-mt-[calc(var(--site-header-height)+1rem)]";
@@ -38,6 +38,7 @@ export function FactsPageClient() {
   const t = useTranslations("home");
   const common = useTranslations("common");
   const { mode } = useRankingMode();
+  const scrolledHash = useRef<string | null>(null);
 
   const { data: facts, loading, error } = useApiQuery<TournamentFacts>(
     "/api/facts",
@@ -46,13 +47,14 @@ export function FactsPageClient() {
   );
 
   // Strip legacy ?mode= query params; ranking mode lives in a cookie.
-  useRankingModeUrlSync("/overview");
+  usePageUrlParamsSync("/overview");
 
   // Sections mount after the facts fetch; re-scroll once the hash target exists.
   useEffect(() => {
     if (!facts) return;
     const id = window.location.hash.slice(1);
-    if (!id) return;
+    if (!id || scrolledHash.current === id) return;
+    scrolledHash.current = id;
     requestAnimationFrame(() => {
       scrollIntoViewRespectingMotion(document.getElementById(id));
     });

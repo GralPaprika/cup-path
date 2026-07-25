@@ -142,6 +142,8 @@ export function TeamHeadToHeadPanel({
 
   useEffect(() => {
     if (!showComparison) {
+      // Reset results when the externally selected pair is incomplete.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAnalysisA(null);
       setAnalysisB(null);
       return;

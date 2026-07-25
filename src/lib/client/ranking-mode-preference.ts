@@ -1,8 +1,8 @@
 import { parseRankingMode } from "@/lib/data/ranking-modes";
 import type { RankingMode } from "@/lib/types";
 
-export const RANKING_MODE_STORAGE_KEY = "cuppath:ranking-mode";
-export const RANKING_MODE_COOKIE = "RANKING_MODE";
+export const RANKING_MODE_STORAGE_KEY = "cuppath:ranking-mode:v2";
+export const RANKING_MODE_COOKIE = "RANKING_MODE_V2";
 
 export function readRankingModePreference(): RankingMode | null {
   if (typeof window === "undefined") return null;

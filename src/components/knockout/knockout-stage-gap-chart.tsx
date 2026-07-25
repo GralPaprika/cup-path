@@ -1,7 +1,7 @@
 "use client";
 
 import type { KnockoutFixtureEntry } from "@/lib/types";
-import { GapDistributionChart } from "@/components/facts/gap-distribution-chart";
+import { GapDistributionChart } from "@/components/charts/gap-distribution-chart";
 import { formatFifaPoints } from "@/lib/format";
 import { CHART_COLORS } from "@/lib/chart-colors";
 import { cn } from "@/lib/utils";

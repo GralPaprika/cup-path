@@ -1,6 +1,6 @@
 import type { AvgPointsContext, PointsAnchor, RankingEntry } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
-import { enrichTeam } from "@/lib/data/team-registry";
+import { enrichTeam } from "@/lib/domain/team/team-enrich";
 
 export function computePointsPercentile(
   targetPoints: number | null,

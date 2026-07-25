@@ -22,7 +22,8 @@ function match(
     opponent: {
       id: "AAA",
       displayName: "Team A",
-      fifaCode: "AAA",
+      aliases: [],
+      flagUrl: "",
       group: "A",
       confederation: "UEFA",
     },

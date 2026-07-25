@@ -3,7 +3,7 @@ import type { TournamentContext } from "@/lib/domain/tournament/tournament-conte
 import {
   getMatchWinner,
   isMatchPlayed,
-} from "@/lib/data/worldcup-loader";
+} from "@/lib/domain/match/match-result";
 import {
   getAdvancingTeams,
   getTeamMatches,

@@ -9,9 +9,9 @@ import { GroupWinLossGapChart } from "@/components/groups/group-win-loss-gap-cha
 import { GroupPaperPositionCards } from "@/components/groups/group-paper-position-cards";
 import { GroupStageDifficultyChart } from "@/components/groups/group-stage-difficulty-chart";
 import type { GroupStageDifficultyStrip } from "@/lib/types";
-import { GroupMatchPreview } from "@/components/facts/group-match-preview";
-import { StatTile } from "@/components/facts/stat-tile";
-import { StorySection } from "@/components/facts/story-section";
+import { GroupMatchPreview } from "@/components/groups/group-match-preview";
+import { StatTile } from "@/components/shared/stat-tile";
+import { StorySection } from "@/components/shared/story-section";
 import { formatFifaPoints } from "@/lib/format";
 import { useTranslations } from "next-intl";
 

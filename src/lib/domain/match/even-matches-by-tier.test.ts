@@ -63,7 +63,7 @@ describe("computeEvenMatchesByTier", () => {
       computeEvenMatchesByTier([
         entry({
           index: 1,
-          stage: "roundOf16",
+          stage: "r16",
           team1Points: 1800,
           team2Points: 1750,
         }),
@@ -91,7 +91,7 @@ describe("computeEvenMatchesByTier", () => {
       // knockout even match — ignored for buckets, counted in total
       entry({
         index: 5,
-        stage: "roundOf16",
+        stage: "r16",
         team1Points: 1800,
         team2Points: 1750,
       }),

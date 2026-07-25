@@ -1,6 +1,7 @@
 import type { OpenFootballTeam, RankingMode, RankingsSnapshot, Team } from "@/lib/types";
 import { getFifaFlagUrl } from "@/lib/data/flag-utils";
 import { DEFAULT_RANKING_MODE } from "@/lib/data/ranking-modes";
+import { enrichTeam } from "@/lib/domain/team/team-enrich";
 import bundledTeams from "../../../data/worldcup/2026/worldcup.teams.json";
 
 const EXTRA_ALIASES: Record<string, string[]> = {
@@ -94,11 +95,6 @@ export function resolveTeam(name: string): Team | undefined {
 
 export function getTeamsByGroup(group: string): Team[] {
   return teams.filter((team) => team.group === group.toUpperCase());
-}
-
-export function enrichTeam(team: Team, flagUrl?: string): Team {
-  if (!flagUrl || flagUrl === team.flagUrl) return team;
-  return { ...team, flagUrl };
 }
 
 export function enrichTeamsFromSnapshot(

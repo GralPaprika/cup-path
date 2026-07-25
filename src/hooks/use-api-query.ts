@@ -39,6 +39,7 @@ export function useApiQuery<T>(
     abortRef.current = controller;
 
     setLoading(true);
+    setData(null);
     setError(null);
 
     try {
@@ -66,7 +67,7 @@ export function useApiQuery<T>(
         setLoading(false);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- caller controls invalidation via deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo -- caller controls invalidation via deps
   }, [url, enabled, errorMessage, method, body, headers, ...deps]);
 
   useEffect(() => {

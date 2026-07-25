@@ -2,14 +2,6 @@ import type { RankingMode } from "@/lib/types";
 
 export const DEFAULT_RANKING_MODE: RankingMode = "july20";
 
-export const RANKING_MODES: RankingMode[] = [
-  "july20",
-  "june11",
-  "april",
-  "january",
-  "november19",
-];
-
 export const SNAPSHOT_MODES = [
   "july20",
   "june11",
@@ -19,6 +11,8 @@ export const SNAPSHOT_MODES = [
 ] as const;
 
 export type SnapshotMode = (typeof SNAPSHOT_MODES)[number];
+
+export const RANKING_MODES: RankingMode[] = [...SNAPSHOT_MODES];
 
 export const SNAPSHOT_DATES: Record<SnapshotMode, string> = {
   july20: "2026-07-20",

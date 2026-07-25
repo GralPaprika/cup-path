@@ -54,7 +54,8 @@ npm run sync:rankings
 |---|---|
 | `npm run dev` | Start development server |
 | `npm run build` | Sync worldcup data and build |
-| `npm run test` | Run domain unit tests (81 tests) |
+| `npm run test` | Run unit tests (146 tests) |
+| `npm run typecheck` | Check TypeScript types without emitting files |
 | `npm run sync:worldcup` | Fetch latest 2026 data from openfootball |
 | `npm run sync:rankings` | Fetch all FIFA ranking snapshots from RapidAPI into local runtime cache |
 | `npm run seed:rankings` | Upload ranking snapshots to Vercel Blob |

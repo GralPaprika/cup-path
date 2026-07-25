@@ -36,6 +36,8 @@ export function RankingModeProvider({
     // Recover localStorage preference after hydration when the cookie was absent.
     const preferred = readRankingModePreference();
     if (preferred) {
+      // Reconcile the browser-only preference after server hydration.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setModeState((current) => {
         if (current === preferred) return current;
         writeRankingModePreference(preferred);

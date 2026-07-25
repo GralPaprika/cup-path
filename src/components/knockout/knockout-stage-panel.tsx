@@ -6,9 +6,9 @@ import type {
   KnockoutStageAnalysis,
 } from "@/lib/types";
 import { CollapsibleSection } from "@/components/shared/collapsible-section";
-import { ParticipantPoolSection } from "@/components/facts/participant-pool-section";
-import { KnockoutFixturePreview } from "@/components/facts/knockout-fixture-preview";
-import { StatTile } from "@/components/facts/stat-tile";
+import { ParticipantPoolSection } from "@/components/shared/participant-pool-section";
+import { KnockoutFixturePreview } from "@/components/knockout/knockout-fixture-preview";
+import { StatTile } from "@/components/shared/stat-tile";
 import { KnockoutStageTable } from "@/components/knockout/knockout-stage-table";
 import { KnockoutStageGapChart } from "@/components/knockout/knockout-stage-gap-chart";
 import { KnockoutStageOpponentDifficultyChart } from "@/components/knockout/knockout-stage-opponent-difficulty-chart";

@@ -20,6 +20,8 @@ const sizeClasses = {
 
 export function TeamFlag({ team, size = "md", className = "" }: TeamFlagProps) {
   return (
+    // Remote flag URLs are not constrained to a Next Image-compatible host.
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={team.flagUrl}
       alt={`${team.displayName} flag`}

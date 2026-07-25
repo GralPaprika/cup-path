@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseRankingMode } from "@/lib/data/ranking-modes";
+import { resolveRankingMode } from "@/lib/api/ranking-mode";
 import { emptySimulationScenario } from "@/lib/domain/core/simulation-scenario";
 import {
   buildStrongestKnockoutWinners,
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const mode = parseRankingMode(body.mode ?? null);
+  const mode = resolveRankingMode(request, body.mode);
   const scenario = body.scenario ?? emptySimulationScenario();
   const scope = parseScope(body.scope);
   const context = await getSimulationStrongestWinnersContext(scenario, mode);

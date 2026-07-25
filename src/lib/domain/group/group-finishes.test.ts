@@ -9,6 +9,7 @@ import {
   groupAMatchesComplete,
   groupBMatchesComplete,
 } from "@/lib/domain/core/test-fixtures";
+import type { GroupFinishMap } from "@/lib/domain/group/group-finish-swap";
 
 function groupsABContext() {
   return createTestContext([...groupAMatchesComplete(), ...groupBMatchesComplete()]);
@@ -17,7 +18,7 @@ function groupsABContext() {
 describe("getQualifyingThirdGroups", () => {
   it("marks the best third-place groups as qualifying", () => {
     const ctx = groupsABContext();
-    const finishes = {
+    const finishes: GroupFinishMap = {
       A: ["MEX", "CZE", "RSA", "KOR"],
       B: ["CAN", "SUI", "BIH", "QAT"],
     };
@@ -30,7 +31,7 @@ describe("getQualifyingThirdGroups", () => {
 describe("buildBestThirdRanking", () => {
   it("ranks third-place teams and flags qualifiers", () => {
     const ctx = groupsABContext();
-    const finishes = {
+    const finishes: GroupFinishMap = {
       A: ["MEX", "CZE", "RSA", "KOR"],
       B: ["CAN", "SUI", "BIH", "QAT"],
     };
@@ -44,7 +45,7 @@ describe("buildBestThirdRanking", () => {
 describe("group finish stats reuse", () => {
   it("keeps actual group-stage stats when positions are swapped", () => {
     const ctx = groupsABContext();
-    const finishes = {
+    const finishes: GroupFinishMap = {
       A: ["RSA", "MEX", "KOR", "CZE"],
       B: ["CAN", "SUI", "BIH", "QAT"],
     };

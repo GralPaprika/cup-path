@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { AvgPointsContext, Team } from "@/lib/types";
 import { TeamLabel } from "@/components/team/team-flag";
 import { AvgPointsContextHint } from "@/components/shared/avg-points-context";
-import { StatTile } from "@/components/facts/stat-tile";
+import { StatTile } from "@/components/shared/stat-tile";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 
 interface ParticipantPoolSectionProps {

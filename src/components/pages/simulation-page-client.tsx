@@ -1,48 +1,23 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useSearchParams } from "next/navigation";
-import type { SimulationResult, SimulationScenario, Team } from "@/lib/types";
+import type { Team } from "@/lib/types";
 import { TeamSelector } from "@/components/team/team-selector";
 import { BracketTree } from "@/components/bracket/bracket-tree";
 import { GroupFinishEditor } from "@/components/groups/group-finish-editor";
 import { TeamPathImpactPanel } from "@/components/team/team-path-impact-panel";
 import { PageShellSkeleton } from "@/components/loading-skeletons";
-import { useRankingMode } from "@/components/layout/ranking-mode-provider";
-import {
-  compactGroupFinishes,
-  groupFinishesDifferFromBaseline,
-  swapGroupPositions,
-  type GroupFinishMap,
-  type GroupFinishPosition,
-} from "@/lib/domain/group/group-finish-swap";
-import { sortGroupFinishesByFifaPoints } from "@/lib/domain/group/group-finish-sort";
-import { emptySimulationScenario } from "@/lib/domain/core/simulation-scenario";
-import {
-  clearSimulationScenarioPreference,
-  readSimulationScenarioPreference,
-  writeSimulationScenarioPreference,
-} from "@/lib/client/simulation-scenario-preference";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
+import { usePageUrlParamsSync } from "@/hooks/use-page-url-params-sync";
+import { useSimulationAnalysis } from "@/hooks/use-simulation-analysis";
 import { useTranslations } from "next-intl";
-
-function scenarioHasOverrides(
-  scenario: SimulationScenario,
-  baseline?: GroupFinishMap,
-): boolean {
-  const hasWinners = Object.keys(scenario.knockoutWinners ?? {}).length > 0;
-  if (hasWinners) return true;
-  if (!scenario.groupFinishes || !baseline) return false;
-  return groupFinishesDifferFromBaseline(scenario.groupFinishes, baseline);
-}
 
 function FixedResetButton({ onReset }: { onReset: () => void }) {
   const t = useTranslations("simulate");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal mount gate
     setMounted(true);
   }, []);
 
@@ -73,6 +48,7 @@ function PickWinnersAlert({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal mount gate
     setMounted(true);
   }, []);
 
@@ -112,162 +88,35 @@ function PickWinnersAlert({
 }
 
 function SimulationPageContent({ teams }: { teams: Team[] }) {
-  const searchParams = useSearchParams();
   const t = useTranslations("simulate");
   const common = useTranslations("common");
-  const initialTeam =
-    searchParams.get("team")?.toUpperCase() ?? teams[0]?.id ?? "ARG";
-  const initialComparisonTeam =
-    searchParams.get("compareTeam")?.toUpperCase() ?? "";
-
-  const { mode } = useRankingMode();
-  const [teamId, setTeamId] = useState(initialTeam);
-  const [comparisonTeamId, setComparisonTeamId] = useState(initialComparisonTeam);
-  const [scenario, setScenario] = useState<SimulationScenario>(
-    emptySimulationScenario,
-  );
-  const [scenarioHydrated, setScenarioHydrated] = useState(false);
-  const [pickWinnersAlertDismissed, setPickWinnersAlertDismissed] =
-    useState(false);
-
-  const simulationBody = useMemo(
-    () => ({
-      mode,
-      team: teamId,
-      compareTeam: comparisonTeamId || undefined,
-      scenario,
-    }),
-    [mode, teamId, comparisonTeamId, scenario],
-  );
-
   const {
+    teamId,
+    setTeamId,
+    comparisonTeamId,
+    setComparisonTeamId,
+    scenario,
     data,
     loading,
     error,
-  } = useApiQuery<SimulationResult>(
-    "/api/simulation",
-    [mode, teamId, comparisonTeamId, scenario, scenarioHydrated],
-    {
-      enabled: scenarioHydrated,
-      method: "POST",
-      body: simulationBody,
-      errorMessage: common("error"),
-    },
-  );
+    hasOverrides,
+    handleSelectWinner,
+    handleSwapGroupPositions,
+    handleSortGroupsByPoints,
+    resetScenario,
+    pickStrongestWinners,
+  } = useSimulationAnalysis(teams);
 
+  const [pickWinnersAlertDismissed, setPickWinnersAlertDismissed] =
+    useState(false);
   const pendingWinnersKey = data?.pendingWinnerMatchNums.join(",") ?? "";
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- re-show alert when pending set changes
     setPickWinnersAlertDismissed(false);
   }, [pendingWinnersKey]);
 
-  useEffect(() => {
-    setScenario(readSimulationScenarioPreference());
-    setScenarioHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!scenarioHydrated) return;
-    writeSimulationScenarioPreference(scenario);
-  }, [scenario, scenarioHydrated]);
-
-  useRankingModeUrlSync(
-    "/simulate",
-    () => {
-      const params = new URLSearchParams({ team: teamId });
-      if (comparisonTeamId) {
-        params.set("compareTeam", comparisonTeamId);
-      }
-      return params;
-    },
-    [teamId, comparisonTeamId],
-  );
-
-  function handleSelectWinner(matchNum: number, winnerId: string) {
-    setScenario((current) => ({
-      ...current,
-      knockoutWinners: {
-        ...current.knockoutWinners,
-        [matchNum]: winnerId,
-      },
-    }));
-  }
-
-  function handleSwapGroupPositions(
-    groupLetter: string,
-    positionA: GroupFinishPosition,
-    positionB: GroupFinishPosition,
-  ) {
-    setScenario((current) => {
-      const baseline = data?.baselineGroupFinishes ?? {};
-      const merged = { ...baseline, ...current.groupFinishes };
-      const swapped = swapGroupPositions(
-        merged,
-        groupLetter,
-        positionA,
-        positionB,
-      );
-      return {
-        ...current,
-        groupFinishes: compactGroupFinishes(swapped, baseline),
-        knockoutWinners: {},
-      };
-    });
-  }
-
-  function handleSortGroupsByPoints() {
-    setScenario((current) => {
-      const baseline = data?.baselineGroupFinishes ?? {};
-      const merged = { ...baseline, ...current.groupFinishes };
-      const sorted = sortGroupFinishesByFifaPoints(
-        merged,
-        data?.teamRankings ?? {},
-      );
-      return {
-        ...current,
-        groupFinishes: compactGroupFinishes(sorted, baseline),
-        knockoutWinners: {},
-      };
-    });
-  }
-
-  function resetScenario() {
-    const empty = emptySimulationScenario();
-    setScenario(empty);
-    clearSimulationScenarioPreference();
-  }
-
-  function pickStrongestWinners(scope: "all" | "simulated") {
-    if (!data) return;
-
-    void (async () => {
-      try {
-        const response = await fetch("/api/simulation/strongest-winners", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode, scenario, scope }),
-        });
-        if (!response.ok) return;
-
-        const json = (await response.json()) as {
-          knockoutWinners: Record<number, string> | null;
-        };
-        if (!json.knockoutWinners) return;
-
-        setScenario((current) => ({
-          ...current,
-          knockoutWinners: json.knockoutWinners ?? {},
-        }));
-      } catch {
-        // ignore
-      }
-    })();
-  }
-
-  const hasOverrides = scenarioHasOverrides(
-    scenario,
-    data?.baselineGroupFinishes,
-  );
+  usePageUrlParamsSync("/simulate");
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8">

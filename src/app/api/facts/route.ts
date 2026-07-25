@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RANKING_MODE_COOKIE } from "@/lib/client/ranking-mode-preference";
-import { parseRankingMode } from "@/lib/data/ranking-modes";
+import { resolveRankingMode } from "@/lib/api/ranking-mode";
 import { getTournamentFacts } from "@/lib/services/facts-service";
 
 export async function GET(request: NextRequest) {
-  const mode = parseRankingMode(
-    request.cookies.get(RANKING_MODE_COOKIE)?.value ?? null,
-  );
+  const mode = resolveRankingMode(request, request.nextUrl.searchParams.get("mode"));
   const facts = await getTournamentFacts(mode);
 
   return NextResponse.json({ mode, ...facts });

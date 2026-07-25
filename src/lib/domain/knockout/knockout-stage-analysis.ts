@@ -8,7 +8,7 @@ import type { TournamentContext } from "@/lib/domain/tournament/tournament-conte
 import {
   getMatchWinner,
   isMatchPlayed,
-} from "@/lib/data/worldcup-loader";
+} from "@/lib/domain/match/match-result";
 import { computeNumericStats } from "@/lib/domain/group/group-stats";
 import { buildMatchScoreBreakdown } from "@/lib/domain/match/match-score";
 import { buildKnockoutOpponentDifficultyStrip } from "@/lib/domain/knockout/knockout-opponent-difficulty";

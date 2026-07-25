@@ -60,6 +60,8 @@ export function MatchOutcomeGapChartOverlay({
   );
 
   useEffect(() => {
+    // Portal rendering must wait until the browser document is available.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

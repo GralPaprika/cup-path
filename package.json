@@ -7,6 +7,7 @@
     "build": "npm run sync:worldcup && next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "sync:worldcup": "tsx scripts/sync-openfootball.ts",
     "sync:rankings": "tsx scripts/sync-rankings.ts",
     "seed:rankings": "tsx scripts/seed-ranking-snapshots.ts",

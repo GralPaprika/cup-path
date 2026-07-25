@@ -64,6 +64,25 @@ describe("analysis API handler", () => {
     assert.deepEqual(await response.json(), expected);
   });
 
+  it("uses the default mode when omitted and maps legacy aliases", async () => {
+    const received: RankingMode[] = [];
+    const loader = async (
+      _teamId: string,
+      mode: RankingMode,
+    ) => {
+      received.push(mode);
+      return {};
+    };
+
+    await handleAnalysisRequest(jsonRequest({ team: "esp" }), loader);
+    await handleAnalysisRequest(
+      jsonRequest({ team: "esp", mode: "tournamentStart" }),
+      loader,
+    );
+
+    assert.deepEqual(received, ["july20", "june11"]);
+  });
+
   it("returns 404 when the team is unknown", async () => {
     const response = await handleAnalysisRequest(
       jsonRequest({ team: "unknown" }),

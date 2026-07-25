@@ -1,6 +1,6 @@
 import type { GroupStanding, OpenFootballMatch } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
-import { getMatchWinner, isMatchPlayed } from "@/lib/data/worldcup-loader";
+import { isMatchPlayed } from "@/lib/domain/match/match-result";
 
 function initStanding(teamId: string): GroupStanding {
   return {

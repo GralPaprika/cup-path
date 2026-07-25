@@ -4,7 +4,7 @@ import {
   getMatchWinner,
   isKnockoutRound,
   isMatchPlayed,
-} from "@/lib/data/worldcup-loader";
+} from "@/lib/domain/match/match-result";
 import {
   getAdvancingTeamIds,
   isTeamEliminatedFromGroup,

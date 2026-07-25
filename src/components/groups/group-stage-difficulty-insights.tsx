@@ -6,7 +6,7 @@ import type {
   GroupStageDifficultySpotlight,
 } from "@/lib/types";
 import { TeamFlag } from "@/components/team/team-flag";
-import { QualificationInsightsPanel } from "@/components/facts/qualification-insights-panel";
+import { QualificationInsightsPanel } from "@/components/shared/qualification-insights-panel";
 import { formatFifaPoints } from "@/lib/format";
 import { useTranslations } from "next-intl";
 

@@ -9,6 +9,7 @@ import {
   groupAMatchesComplete,
   groupBMatchesComplete,
 } from "@/lib/domain/core/test-fixtures";
+import type { SimulationScenario } from "@/lib/types";
 
 describe("buildStrongestKnockoutWinners", () => {
   it("picks the higher FIFA points team for played knockout matches", () => {
@@ -25,7 +26,7 @@ describe("buildStrongestKnockoutWinners", () => {
       },
     ]);
 
-    const scenario = {
+    const scenario: SimulationScenario = {
       groupFinishes: {
         A: ["MEX", "CZE", "RSA", "KOR"],
         B: ["CAN", "SUI", "BIH", "QAT"],
@@ -65,7 +66,7 @@ describe("buildStrongestKnockoutWinners", () => {
       },
     ]);
 
-    const scenario = {
+    const scenario: SimulationScenario = {
       groupFinishes: {
         A: ["MEX", "CZE", "RSA", "KOR"],
         B: ["CAN", "SUI", "BIH", "QAT"],

@@ -1,23 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import type { PathStage, Team } from "@/lib/types";
-import {
-  clampPathStages,
-  isStageWithinReach,
-  stagesThrough,
-} from "@/lib/domain/match/match-stages";
 import { TeamSelector } from "@/components/team/team-selector";
-import {
-  PathStageFilters,
-  serializePathStages,
-} from "@/components/path/path-stage-filters";
-import { useRankingMode } from "@/components/layout/ranking-mode-provider";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { useRankingModeUrlSync } from "@/hooks/use-ranking-mode-url-sync";
-import { usePersistedPathStages } from "@/hooks/use-persisted-path-stages";
-import type { TeamAnalysisResult, TeamsResponse } from "@/lib/api/responses";
+import { PathStageFilters } from "@/components/path/path-stage-filters";
+import { usePageUrlParamsSync } from "@/hooks/use-page-url-params-sync";
+import { useTeamAnalysisQuery } from "@/hooks/use-team-analysis-query";
 import { AdvancedStatsPanel } from "@/components/path/advanced-stats-panel";
 import { SummaryCard } from "@/components/shared/summary-card";
 import { PathTable } from "@/components/path/path-table";
@@ -25,75 +11,24 @@ import {
   PathTableSkeleton,
   SummaryCardSkeleton,
 } from "@/components/loading-skeletons";
+import type { Team } from "@/lib/types";
 import { useTranslations } from "next-intl";
 
-function stagesNeedClamp(stages: Set<PathStage>, maxStage: PathStage): boolean {
-  return [...stages].some((stage) => !isStageWithinReach(stage, maxStage));
-}
-
 export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
-  const searchParams = useSearchParams();
-  const t = useTranslations("common");
   const analysis = useTranslations("teamAnalysis");
-  const urlTeam = searchParams.get("team")?.toUpperCase() ?? "ESP";
-
-  const [teamId, setTeamId] = useState(urlTeam);
-  const { mode } = useRankingMode();
-  const [stages, setStages, stagesHydrated] = usePersistedPathStages("team-analysis");
-  const [data, setData] = useState<TeamAnalysisResult | null>(null);
-  const [maxStageReached, setMaxStageReached] = useState<PathStage | undefined>();
-
-  const { data: teamsData } = useApiQuery<TeamsResponse>("/api/teams", [mode]);
-  const teamList = teamsData?.teams ?? teams;
-
-  const analysisBody = useMemo(
-    () => ({
-      team: teamId,
-      mode,
-      stages: serializePathStages(stages),
-    }),
-    [teamId, mode, stages],
-  );
   const {
-    data: rawData,
+    teamId,
+    setTeamId,
+    stages,
+    setStages,
+    teamList,
+    data,
     loading,
     error,
-  } = useApiQuery<TeamAnalysisResult>(
-    "/api/analysis",
-    [teamId, mode, stages, stagesHydrated],
-    {
-      method: "POST",
-      body: analysisBody,
-      errorMessage: t("error"),
-      enabled: stagesHydrated,
-    },
-  );
+    maxStageReached,
+  } = useTeamAnalysisQuery(teams);
 
-  useEffect(() => {
-    setTeamId(urlTeam);
-  }, [urlTeam]);
-
-  useEffect(() => {
-    setMaxStageReached(undefined);
-  }, [teamId]);
-
-  useEffect(() => {
-    if (!rawData) return;
-    if (maxStageReached === undefined) {
-      setStages(stagesThrough(rawData.maxStageReached));
-    } else if (stagesNeedClamp(stages, rawData.maxStageReached)) {
-      setStages(clampPathStages(stages, rawData.maxStageReached));
-      return;
-    }
-    setMaxStageReached(rawData.maxStageReached);
-    setData(rawData);
-  }, [rawData, stages, maxStageReached, setStages]);
-
-  useRankingModeUrlSync(
-    "/",
-    () => ({ team: teamId }),
-    [teamId],
-  );
+  usePageUrlParamsSync("/");
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
@@ -160,16 +95,18 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
                   includedStages={stages}
                 />
               )}
-              <AdvancedStatsPanel
-                pathStats={data.advanced.pathStats}
-                cohortCorrelation={data.advanced.cohortCorrelation}
-                hardestPathRank={data.hardestPathRank}
-                hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
-                cohortSize={data.cohortSize}
-                cohortStage={data.cohortStage}
-                selectedTeam={data.summary.team}
-                selectedTeamPoints={data.summary.teamPoints}
-              />
+              {!loading && (
+                <AdvancedStatsPanel
+                  pathStats={data.advanced.pathStats}
+                  cohortCorrelation={data.advanced.cohortCorrelation}
+                  hardestPathRank={data.hardestPathRank}
+                  hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
+                  cohortSize={data.cohortSize}
+                  cohortStage={data.cohortStage}
+                  selectedTeam={data.summary.team}
+                  selectedTeamPoints={data.summary.teamPoints}
+                />
+              )}
             </>
           )}
         </div>

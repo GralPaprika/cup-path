@@ -34,8 +34,6 @@ function toSpotlight(
 
 function buildKnockoutOpponentDifficultyInsights(
   entries: KnockoutOpponentDifficultyEntry[],
-  mean: number,
-  stdDev: number | null,
 ): KnockoutOpponentDifficultyInsights {
   const insights = buildQualificationInsights({
     entries,
@@ -95,7 +93,6 @@ export function buildKnockoutOpponentDifficultyStrip(
   const stats = computeNumericStats(
     entries.map((entry) => entry.opponentFifaPoints),
   );
-  const mean = stats.mean ?? 0;
 
   return {
     entries,
@@ -103,10 +100,6 @@ export function buildKnockoutOpponentDifficultyStrip(
     stdDevOpponentPoints: stats.stdDev,
     minOpponentPoints: stats.min,
     maxOpponentPoints: stats.max,
-    insights: buildKnockoutOpponentDifficultyInsights(
-      entries,
-      mean,
-      stats.stdDev,
-    ),
+    insights: buildKnockoutOpponentDifficultyInsights(entries),
   };
 }

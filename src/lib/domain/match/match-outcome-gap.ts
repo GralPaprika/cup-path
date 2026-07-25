@@ -7,7 +7,7 @@ import type {
   RankingEntry,
 } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
-import { isKnockoutRound, isMatchPlayed } from "@/lib/data/worldcup-loader";
+import { isKnockoutRound, isMatchPlayed } from "@/lib/domain/match/match-result";
 import { isMeanPlusStdDevOutlier } from "@/lib/domain/core/stats-helpers";
 import { computeNumericStats } from "@/lib/domain/group/group-stats";
 import { buildMatchScoreBreakdown } from "@/lib/domain/match/match-score";

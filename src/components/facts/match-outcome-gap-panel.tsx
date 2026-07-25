@@ -37,7 +37,7 @@ export function MatchOutcomeGapPanel({
 
   const availableStages = useMemo(
     () => availableStagesFromDataset(dataset),
-    [dataset.matches],
+    [dataset],
   );
 
   const maxStageReached = useMemo(

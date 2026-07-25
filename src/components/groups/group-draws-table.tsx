@@ -5,10 +5,10 @@ import type { GroupExpectedMatchEntry } from "@/lib/types";
 import {
   FACTS_TABLE_PAGE_SIZE,
   usePaginatedRows,
-} from "@/components/facts/use-paginated-rows";
-import { FactsTablePagination } from "@/components/facts/facts-table-pagination";
-import { FactsMatchCell } from "@/components/facts/facts-match-cell";
-import { SortButton, type SortDirection } from "@/components/facts/sort-button";
+} from "@/components/tables/use-paginated-rows";
+import { FactsTablePagination } from "@/components/tables/facts-table-pagination";
+import { FactsMatchCell } from "@/components/tables/facts-match-cell";
+import { SortButton, type SortDirection } from "@/components/tables/sort-button";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -134,7 +134,6 @@ export function GroupDrawsTable({
 
       {showPagination && (
         <FactsTablePagination
-          pageStart={pageStart}
           pageSize={FACTS_TABLE_PAGE_SIZE}
           totalItems={sortedMatches.length}
           safePage={safePage}

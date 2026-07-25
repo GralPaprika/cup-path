@@ -8,7 +8,7 @@ import type {
   RankingEntry,
 } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
-import { isMatchPlayed } from "@/lib/data/worldcup-loader";
+import { isMatchPlayed } from "@/lib/domain/match/match-result";
 import { computeGroupStandings, isTeamEliminatedFromGroup } from "@/lib/domain/group/group-standings";
 import { computeMean, computeNumericStats } from "@/lib/domain/group/group-stats";
 import { getGroupNames } from "@/lib/domain/path/path-builder";

@@ -1,7 +1,7 @@
 "use client";
 
-import { OpponentDifficultyPointTooltip } from "@/components/facts/opponent-difficulty-point-tooltip";
-import { OpponentDifficultyScatterChart } from "@/components/facts/opponent-difficulty-scatter-chart";
+import { OpponentDifficultyPointTooltip } from "@/components/charts/opponent-difficulty-point-tooltip";
+import { OpponentDifficultyScatterChart } from "@/components/charts/opponent-difficulty-scatter-chart";
 import type { KnockoutOpponentDifficultyStrip } from "@/lib/types";
 import { CHART_COLORS } from "@/lib/chart-colors";
 import { useTranslations } from "next-intl";

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { buildPageUrl } from "@/lib/client/url-params";
 
 export function useUrlParamsSync(
   pathname: string,
@@ -9,9 +10,7 @@ export function useUrlParamsSync(
 ) {
   useEffect(() => {
     const params = buildParams();
-    const query = params.toString();
-    const hash = window.location.hash;
-    const nextUrl = (query ? `${pathname}?${query}` : pathname) + hash;
+    const nextUrl = buildPageUrl(pathname, params, window.location.hash);
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 
     if (currentUrl !== nextUrl) {

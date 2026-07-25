@@ -78,6 +78,7 @@ describe("buildTournamentFacts", () => {
             pointsGap: 400,
             result: "W",
             scoreLabel: "2-1",
+            scorePensLabel: null,
             isNext: false,
             isPlayed: true,
           },

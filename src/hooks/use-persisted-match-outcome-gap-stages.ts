@@ -25,6 +25,8 @@ export function usePersistedMatchOutcomeGapStages(
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // Hydrate the browser-only preference after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStagesState(readInitialMatchOutcomeGapStages(availableStages));
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- hydrate once from localStorage
@@ -34,6 +36,8 @@ export function usePersistedMatchOutcomeGapStages(
     if (!hydrated) return;
 
     const available = parsePathStages(availableStagesKey);
+    // Reconcile stored stages when the server-provided stage set changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStagesState((current) => {
       const filtered = new Set(
         [...current].filter((stage) => available.has(stage)),

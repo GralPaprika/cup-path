@@ -8,7 +8,7 @@ import type {
 } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
 import { getBracketTemplateMatches } from "@/lib/data/bracket-template";
-import { getMatchWinner, isMatchPlayed } from "@/lib/data/worldcup-loader";
+import { getMatchWinner, isMatchPlayed } from "@/lib/domain/match/match-result";
 import { computeGroupStandings } from "@/lib/domain/group/group-standings";
 import { getGroupNames } from "@/lib/domain/path/path-builder";
 import { buildStandingsByGroupFromFinishes } from "@/lib/domain/group/group-finishes";

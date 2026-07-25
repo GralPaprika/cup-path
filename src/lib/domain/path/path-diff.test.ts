@@ -7,7 +7,8 @@ function opponent(id: string): MatchDifficulty["opponent"] {
   return {
     id,
     displayName: id,
-    fifaCode: id,
+    aliases: [],
+    flagUrl: "",
     group: "A",
     confederation: "UEFA",
   };

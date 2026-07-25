@@ -20,6 +20,8 @@ export function usePersistedPathStages(
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // Hydrate the browser-only preference after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStagesState(readInitialPathStages(pageId));
     setHydrated(true);
   }, [pageId]);

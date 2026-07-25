@@ -103,7 +103,6 @@ export function ParticipantPoolSectionSkeleton({
 }
 
 export function CollapsibleSectionSkeleton({
-  children: _children,
   embedded = false,
 }: {
   children?: ReactNode;

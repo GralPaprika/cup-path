@@ -11,6 +11,7 @@ export function usePageUrlParamsSync(
   buildExtraParams?: () => ExtraParams,
   deps: unknown[] = [],
   managedKeys: readonly string[] = [],
+  enabled = true,
 ) {
   useUrlParamsSync(
     pathname,
@@ -21,5 +22,6 @@ export function usePageUrlParamsSync(
         buildExtraParams?.(),
       ),
     deps,
+    enabled,
   );
 }

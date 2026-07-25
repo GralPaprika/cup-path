@@ -7,8 +7,11 @@ export function useUrlParamsSync(
   pathname: string,
   buildParams: () => URLSearchParams,
   deps: unknown[],
+  enabled = true,
 ) {
   useEffect(() => {
+    if (!enabled) return;
+
     const params = buildParams();
     const nextUrl = buildPageUrl(pathname, params, window.location.hash);
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -17,5 +20,5 @@ export function useUrlParamsSync(
       window.history.replaceState(null, "", nextUrl);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- caller controls sync via deps
-  }, deps);
+  }, [...deps, enabled]);
 }

@@ -21,10 +21,9 @@ export function GroupsPageClient() {
   const urlGroup = searchParams.get("group")?.toUpperCase() ?? null;
 
   const { mode } = useRankingMode();
-  const [selectedGroupLetter, setSelectedGroupLetter] = useState("A");
+  const [userGroupLetter, setUserGroupLetter] = useState<string | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [detailScrollTrigger, setDetailScrollTrigger] = useState(0);
-  const userPickedGroup = useRef(false);
   const deepLinkScrollPending = useRef(Boolean(selectedTeamId));
 
   const {
@@ -36,11 +35,19 @@ export function GroupsPageClient() {
   });
 
   const groupCards = groupsData?.groups ?? EMPTY_GROUP_CARDS;
+  const groupsReady = groupCards.length > 0;
   const strengthOrdering = groupsData?.strengthOrdering;
   const pointsBenchmarks = groupsData?.pointsBenchmarks ?? null;
 
+  // Resolve from loaded data during render so URL sync never sees a stale default.
+  const selectedGroupLetter = groupsReady
+    ? (userGroupLetter ??
+      parseSelectedGroupLetter(urlGroup, groupCards, selectedTeamId ?? undefined))
+    : (urlGroup || "A");
+
   useEffect(() => {
-    userPickedGroup.current = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clear manual pick on deep-link/mode change
+    setUserGroupLetter(null);
     deepLinkScrollPending.current = Boolean(selectedTeamId);
   }, [selectedTeamId, mode]);
 
@@ -49,14 +56,6 @@ export function GroupsPageClient() {
     deepLinkScrollPending.current = false;
     setDetailScrollTrigger((count) => count + 1);
   }, [groupCards.length]);
-
-  useEffect(() => {
-    if (groupCards.length === 0 || userPickedGroup.current) return;
-
-    setSelectedGroupLetter(
-      parseSelectedGroupLetter(urlGroup, groupCards, selectedTeamId ?? undefined),
-    );
-  }, [groupCards, urlGroup, selectedTeamId]);
 
   usePageUrlParamsSync(
     "/groups",
@@ -67,11 +66,11 @@ export function GroupsPageClient() {
     },
     [selectedGroupLetter, selectedTeamId, groupCards.length],
     ["group", "team"],
+    groupsReady,
   );
 
   function handleSelectGroup(groupLetter: string) {
-    userPickedGroup.current = true;
-    setSelectedGroupLetter(groupLetter);
+    setUserGroupLetter(groupLetter);
     setDetailScrollTrigger((count) => count + 1);
   }
 

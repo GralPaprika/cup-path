@@ -49,6 +49,15 @@ export function useComparisonAnalysis() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stagesHydrated]);
 
+  // Drop pair-specific state whenever either side changes so shared-path
+  // alignment cannot reuse the previous opponents' reach.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset on opponent change
+    setMaxStageReached(undefined);
+    setEntries([]);
+    setTeamCounts(null);
+  }, [teamAId, teamBId]);
+
   const bothTeamsSelected =
     Boolean(teamAId) && Boolean(teamBId) && teamAId !== teamBId;
 
@@ -138,13 +147,7 @@ export function useComparisonAnalysis() {
       writeTeamRoundPreference("compare", resolved);
       return resolved;
     });
-  }, [bothTeamsSelected, maxStageReached, teamAId, teamBId, setStages]);
-
-  useEffect(() => {
-    if (bothTeamsSelected) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- clear when head-to-head ends
-    setMaxStageReached(undefined);
-  }, [bothTeamsSelected, teamAId, teamBId]);
+  }, [bothTeamsSelected, maxStageReached, setStages]);
 
   return {
     mode,

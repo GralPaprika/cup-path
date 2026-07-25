@@ -12,7 +12,7 @@
     "sync:rankings": "tsx scripts/sync-rankings.ts",
     "seed:rankings": "tsx scripts/seed-ranking-snapshots.ts",
     "validate:teams": "tsx scripts/validate-team-mapping.ts",
-    "test": "tsx --test src/**/*.test.ts"
+    "test": "tsx --test"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

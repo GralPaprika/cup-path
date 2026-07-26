@@ -27,6 +27,7 @@ import {
   PODIUM_LABEL_KEYS,
 } from "@/components/shared/path-outcome-styles";
 import { Badge } from "@/components/ui/badge";
+import { StatTile } from "@/components/shared/stat-tile";
 import { formatFifaPoints, formatStatValue, formatWholeNumber } from "@/lib/format";
 import { getRoundDisplayName } from "@/lib/i18n/round-display-name";
 import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
@@ -90,37 +91,6 @@ function getOverviewHrefForOutcome(outcome: PathOutcome): string | null {
     }
   }
   return null;
-}
-
-function StatTile({
-  label,
-  value,
-  hint,
-  className,
-  valueClassName,
-}: {
-  label: string;
-  value: string;
-  hint?: React.ReactNode;
-  className?: string;
-  valueClassName?: string;
-}) {
-  return (
-    <div className={cn("glass-panel-subtle px-4 py-3", className)}>
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </p>
-      <p
-        className={cn(
-          "mt-1 text-xl font-bold leading-tight text-white",
-          valueClassName,
-        )}
-      >
-        {value}
-      </p>
-      {hint}
-    </div>
-  );
 }
 
 export function SummaryCard({
@@ -311,16 +281,22 @@ export function SummaryCard({
         <StatTile
           label={t("fifaPoints")}
           value={formatFifaPoints(summary.teamPoints)}
+          size="lg"
+          className="glass-panel-subtle"
           valueClassName="tabular-nums"
         />
         <StatTile
           label={t("fifaRank")}
           value={formatWholeNumber(summary.teamRank)}
+          size="lg"
+          className="glass-panel-subtle"
           valueClassName="tabular-nums"
         />
         <StatTile
           label={t("avgDifficulty")}
           value={formatFifaPoints(summary.avgOpponentPoints)}
+          size="lg"
+          className="glass-panel-subtle"
           hint={
             <AvgPointsContextHint context={avgPointsContext} align="left" />
           }
@@ -329,6 +305,8 @@ export function SummaryCard({
         <StatTile
           label={t("avgRank")}
           value={formatStatValue(summary.avgOpponentRank, 1)}
+          size="lg"
+          className="glass-panel-subtle"
           valueClassName="tabular-nums"
         />
       </div>

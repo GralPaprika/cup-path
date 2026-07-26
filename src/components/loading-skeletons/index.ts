@@ -10,3 +10,7 @@ export {
 export { ComparisonGroupsSkeleton } from "@/components/loading-skeletons/groups";
 export { FactsPageSkeleton } from "@/components/loading-skeletons/facts-page";
 export { PageShellSkeleton } from "@/components/loading-skeletons/page-shell";
+export {
+  SimulateContentSkeleton,
+  SimulatePageSkeleton,
+} from "@/components/loading-skeletons/simulate-page";

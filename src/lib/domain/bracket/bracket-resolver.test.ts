@@ -5,7 +5,9 @@ import {
   computePendingWinnerMatchNums,
   findChangedMatchNums,
   formatSlotLabel,
+  getCuratedBracketMatchNums,
   getDownstreamMatchNums,
+  getFocusPathFeederMatchNums,
   resolveBracket,
   sanitizeKnockoutWinners,
 } from "@/lib/domain/bracket/bracket-resolver";
@@ -103,6 +105,93 @@ describe("computePendingWinnerMatchNums", () => {
       {},
     );
     assert.deepEqual(pending, [104]);
+  });
+});
+
+describe("getFocusPathFeederMatchNums", () => {
+  it("collects opponent upstream matches for a focus path", () => {
+    const bracket = [
+      {
+        num: 73,
+        home: { teamId: "MEX", sourceMatchNum: undefined },
+        away: { teamId: "CAN", sourceMatchNum: undefined },
+        winnerTeamId: "MEX",
+      },
+      {
+        num: 74,
+        home: { teamId: "BRA", sourceMatchNum: undefined },
+        away: { teamId: "USA", sourceMatchNum: undefined },
+        winnerTeamId: "BRA",
+      },
+      {
+        num: 90,
+        home: { teamId: "MEX", sourceMatchNum: 73 },
+        away: { teamId: "BRA", sourceMatchNum: 74 },
+        winnerTeamId: null,
+      },
+    ] as ResolvedBracketMatch[];
+
+    assert.deepEqual(getFocusPathFeederMatchNums(bracket, "MEX"), [74]);
+    assert.deepEqual(getCuratedBracketMatchNums(bracket, "MEX").path, [73, 90]);
+    assert.deepEqual(getCuratedBracketMatchNums(bracket, "MEX").feeders, [74]);
+  });
+
+  it("extends path from scenario winners before the next slot is occupied", () => {
+    // Algeria is still only on #85 in a stale snapshot; scenario says they won.
+    const bracket = [
+      {
+        num: 85,
+        home: { teamId: "SUI", sourceMatchNum: undefined },
+        away: { teamId: "ALG", sourceMatchNum: undefined },
+        winnerTeamId: "SUI",
+      },
+      {
+        num: 87,
+        home: { teamId: "COL", sourceMatchNum: undefined },
+        away: { teamId: "GHA", sourceMatchNum: undefined },
+        winnerTeamId: "COL",
+      },
+      {
+        num: 96,
+        home: { teamId: "SUI", sourceMatchNum: 85 },
+        away: { teamId: "COL", sourceMatchNum: 87 },
+        winnerTeamId: null,
+      },
+    ] as ResolvedBracketMatch[];
+
+    const curated = getCuratedBracketMatchNums(bracket, "ALG", {
+      85: "ALG",
+    });
+    assert.deepEqual(curated.path, [85, 96]);
+    assert.deepEqual(curated.feeders, [87]);
+  });
+
+  it("walks nested feeders when the opponent side is unresolved", () => {
+    const bracket = [
+      {
+        num: 73,
+        home: { teamId: "A", sourceMatchNum: undefined },
+        away: { teamId: "B", sourceMatchNum: undefined },
+      },
+      {
+        num: 74,
+        home: { teamId: "C", sourceMatchNum: undefined },
+        away: { teamId: "D", sourceMatchNum: undefined },
+      },
+      {
+        num: 90,
+        home: { teamId: null, sourceMatchNum: 73 },
+        away: { teamId: null, sourceMatchNum: 74 },
+      },
+      {
+        num: 98,
+        home: { teamId: "FOCUS", sourceMatchNum: undefined },
+        away: { teamId: null, sourceMatchNum: 90 },
+      },
+    ] as ResolvedBracketMatch[];
+
+    const feeders = getFocusPathFeederMatchNums(bracket, "FOCUS");
+    assert.deepEqual(feeders, [73, 74, 90]);
   });
 });
 

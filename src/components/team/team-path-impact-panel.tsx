@@ -15,6 +15,7 @@ import {
   AvgPointsContextFootnote,
   AvgPointsContextHint,
 } from "@/components/shared/avg-points-context";
+import { StatTile } from "@/components/shared/stat-tile";
 import { TeamSelector } from "@/components/team/team-selector";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,8 @@ interface TeamPathImpactPanelProps {
   actualPathChart: PathChartData;
   simulatedPathChart: PathChartData;
   comparisonPathChart: PathChartData | null;
+  /** When true, omit the outer glass panel and page title. */
+  embedded?: boolean;
 }
 
 function formatPointsDelta(
@@ -58,6 +61,80 @@ function formatRankDelta(
   if (delta === 0) return "0";
   const sign = delta > 0 ? "+" : "-";
   return `${sign}${formatStatValue(Math.abs(delta), 1)}`;
+}
+
+function deltaToneFromPoints(
+  delta: number | null,
+): "positive" | "negative" | "neutral" {
+  if (delta === null || delta === 0) return "neutral";
+  return delta > 0 ? "negative" : "positive";
+}
+
+function PathSummaryCard({
+  title,
+  team,
+  avgPoints,
+  avgRank,
+  avgPointsContext,
+  delta,
+  deltaTone,
+  basis,
+  accentClassName,
+}: {
+  title: string;
+  team: Team;
+  avgPoints: number | null;
+  avgRank: number | null;
+  avgPointsContext: AvgPointsContext | null;
+  delta?: string | null;
+  deltaTone?: "positive" | "negative" | "neutral";
+  basis?: string;
+  accentClassName?: string;
+}) {
+  const summary = useTranslations("summary");
+  const teamNames = useTranslations("teams");
+
+  return (
+    <div
+      className={cn(
+        "glass-panel-subtle flex flex-col gap-3 p-4",
+        accentClassName,
+      )}
+    >
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {title}
+        </p>
+        <div className="mt-1.5 flex items-center gap-2">
+          <TeamFlag team={team} size="sm" />
+          <p className="truncate text-sm font-semibold text-white">
+            {getTeamDisplayName(teamNames, team)}
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <StatTile
+          label={summary("avgDifficulty")}
+          value={formatFifaPoints(avgPoints)}
+          size="md"
+          delta={delta}
+          deltaTone={deltaTone}
+          basis={basis}
+          hint={
+            <AvgPointsContextHint context={avgPointsContext} align="left" />
+          }
+          valueClassName="text-wc-orange"
+          className="border-white/6 bg-white/[0.02] px-3 py-2.5"
+        />
+        <StatTile
+          label={summary("avgRank")}
+          value={avgRank !== null ? formatStatValue(avgRank, 1) : "—"}
+          size="md"
+          className="border-white/6 bg-white/[0.02] px-3 py-2.5"
+        />
+      </div>
+    </div>
+  );
 }
 
 function ValueCell({
@@ -189,6 +266,7 @@ export function TeamPathImpactPanel({
   actualPathChart,
   simulatedPathChart,
   comparisonPathChart,
+  embedded = false,
 }: TeamPathImpactPanelProps) {
   const t = useTranslations("simulate");
   const summary = useTranslations("summary");
@@ -213,6 +291,15 @@ export function TeamPathImpactPanel({
       ? simulatedSummary.avgOpponentPoints - actualSummary.avgOpponentPoints
       : null;
 
+  const comparisonPointsDelta =
+    showComparison &&
+    comparisonSummary &&
+    comparisonSummary.avgOpponentPoints !== null &&
+    simulatedSummary.avgOpponentPoints !== null
+      ? simulatedSummary.avgOpponentPoints -
+        comparisonSummary.avgOpponentPoints
+      : null;
+
   const actualChart = actualPathChart;
   const simulatedChart = simulatedPathChart;
   const comparisonChart = comparisonPathChart;
@@ -221,13 +308,24 @@ export function TeamPathImpactPanel({
     simulatedChart.opponents.length > 0 ||
     (comparisonChart?.opponents.length ?? 0) > 0;
 
+  const verdict =
+    pointsDelta !== null && hasOverrides
+      ? pointsDelta > 0
+        ? t("harderBy", { gap: formatFifaPoints(Math.abs(pointsDelta)) })
+        : pointsDelta < 0
+          ? t("easierBy", { gap: formatFifaPoints(Math.abs(pointsDelta)) })
+          : t("pathUnchanged")
+      : null;
+
   return (
-    <div className="glass-panel space-y-5 p-5 sm:p-6">
+    <div className={cn("space-y-5", !embedded && "glass-panel p-5 sm:p-6")}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold text-white">
-          {t("pathComparison")}
-        </h2>
-        <div className="flex flex-wrap gap-2">
+        {!embedded && (
+          <h2 className="text-lg font-semibold text-white">
+            {t("pathComparison")}
+          </h2>
+        )}
+        <div className={cn("flex flex-wrap gap-2", embedded && "ml-auto")}>
           <button
             type="button"
             onClick={() =>
@@ -242,6 +340,66 @@ export function TeamPathImpactPanel({
         </div>
       </div>
 
+      {verdict && (
+        <p
+          className={cn(
+            "rounded-lg border px-3 py-2.5 text-sm font-medium",
+            pointsDelta !== null && pointsDelta > 0
+              ? "border-wc-orange/35 bg-wc-orange/10 text-wc-orange"
+              : pointsDelta !== null && pointsDelta < 0
+                ? "border-wc-sky/35 bg-wc-sky/10 text-wc-sky"
+                : "border-white/10 bg-white/5 text-muted-foreground",
+          )}
+        >
+          {verdict}
+        </p>
+      )}
+
+      <div
+        className={cn(
+          "grid gap-3",
+          showComparison ? "lg:grid-cols-3" : "sm:grid-cols-2",
+        )}
+      >
+        <PathSummaryCard
+          title={t("actualPath")}
+          team={actualSummary.team}
+          avgPoints={actualSummary.avgOpponentPoints}
+          avgRank={actualSummary.avgOpponentRank}
+          avgPointsContext={actualAvgPointsContext}
+          basis={t("summaryCardActualBasis")}
+        />
+        <PathSummaryCard
+          title={t("simulatedPath")}
+          team={simulatedSummary.team}
+          avgPoints={simulatedSummary.avgOpponentPoints}
+          avgRank={simulatedSummary.avgOpponentRank}
+          avgPointsContext={simulatedAvgPointsContext}
+          delta={formatPointsDelta(
+            actualSummary.avgOpponentPoints,
+            simulatedSummary.avgOpponentPoints,
+          )}
+          deltaTone={deltaToneFromPoints(pointsDelta)}
+          basis={t("summaryCardSimulatedBasis")}
+          accentClassName={hasOverrides ? "border-wc-orange/30" : undefined}
+        />
+        {showComparison && comparisonSummary ? (
+          <PathSummaryCard
+            title={t("comparisonActualPath")}
+            team={comparisonSummary.team}
+            avgPoints={comparisonSummary.avgOpponentPoints}
+            avgRank={comparisonSummary.avgOpponentRank}
+            avgPointsContext={comparisonAvgPointsContext}
+            delta={formatPointsDelta(
+              comparisonSummary.avgOpponentPoints,
+              simulatedSummary.avgOpponentPoints,
+            )}
+            deltaTone={deltaToneFromPoints(comparisonPointsDelta)}
+            basis={t("summaryCardComparisonBasis")}
+          />
+        ) : null}
+      </div>
+
       {comparisonTeamId && (
         <div className="max-w-xl">
           <TeamSelector
@@ -249,6 +407,7 @@ export function TeamPathImpactPanel({
             value={comparisonTeamId}
             onChange={onComparisonTeamChange}
             label={t("comparisonTeam")}
+            size="compact"
           />
         </div>
       )}
@@ -411,16 +570,6 @@ export function TeamPathImpactPanel({
       <p className="text-xs text-muted-foreground">
         {t("averagesIncludeScheduled")}
       </p>
-
-      {pointsDelta !== null && hasOverrides && pointsDelta !== 0 && (
-        <p className="text-sm text-muted-foreground">
-          {pointsDelta > 0
-            ? t("harderBy", { gap: formatFifaPoints(Math.abs(pointsDelta)) })
-            : t("easierBy", {
-                gap: formatFifaPoints(Math.abs(pointsDelta)),
-              })}
-        </p>
-      )}
 
       {(actualAvgPointsContext ||
         simulatedAvgPointsContext ||

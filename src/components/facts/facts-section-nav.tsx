@@ -72,7 +72,7 @@ export function FactsSectionNav({
   return (
     <nav
       aria-label={t("sectionNav.label")}
-      className={cn("glass-panel h-fit p-5 lg:sticky lg:top-20", className)}
+      className={cn("glass-panel h-fit p-5 lg:sticky lg:top-[var(--shell-sticky-top)]", className)}
     >
       <div className="space-y-6">
         {groups.map((group) => (

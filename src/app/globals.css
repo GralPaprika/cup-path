@@ -137,6 +137,21 @@
   --sidebar-accent-foreground: #93c5fd;
   --sidebar-border: rgba(148, 163, 184, 0.12);
   --sidebar-ring: #38bdf8;
+  --site-header-height: 3.5rem;
+  --shell-sidebar-expanded: 15rem;
+  --shell-sidebar-collapsed: 4.5rem;
+  --shell-sidebar-width: 0px;
+  --shell-sticky-top: calc(var(--site-header-height) + 0.5rem);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --shell-sidebar-width: var(--shell-sidebar-expanded);
+  }
+
+  :root[data-sidebar-collapsed="true"] {
+    --shell-sidebar-width: var(--shell-sidebar-collapsed);
+  }
 }
 
 @layer base {

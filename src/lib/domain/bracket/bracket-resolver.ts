@@ -212,16 +212,138 @@ export function resolveBracket(
   return resolved;
 }
 
+function teamIdsEqual(
+  left: string | null | undefined,
+  right: string | null | undefined,
+): boolean {
+  if (!left || !right) return false;
+  return left.toUpperCase() === right.toUpperCase();
+}
+
+function effectiveMatchWinner(
+  match: ResolvedBracketMatch,
+  scenarioWinners?: Record<number, string | undefined>,
+): string | null {
+  return scenarioWinners?.[match.num] ?? match.winnerTeamId ?? null;
+}
+
+/**
+ * Knockout matches on the focus team's path.
+ * Occupancy-based, then extended along winner→next-slot edges when the focus
+ * team is the effective winner (scenario override or resolved result) so the
+ * next round appears immediately after a pick — even before the bracket
+ * snapshot places them in the downstream slot.
+ */
 export function getFocusTeamMatchNums(
   bracket: ResolvedBracketMatch[],
   teamId: string,
+  scenarioWinners?: Record<number, string | undefined>,
 ): number[] {
-  return bracket
-    .filter(
-      (match) =>
-        match.home.teamId === teamId || match.away.teamId === teamId,
-    )
-    .map((match) => match.num);
+  const path = new Set(
+    bracket
+      .filter(
+        (match) =>
+          teamIdsEqual(match.home.teamId, teamId) ||
+          teamIdsEqual(match.away.teamId, teamId),
+      )
+      .map((match) => match.num),
+  );
+
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const match of bracket) {
+      if (!path.has(match.num)) continue;
+      if (!teamIdsEqual(effectiveMatchWinner(match, scenarioWinners), teamId)) {
+        continue;
+      }
+
+      for (const next of bracket) {
+        if (path.has(next.num)) continue;
+        if (
+          next.home.sourceMatchNum === match.num ||
+          next.away.sourceMatchNum === match.num
+        ) {
+          path.add(next.num);
+          grew = true;
+        }
+      }
+    }
+  }
+
+  return [...path].sort((a, b) => a - b);
+}
+
+/**
+ * Matches that determine the next opponent for the focus team.
+ * Walks upstream from the non-focus side of each path match via sourceMatchNum.
+ */
+export function getFocusPathFeederMatchNums(
+  bracket: ResolvedBracketMatch[],
+  teamId: string,
+  scenarioWinners?: Record<number, string | undefined>,
+): number[] {
+  const pathNums = new Set(
+    getFocusTeamMatchNums(bracket, teamId, scenarioWinners),
+  );
+  const byNum = new Map(bracket.map((match) => [match.num, match]));
+  const feeders = new Set<number>();
+
+  function collectUpstream(matchNum: number | undefined): void {
+    if (
+      matchNum === undefined ||
+      pathNums.has(matchNum) ||
+      feeders.has(matchNum)
+    ) {
+      return;
+    }
+    const match = byNum.get(matchNum);
+    if (!match) return;
+    feeders.add(matchNum);
+    collectUpstream(match.home.sourceMatchNum);
+    collectUpstream(match.away.sourceMatchNum);
+  }
+
+  for (const match of bracket) {
+    if (!pathNums.has(match.num)) continue;
+
+    const focusOnHome = teamIdsEqual(match.home.teamId, teamId);
+    const focusOnAway = teamIdsEqual(match.away.teamId, teamId);
+
+    if (focusOnHome && !focusOnAway) {
+      collectUpstream(match.away.sourceMatchNum);
+    } else if (focusOnAway && !focusOnHome) {
+      collectUpstream(match.home.sourceMatchNum);
+    } else {
+      // Focus not yet resolved onto a side — collect both upstream sources
+      // except the previous path match that advances the focus team.
+      for (const side of [match.home, match.away]) {
+        if (
+          side.sourceMatchNum !== undefined &&
+          !pathNums.has(side.sourceMatchNum)
+        ) {
+          collectUpstream(side.sourceMatchNum);
+        }
+      }
+    }
+  }
+
+  return [...feeders].sort((a, b) => a - b);
+}
+
+export function getCuratedBracketMatchNums(
+  bracket: ResolvedBracketMatch[],
+  teamId: string,
+  scenarioWinners?: Record<number, string | undefined>,
+): { path: number[]; feeders: number[]; curated: number[] } {
+  const path = getFocusTeamMatchNums(bracket, teamId, scenarioWinners);
+  const feeders = getFocusPathFeederMatchNums(
+    bracket,
+    teamId,
+    scenarioWinners,
+  );
+  const curated = [...new Set([...path, ...feeders])].sort((a, b) => a - b);
+  return { path, feeders, curated };
 }
 
 export function getDefaultScenario(): SimulationScenario {

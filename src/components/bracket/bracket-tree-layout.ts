@@ -91,3 +91,51 @@ export function getMatchLayout(matchNum: number): BracketMatchLayout {
     }
   );
 }
+
+const PATH_SLICE_ROUND_ORDER: readonly RoundDisplayKey[] = [
+  "round32",
+  "round16",
+  "quarterFinal",
+  "semiFinal",
+  "final",
+];
+
+/**
+ * Contiguous column slice covering curated match nums so relative
+ * bracket spacing stays intact while empty halves are cropped away.
+ */
+export function visibleColumnsForCurated(
+  matchNums: Iterable<number>,
+): BracketColumn[] {
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+
+  for (const matchNum of matchNums) {
+    const { column } = getMatchLayout(matchNum);
+    if (column < min) min = column;
+    if (column > max) max = column;
+  }
+
+  if (!Number.isFinite(min) || !Number.isFinite(max)) {
+    return [];
+  }
+
+  return BRACKET_COLUMNS.filter(
+    (_, index) => index >= min && index <= max,
+  );
+}
+
+/**
+ * Path-slice columns in chronological order (R32 → Final) so the focused
+ * view always reads left-to-right, including right-half mirrored paths.
+ */
+export function visibleColumnsForPathSlice(
+  matchNums: Iterable<number>,
+): BracketColumn[] {
+  const columns = visibleColumnsForCurated(matchNums);
+  return [...columns].sort(
+    (a, b) =>
+      PATH_SLICE_ROUND_ORDER.indexOf(a.roundKey) -
+      PATH_SLICE_ROUND_ORDER.indexOf(b.roundKey),
+  );
+}

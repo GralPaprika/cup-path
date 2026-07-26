@@ -19,6 +19,12 @@ interface TeamSelectorProps {
   onChange: (teamId: string) => void;
   label?: string;
   placeholder?: string;
+  /** Compact trigger for page headers and tight layouts. */
+  size?: "default" | "compact";
+  /** Hide the visible label (still exposed via aria attributes). */
+  hideLabel?: boolean;
+  className?: string;
+  triggerClassName?: string;
 }
 
 export function TeamSelector({
@@ -27,6 +33,10 @@ export function TeamSelector({
   onChange,
   label,
   placeholder,
+  size = "default",
+  hideLabel = false,
+  className,
+  triggerClassName,
 }: TeamSelectorProps) {
   const t = useTranslations("teamSelector");
   const teamNames = useTranslations("teams");
@@ -42,7 +52,9 @@ export function TeamSelector({
     width: number;
   } | null>(null);
 
+  const compact = size === "compact";
   const selected = teams.find((team) => team.id === value);
+  const fieldLabel = label ?? t("label");
 
   const localizedTeams = useMemo(
     () =>
@@ -67,10 +79,12 @@ export function TeamSelector({
       const trigger = triggerRef.current;
       if (!trigger) return;
       const rect = trigger.getBoundingClientRect();
+      const width = Math.max(rect.width, compact ? 260 : rect.width);
+      const left = Math.min(rect.left, window.innerWidth - width - 8);
       setMenuPosition({
         top: rect.bottom + 8,
-        left: rect.left,
-        width: rect.width,
+        left: Math.max(8, left),
+        width,
       });
     }
 
@@ -81,7 +95,7 @@ export function TeamSelector({
       window.removeEventListener("resize", updateMenuPosition);
       window.removeEventListener("scroll", updateMenuPosition, true);
     };
-  }, [open]);
+  }, [open, compact]);
 
   useEffect(() => {
     if (!open) return;
@@ -124,10 +138,12 @@ export function TeamSelector({
       }
       const rect = triggerRef.current?.getBoundingClientRect();
       if (rect) {
+        const width = Math.max(rect.width, compact ? 260 : rect.width);
+        const left = Math.min(rect.left, window.innerWidth - width - 8);
         setMenuPosition({
           top: rect.bottom + 8,
-          left: rect.left,
-          width: rect.width,
+          left: Math.max(8, left),
+          width,
         });
       }
       return true;
@@ -165,7 +181,7 @@ export function TeamSelector({
       <ul
         role="listbox"
         className="scrollbar-subtle max-h-64 overflow-y-auto p-1"
-        aria-label={t("label")}
+        aria-label={fieldLabel}
       >
         {filteredTeams.length === 0 ? (
           <li className="px-3 py-6 text-center text-sm text-muted-foreground">
@@ -204,8 +220,8 @@ export function TeamSelector({
   );
 
   return (
-    <div className="space-y-3" ref={containerRef}>
-      <PickerLabel>{label ?? t("label")}</PickerLabel>
+    <div className={cn(compact ? "space-y-1.5" : "space-y-3", className)} ref={containerRef}>
+      {!hideLabel && <PickerLabel>{fieldLabel}</PickerLabel>}
 
       <div className="relative">
         <button
@@ -214,11 +230,16 @@ export function TeamSelector({
           onClick={toggleOpen}
           aria-expanded={open}
           aria-haspopup="listbox"
-          className="flex h-12 w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-3 text-left text-base transition-colors hover:border-white/15 hover:bg-white/8 focus-visible:border-wc-sky/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wc-sky/30"
+          aria-label={hideLabel ? fieldLabel : undefined}
+          className={cn(
+            "flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 text-left transition-colors hover:border-white/15 hover:bg-white/8 focus-visible:border-wc-sky/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wc-sky/30",
+            compact ? "h-11 min-w-[11rem] max-w-xs gap-2 px-2.5 text-sm" : "h-12 px-3 text-base",
+            triggerClassName,
+          )}
         >
           {selected ? (
             <span className="flex min-w-0 items-center gap-2">
-              <TeamFlag team={selected} size="md" />
+              <TeamFlag team={selected} size={compact ? "sm" : "md"} />
               <span className="shrink-0 font-mono text-xs font-semibold tracking-wide text-muted-foreground">
                 {selected.id}
               </span>

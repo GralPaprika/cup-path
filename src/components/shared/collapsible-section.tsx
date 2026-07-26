@@ -10,6 +10,8 @@ interface CollapsibleSectionProps {
   subtitle?: string;
   children: ReactNode;
   contentClassName?: string;
+  className?: string;
+  id?: string;
   /** Renders as a nested sub-panel instead of a standalone glass panel. */
   embedded?: boolean;
   /** Whether the section starts expanded. Defaults to collapsed. */
@@ -23,6 +25,8 @@ export function CollapsibleSection({
   subtitle,
   children,
   contentClassName,
+  className,
+  id,
   embedded = false,
   defaultOpen = false,
   persistKey,
@@ -31,11 +35,13 @@ export function CollapsibleSection({
 
   return (
     <details
+      id={id}
       className={cn(
-        "group overflow-hidden",
+        "group overflow-hidden scroll-mt-28",
         embedded
           ? "rounded-xl border border-white/8 bg-white/[0.02]"
           : "glass-panel",
+        className,
       )}
       open={open}
       onToggle={(event) => {

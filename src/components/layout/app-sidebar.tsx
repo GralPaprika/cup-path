@@ -1,0 +1,172 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import {
+  ChartColumn,
+  GitCompareArrows,
+  HelpCircle,
+  LayoutGrid,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Route,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { NAV_LINKS, type NavLinkKey } from "@/components/layout/nav-links";
+import { Button } from "@/components/ui/button";
+import { usePersistedUiState } from "@/hooks/use-persisted-ui-state";
+import { SHELL_SIDEBAR_COLLAPSED_KEY } from "@/lib/client/shell-preference";
+import { cn } from "@/lib/utils";
+
+const NAV_ICONS: Record<NavLinkKey, typeof Route> = {
+  teamAnalysis: Route,
+  overview: ChartColumn,
+  groups: LayoutGrid,
+  compare: GitCompareArrows,
+  simulate: Sparkles,
+  about: HelpCircle,
+};
+
+function NavItems({
+  collapsed,
+  onNavigate,
+}: {
+  collapsed?: boolean;
+  onNavigate?: () => void;
+}) {
+  const pathname = usePathname();
+  const t = useTranslations("nav");
+
+  return (
+    <nav className="flex flex-col gap-1" aria-label={t("primary")}>
+      {NAV_LINKS.map((link) => {
+        const active = pathname === link.href;
+        const Icon = NAV_ICONS[link.key];
+        const label = t(link.key);
+
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            title={collapsed ? label : undefined}
+            onClick={onNavigate}
+            className={cn(
+              "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              collapsed && "justify-center px-2",
+              active
+                ? "bg-wc-sky/15 text-wc-sky shadow-sm shadow-wc-sky/10"
+                : "text-muted-foreground hover:bg-white/6 hover:text-white",
+            )}
+          >
+            <Icon
+              className={cn(
+                "size-4 shrink-0",
+                active
+                  ? "text-wc-sky"
+                  : "text-muted-foreground group-hover:text-white",
+              )}
+            />
+            {!collapsed && <span className="truncate">{label}</span>}
+            {collapsed && <span className="sr-only">{label}</span>}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function AppSidebar() {
+  const t = useTranslations("nav");
+  const app = useTranslations("app");
+  const [collapsed, setCollapsed] = usePersistedUiState(
+    SHELL_SIDEBAR_COLLAPSED_KEY,
+    false,
+  );
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+  const [menuPath, setMenuPath] = useState(pathname);
+
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    if (mobileOpen) {
+      setMobileOpen(false);
+    }
+  }
+
+  useEffect(() => {
+    document.documentElement.dataset.sidebarCollapsed = collapsed
+      ? "true"
+      : "false";
+  }, [collapsed]);
+
+  return (
+    <>
+      <aside
+        className={cn(
+          "fixed top-[var(--site-header-height,3.5rem)] bottom-0 left-0 z-40 hidden flex-col border-r border-white/8 bg-wc-navy/80 backdrop-blur-xl transition-[width] duration-200 lg:flex",
+          collapsed
+            ? "w-[var(--shell-sidebar-collapsed)]"
+            : "w-[var(--shell-sidebar-expanded)]",
+        )}
+        aria-label={t("primary")}
+      >
+        <div className="flex h-12 items-center justify-end border-b border-white/6 px-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setCollapsed((current) => !current)}
+            aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
+            title={collapsed ? t("expandSidebar") : t("collapseSidebar")}
+            className="text-muted-foreground hover:text-white"
+          >
+            {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+          </Button>
+        </div>
+        <div className="scrollbar-subtle flex-1 overflow-y-auto p-2">
+          <NavItems collapsed={collapsed} />
+        </div>
+      </aside>
+
+      <div className="lg:hidden">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="fixed top-3 left-3 z-[60] text-muted-foreground hover:text-white"
+          onClick={() => setMobileOpen(true)}
+          aria-label={t("openMenu")}
+        >
+          <Menu />
+        </Button>
+
+        <DialogPrimitive.Root open={mobileOpen} onOpenChange={setMobileOpen}>
+          <DialogPrimitive.Portal>
+            <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+            <DialogPrimitive.Popup className="fixed inset-y-0 left-0 z-50 flex w-[min(18rem,88vw)] flex-col border-r border-white/10 bg-wc-navy/95 shadow-2xl outline-none backdrop-blur-xl transition-transform data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full">
+              <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-4">
+                <DialogPrimitive.Title className="text-base font-semibold text-white">
+                  {app("name")}
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Close
+                  className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-white/8 hover:text-white"
+                  aria-label={t("closeMenu")}
+                >
+                  <X className="size-4" />
+                </DialogPrimitive.Close>
+              </div>
+              <div className="scrollbar-subtle flex-1 overflow-y-auto px-3 py-3">
+                <NavItems onNavigate={() => setMobileOpen(false)} />
+              </div>
+            </DialogPrimitive.Popup>
+          </DialogPrimitive.Portal>
+        </DialogPrimitive.Root>
+      </div>
+    </>
+  );
+}

@@ -39,8 +39,8 @@ export function useApiQuery<T>(
     abortRef.current = controller;
 
     setLoading(true);
-    setData(null);
     setError(null);
+    // Keep previous data visible during refetch to avoid skeleton flashes.
 
     try {
       const response = await fetch(url, {

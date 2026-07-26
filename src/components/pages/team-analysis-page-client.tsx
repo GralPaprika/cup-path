@@ -47,7 +47,7 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <aside className="glass-panel h-fit space-y-6 p-5 lg:sticky lg:top-20">
+        <aside className="glass-panel h-fit space-y-6 p-5 lg:sticky lg:top-[var(--shell-sticky-top)]">
           <section>
             <TeamSelector teams={teamList} value={teamId} onChange={setTeamId} />
           </section>

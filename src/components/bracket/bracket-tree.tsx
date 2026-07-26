@@ -436,10 +436,9 @@ function BracketGrid({
   }
 
   useLayoutEffect(() => {
-    if (!showConnectors || !sourcesByMatch) {
-      setConnectorPaths((prev) => (prev.length === 0 ? prev : []));
-      return;
-    }
+    // Paths are only painted when showConnectors is true; skip measuring otherwise.
+    if (!showConnectors || !sourcesByMatch) return;
+    const sourceMap = sourcesByMatch;
 
     function measure() {
       const container = gridRef.current;
@@ -450,7 +449,7 @@ function BracketGrid({
       const scaleY = cRect.height / Math.max(container.offsetHeight, 1);
       const paths: string[] = [];
 
-      for (const [targetNum, sources] of sourcesByMatch) {
+      for (const [targetNum, sources] of sourceMap) {
         const targetEl = localCardRefs.current.get(targetNum);
         if (!targetEl || !visibleMatchNums.has(targetNum)) continue;
         const tRect = targetEl.getBoundingClientRect();

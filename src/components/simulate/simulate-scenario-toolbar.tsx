@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { useTranslations } from "next-intl";
 
 const PICK_WINNERS_ALERT_TIMEOUT_MS = 5000;
@@ -78,14 +78,13 @@ export function SimulatePendingWinnersAlert({
   onDismiss,
 }: SimulatePendingWinnersAlertProps) {
   const t = useTranslations("simulate");
-  const onDismissRef = useRef(onDismiss);
-  onDismissRef.current = onDismiss;
   const show = count > 0 && visible;
+  const dismiss = useEffectEvent(onDismiss);
 
   useEffect(() => {
     if (!show) return;
     const timeoutId = window.setTimeout(
-      () => onDismissRef.current(),
+      () => dismiss(),
       PICK_WINNERS_ALERT_TIMEOUT_MS,
     );
     return () => window.clearTimeout(timeoutId);

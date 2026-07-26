@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { SimulationResult, SimulationScenario, Team } from "@/lib/types";
+import type { SimulationResult, SimulationScenario } from "@/lib/types";
 import { useRankingMode } from "@/components/layout/ranking-mode-provider";
 import {
   compactGroupFinishes,
@@ -32,7 +32,7 @@ function scenarioHasOverrides(
   return groupFinishesDifferFromBaseline(scenario.groupFinishes, baseline);
 }
 
-export function useSimulationAnalysis(teams: Team[]) {
+export function useSimulationAnalysis() {
   const common = useTranslations("common");
   const { mode } = useRankingMode();
   const [teamId, setTeamId] = useUrlParamState(

@@ -41,7 +41,7 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
     handleSortGroupsByPoints,
     resetScenario,
     pickStrongestWinners,
-  } = useSimulationAnalysis(teams);
+  } = useSimulationAnalysis();
 
   const [pickWinnersAlertDismissed, setPickWinnersAlertDismissed] =
     useState(false);

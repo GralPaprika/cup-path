@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { NAV_LINKS, type NavLinkKey } from "@/components/layout/nav-links";
 import { Button } from "@/components/ui/button";
 import { usePersistedUiState } from "@/hooks/use-persisted-ui-state";
@@ -131,6 +132,14 @@ export function AppSidebar() {
         <div className="scrollbar-subtle flex-1 overflow-y-auto p-2">
           <NavItems collapsed={collapsed} />
         </div>
+        <div
+          className={cn(
+            "shrink-0 border-t border-white/6 p-3",
+            collapsed && "px-2",
+          )}
+        >
+          <LocaleSwitcher collapsed={collapsed} />
+        </div>
       </aside>
 
       <div className="lg:hidden">
@@ -162,6 +171,9 @@ export function AppSidebar() {
               </div>
               <div className="scrollbar-subtle flex-1 overflow-y-auto px-3 py-3">
                 <NavItems onNavigate={() => setMobileOpen(false)} />
+              </div>
+              <div className="shrink-0 border-t border-white/6 p-3">
+                <LocaleSwitcher />
               </div>
             </DialogPrimitive.Popup>
           </DialogPrimitive.Portal>

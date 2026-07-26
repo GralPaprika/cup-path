@@ -24,6 +24,8 @@ import { SimulatedPathPointsChart } from "@/components/path/simulated-path-point
 
 interface TeamPathImpactPanelProps {
   teams: Team[];
+  teamId: string;
+  onTeamChange: (teamId: string) => void;
   actualSummary: TeamPathSummary;
   simulatedSummary: TeamPathSummary;
   actualAvgPointsContext: AvgPointsContext | null;
@@ -80,6 +82,8 @@ function PathSummaryCard({
   deltaTone,
   basis,
   accentClassName,
+  banner,
+  bannerTone,
 }: {
   title: string;
   team: Team;
@@ -90,6 +94,8 @@ function PathSummaryCard({
   deltaTone?: "positive" | "negative" | "neutral";
   basis?: string;
   accentClassName?: string;
+  banner?: string | null;
+  bannerTone?: "positive" | "negative" | "neutral";
 }) {
   const summary = useTranslations("summary");
   const teamNames = useTranslations("teams");
@@ -112,6 +118,20 @@ function PathSummaryCard({
           </p>
         </div>
       </div>
+      {banner && (
+        <p
+          className={cn(
+            "rounded-lg border px-3 py-2 text-xs font-medium sm:text-sm",
+            bannerTone === "negative"
+              ? "border-wc-orange/35 bg-wc-orange/10 text-wc-orange"
+              : bannerTone === "positive"
+                ? "border-wc-sky/35 bg-wc-sky/10 text-wc-sky"
+                : "border-white/10 bg-white/5 text-muted-foreground",
+          )}
+        >
+          {banner}
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-2">
         <StatTile
           label={summary("avgDifficulty")}
@@ -253,6 +273,8 @@ function OpponentCell({
 
 export function TeamPathImpactPanel({
   teams,
+  teamId,
+  onTeamChange,
   actualSummary,
   simulatedSummary,
   actualAvgPointsContext,
@@ -278,8 +300,7 @@ export function TeamPathImpactPanel({
   const comparisonTeamName = comparisonSummary
     ? getTeamDisplayName(teamNames, comparisonSummary.team)
     : "";
-  const firstOtherTeam =
-    teams.find((team) => team.id !== actualSummary.team.id)?.id ?? "";
+  const comparisonTeams = teams.filter((team) => team.id !== teamId);
 
   const gridTemplateColumns = showComparison
     ? "minmax(0,1fr) minmax(0,0.85fr) minmax(0,0.85fr) minmax(0,0.55fr) minmax(0,0.85fr) minmax(0,0.55fr)"
@@ -319,41 +340,33 @@ export function TeamPathImpactPanel({
 
   return (
     <div className={cn("space-y-5", !embedded && "glass-panel p-5 sm:p-6")}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {!embedded && (
-          <h2 className="text-lg font-semibold text-white">
-            {t("pathComparison")}
-          </h2>
-        )}
-        <div className={cn("flex flex-wrap gap-2", embedded && "ml-auto")}>
-          <button
-            type="button"
-            onClick={() =>
-              onComparisonTeamChange(comparisonTeamId ? "" : firstOtherTeam)
-            }
-            className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-white/20 hover:text-white"
-          >
-            {comparisonTeamId
-              ? t("hideComparisonTeam")
-              : t("addComparisonTeam")}
-          </button>
-        </div>
-      </div>
-
-      {verdict && (
-        <p
-          className={cn(
-            "rounded-lg border px-3 py-2.5 text-sm font-medium",
-            pointsDelta !== null && pointsDelta > 0
-              ? "border-wc-orange/35 bg-wc-orange/10 text-wc-orange"
-              : pointsDelta !== null && pointsDelta < 0
-                ? "border-wc-sky/35 bg-wc-sky/10 text-wc-sky"
-                : "border-white/10 bg-white/5 text-muted-foreground",
-          )}
-        >
-          {verdict}
-        </p>
+      {!embedded && (
+        <h2 className="text-lg font-semibold text-white">
+          {t("pathComparison")}
+        </h2>
       )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <TeamSelector
+          teams={teams}
+          value={teamId}
+          onChange={onTeamChange}
+          size="compact"
+          hideLabel
+          className="max-w-xs shrink-0"
+          triggerClassName="glass-panel-subtle"
+        />
+        <TeamSelector
+          teams={comparisonTeams}
+          value={comparisonTeamId}
+          onChange={onComparisonTeamChange}
+          label={t("compareTo")}
+          allowNone
+          noneLabel={t("compareToNone")}
+          size="compact"
+          className="flex shrink-0 flex-row items-center gap-2 space-y-0"
+        />
+      </div>
 
       <div
         className={cn(
@@ -382,6 +395,8 @@ export function TeamPathImpactPanel({
           deltaTone={deltaToneFromPoints(pointsDelta)}
           basis={t("summaryCardSimulatedBasis")}
           accentClassName={hasOverrides ? "border-wc-orange/30" : undefined}
+          banner={verdict}
+          bannerTone={deltaToneFromPoints(pointsDelta)}
         />
         {showComparison && comparisonSummary ? (
           <PathSummaryCard
@@ -399,18 +414,6 @@ export function TeamPathImpactPanel({
           />
         ) : null}
       </div>
-
-      {comparisonTeamId && (
-        <div className="max-w-xl">
-          <TeamSelector
-            teams={teams}
-            value={comparisonTeamId}
-            onChange={onComparisonTeamChange}
-            label={t("comparisonTeam")}
-            size="compact"
-          />
-        </div>
-      )}
 
       <div className="overflow-x-auto rounded-xl border border-white/8">
         <div

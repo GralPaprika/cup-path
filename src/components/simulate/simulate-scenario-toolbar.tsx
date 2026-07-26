@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+
+const PICK_WINNERS_ALERT_TIMEOUT_MS = 5000;
 
 interface SimulateScenarioActionsProps {
   hasOverrides: boolean;
@@ -68,19 +71,32 @@ interface SimulatePendingWinnersAlertProps {
   onDismiss: () => void;
 }
 
+/** Bottom-right toast: auto-dismisses after 5s or when the user closes it. */
 export function SimulatePendingWinnersAlert({
   count,
   visible,
   onDismiss,
 }: SimulatePendingWinnersAlertProps) {
   const t = useTranslations("simulate");
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
+  const show = count > 0 && visible;
 
-  if (count <= 0 || !visible) return null;
+  useEffect(() => {
+    if (!show) return;
+    const timeoutId = window.setTimeout(
+      () => onDismissRef.current(),
+      PICK_WINNERS_ALERT_TIMEOUT_MS,
+    );
+    return () => window.clearTimeout(timeoutId);
+  }, [show]);
+
+  if (!show) return null;
 
   return (
     <div
       role="status"
-      className="relative rounded-lg border border-wc-purple/30 bg-wc-purple/5 px-3 py-2.5 pr-9"
+      className="fixed right-4 bottom-4 z-50 w-[min(24rem,calc(100vw-2rem))] rounded-xl border border-wc-purple/30 bg-wc-navy/95 px-4 py-3 pr-10 shadow-xl backdrop-blur-xl"
     >
       <button
         type="button"

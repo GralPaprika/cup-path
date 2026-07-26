@@ -23,6 +23,10 @@ interface TeamSelectorProps {
   size?: "default" | "compact";
   /** Hide the visible label (still exposed via aria attributes). */
   hideLabel?: boolean;
+  /** Allow clearing the selection via a leading “(none)” option. */
+  allowNone?: boolean;
+  /** Label shown when `allowNone` is set and `value` is empty. */
+  noneLabel?: string;
   className?: string;
   triggerClassName?: string;
 }
@@ -35,6 +39,8 @@ export function TeamSelector({
   placeholder,
   size = "default",
   hideLabel = false,
+  allowNone = false,
+  noneLabel,
   className,
   triggerClassName,
 }: TeamSelectorProps) {
@@ -55,6 +61,8 @@ export function TeamSelector({
   const compact = size === "compact";
   const selected = teams.find((team) => team.id === value);
   const fieldLabel = label ?? t("label");
+  const emptyLabel = noneLabel ?? t("none");
+  const showNoneOption = allowNone && !query.trim();
 
   const localizedTeams = useMemo(
     () =>
@@ -183,7 +191,27 @@ export function TeamSelector({
         className="scrollbar-subtle max-h-64 overflow-y-auto p-1"
         aria-label={fieldLabel}
       >
-        {filteredTeams.length === 0 ? (
+        {showNoneOption && (
+          <li>
+            <button
+              type="button"
+              role="option"
+              aria-selected={!value}
+              onClick={() => selectTeam("")}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
+                !value
+                  ? "bg-white/12 text-white"
+                  : "text-white/80 hover:bg-white/6",
+              )}
+            >
+              <span className="truncate font-medium text-muted-foreground">
+                {emptyLabel}
+              </span>
+            </button>
+          </li>
+        )}
+        {filteredTeams.length === 0 && !showNoneOption ? (
           <li className="px-3 py-6 text-center text-sm text-muted-foreground">
             {t("noResults")}
           </li>
@@ -246,6 +274,10 @@ export function TeamSelector({
               <span className="truncate font-medium text-white">
                 {selectedName}
               </span>
+            </span>
+          ) : allowNone ? (
+            <span className="truncate font-medium text-muted-foreground">
+              {emptyLabel}
             </span>
           ) : (
             <span className="text-muted-foreground">

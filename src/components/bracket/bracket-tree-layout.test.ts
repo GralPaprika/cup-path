@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   BRACKET_COLUMNS,
   getMatchLayout,
+  getPathSliceLayouts,
   visibleColumnsForCurated,
   visibleColumnsForPathSlice,
 } from "@/components/bracket/bracket-tree-layout";
@@ -51,27 +52,116 @@ describe("visibleColumnsForPathSlice", () => {
     assert.deepEqual(visibleColumnsForPathSlice([]), []);
   });
 
-  it("orders right-half paths left-to-right (R32 → R16)", () => {
+  it("collapses right-half paths into one column per round (R32 → R16)", () => {
     const columns = visibleColumnsForPathSlice([79, 80, 92]);
     assert.deepEqual(
       columns.map((column) => column.key),
-      ["r32-right", "r16-right"],
+      ["path-round32", "path-round16"],
     );
+    assert.deepEqual(columns[0]?.matchNums, [79, 80]);
+    assert.deepEqual(columns[1]?.matchNums, [92]);
   });
 
   it("orders right-half spans left-to-right through QF", () => {
     const columns = visibleColumnsForPathSlice([79, 92, 99]);
     assert.deepEqual(
       columns.map((column) => column.key),
-      ["r32-right", "r16-right", "qf-right"],
+      ["path-round32", "path-round16", "path-quarterFinal"],
     );
   });
 
-  it("keeps left-half paths chronological (sort is a no-op)", () => {
+  it("collapses left-half paths into one column per round", () => {
     const columns = visibleColumnsForPathSlice([73, 90, 97]);
     assert.deepEqual(
       columns.map((column) => column.key),
-      ["r32-left", "r16-left", "qf-left"],
+      ["path-round32", "path-round16", "path-quarterFinal"],
     );
+    assert.deepEqual(columns[0]?.matchNums, [73]);
+  });
+
+  it("merges left and right halves into a single column per round", () => {
+    // Path on left (#77) plus opposite-half feeder (#76) both R32.
+    const columns = visibleColumnsForPathSlice([77, 76, 89, 91]);
+    assert.deepEqual(
+      columns.map((column) => column.key),
+      ["path-round32", "path-round16"],
+    );
+    assert.deepEqual(columns[0]?.matchNums, [77, 76]);
+    assert.deepEqual(columns[1]?.matchNums, [89, 91]);
+  });
+});
+
+describe("getPathSliceLayouts", () => {
+  it("places a single path chain on one aligned row", () => {
+    const columns = visibleColumnsForPathSlice([77, 89, 97]);
+    const sources = new Map<number, number[]>([
+      [89, [77]],
+      [97, [89]],
+    ]);
+    const { layouts, gridRows } = getPathSliceLayouts(columns, sources);
+
+    assert.equal(gridRows, 1);
+    assert.deepEqual(layouts.get(77), {
+      matchNum: 77,
+      columnIndex: 0,
+      rowStart: 1,
+      rowSpan: 1,
+    });
+    assert.deepEqual(layouts.get(89), {
+      matchNum: 89,
+      columnIndex: 1,
+      rowStart: 1,
+      rowSpan: 1,
+    });
+    assert.deepEqual(layouts.get(97), {
+      matchNum: 97,
+      columnIndex: 2,
+      rowStart: 1,
+      rowSpan: 1,
+    });
+  });
+
+  it("spans a later match across its visible feeder children", () => {
+    // Path R32 #77 + feeder R32 #76 both feed R16 #89.
+    const columns = visibleColumnsForPathSlice([77, 76, 89]);
+    const sources = new Map<number, number[]>([[89, [77, 76]]]);
+    const { layouts, gridRows } = getPathSliceLayouts(columns, sources);
+
+    assert.equal(gridRows, 2);
+    assert.deepEqual(layouts.get(77), {
+      matchNum: 77,
+      columnIndex: 0,
+      rowStart: 1,
+      rowSpan: 1,
+    });
+    assert.deepEqual(layouts.get(76), {
+      matchNum: 76,
+      columnIndex: 0,
+      rowStart: 2,
+      rowSpan: 1,
+    });
+    assert.deepEqual(layouts.get(89), {
+      matchNum: 89,
+      columnIndex: 1,
+      rowStart: 1,
+      rowSpan: 2,
+    });
+  });
+
+  it("propagates branch height through the path", () => {
+    const columns = visibleColumnsForPathSlice([77, 76, 89, 97]);
+    const sources = new Map<number, number[]>([
+      [89, [77, 76]],
+      [97, [89]],
+    ]);
+    const { layouts, gridRows } = getPathSliceLayouts(columns, sources);
+
+    assert.equal(gridRows, 2);
+    assert.deepEqual(layouts.get(97), {
+      matchNum: 97,
+      columnIndex: 2,
+      rowStart: 1,
+      rowSpan: 2,
+    });
   });
 });

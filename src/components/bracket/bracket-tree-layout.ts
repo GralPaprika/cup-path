@@ -126,16 +126,96 @@ export function visibleColumnsForCurated(
 }
 
 /**
- * Path-slice columns in chronological order (R32 → Final) so the focused
- * view always reads left-to-right, including right-half mirrored paths.
+ * Path-slice columns collapsed to one column per round (R32 → Final),
+ * merging left/right halves so cards can stack in a single track.
  */
 export function visibleColumnsForPathSlice(
   matchNums: Iterable<number>,
 ): BracketColumn[] {
-  const columns = visibleColumnsForCurated(matchNums);
-  return [...columns].sort(
-    (a, b) =>
-      PATH_SLICE_ROUND_ORDER.indexOf(a.roundKey) -
-      PATH_SLICE_ROUND_ORDER.indexOf(b.roundKey),
-  );
+  const visible = new Set(matchNums);
+  if (visible.size === 0) return [];
+
+  const columns: BracketColumn[] = [];
+
+  for (const roundKey of PATH_SLICE_ROUND_ORDER) {
+    const merged: number[] = [];
+    for (const column of BRACKET_COLUMNS) {
+      if (column.roundKey !== roundKey) continue;
+      for (const matchNum of column.matchNums) {
+        if (visible.has(matchNum)) merged.push(matchNum);
+      }
+    }
+    if (merged.length === 0) continue;
+    columns.push({
+      key: `path-${roundKey}`,
+      roundKey,
+      matchNums: merged,
+    });
+  }
+
+  return columns;
+}
+
+export interface PathSliceMatchLayout {
+  matchNum: number;
+  columnIndex: number;
+  rowStart: number;
+  rowSpan: number;
+}
+
+/** sourceMatchNum values that feed into a match (home then away). */
+export type PathSliceSourcesByMatch = ReadonlyMap<number, readonly number[]>;
+
+/**
+ * Bracket-branch placement for the path slice: earlier rounds stack as leaves,
+ * later rounds span the vertical range of their visible feeder children so the
+ * path reads like a tournament tree rather than a dense list.
+ */
+export function getPathSliceLayouts(
+  visibleColumns: BracketColumn[],
+  sourcesByMatch: PathSliceSourcesByMatch = new Map(),
+): {
+  layouts: Map<number, PathSliceMatchLayout>;
+  gridRows: number;
+} {
+  const layouts = new Map<number, PathSliceMatchLayout>();
+
+  function occupiedRowEnd(): number {
+    let end = 0;
+    for (const layout of layouts.values()) {
+      end = Math.max(end, layout.rowStart + layout.rowSpan - 1);
+    }
+    return end;
+  }
+
+  visibleColumns.forEach((column, columnIndex) => {
+    for (const matchNum of column.matchNums) {
+      const childLayouts = (sourcesByMatch.get(matchNum) ?? [])
+        .map((sourceNum) => layouts.get(sourceNum))
+        .filter((layout): layout is PathSliceMatchLayout => layout != null);
+
+      if (childLayouts.length > 0) {
+        const rowStart = Math.min(...childLayouts.map((l) => l.rowStart));
+        const rowEnd = Math.max(
+          ...childLayouts.map((l) => l.rowStart + l.rowSpan - 1),
+        );
+        layouts.set(matchNum, {
+          matchNum,
+          columnIndex,
+          rowStart,
+          rowSpan: Math.max(1, rowEnd - rowStart + 1),
+        });
+        continue;
+      }
+
+      layouts.set(matchNum, {
+        matchNum,
+        columnIndex,
+        rowStart: occupiedRowEnd() + 1,
+        rowSpan: 1,
+      });
+    }
+  });
+
+  return { layouts, gridRows: occupiedRowEnd() };
 }

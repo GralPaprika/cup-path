@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { RankingModeSwitcher } from "@/components/layout/ranking-mode-switcher";
 
 export function SiteHeader() {
@@ -49,7 +48,6 @@ export function SiteHeader() {
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <RankingModeSwitcher />
-          <LocaleSwitcher />
         </div>
       </div>
     </header>

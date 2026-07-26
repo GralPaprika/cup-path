@@ -12,6 +12,7 @@ import {
 } from "@/lib/domain/group/group-finish-swap";
 import { sortGroupFinishesByFifaPoints } from "@/lib/domain/group/group-finish-sort";
 import { emptySimulationScenario } from "@/lib/domain/core/simulation-scenario";
+import { isKnockoutWinnerOverride } from "@/lib/domain/bracket/bracket-resolver";
 import {
   clearSimulationScenarioPreference,
   readSimulationScenarioPreference,
@@ -37,7 +38,7 @@ export function useSimulationAnalysis(teams: Team[]) {
   const [teamId, setTeamId] = useUrlParamState(
     "/simulate",
     "team",
-    teams[0]?.id || "ARG",
+    "ESP",
   );
   const [comparisonTeamId, setComparisonTeamId] = useUrlParamState(
     "/simulate",
@@ -85,13 +86,43 @@ export function useSimulationAnalysis(teams: Team[]) {
   }, [scenario, scenarioHydrated]);
 
   function handleSelectWinner(matchNum: number, winnerId: string) {
-    setScenario((current) => ({
-      ...current,
-      knockoutWinners: {
-        ...current.knockoutWinners,
-        [matchNum]: winnerId,
-      },
-    }));
+    setScenario((current) => {
+      const actualWinner = data?.actualWinnersByMatchNum?.[matchNum] ?? null;
+      const nextWinners = { ...(current.knockoutWinners ?? {}) };
+      const bracketMatch = data?.bracket?.find((match) => match.num === matchNum);
+      // Rematches after group edits must store any pick — including the
+      // historical winner id (e.g. ARG on #100) — because that result no
+      // longer applies to these sides.
+      const playedResultSuppressed =
+        (data?.affectedMatchNums ?? []).some(
+          (num) => Number(num) === Number(matchNum),
+        ) ||
+        (data?.pendingWinnerMatchNums ?? []).some(
+          (num) => Number(num) === Number(matchNum),
+        ) ||
+        Boolean(
+          bracketMatch &&
+            bracketMatch.isPlayed &&
+            !bracketMatch.winnerTeamId &&
+            bracketMatch.home.teamId &&
+            bracketMatch.away.teamId,
+        );
+
+      if (
+        !isKnockoutWinnerOverride(actualWinner, winnerId, {
+          playedResultSuppressed,
+        })
+      ) {
+        delete nextWinners[matchNum];
+      } else {
+        nextWinners[matchNum] = winnerId;
+      }
+
+      return {
+        ...current,
+        knockoutWinners: nextWinners,
+      };
+    });
   }
 
   function handleSwapGroupPositions(

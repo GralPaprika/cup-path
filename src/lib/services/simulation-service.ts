@@ -1,8 +1,10 @@
 import type { RankingMode, SimulationResult, SimulationScenario } from "@/lib/types";
 import {
   computePendingWinnerMatchNums,
+  filterPendingToCuratedMatches,
   findChangedMatchNums,
   getActualScenario,
+  getCuratedBracketMatchNums,
   getDownstreamMatchNums,
   getFocusTeamMatchNums,
   resolveBracket,
@@ -122,7 +124,7 @@ export async function getSimulationAnalysis(
     actualBracket,
     simulatedBracket,
     changedMatchNums,
-    pendingWinnerMatchNums,
+    pendingWinnerMatchNums: allPendingWinnerMatchNums,
     suppressPlayedResultsMatchNums,
     affectedMatchNums,
   } = resolveSimulatedBracketState(ctx, effectiveScenario);
@@ -131,6 +133,16 @@ export async function getSimulationAnalysis(
   for (const match of actualBracket) {
     actualWinnersByMatchNum[match.num] = match.winnerTeamId;
   }
+
+  const curatedMatchNums = getCuratedBracketMatchNums(
+    simulatedBracket,
+    teamId,
+    effectiveScenario.knockoutWinners,
+  ).curated;
+  const pendingWinnerMatchNums = filterPendingToCuratedMatches(
+    allPendingWinnerMatchNums,
+    curatedMatchNums,
+  );
 
   const simulatedSummary = buildProjectedTeamPathSummary(
     ctx,
@@ -227,7 +239,11 @@ export async function getSimulationAnalysis(
     groupCards: buildGroupFinishCards(ctx, activeFinishes),
     bestThirdRanking: buildBestThirdRanking(ctx, activeFinishes),
     teamRankings,
-    focusTeamMatchNums: getFocusTeamMatchNums(simulatedBracket, teamId),
+    focusTeamMatchNums: getFocusTeamMatchNums(
+      simulatedBracket,
+      teamId,
+      effectiveScenario.knockoutWinners,
+    ),
     pathChartMaxStage,
     actualPathChart: buildPathChartDataFromSummary(actualSummary, pathChartMaxStage),
     simulatedPathChart: buildPathChartDataFromSummary(

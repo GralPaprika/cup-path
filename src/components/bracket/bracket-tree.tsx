@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -21,6 +22,7 @@ import {
   BRACKET_COLUMNS,
   getBracketGridRows,
   getMatchLayout,
+  getPathSliceLayouts,
   visibleColumnsForPathSlice,
   type BracketColumn,
 } from "@/components/bracket/bracket-tree-layout";
@@ -32,31 +34,48 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getCuratedBracketMatchNums } from "@/lib/domain/bracket/bracket-resolver";
+import { getCuratedBracketMatchNums, isKnockoutWinnerOverride } from "@/lib/domain/bracket/bracket-resolver";
 import { isThirdPlaceMatch } from "@/lib/domain/match/match-stages";
 import { cn } from "@/lib/utils";
 
-export type BracketRoundFilter =
-  | "all"
-  | "r32"
-  | "r16"
-  | "qf"
-  | "sf"
-  | "final";
+export type BracketRoundFilter = "all" | "r16" | "qf" | "sf";
+
+type BracketCardDensity = "compact" | "cozy" | "comfortable" | "roomy";
 
 const ROUND_FILTER_COLUMN_KEYS: Record<
   Exclude<BracketRoundFilter, "all">,
   readonly string[]
 > = {
-  r32: ["r32-left", "r32-right"],
-  r16: ["r16-left", "r16-right"],
-  qf: ["qf-left", "qf-right"],
-  sf: ["sf-left", "sf-right"],
-  final: ["center"],
+  r16: [
+    "r16-left",
+    "qf-left",
+    "sf-left",
+    "center",
+    "sf-right",
+    "qf-right",
+    "r16-right",
+  ],
+  qf: ["qf-left", "sf-left", "center", "sf-right", "qf-right"],
+  sf: ["sf-left", "center", "sf-right"],
 };
 
-const PATH_SLICE_ZOOM = 1.25;
-const PATH_SLICE_COLUMN_MIN_PX = 150;
+const DENSITY_COLUMN_SIZES: Record<
+  BracketCardDensity,
+  { minPx: number; maxPx?: number }
+> = {
+  compact: { minPx: 130 },
+  cozy: { minPx: 150 },
+  comfortable: { minPx: 160, maxPx: 220 },
+  roomy: { minPx: 180, maxPx: 260 },
+};
+
+function densityForRoundFilter(filter: BracketRoundFilter): BracketCardDensity {
+  if (filter === "sf") return "roomy";
+  if (filter === "qf") return "comfortable";
+  return "compact";
+}
+
+const PATH_SLICE_COLUMN_MIN_PX = 170;
 const PATH_SLICE_VIEWPORT_HEIGHT_PX = 480;
 const DRAG_THRESHOLD_PX = 4;
 
@@ -64,6 +83,8 @@ interface BracketTreeProps {
   matches: ResolvedBracketMatch[];
   teams: Team[];
   scenarioWinners: Record<number, string | undefined>;
+  actualWinnersByMatchNum: Record<number, string | null>;
+  affectedMatchNums: number[];
   changedMatchNums: number[];
   pendingWinnerMatchNums: number[];
   focusTeamId: string;
@@ -80,7 +101,7 @@ function BracketSide({
   teams,
   isWinner,
   isFocus,
-  compact,
+  density,
   selectable,
   onClick,
 }: {
@@ -88,7 +109,7 @@ function BracketSide({
   teams: Team[];
   isWinner: boolean;
   isFocus: boolean;
-  compact?: boolean;
+  density: BracketCardDensity;
   selectable: boolean;
   onClick: () => void;
 }) {
@@ -98,6 +119,14 @@ function BracketSide({
     : null;
   const name = team ? getTeamDisplayName(teamNames, team) : null;
   const canSelect = selectable && Boolean(side.teamId);
+  const flagSize =
+    density === "compact"
+      ? "xs"
+      : density === "cozy"
+        ? "sm"
+        : density === "comfortable"
+          ? "sm"
+          : "md";
 
   return (
     <button
@@ -105,20 +134,37 @@ function BracketSide({
       onClick={onClick}
       disabled={!canSelect}
       className={cn(
-        "flex w-full items-center gap-1.5 rounded border px-1.5 py-1 text-left transition-colors",
-        compact ? "text-[10px]" : "text-xs",
+        "flex w-full items-center rounded border text-left transition-colors",
+        density === "roomy"
+          ? "gap-2 px-2 py-1.5 text-sm"
+          : density === "comfortable"
+            ? "gap-1.5 px-2 py-1 text-xs"
+            : density === "cozy"
+              ? "gap-1.5 px-1.5 py-1 text-[11px]"
+              : "gap-1 px-1 py-0.5 text-[9px]",
         canSelect && "hover:border-wc-sky/40 hover:bg-white/5",
         isWinner && "border-wc-sky/40 bg-wc-sky/10",
         isFocus && "ring-1 ring-wc-orange/60",
         !canSelect && "cursor-default opacity-50",
       )}
     >
-      <span className="shrink-0 font-mono text-[9px] font-semibold text-wc-orange">
+      <span
+        className={cn(
+          "shrink-0 font-mono font-semibold text-wc-orange",
+          density === "roomy"
+            ? "text-xs"
+            : density === "comfortable"
+              ? "text-[10px]"
+              : density === "cozy"
+                ? "text-[10px]"
+                : "text-[8px]",
+        )}
+      >
         {side.slotLabel}
       </span>
       {team && name ? (
         <>
-          <TeamFlag team={team} size="sm" />
+          <TeamFlag team={team} size={flagSize} />
           <span className="min-w-0 truncate font-medium text-white">{name}</span>
         </>
       ) : (
@@ -139,6 +185,7 @@ function BracketMatchCard({
   focusTeamMatchNums,
   pathOnly,
   enlarged,
+  density = "compact",
   feeder,
   onSelectWinner,
 }: {
@@ -152,6 +199,7 @@ function BracketMatchCard({
   focusTeamMatchNums: number[];
   pathOnly: boolean;
   enlarged: boolean;
+  density?: BracketCardDensity;
   feeder?: boolean;
   onSelectWinner: (matchNum: number, teamId: string) => void;
 }) {
@@ -162,11 +210,27 @@ function BracketMatchCard({
   const isThirdPlace = isThirdPlaceMatch(match.round);
   const canPickWinner = !isThirdPlace;
   const dimmed = pathOnly && !involvesFocus && !feeder;
+  const sideDensity: BracketCardDensity = enlarged ? "comfortable" : density;
+  const metaText =
+    density === "roomy"
+      ? "text-[11px]"
+      : density === "comfortable"
+        ? "text-[10px]"
+        : density === "cozy"
+          ? "text-[10px]"
+          : "text-[9px]";
+  const badgeText =
+    density === "compact" ? "text-[8px]" : "text-[9px]";
 
   return (
     <div
       className={cn(
-        "flex min-h-0 flex-col justify-center rounded-lg border border-white/8 bg-white/[0.02] p-1.5 transition-[opacity,box-shadow,transform]",
+        "flex min-h-0 flex-col justify-center rounded-lg border border-white/8 bg-white/[0.02] transition-[opacity,box-shadow,transform]",
+        density === "roomy"
+          ? "p-2.5"
+          : density === "comfortable"
+            ? "p-2"
+            : "p-1.5",
         changed && "border-wc-orange/40 bg-wc-orange/5",
         needsWinner &&
           "border-wc-purple/50 bg-wc-purple/10 ring-1 ring-wc-purple/30",
@@ -185,42 +249,62 @@ function BracketMatchCard({
       )}
     >
       {isCenter && (
-        <p className="mb-1 text-center text-[9px] font-semibold uppercase tracking-widest text-wc-orange">
+        <p
+          className={cn(
+            "mb-1 text-center font-semibold uppercase tracking-widest text-wc-orange",
+            metaText,
+          )}
+        >
           {getRoundDisplayName(stages, match.round)}
         </p>
       )}
       <div className="mb-1 flex items-center justify-between gap-1">
-        <span className="font-mono text-[9px] text-muted-foreground">
+        <span className={cn("font-mono text-muted-foreground", metaText)}>
           #{match.num}
         </span>
         {feeder && !involvesFocus && (
-          <span className="rounded bg-wc-sky/15 px-1 py-0.5 text-[8px] font-semibold uppercase text-wc-sky">
+          <span
+            className={cn(
+              "rounded bg-wc-sky/15 px-1 py-0.5 font-semibold uppercase text-wc-sky",
+              badgeText,
+            )}
+          >
             {t("feederBadge")}
           </span>
         )}
         {needsWinner && (
-          <span className="rounded bg-wc-purple/20 px-1 py-0.5 text-[8px] font-semibold uppercase text-wc-purple">
+          <span
+            className={cn(
+              "rounded bg-wc-purple/20 px-1 py-0.5 font-semibold uppercase text-wc-purple",
+              badgeText,
+            )}
+          >
             {t("pickWinnerBadge")}
           </span>
         )}
         {overridden && !needsWinner && (
-          <span className="rounded bg-wc-purple/15 px-1 py-0.5 text-[8px] font-semibold uppercase text-wc-purple">
+          <span
+            className={cn(
+              "rounded bg-wc-purple/15 px-1 py-0.5 font-semibold uppercase text-wc-purple",
+              badgeText,
+            )}
+          >
             {t("simulated")}
           </span>
         )}
         {match.scoreLabel && !overridden && !needsWinner && (
-          <span className="font-mono text-[9px] text-muted-foreground">
+          <span className={cn("font-mono text-muted-foreground", metaText)}>
             {match.scoreLabel}
           </span>
         )}
       </div>
-      <div className="space-y-1">
+      <div className={cn(density === "compact" ? "space-y-1" : density === "cozy" ? "space-y-1" : "space-y-1.5")}>
         <BracketSide
           side={match.home}
           teams={teams}
           isWinner={selectedWinnerId === match.home.teamId}
           isFocus={focusTeamId === match.home.teamId}
-          compact={!enlarged}
+          density={sideDensity}
           selectable={canPickWinner}
           onClick={() =>
             canPickWinner &&
@@ -233,7 +317,7 @@ function BracketMatchCard({
           teams={teams}
           isWinner={selectedWinnerId === match.away.teamId}
           isFocus={focusTeamId === match.away.teamId}
-          compact={!enlarged}
+          density={sideDensity}
           selectable={canPickWinner}
           onClick={() =>
             canPickWinner &&
@@ -260,6 +344,8 @@ function BracketGrid({
   visibleColumns,
   teams,
   scenarioWinners,
+  actualWinnersByMatchNum,
+  affectedMatchNums,
   changedMatchNums,
   pendingWinnerMatchNums,
   focusTeamId,
@@ -268,14 +354,20 @@ function BracketGrid({
   onSelectWinner,
   pathOnly,
   enlargePath,
+  density = "compact",
   columnMinPx,
+  columnMaxPx,
   matchCardRefs,
+  stacked = false,
+  showConnectors = false,
 }: {
   matches: ResolvedBracketMatch[];
   visibleMatchNums: Set<number>;
   visibleColumns: BracketColumn[];
   teams: Team[];
   scenarioWinners: Record<number, string | undefined>;
+  actualWinnersByMatchNum: Record<number, string | null>;
+  affectedMatchNums: Set<number>;
   changedMatchNums: number[];
   pendingWinnerMatchNums: number[];
   focusTeamId: string;
@@ -284,30 +376,193 @@ function BracketGrid({
   onSelectWinner: (matchNum: number, teamId: string) => void;
   pathOnly: boolean;
   enlargePath: boolean;
+  density?: BracketCardDensity;
   columnMinPx: number;
+  columnMaxPx?: number;
   matchCardRefs?: MutableRefObject<Map<number, HTMLDivElement | null>>;
+  /** One-column-per-round path slice with bracket-branch vertical spanning. */
+  stacked?: boolean;
+  /** Draw elbow links between feeder sources and their child matches. */
+  showConnectors?: boolean;
 }) {
   const stages = useTranslations("compare.stages");
-  const gridRows = getBracketGridRows();
+  const gridRef = useRef<HTMLDivElement>(null);
+  const localCardRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
+  const [connectorPaths, setConnectorPaths] = useState<string[]>([]);
+
+  const sourcesByMatch = useMemo(() => {
+    if (!stacked && !showConnectors) return undefined;
+    const map = new Map<number, number[]>();
+    for (const match of matches) {
+      if (!visibleMatchNums.has(match.num)) continue;
+      const sources = [
+        match.home.sourceMatchNum,
+        match.away.sourceMatchNum,
+      ].filter((num): num is number => num !== undefined);
+      if (sources.length > 0) map.set(match.num, sources);
+    }
+    return map;
+  }, [stacked, showConnectors, matches, visibleMatchNums]);
+  const stackedLayouts = useMemo(
+    () =>
+      stacked ? getPathSliceLayouts(visibleColumns, sourcesByMatch) : null,
+    [stacked, visibleColumns, sourcesByMatch],
+  );
+  const gridRows = stackedLayouts?.gridRows || getBracketGridRows();
   const matchByNum = new Map(matches.map((match) => [match.num, match]));
   const columnIndexByKey = new Map(
     visibleColumns.map((column, index) => [column.key, index]),
   );
-  const minWidthPx = Math.max(visibleColumns.length * columnMinPx, 280);
+  const trackMax = columnMaxPx ?? columnMinPx;
+  const columnGapPx = stacked ? 40 : showConnectors ? 24 : 8;
+  const minWidthPx = Math.max(
+    visibleColumns.length * columnMinPx +
+      Math.max(0, visibleColumns.length - 1) * columnGapPx,
+    280,
+  );
+  // Path slice: fixed card width, columns spread across full container width.
+  // Full bracket: optional max track width; otherwise grow with 1fr.
+  const spreadColumns = stacked;
+  const stretch = !spreadColumns && columnMaxPx === undefined;
+
+  function setCardRef(matchNum: number, node: HTMLDivElement | null) {
+    if (node) {
+      localCardRefs.current.set(matchNum, node);
+      matchCardRefs?.current.set(matchNum, node);
+    } else {
+      localCardRefs.current.delete(matchNum);
+      matchCardRefs?.current.delete(matchNum);
+    }
+  }
+
+  useLayoutEffect(() => {
+    if (!showConnectors || !sourcesByMatch) {
+      setConnectorPaths((prev) => (prev.length === 0 ? prev : []));
+      return;
+    }
+
+    function measure() {
+      const container = gridRef.current;
+      if (!container) return;
+      const cRect = container.getBoundingClientRect();
+      // Account for ancestor CSS scale (path slice zoom) so SVG user space matches layout.
+      const scaleX = cRect.width / Math.max(container.offsetWidth, 1);
+      const scaleY = cRect.height / Math.max(container.offsetHeight, 1);
+      const paths: string[] = [];
+
+      for (const [targetNum, sources] of sourcesByMatch) {
+        const targetEl = localCardRefs.current.get(targetNum);
+        if (!targetEl || !visibleMatchNums.has(targetNum)) continue;
+        const tRect = targetEl.getBoundingClientRect();
+        const tMidX = tRect.left + tRect.width / 2;
+        const y2 = (tRect.top + tRect.height / 2 - cRect.top) / scaleY;
+
+        for (const sourceNum of sources) {
+          if (!visibleMatchNums.has(sourceNum)) continue;
+          const sourceEl = localCardRefs.current.get(sourceNum);
+          if (!sourceEl) continue;
+          const sRect = sourceEl.getBoundingClientRect();
+          const sMidX = sRect.left + sRect.width / 2;
+          const y1 = (sRect.top + sRect.height / 2 - cRect.top) / scaleY;
+          // Mirrored full bracket: right-half sources sit to the right of their child.
+          const sourceOnLeft = sMidX <= tMidX;
+          const x1 =
+            (sourceOnLeft ? sRect.right - cRect.left : sRect.left - cRect.left) /
+            scaleX;
+          const x2 =
+            (sourceOnLeft ? tRect.left - cRect.left : tRect.right - cRect.left) /
+            scaleX;
+          const midX = (x1 + x2) / 2;
+          paths.push(`M ${x1} ${y1} H ${midX} V ${y2} H ${x2}`);
+        }
+      }
+
+      setConnectorPaths((prev) => {
+        if (
+          prev.length === paths.length &&
+          prev.every((path, index) => path === paths[index])
+        ) {
+          return prev;
+        }
+        return paths;
+      });
+    }
+
+    measure();
+
+    const container = gridRef.current;
+    if (!container || typeof ResizeObserver === "undefined") {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => measure());
+    observer.observe(container);
+    for (const el of localCardRefs.current.values()) {
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, [showConnectors, sourcesByMatch, visibleMatchNums, stackedLayouts]);
 
   return (
     <div
-      className="inline-grid w-full gap-x-2 gap-y-1"
+      ref={gridRef}
+      className={cn(
+        "relative gap-y-5",
+        spreadColumns
+          ? undefined
+          : stacked
+            ? "gap-x-10"
+            : showConnectors
+              ? "gap-x-6"
+              : "gap-x-2",
+        stretch || spreadColumns ? "inline-grid w-full" : "grid",
+      )}
       style={{
-        minWidth: `${minWidthPx}px`,
-        gridTemplateColumns: `repeat(${visibleColumns.length}, minmax(${columnMinPx}px, 1fr))`,
+        minWidth: stretch || spreadColumns ? `${minWidthPx}px` : undefined,
+        width: stretch || spreadColumns
+          ? undefined
+          : `${visibleColumns.length * trackMax + (visibleColumns.length - 1) * columnGapPx}px`,
+        gridTemplateColumns: spreadColumns
+          ? `repeat(${visibleColumns.length}, ${columnMinPx}px)`
+          : stretch
+            ? `repeat(${visibleColumns.length}, minmax(${columnMinPx}px, 1fr))`
+            : `repeat(${visibleColumns.length}, minmax(${columnMinPx}px, ${trackMax}px))`,
+        justifyContent: spreadColumns ? "space-between" : undefined,
         gridTemplateRows: `auto repeat(${gridRows}, minmax(0, auto))`,
       }}
     >
+      {showConnectors && connectorPaths.length > 0 && (
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 overflow-visible"
+        >
+          {connectorPaths.map((d, index) => (
+            <path
+              key={index}
+              d={d}
+              fill="none"
+              className="stroke-white/25"
+              strokeWidth={1.5}
+              strokeLinecap="square"
+              strokeLinejoin="miter"
+            />
+          ))}
+        </svg>
+      )}
+
       {visibleColumns.map((column) => (
         <div
           key={column.key}
-          className="mb-2 text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
+          className={cn(
+            "relative z-10 mb-2 text-center font-semibold uppercase tracking-widest text-muted-foreground",
+            density === "roomy"
+              ? "text-xs"
+              : density === "comfortable"
+                ? "text-[11px]"
+                : density === "cozy"
+                  ? "text-[10px]"
+                  : "text-[10px]",
+          )}
           style={{
             gridColumn: (columnIndexByKey.get(column.key) ?? 0) + 1,
             gridRow: 1,
@@ -320,30 +575,46 @@ function BracketGrid({
       {matches
         .filter((match) => visibleMatchNums.has(match.num))
         .map((match) => {
-          const layout = getMatchLayout(match.num);
-          const sourceColumn = BRACKET_COLUMNS[layout.column];
-          const mappedColumn = columnIndexByKey.get(sourceColumn?.key);
+          let mappedColumn: number | undefined;
+          let rowStart: number;
+          let rowSpan: number;
+
+          if (stackedLayouts) {
+            const layout = stackedLayouts.layouts.get(match.num);
+            if (!layout) return null;
+            mappedColumn = layout.columnIndex;
+            rowStart = layout.rowStart;
+            rowSpan = layout.rowSpan;
+          } else {
+            const layout = getMatchLayout(match.num);
+            const sourceColumn = BRACKET_COLUMNS[layout.column];
+            mappedColumn = columnIndexByKey.get(sourceColumn?.key);
+            rowStart = layout.rowStart;
+            rowSpan = layout.rowSpan;
+          }
           if (mappedColumn === undefined) return null;
 
-          const overridden = Boolean(scenarioWinners[match.num]);
-          const selectedWinnerId =
-            scenarioWinners[match.num] ?? match.winnerTeamId;
+          const scenarioWinner = scenarioWinners[match.num];
+          const overridden = isKnockoutWinnerOverride(
+            actualWinnersByMatchNum[match.num],
+            scenarioWinner,
+            {
+              playedResultSuppressed: affectedMatchNums.has(match.num),
+            },
+          );
+          const selectedWinnerId = scenarioWinner ?? match.winnerTeamId;
           const involvesFocus = focusTeamMatchNums.includes(match.num);
           const isFeeder = feederNums.has(match.num);
 
           return (
             <div
               key={match.num}
-              ref={(node) => {
-                if (!matchCardRefs) return;
-                if (node) matchCardRefs.current.set(match.num, node);
-                else matchCardRefs.current.delete(match.num);
-              }}
+              ref={(node) => setCardRef(match.num, node)}
               data-match-num={match.num}
-              className="flex flex-col justify-center"
+              className="relative z-10 flex flex-col justify-center"
               style={{
                 gridColumn: mappedColumn + 1,
-                gridRow: `${layout.rowStart + 1} / span ${layout.rowSpan}`,
+                gridRow: `${rowStart + 1} / span ${rowSpan}`,
               }}
             >
               <BracketMatchCard
@@ -357,6 +628,7 @@ function BracketGrid({
                 focusTeamMatchNums={focusTeamMatchNums}
                 pathOnly={pathOnly}
                 enlarged={enlargePath && (involvesFocus || isFeeder)}
+                density={density}
                 feeder={isFeeder}
                 onSelectWinner={onSelectWinner}
               />
@@ -371,6 +643,8 @@ function FullBracketGrid({
   matches,
   teams,
   scenarioWinners,
+  actualWinnersByMatchNum,
+  affectedMatchNums,
   changedMatchNums,
   pendingWinnerMatchNums,
   focusTeamId,
@@ -383,6 +657,8 @@ function FullBracketGrid({
   matches: ResolvedBracketMatch[];
   teams: Team[];
   scenarioWinners: Record<number, string | undefined>;
+  actualWinnersByMatchNum: Record<number, string | null>;
+  affectedMatchNums: Set<number>;
   changedMatchNums: number[];
   pendingWinnerMatchNums: number[];
   focusTeamId: string;
@@ -392,29 +668,50 @@ function FullBracketGrid({
   roundFilter: BracketRoundFilter;
   pathOnly: boolean;
 }) {
-  const visibleColumns = visibleColumnsForFilter(roundFilter);
-  const visibleMatchNums = new Set(
-    visibleColumns.flatMap((column) => column.matchNums),
+  const visibleColumns = useMemo(
+    () => visibleColumnsForFilter(roundFilter),
+    [roundFilter],
   );
+  const visibleMatchNums = useMemo(
+    () => new Set(visibleColumns.flatMap((column) => column.matchNums)),
+    [visibleColumns],
+  );
+  const density = densityForRoundFilter(roundFilter);
+  const { minPx, maxPx } = DENSITY_COLUMN_SIZES[density];
+  const centered = maxPx !== undefined;
 
   return (
-    <div className="overflow-x-auto pb-2">
-      <BracketGrid
-        matches={matches}
-        visibleMatchNums={visibleMatchNums}
-        visibleColumns={visibleColumns}
-        teams={teams}
-        scenarioWinners={scenarioWinners}
-        changedMatchNums={changedMatchNums}
-        pendingWinnerMatchNums={pendingWinnerMatchNums}
-        focusTeamId={focusTeamId}
-        focusTeamMatchNums={focusTeamMatchNums}
-        feederNums={feederNums}
-        onSelectWinner={onSelectWinner}
-        pathOnly={pathOnly}
-        enlargePath={pathOnly}
-        columnMinPx={130}
-      />
+    <div
+      className={cn(
+        "scrollbar-subtle overflow-x-auto pb-2",
+        centered && "flex min-h-[min(52vh,520px)] items-center",
+      )}
+    >
+      <div
+        className={cn(centered && "flex w-full min-w-full justify-center px-1")}
+      >
+        <BracketGrid
+          matches={matches}
+          visibleMatchNums={visibleMatchNums}
+          visibleColumns={visibleColumns}
+          teams={teams}
+          scenarioWinners={scenarioWinners}
+          actualWinnersByMatchNum={actualWinnersByMatchNum}
+          affectedMatchNums={affectedMatchNums}
+          changedMatchNums={changedMatchNums}
+          pendingWinnerMatchNums={pendingWinnerMatchNums}
+          focusTeamId={focusTeamId}
+          focusTeamMatchNums={focusTeamMatchNums}
+          feederNums={feederNums}
+          onSelectWinner={onSelectWinner}
+          pathOnly={pathOnly}
+          enlargePath={pathOnly}
+          density={density}
+          columnMinPx={minPx}
+          columnMaxPx={maxPx}
+          showConnectors
+        />
+      </div>
     </div>
   );
 }
@@ -512,6 +809,8 @@ function FocusedBracketSlice({
   pathMatchNums,
   teams,
   scenarioWinners,
+  actualWinnersByMatchNum,
+  affectedMatchNums,
   changedMatchNums,
   pendingWinnerMatchNums,
   focusTeamId,
@@ -525,6 +824,8 @@ function FocusedBracketSlice({
   pathMatchNums: number[];
   teams: Team[];
   scenarioWinners: Record<number, string | undefined>;
+  actualWinnersByMatchNum: Record<number, string | null>;
+  affectedMatchNums: Set<number>;
   changedMatchNums: number[];
   pendingWinnerMatchNums: number[];
   focusTeamId: string;
@@ -534,10 +835,8 @@ function FocusedBracketSlice({
   emptyLabel: string;
 }) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const contentMeasureRef = useRef<HTMLDivElement | null>(null);
   const matchCardRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
   const prevPathKeyRef = useRef<string>("");
-  const [contentSize, setContentSize] = useState({ width: 0, height: 0 });
   const [grabbing, setGrabbing] = useState(false);
   const drag = useDragToScroll(viewportRef);
 
@@ -550,22 +849,7 @@ function FocusedBracketSlice({
     [curatedMatchNums],
   );
   const pathKey = pathMatchNums.join(",");
-
-  useEffect(() => {
-    const node = contentMeasureRef.current;
-    if (!node || typeof ResizeObserver === "undefined") return;
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      setContentSize({
-        width: entry.contentRect.width,
-        height: entry.contentRect.height,
-      });
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [visibleColumns.length, curatedMatchNums.length]);
+  const pendingKey = pendingWinnerMatchNums.join(",");
 
   useEffect(() => {
     if (curatedMatchNums.length === 0) {
@@ -582,15 +866,17 @@ function FocusedBracketSlice({
     const prevNums = prev ? prev.split(",").filter(Boolean).map(Number) : [];
     const prevSet = new Set(prevNums);
     const added = pathMatchNums.filter((num) => !prevSet.has(num));
+    const pendingTarget = pendingWinnerMatchNums[0];
     const targetNum =
-      added.length > 0
+      pendingTarget ??
+      (added.length > 0
         ? added[added.length - 1]
-        : pathMatchNums[pathMatchNums.length - 1];
+        : pathMatchNums[pathMatchNums.length - 1]);
 
     if (targetNum === undefined) return;
 
     // Skip auto-pan on the very first paint so the default crop is stable.
-    if (!prev) return;
+    if (!prev && pendingWinnerMatchNums.length === 0) return;
 
     const card = matchCardRefs.current.get(targetNum);
     if (!card) return;
@@ -617,20 +903,17 @@ function FocusedBracketSlice({
       viewport.scrollTo({ left: nextLeft, top: nextTop, behavior: "smooth" });
     });
     return () => cancelAnimationFrame(frame);
-  }, [pathKey, pathMatchNums, curatedMatchNums.length]);
+  }, [pathKey, pendingKey, pathMatchNums, pendingWinnerMatchNums, curatedMatchNums.length]);
 
   if (curatedMatchNums.length === 0) {
     return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
   }
 
-  const scaledWidth = contentSize.width * PATH_SLICE_ZOOM;
-  const scaledHeight = contentSize.height * PATH_SLICE_ZOOM;
-
   return (
     <div
       ref={viewportRef}
       className={cn(
-        "relative overflow-auto rounded-xl border border-white/8 bg-black/20",
+        "scrollbar-subtle relative w-full overflow-auto rounded-xl border border-white/8 bg-black/20 p-3",
         grabbing ? "cursor-grabbing select-none" : "cursor-grab",
       )}
       style={{ height: PATH_SLICE_VIEWPORT_HEIGHT_PX }}
@@ -649,36 +932,28 @@ function FocusedBracketSlice({
       }}
       onClickCapture={drag.onClickCapture}
     >
-      <div
-        style={{
-          width: Math.max(scaledWidth, 1),
-          height: Math.max(scaledHeight, 1),
-        }}
-      >
-        <div
-          ref={contentMeasureRef}
-          className="origin-top-left p-3"
-          style={{ transform: `scale(${PATH_SLICE_ZOOM})` }}
-        >
-          <BracketGrid
-            matches={matches}
-            visibleMatchNums={visibleMatchNums}
-            visibleColumns={visibleColumns}
-            teams={teams}
-            scenarioWinners={scenarioWinners}
-            changedMatchNums={changedMatchNums}
-            pendingWinnerMatchNums={pendingWinnerMatchNums}
-            focusTeamId={focusTeamId}
-            focusTeamMatchNums={focusTeamMatchNums}
-            feederNums={feederNums}
-            onSelectWinner={onSelectWinner}
-            pathOnly={false}
-            enlargePath
-            columnMinPx={PATH_SLICE_COLUMN_MIN_PX}
-            matchCardRefs={matchCardRefs}
-          />
-        </div>
-      </div>
+      <BracketGrid
+        matches={matches}
+        visibleMatchNums={visibleMatchNums}
+        visibleColumns={visibleColumns}
+        teams={teams}
+        scenarioWinners={scenarioWinners}
+        actualWinnersByMatchNum={actualWinnersByMatchNum}
+        affectedMatchNums={affectedMatchNums}
+        changedMatchNums={changedMatchNums}
+        pendingWinnerMatchNums={pendingWinnerMatchNums}
+        focusTeamId={focusTeamId}
+        focusTeamMatchNums={focusTeamMatchNums}
+        feederNums={feederNums}
+        onSelectWinner={onSelectWinner}
+        pathOnly={false}
+        enlargePath={false}
+        density="cozy"
+        columnMinPx={PATH_SLICE_COLUMN_MIN_PX}
+        matchCardRefs={matchCardRefs}
+        stacked
+        showConnectors
+      />
     </div>
   );
 }
@@ -687,6 +962,8 @@ export function BracketTree({
   matches,
   teams,
   scenarioWinners,
+  actualWinnersByMatchNum,
+  affectedMatchNums,
   changedMatchNums,
   pendingWinnerMatchNums,
   focusTeamId,
@@ -700,7 +977,7 @@ export function BracketTree({
   const [fullOpen, setFullOpen] = useState(false);
   const [roundFilter, setRoundFilter] = useState<BracketRoundFilter>("all");
   const [pathOnly, setPathOnly] = useState(true);
-  const [showFeeders, setShowFeeders] = useState(true);
+  const [showFeeders, setShowFeeders] = useState(false);
 
   const curated = useMemo(
     () =>
@@ -711,10 +988,16 @@ export function BracketTree({
     () => new Set(curated.feeders),
     [curated.feeders],
   );
-  const sliceMatchNums = useMemo(
-    () => (showFeeders ? curated.curated : curated.path),
-    [showFeeders, curated.curated, curated.path],
+  const affectedMatchNumSet = useMemo(
+    () => new Set(affectedMatchNums),
+    [affectedMatchNums],
   );
+  const sliceMatchNums = useMemo(() => {
+    const base = showFeeders ? curated.curated : curated.path;
+    return [...new Set([...base, ...pendingWinnerMatchNums])].sort(
+      (a, b) => a - b,
+    );
+  }, [showFeeders, curated.curated, curated.path, pendingWinnerMatchNums]);
   const sliceFocusMatchNums = useMemo(
     () => [...new Set([...focusTeamMatchNums, ...curated.path])],
     [focusTeamMatchNums, curated.path],
@@ -725,11 +1008,9 @@ export function BracketTree({
     label: string;
   }> = [
     { id: "all", label: tb("roundFilterAll") },
-    { id: "r32", label: tb("roundFilterR32") },
     { id: "r16", label: tb("roundFilterR16") },
     { id: "qf", label: tb("roundFilterQf") },
     { id: "sf", label: tb("roundFilterSf") },
-    { id: "final", label: tb("roundFilterFinal") },
   ];
 
   return (
@@ -777,6 +1058,8 @@ export function BracketTree({
         pathMatchNums={curated.path}
         teams={teams}
         scenarioWinners={scenarioWinners}
+        actualWinnersByMatchNum={actualWinnersByMatchNum}
+        affectedMatchNums={affectedMatchNumSet}
         changedMatchNums={changedMatchNums}
         pendingWinnerMatchNums={pendingWinnerMatchNums}
         focusTeamId={focusTeamId}
@@ -787,7 +1070,10 @@ export function BracketTree({
       />
 
       <Dialog open={fullOpen} onOpenChange={setFullOpen}>
-        <DialogContent size="full">
+        <DialogContent
+          size="full"
+          className="max-h-[min(94vh,980px)] max-w-[min(98vw,1560px)]"
+        >
           <DialogHeader>
             <DialogTitle>{tb("fullBracketTitle")}</DialogTitle>
             <DialogDescription>{tb("fullBracketDescription")}</DialogDescription>
@@ -828,6 +1114,8 @@ export function BracketTree({
               matches={matches}
               teams={teams}
               scenarioWinners={scenarioWinners}
+              actualWinnersByMatchNum={actualWinnersByMatchNum}
+              affectedMatchNums={affectedMatchNumSet}
               changedMatchNums={changedMatchNums}
               pendingWinnerMatchNums={pendingWinnerMatchNums}
               focusTeamId={focusTeamId}

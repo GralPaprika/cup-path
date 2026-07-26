@@ -7,11 +7,12 @@ import Link from "next/link";
 
 interface TeamFlagProps {
   team: Pick<Team, "id" | "flagUrl" | "displayName">;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
 }
 
 const sizeClasses = {
+  xs: "h-3 w-[1.125rem]",
   sm: "h-4 w-6",
   md: "h-5 w-7",
   lg: "h-8 w-11",
@@ -34,7 +35,7 @@ export function TeamFlag({ team, size = "md", className = "" }: TeamFlagProps) {
 interface TeamLabelProps {
   team: Pick<Team, "id" | "flagUrl" | "displayName">;
   showCode?: boolean;
-  flagSize?: "sm" | "md" | "lg" | "xl";
+  flagSize?: "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
   nameClassName?: string;
   href?: string;

@@ -220,6 +220,25 @@ function teamIdsEqual(
   return left.toUpperCase() === right.toUpperCase();
 }
 
+/**
+ * True when a scenario pick should count as a simulated override.
+ * - No selection → not an override
+ * - Played result suppressed (sides changed upstream) → any pick is an override,
+ *   even if the team id matches the historical winner (that result no longer applies)
+ * - Otherwise → override only when the pick differs from the actual winner
+ * - No actual winner yet → any pick is an override
+ */
+export function isKnockoutWinnerOverride(
+  actualWinnerId: string | null | undefined,
+  selectedWinnerId: string | null | undefined,
+  options?: { playedResultSuppressed?: boolean },
+): boolean {
+  if (!selectedWinnerId) return false;
+  if (options?.playedResultSuppressed) return true;
+  if (!actualWinnerId) return true;
+  return !teamIdsEqual(actualWinnerId, selectedWinnerId);
+}
+
 function effectiveMatchWinner(
   match: ResolvedBracketMatch,
   scenarioWinners?: Record<number, string | undefined>,
@@ -439,4 +458,16 @@ export function computePendingWinnerMatchNums(
     )
     .map((match) => match.num)
     .sort((a, b) => a - b);
+}
+
+/** Keep pending picks that matter for the focus team's visible path (and feeders). */
+export function filterPendingToCuratedMatches(
+  pendingWinnerMatchNums: number[],
+  curatedMatchNums: number[],
+): number[] {
+  if (pendingWinnerMatchNums.length === 0 || curatedMatchNums.length === 0) {
+    return [];
+  }
+  const curated = new Set(curatedMatchNums);
+  return pendingWinnerMatchNums.filter((num) => curated.has(num));
 }

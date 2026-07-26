@@ -1,5 +1,3 @@
-export const SIMULATE_COLLAPSE_IMPACT_KEY =
-  "cuppath:simulate:collapse:impact";
 export const SIMULATE_COLLAPSE_GROUPS_KEY =
   "cuppath:simulate:collapse:groups";
 export const SIMULATE_COLLAPSE_BRACKET_KEY =

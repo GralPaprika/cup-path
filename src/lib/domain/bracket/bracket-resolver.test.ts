@@ -3,15 +3,56 @@ import { describe, it } from "node:test";
 import type { ResolvedBracketMatch } from "@/lib/types";
 import {
   computePendingWinnerMatchNums,
+  filterPendingToCuratedMatches,
   findChangedMatchNums,
   formatSlotLabel,
   getCuratedBracketMatchNums,
   getDownstreamMatchNums,
   getFocusPathFeederMatchNums,
+  isKnockoutWinnerOverride,
   resolveBracket,
   sanitizeKnockoutWinners,
 } from "@/lib/domain/bracket/bracket-resolver";
 import { bundledTestContext } from "@/lib/domain/core/test-fixtures";
+
+describe("isKnockoutWinnerOverride", () => {
+  it("is false when there is no selected winner", () => {
+    assert.equal(isKnockoutWinnerOverride("SUI", null), false);
+    assert.equal(isKnockoutWinnerOverride("SUI", undefined), false);
+  });
+
+  it("is false when the selected winner matches the actual winner", () => {
+    assert.equal(isKnockoutWinnerOverride("SUI", "SUI"), false);
+    assert.equal(isKnockoutWinnerOverride("sui", "SUI"), false);
+  });
+
+  it("is true when the selected winner differs from the actual winner", () => {
+    assert.equal(isKnockoutWinnerOverride("SUI", "ALG"), true);
+  });
+
+  it("is true when a winner is selected but there is no actual result yet", () => {
+    assert.equal(isKnockoutWinnerOverride(null, "ALG"), true);
+    assert.equal(isKnockoutWinnerOverride(undefined, "ALG"), true);
+  });
+
+  it("is true for suppressed matches even when the pick matches the actual winner", () => {
+    assert.equal(
+      isKnockoutWinnerOverride("ARG", "ARG", {
+        playedResultSuppressed: true,
+      }),
+      true,
+    );
+  });
+
+  it("stays false for a real-result pick when the match is not suppressed", () => {
+    assert.equal(
+      isKnockoutWinnerOverride("ARG", "ARG", {
+        playedResultSuppressed: false,
+      }),
+      false,
+    );
+  });
+});
 
 describe("formatSlotLabel", () => {
   it("formats group and winner slots", () => {
@@ -105,6 +146,22 @@ describe("computePendingWinnerMatchNums", () => {
       {},
     );
     assert.deepEqual(pending, [104]);
+  });
+});
+
+describe("filterPendingToCuratedMatches", () => {
+  it("keeps only pending matches on the curated path", () => {
+    assert.deepEqual(
+      filterPendingToCuratedMatches([73, 100, 102], [85, 96, 100]),
+      [100],
+    );
+  });
+
+  it("returns empty when nothing overlaps", () => {
+    assert.deepEqual(
+      filterPendingToCuratedMatches([73, 102], [85, 96, 100]),
+      [],
+    );
   });
 });
 

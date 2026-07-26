@@ -1,8 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import type { Team } from "@/lib/types";
-import { TeamSelector } from "@/components/team/team-selector";
 import { BracketTree } from "@/components/bracket/bracket-tree";
 import { GroupFinishEditor } from "@/components/groups/group-finish-editor";
 import { TeamPathImpactPanel } from "@/components/team/team-path-impact-panel";
@@ -20,7 +19,6 @@ import { useSimulationAnalysis } from "@/hooks/use-simulation-analysis";
 import {
   SIMULATE_COLLAPSE_BRACKET_KEY,
   SIMULATE_COLLAPSE_GROUPS_KEY,
-  SIMULATE_COLLAPSE_IMPACT_KEY,
   SIMULATE_SECTION_IDS,
 } from "@/lib/client/simulate-ui-preference";
 import { cn } from "@/lib/utils";
@@ -47,36 +45,24 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
 
   const [pickWinnersAlertDismissed, setPickWinnersAlertDismissed] =
     useState(false);
-  const pendingWinnersKey = data?.pendingWinnerMatchNums.join(",") ?? "";
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- re-show alert when pending set changes
+  function handleResetScenario() {
     setPickWinnersAlertDismissed(false);
-  }, [pendingWinnersKey]);
+    resetScenario();
+  }
 
   usePageUrlParamsSync("/simulate");
 
   const showRefetchPulse = loading && Boolean(data);
   return (
     <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8">
-      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-white sm:text-3xl">
-            {t("title")}
-          </h1>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground sm:text-base">
-            {t("subtitle")}
-          </p>
-        </div>
-        <TeamSelector
-          teams={teams}
-          value={teamId}
-          onChange={setTeamId}
-          size="compact"
-          hideLabel
-          className="shrink-0"
-          triggerClassName="glass-panel-subtle"
-        />
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-white sm:text-3xl">
+          {t("title")}
+        </h1>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground sm:text-base">
+          {t("subtitle")}
+        </p>
       </header>
 
       {error && (
@@ -103,15 +89,16 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
             </div>
           )}
 
-          <CollapsibleSection
-            id={SIMULATE_SECTION_IDS.impact}
-            title={t("pathComparison")}
-            defaultOpen
-            persistKey={SIMULATE_COLLAPSE_IMPACT_KEY}
-          >
+          <div id={SIMULATE_SECTION_IDS.impact}>
             <TeamPathImpactPanel
-              embedded
               teams={teams}
+              teamId={teamId}
+              onTeamChange={(nextTeamId) => {
+                setTeamId(nextTeamId);
+                if (nextTeamId === comparisonTeamId) {
+                  setComparisonTeamId("");
+                }
+              }}
               actualSummary={data.actualSummary}
               simulatedSummary={data.simulatedSummary}
               actualAvgPointsContext={data.actualAvgPointsContext}
@@ -126,7 +113,7 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
               simulatedPathChart={data.simulatedPathChart}
               comparisonPathChart={data.comparisonPathChart}
             />
-          </CollapsibleSection>
+          </div>
 
           <CollapsibleSection
             id={SIMULATE_SECTION_IDS.groups}
@@ -153,40 +140,41 @@ function SimulationPageContent({ teams }: { teams: Team[] }) {
             defaultOpen={false}
             persistKey={SIMULATE_COLLAPSE_BRACKET_KEY}
           >
-            <div className="space-y-4">
-              <SimulatePendingWinnersAlert
-                count={data.pendingWinnerMatchNums.length}
-                visible={!pickWinnersAlertDismissed}
-                onDismiss={() => setPickWinnersAlertDismissed(true)}
-              />
-              <BracketTree
-                embedded
-                matches={data.bracket}
-                teams={teams}
-                scenarioWinners={scenario.knockoutWinners ?? {}}
-                changedMatchNums={data.changedMatchNums}
-                pendingWinnerMatchNums={data.pendingWinnerMatchNums}
-                focusTeamId={teamId}
-                focusTeamMatchNums={data.focusTeamMatchNums}
-                onSelectWinner={handleSelectWinner}
-                actions={
-                  <SimulateScenarioActions
-                    hasOverrides={hasOverrides}
-                    pendingWinnerCount={data.pendingWinnerMatchNums.length}
-                    showPickAllStrongest={data.canPickAllStrongestWinners}
-                    showPickSimulatedStrongest={
-                      data.canPickSimulatedStrongestWinners
-                    }
-                    onReset={resetScenario}
-                    onPickAllStrongest={() => pickStrongestWinners("all")}
-                    onPickSimulatedStrongest={() =>
-                      pickStrongestWinners("simulated")
-                    }
-                  />
-                }
-              />
-            </div>
+            <BracketTree
+              embedded
+              matches={data.bracket}
+              teams={teams}
+              scenarioWinners={scenario.knockoutWinners ?? {}}
+              actualWinnersByMatchNum={data.actualWinnersByMatchNum}
+              affectedMatchNums={data.affectedMatchNums}
+              changedMatchNums={data.changedMatchNums}
+              pendingWinnerMatchNums={data.pendingWinnerMatchNums}
+              focusTeamId={teamId}
+              focusTeamMatchNums={data.focusTeamMatchNums}
+              onSelectWinner={handleSelectWinner}
+              actions={
+                <SimulateScenarioActions
+                  hasOverrides={hasOverrides}
+                  pendingWinnerCount={data.pendingWinnerMatchNums.length}
+                  showPickAllStrongest={data.canPickAllStrongestWinners}
+                  showPickSimulatedStrongest={
+                    data.canPickSimulatedStrongestWinners
+                  }
+                  onReset={handleResetScenario}
+                  onPickAllStrongest={() => pickStrongestWinners("all")}
+                  onPickSimulatedStrongest={() =>
+                    pickStrongestWinners("simulated")
+                  }
+                />
+              }
+            />
           </CollapsibleSection>
+
+          <SimulatePendingWinnersAlert
+            count={data.pendingWinnerMatchNums.length}
+            visible={!pickWinnersAlertDismissed}
+            onDismiss={() => setPickWinnersAlertDismissed(true)}
+          />
         </div>
       )}
     </div>

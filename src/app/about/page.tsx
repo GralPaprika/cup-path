@@ -1,20 +1,29 @@
-import Link from "next/link";
+import { AboutSectionNav } from "@/components/about/about-section-nav";
+import { AboutTopic } from "@/components/about/about-topic";
 import { getTranslations } from "next-intl/server";
 
 const FIFA_RANKING_METHODOLOGY_URL =
   "https://digitalhub.fifa.com/m/f99da4f73212220/original/edbm045h0udbwkqew35a-pdf.pdf";
+const CONTACT_EMAIL = "dev@carlosrdgz.space";
+const REPO_URL = "https://github.com/GralPaprika/cup-path";
+
+const SECTION_SCROLL_MT =
+  "scroll-mt-[calc(var(--site-header-height)+1rem)]";
 
 export default async function AboutPage() {
   const t = await getTranslations("about");
 
-  const sections: Array<{
-    title: string;
-    body: string;
-    openHref?: string;
-    openLabel?: string;
-    source?: { href: string; label: string };
-  }> = [
-    { title: t("whyTitle"), body: t("whyBody") },
+  const navGroups = [
+    { id: "origin", label: t("groupOrigin") },
+    { id: "methodology", label: t("groupMethodology") },
+    { id: "features", label: t("groupFeatures") },
+    { id: "data", label: t("groupData") },
+    { id: "contact", label: t("groupContact") },
+  ];
+
+  const originTopics = [{ title: t("whyTitle"), body: t("whyBody") }];
+
+  const methodologyTopics = [
     {
       title: t("metricTitle"),
       body: t("metricBody"),
@@ -28,6 +37,9 @@ export default async function AboutPage() {
     { title: t("comparisonTitle"), body: t("comparisonBody") },
     { title: t("pointsGapTitle"), body: t("pointsGapBody") },
     { title: t("rankGapTitle"), body: t("rankGapBody") },
+  ];
+
+  const featureTopics = [
     {
       title: t("overviewTitle"),
       body: t("overviewBody"),
@@ -59,52 +71,128 @@ export default async function AboutPage() {
       openHref: "/simulate",
       openLabel: t("simulateOpen"),
     },
+  ];
+
+  const dataTopics = [
     { title: t("rankingModesTitle"), body: t("rankingModesBody") },
     { title: t("dataTitle"), body: t("dataBody") },
   ];
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-8 sm:px-6">
-      <section className="glass-panel p-6">
-        <h1 className="text-3xl font-bold text-white">{t("title")}</h1>
-      </section>
-      {sections.map((section) => (
-        <section
-          key={section.title}
-          className="glass-panel overflow-hidden"
-        >
-          <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
-            <h2 className="text-lg font-semibold text-wc-sky">{section.title}</h2>
-          </div>
-          <div className="space-y-4 px-5 py-5 leading-7 text-muted-foreground">
-            {section.body.split("\n\n").map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-            {section.openHref && section.openLabel && (
-              <p>
-                <Link
-                  href={section.openHref}
-                  className="text-wc-sky hover:underline"
-                >
-                  {section.openLabel}
-                </Link>
-              </p>
-            )}
-            {section.source && (
-              <p>
-                <a
-                  href={section.source.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-wc-sky hover:underline"
-                >
-                  {section.source.label}
-                </a>
-              </p>
-            )}
-          </div>
-        </section>
-      ))}
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-white sm:text-3xl">{t("title")}</h1>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground sm:text-base">
+          {t("subtitle")}
+        </p>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+        <AboutSectionNav
+          ariaLabel={t("sectionNavLabel")}
+          groups={navGroups}
+        />
+
+        <div className="space-y-6">
+          <section
+            id="origin"
+            className={`${SECTION_SCROLL_MT} glass-panel space-y-6 p-5 sm:p-6`}
+          >
+            <h2 className="text-lg font-semibold text-white">
+              {t("groupOrigin")}
+            </h2>
+            <div>
+              {originTopics.map((topic) => (
+                <AboutTopic key={topic.title} {...topic} />
+              ))}
+            </div>
+          </section>
+
+          <section
+            id="methodology"
+            className={`${SECTION_SCROLL_MT} glass-panel space-y-6 p-5 sm:p-6`}
+          >
+            <h2 className="text-lg font-semibold text-white">
+              {t("groupMethodology")}
+            </h2>
+            <div>
+              {methodologyTopics.map((topic) => (
+                <AboutTopic key={topic.title} {...topic} />
+              ))}
+            </div>
+          </section>
+
+          <section
+            id="features"
+            className={`${SECTION_SCROLL_MT} glass-panel space-y-6 p-5 sm:p-6`}
+          >
+            <h2 className="text-lg font-semibold text-white">
+              {t("groupFeatures")}
+            </h2>
+            <div>
+              {featureTopics.map((topic) => (
+                <AboutTopic key={topic.title} {...topic} />
+              ))}
+            </div>
+          </section>
+
+          <section
+            id="data"
+            className={`${SECTION_SCROLL_MT} glass-panel space-y-6 p-5 sm:p-6`}
+          >
+            <h2 className="text-lg font-semibold text-white">
+              {t("groupData")}
+            </h2>
+            <div>
+              {dataTopics.map((topic) => (
+                <AboutTopic key={topic.title} {...topic} />
+              ))}
+            </div>
+          </section>
+
+          <section
+            id="contact"
+            className={`${SECTION_SCROLL_MT} glass-panel space-y-6 p-5 sm:p-6`}
+          >
+            <h2 className="text-lg font-semibold text-white">
+              {t("groupContact")}
+            </h2>
+            <div className="space-y-4 leading-7 text-muted-foreground">
+              <p>{t("contactBody")}</p>
+              <dl className="space-y-3">
+                <div>
+                  <dt className="text-sm font-medium text-white/70">
+                    {t("contactEmailLabel")}
+                  </dt>
+                  <dd>
+                    <a
+                      href={`mailto:${CONTACT_EMAIL}`}
+                      className="text-wc-sky hover:underline"
+                    >
+                      {CONTACT_EMAIL}
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-white/70">
+                    {t("contactRepoLabel")}
+                  </dt>
+                  <dd>
+                    <a
+                      href={REPO_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-wc-sky hover:underline"
+                    >
+                      {t("contactRepoLink")}
+                    </a>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }

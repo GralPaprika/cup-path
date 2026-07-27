@@ -282,6 +282,13 @@
   },
   "about": {
     "title": "Acerca de CupPath",
+    "subtitle": "Por qué existe CupPath, cómo se mide la dificultad del camino y cómo usar cada página.",
+    "sectionNavLabel": "Secciones de Acerca de",
+    "groupOrigin": "Origen",
+    "groupMethodology": "Metodología",
+    "groupFeatures": "Funciones",
+    "groupData": "Datos",
+    "groupContact": "Contacto",
     "whyTitle": "Por qué existe CupPath",
     "whyBody": "CupPath nació de una afirmación de sobremesa: que a Argentina le habían dado un camino más fácil en el Mundial para ayudarlos a llegar a la final. La pregunta obvia fue: ¿era realmente el camino más fácil — y cómo se podría saber?\n\nEl sitio es una respuesta a esa pregunta. Ordena y compara caminos según los puntos del ranking FIFA de los rivales que enfrentó cada equipo, para que veas quién tuvo el camino duro, quién un cuadro más blando sobre el papel, y cómo quedó esa imagen una vez terminado el torneo.",
     "metricTitle": "Sobre la métrica",
@@ -317,7 +324,12 @@
     "dataTitle": "Fuentes de datos",
     "dataBody": "Los partidos provienen del archivo completo openfootball/worldcup.json (2026) y se almacenan en Vercel Blob. Marcadores, resultados y rivales se leen desde ahí. El JSON incluido en el repo se usa cuando Blob no está disponible.\n\nLos rankings FIFA vienen de la API World Football Ranking en RapidAPI como instantáneas con fecha fija (no un feed en vivo). El JSON semilla incluido en el repo se usa cuando Blob no está disponible.",
     "rankingModesTitle": "Modos de ranking",
-    "rankingModesBody": "El predeterminado es el 20 de julio de 2026 —el primer ranking oficial de FIFA publicado tras el final del Mundial. Sirve para ver cómo se leen los caminos una vez que los resultados del torneo ya están en el ranking.\n\nEl 19 de noviembre de 2025 es el ranking que FIFA usó para sortear el Mundial. Ese día cada selección fue asignada a un bombo antes de armar los grupos, así que esta instantánea responde qué tan fuertes parecían tus rivales sobre el papel antes de que empezara el torneo.\n\nEl 11 de junio de 2026 es la instantánea de inicio del torneo: cómo se veía la fuerza de los rivales al arrancar la fase final. También conservamos el 19 de enero y el 1 de abril de 2026 como puntos de control anteriores del ciclo."
+    "rankingModesBody": "El predeterminado es el 20 de julio de 2026 —el primer ranking oficial de FIFA publicado tras el final del Mundial. Sirve para ver cómo se leen los caminos una vez que los resultados del torneo ya están en el ranking.\n\nEl 19 de noviembre de 2025 es el ranking que FIFA usó para sortear el Mundial. Ese día cada selección fue asignada a un bombo antes de armar los grupos, así que esta instantánea responde qué tan fuertes parecían tus rivales sobre el papel antes de que empezara el torneo.\n\nEl 11 de junio de 2026 es la instantánea de inicio del torneo: cómo se veía la fuerza de los rivales al arrancar la fase final. También conservamos el 19 de enero y el 1 de abril de 2026 como puntos de control anteriores del ciclo.",
+    "contactTitle": "Contacto",
+    "contactBody": "CupPath está creado y mantenido por Carlos Francisco Rodriguez Aguilar. Comentarios, preguntas y sugerencias son bienvenidos.",
+    "contactEmailLabel": "Correo",
+    "contactRepoLabel": "Código fuente",
+    "contactRepoLink": "Ver en GitHub"
   },
   "results": {
     "W": "G",

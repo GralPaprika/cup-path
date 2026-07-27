@@ -282,6 +282,13 @@
   },
   "about": {
     "title": "About CupPath",
+    "subtitle": "Why CupPath exists, how path difficulty is measured, and how to use each page.",
+    "sectionNavLabel": "About sections",
+    "groupOrigin": "Origin",
+    "groupMethodology": "Methodology",
+    "groupFeatures": "Features",
+    "groupData": "Data",
+    "groupContact": "Contact",
     "whyTitle": "Why CupPath",
     "whyBody": "CupPath started with a dinner-table claim: that Argentina had been given an easier World Cup path to help them reach the final. The obvious follow-up was: was that really the easiest path — and how would you even tell?\n\nThe site is an answer to that question. It ranks and compares paths by the FIFA ranking points of the opponents each team faced, so you can see who drew the hard road, who had a softer bracket on paper, and how that picture looked once the tournament was complete.",
     "metricTitle": "About the metric",
@@ -317,7 +324,12 @@
     "dataTitle": "Data sources",
     "dataBody": "Match data comes from the completed openfootball/worldcup.json (2026) archive and is stored in Vercel Blob. Scores, results, and opponents are read from there. Bundled JSON in the repo is used when Blob is unavailable.\n\nFIFA rankings come from the World Football Ranking API on RapidAPI as fixed dated snapshots (not a live feed). Bundled seed JSON in the repo is used when Blob is unavailable.",
     "rankingModesTitle": "Ranking modes",
-    "rankingModesBody": "The default is 20 July 2026—the first official FIFA ranking published after the World Cup ended. Use it to see how paths look once tournament results are baked into the ranking.\n\n19 November 2025 is the ranking FIFA used to seed the World Cup draw. On that date each nation was assigned to a pot before groups were drawn, so this snapshot answers how strong your opponents looked on paper before the tournament started.\n\n11 June 2026 is the tournament-start snapshot: how opponent strength looked as the finals began. We also keep 19 January and 1 April 2026 as earlier cycle checkpoints."
+    "rankingModesBody": "The default is 20 July 2026—the first official FIFA ranking published after the World Cup ended. Use it to see how paths look once tournament results are baked into the ranking.\n\n19 November 2025 is the ranking FIFA used to seed the World Cup draw. On that date each nation was assigned to a pot before groups were drawn, so this snapshot answers how strong your opponents looked on paper before the tournament started.\n\n11 June 2026 is the tournament-start snapshot: how opponent strength looked as the finals began. We also keep 19 January and 1 April 2026 as earlier cycle checkpoints.",
+    "contactTitle": "Contact",
+    "contactBody": "CupPath is built and maintained by Carlos Francisco Rodriguez Aguilar. Feedback, questions, and suggestions are welcome.",
+    "contactEmailLabel": "Email",
+    "contactRepoLabel": "Source code",
+    "contactRepoLink": "View on GitHub"
   },
   "results": {
     "W": "W",

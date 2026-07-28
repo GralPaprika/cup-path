@@ -137,11 +137,10 @@
   --sidebar-accent-foreground: #93c5fd;
   --sidebar-border: rgba(148, 163, 184, 0.12);
   --sidebar-ring: #38bdf8;
-  --site-header-height: 3.5rem;
-  --shell-sidebar-expanded: 15rem;
+  --shell-sidebar-expanded: 17rem;
   --shell-sidebar-collapsed: 4.5rem;
   --shell-sidebar-width: 0px;
-  --shell-sticky-top: calc(var(--site-header-height) + 0.5rem);
+  --shell-sticky-top: 1rem;
 }
 
 @media (min-width: 1024px) {

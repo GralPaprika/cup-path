@@ -19,6 +19,7 @@ import {
 import { useState } from "react";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { NAV_LINKS, type NavLinkKey } from "@/components/layout/nav-links";
+import { RankingModeSwitcher } from "@/components/layout/ranking-mode-switcher";
 import { useSidebarCollapse } from "@/components/layout/sidebar-collapse-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -87,8 +88,8 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center gap-1 border-b border-white/6 p-3",
-        collapsed && "flex-col gap-2 px-2",
+        "flex shrink-0 items-center gap-1 border-b border-white/6 px-3 py-1",
+        collapsed && "flex-col gap-2 px-2 py-1.5",
       )}
     >
       <Link
@@ -110,7 +111,7 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
             alt="CupPath"
             width={225}
             height={60}
-            className="h-11 w-auto max-w-full"
+            className="h-auto max-h-14 w-auto max-w-full"
           />
         )}
       </Link>
@@ -161,10 +162,11 @@ export function AppSidebar() {
         </div>
         <div
           className={cn(
-            "shrink-0 border-t border-white/6 p-3",
+            "flex shrink-0 flex-col gap-3 border-t border-white/6 p-3",
             collapsed && "px-2",
           )}
         >
+          <RankingModeSwitcher collapsed={collapsed} />
           <LocaleSwitcher collapsed={collapsed} />
         </div>
       </aside>
@@ -213,7 +215,8 @@ export function AppSidebar() {
               <div className="scrollbar-subtle flex-1 overflow-y-auto px-3 py-3">
                 <NavItems onNavigate={() => setMobileOpen(false)} />
               </div>
-              <div className="shrink-0 border-t border-white/6 p-3">
+              <div className="flex shrink-0 flex-col gap-3 border-t border-white/6 p-3">
+                <RankingModeSwitcher />
                 <LocaleSwitcher />
               </div>
             </DialogPrimitive.Popup>

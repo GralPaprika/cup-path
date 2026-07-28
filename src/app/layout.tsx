@@ -6,7 +6,6 @@ import { Geist_Mono } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { RankingModeProvider } from "@/components/layout/ranking-mode-provider";
 import { SidebarCollapseProvider } from "@/components/layout/sidebar-collapse-provider";
-import { SiteHeader } from "@/components/layout/site-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { RANKING_MODE_COOKIE } from "@/lib/client/ranking-mode-preference";
 import { parseRankingMode } from "@/lib/data/ranking-modes";
@@ -59,9 +58,8 @@ export default async function RootLayout({
               <div className="relative flex min-h-screen">
                 <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wc-mesh-bg" />
                 <AppSidebar />
-                <div className="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding] duration-200 lg:pl-[var(--shell-sidebar-width)]">
-                  <SiteHeader />
-                  <main className="min-w-0 flex-1">{children}</main>
+                <div className="min-w-0 flex-1 transition-[padding] duration-200 max-lg:pt-12 lg:pl-[var(--shell-sidebar-width)]">
+                  <main className="min-w-0">{children}</main>
                 </div>
               </div>
             </SidebarCollapseProvider>

@@ -22,7 +22,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 const SECTION_SCROLL_MT =
-  "scroll-mt-[calc(var(--site-header-height)+1rem)]";
+  "scroll-mt-4";
 
 function availableKnockoutRoundsFromFacts(
   facts: TournamentFacts,

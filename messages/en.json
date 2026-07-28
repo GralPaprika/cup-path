@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "CupPath",
-    "tagline": "World Cup opponent difficulty analysis"
+    "tagline": "The path to the title"
   },
   "nav": {
     "teamAnalysis": "Team path",

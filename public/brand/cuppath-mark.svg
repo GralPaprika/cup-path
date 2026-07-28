@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 14 50 54" fill="none" role="img" aria-label="CupPath">
+  <!-- Extracted from gemini-svg logo-icon group -->
+  <path d="M20 18 H50 C50 35 42 45 35 48 V58 H45 V64 H25 V58 H35 V48 C28 45 20 35 20 18 Z"
+        stroke="#00C3DA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M25 36 L31 30 L37 34 L45 22"
+        stroke="#38BDF8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="45" cy="22" r="3" fill="#38BDF8"/>
+  <path d="M19 22 C14 22 13 32 19 34" stroke="#00C3DA" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M51 22 C56 22 57 32 51 34" stroke="#00C3DA" stroke-width="3" stroke-linecap="round" fill="none"/>
+</svg>

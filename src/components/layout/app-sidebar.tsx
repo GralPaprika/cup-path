@@ -16,12 +16,11 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { NAV_LINKS, type NavLinkKey } from "@/components/layout/nav-links";
+import { useSidebarCollapse } from "@/components/layout/sidebar-collapse-provider";
 import { Button } from "@/components/ui/button";
-import { usePersistedUiState } from "@/hooks/use-persisted-ui-state";
-import { SHELL_SIDEBAR_COLLAPSED_KEY } from "@/lib/client/shell-preference";
 import { cn } from "@/lib/utils";
 
 const NAV_ICONS: Record<NavLinkKey, typeof Route> = {
@@ -81,13 +80,59 @@ function NavItems({
   );
 }
 
+function SidebarBrand({ collapsed }: { collapsed: boolean }) {
+  const t = useTranslations("nav");
+  const { setCollapsed } = useSidebarCollapse();
+
+  return (
+    <div
+      className={cn(
+        "flex shrink-0 items-center gap-1 border-b border-white/6 p-3",
+        collapsed && "flex-col gap-2 px-2",
+      )}
+    >
+      <Link
+        href="/"
+        aria-label="CupPath"
+        className={cn("group min-w-0", collapsed ? "shrink-0" : "flex-1")}
+      >
+        {collapsed ? (
+          <img
+            src="/brand/cuppath-mark.svg"
+            alt="CupPath"
+            width={40}
+            height={40}
+            className="size-9"
+          />
+        ) : (
+          <img
+            src="/brand/cuppath-lockup.svg"
+            alt="CupPath"
+            width={225}
+            height={60}
+            className="h-11 w-auto max-w-full"
+          />
+        )}
+      </Link>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => setCollapsed((current) => !current)}
+        aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
+        title={collapsed ? t("expandSidebar") : t("collapseSidebar")}
+        className="shrink-0 text-muted-foreground hover:text-white"
+      >
+        {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+      </Button>
+    </div>
+  );
+}
+
 export function AppSidebar() {
   const t = useTranslations("nav");
   const app = useTranslations("app");
-  const [collapsed, setCollapsed] = usePersistedUiState(
-    SHELL_SIDEBAR_COLLAPSED_KEY,
-    false,
-  );
+  const { collapsed } = useSidebarCollapse();
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const [menuPath, setMenuPath] = useState(pathname);
@@ -99,36 +144,18 @@ export function AppSidebar() {
     }
   }
 
-  useEffect(() => {
-    document.documentElement.dataset.sidebarCollapsed = collapsed
-      ? "true"
-      : "false";
-  }, [collapsed]);
-
   return (
     <>
       <aside
         className={cn(
-          "fixed top-[var(--site-header-height,3.5rem)] bottom-0 left-0 z-40 hidden flex-col border-r border-white/8 bg-wc-navy/80 backdrop-blur-xl transition-[width] duration-200 lg:flex",
+          "fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/8 bg-wc-navy/80 backdrop-blur-xl transition-[width] duration-200 lg:flex",
           collapsed
             ? "w-[var(--shell-sidebar-collapsed)]"
             : "w-[var(--shell-sidebar-expanded)]",
         )}
         aria-label={t("primary")}
       >
-        <div className="flex h-12 items-center justify-end border-b border-white/6 px-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => setCollapsed((current) => !current)}
-            aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
-            title={collapsed ? t("expandSidebar") : t("collapseSidebar")}
-            className="text-muted-foreground hover:text-white"
-          >
-            {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
-          </Button>
-        </div>
+        <SidebarBrand collapsed={collapsed} />
         <div className="scrollbar-subtle flex-1 overflow-y-auto p-2">
           <NavItems collapsed={collapsed} />
         </div>
@@ -159,9 +186,23 @@ export function AppSidebar() {
             <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
             <DialogPrimitive.Popup className="fixed inset-y-0 left-0 z-50 flex w-[min(18rem,88vw)] flex-col border-r border-white/10 bg-wc-navy/95 shadow-2xl outline-none backdrop-blur-xl transition-transform data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full">
               <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-4">
-                <DialogPrimitive.Title className="text-base font-semibold text-white">
+                <DialogPrimitive.Title className="sr-only">
                   {app("name")}
                 </DialogPrimitive.Title>
+                <Link
+                  href="/"
+                  aria-label="CupPath"
+                  onClick={() => setMobileOpen(false)}
+                  className="min-w-0"
+                >
+                  <img
+                    src="/brand/cuppath-lockup.svg"
+                    alt="CupPath"
+                    width={225}
+                    height={60}
+                    className="h-10 w-auto"
+                  />
+                </Link>
                 <DialogPrimitive.Close
                   className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-white/8 hover:text-white"
                   aria-label={t("closeMenu")}

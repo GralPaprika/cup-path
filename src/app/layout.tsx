@@ -5,6 +5,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Geist_Mono } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { RankingModeProvider } from "@/components/layout/ranking-mode-provider";
+import { SidebarCollapseProvider } from "@/components/layout/sidebar-collapse-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { RANKING_MODE_COOKIE } from "@/lib/client/ranking-mode-preference";
@@ -54,16 +55,16 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RankingModeProvider initialMode={initialMode}>
-            <div className="relative flex min-h-screen flex-col">
-              <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wc-mesh-bg" />
-              <SiteHeader />
-              <div className="flex min-h-0 flex-1">
+            <SidebarCollapseProvider>
+              <div className="relative flex min-h-screen">
+                <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wc-mesh-bg" />
                 <AppSidebar />
-                <main className="min-w-0 flex-1 transition-[padding] duration-200 lg:pl-[var(--shell-sidebar-width)]">
-                  {children}
-                </main>
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding] duration-200 lg:pl-[var(--shell-sidebar-width)]">
+                  <SiteHeader />
+                  <main className="min-w-0 flex-1">{children}</main>
+                </div>
               </div>
-            </div>
+            </SidebarCollapseProvider>
           </RankingModeProvider>
         </NextIntlClientProvider>
       </body>

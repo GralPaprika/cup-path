@@ -246,12 +246,29 @@ function effectiveMatchWinner(
   return scenarioWinners?.[match.num] ?? match.winnerTeamId ?? null;
 }
 
+function matchFedByOutcome(
+  next: ResolvedBracketMatch,
+  matchNum: number,
+  expectedKind: "winner" | "loser",
+): boolean {
+  const fedByMatch =
+    next.home.sourceMatchNum === matchNum ||
+    next.away.sourceMatchNum === matchNum;
+  if (!fedByMatch) return false;
+
+  // Third place is the only loser destination; every other edge is winner→winner.
+  if (isThirdPlaceMatch(next.round)) {
+    return expectedKind === "loser";
+  }
+  return expectedKind === "winner";
+}
+
 /**
  * Knockout matches on the focus team's path.
- * Occupancy-based, then extended along winner→next-slot edges when the focus
- * team is the effective winner (scenario override or resolved result) so the
- * next round appears immediately after a pick — even before the bracket
- * snapshot places them in the downstream slot.
+ * Occupancy-based, then extended along winner→winner (or loser→third-place)
+ * edges when the focus team has an effective result so the next round appears
+ * immediately after a pick — even before the bracket snapshot places them in
+ * the downstream slot.
  */
 export function getFocusTeamMatchNums(
   bracket: ResolvedBracketMatch[],
@@ -273,16 +290,20 @@ export function getFocusTeamMatchNums(
     grew = false;
     for (const match of bracket) {
       if (!path.has(match.num)) continue;
-      if (!teamIdsEqual(effectiveMatchWinner(match, scenarioWinners), teamId)) {
-        continue;
-      }
+      const winnerId = effectiveMatchWinner(match, scenarioWinners);
+      if (!winnerId) continue;
 
+      const focusWon = teamIdsEqual(winnerId, teamId);
+      const focusLost =
+        !focusWon &&
+        (teamIdsEqual(match.home.teamId, teamId) ||
+          teamIdsEqual(match.away.teamId, teamId));
+      if (!focusWon && !focusLost) continue;
+
+      const expectedKind = focusWon ? "winner" : "loser";
       for (const next of bracket) {
         if (path.has(next.num)) continue;
-        if (
-          next.home.sourceMatchNum === match.num ||
-          next.away.sourceMatchNum === match.num
-        ) {
+        if (matchFedByOutcome(next, match.num, expectedKind)) {
           path.add(next.num);
           grew = true;
         }

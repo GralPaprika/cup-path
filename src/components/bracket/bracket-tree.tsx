@@ -20,6 +20,7 @@ import { useTranslations } from "next-intl";
 import { TeamFlag } from "@/components/team/team-flag";
 import {
   BRACKET_COLUMNS,
+  exclusiveCenterMatchNums,
   getBracketGridRows,
   getMatchLayout,
   getPathSliceLayouts,
@@ -839,13 +840,13 @@ function FocusedBracketSlice({
   const [grabbing, setGrabbing] = useState(false);
   const drag = useDragToScroll(viewportRef);
 
-  const visibleColumns = useMemo(
-    () => visibleColumnsForPathSlice(curatedMatchNums),
-    [curatedMatchNums],
-  );
   const visibleMatchNums = useMemo(
-    () => new Set(curatedMatchNums),
-    [curatedMatchNums],
+    () => exclusiveCenterMatchNums(curatedMatchNums, focusTeamMatchNums),
+    [curatedMatchNums, focusTeamMatchNums],
+  );
+  const visibleColumns = useMemo(
+    () => visibleColumnsForPathSlice(visibleMatchNums),
+    [visibleMatchNums],
   );
   const pathKey = pathMatchNums.join(",");
   const pendingKey = pendingWinnerMatchNums.join(",");

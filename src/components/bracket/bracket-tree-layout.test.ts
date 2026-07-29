@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   BRACKET_COLUMNS,
+  exclusiveCenterMatchNums,
   getMatchLayout,
   getPathSliceLayouts,
   visibleColumnsForCurated,
@@ -88,6 +89,35 @@ describe("visibleColumnsForPathSlice", () => {
     );
     assert.deepEqual(columns[0]?.matchNums, [77, 76]);
     assert.deepEqual(columns[1]?.matchNums, [89, 91]);
+  });
+});
+
+describe("exclusiveCenterMatchNums", () => {
+  it("hides third place when the focus path is the Final", () => {
+    assert.deepEqual(
+      [...exclusiveCenterMatchNums([101, 103, 104], [101, 104])].sort(
+        (a, b) => a - b,
+      ),
+      [101, 104],
+    );
+  });
+
+  it("hides the Final when the focus path is third place", () => {
+    assert.deepEqual(
+      [...exclusiveCenterMatchNums([101, 103, 104], [101, 103])].sort(
+        (a, b) => a - b,
+      ),
+      [101, 103],
+    );
+  });
+
+  it("hides third place when the focus path includes neither", () => {
+    assert.deepEqual(
+      [...exclusiveCenterMatchNums([101, 103, 104], [101])].sort(
+        (a, b) => a - b,
+      ),
+      [101, 104],
+    );
   });
 });
 

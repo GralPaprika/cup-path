@@ -285,11 +285,7 @@ function GroupsCarousel({
     if (!node || !showControls) return;
 
     function handleWheel(event: WheelEvent) {
-      const delta = normalizeWheelDelta(
-        event.deltaX,
-        event.deltaY,
-        event.deltaMode,
-      );
+      const delta = normalizeWheelDelta(event.deltaX, event.deltaMode);
       if (delta === 0) return;
       event.preventDefault();
 

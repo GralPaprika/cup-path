@@ -126,27 +126,25 @@ describe("getCarouselWindowLetters", () => {
 });
 
 describe("normalizeWheelDelta", () => {
-  it("picks the dominant axis", () => {
-    assert.equal(normalizeWheelDelta(80, 10, 0), 80);
-    assert.equal(normalizeWheelDelta(10, 80, 0), 80);
-    assert.equal(normalizeWheelDelta(-80, 10, 0), -80);
+  it("uses horizontal delta only", () => {
+    assert.equal(normalizeWheelDelta(80, 0), 80);
+    assert.equal(normalizeWheelDelta(10, 0), 10);
+    assert.equal(normalizeWheelDelta(-80, 0), -80);
   });
 
-  it("maps up/left to negative and down/right to positive", () => {
-    assert.ok(normalizeWheelDelta(0, -100, 0) < 0);
-    assert.ok(normalizeWheelDelta(-100, 0, 0) < 0);
-    assert.ok(normalizeWheelDelta(0, 100, 0) > 0);
-    assert.ok(normalizeWheelDelta(100, 0, 0) > 0);
+  it("ignores vertical-only wheel input", () => {
+    assert.equal(normalizeWheelDelta(0, 0), 0);
+  });
+
+  it("maps left to negative and right to positive", () => {
+    assert.ok(normalizeWheelDelta(-100, 0) < 0);
+    assert.ok(normalizeWheelDelta(100, 0) > 0);
   });
 
   it("scales line and page delta modes", () => {
-    assert.equal(normalizeWheelDelta(0, 3, 1), 48);
-    assert.equal(normalizeWheelDelta(0, 1, 2), 100);
-    assert.equal(normalizeWheelDelta(0, 50, 0), 50);
-  });
-
-  it("returns 0 when both axes are zero", () => {
-    assert.equal(normalizeWheelDelta(0, 0, 0), 0);
+    assert.equal(normalizeWheelDelta(3, 1), 48);
+    assert.equal(normalizeWheelDelta(1, 2), 100);
+    assert.equal(normalizeWheelDelta(50, 0), 50);
   });
 });
 

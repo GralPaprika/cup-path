@@ -153,16 +153,6 @@ export async function getSimulationAnalysis(
   );
   if (!simulatedSummary) return null;
 
-  const comparisonProjectedSummary = comparisonTeamId
-    ? buildProjectedTeamPathSummary(
-        ctx,
-        comparisonTeamId,
-        effectiveScenario,
-        rankings,
-        { suppressPlayedResultsMatchNums },
-      )
-    : null;
-
   const baselineGroupFinishes = getBaselineGroupFinishes(ctx);
   const activeFinishes =
     effectiveScenario.groupFinishes ?? baselineGroupFinishes;
@@ -191,11 +181,11 @@ export async function getSimulationAnalysis(
 
   // Path summaries include projected matches; use match-list stage logic rather than
   // getCompareMaxStageReached(ctx, …), which reads only recorded tournament results.
-  const pathChartMaxStage = comparisonProjectedSummary
+  const pathChartMaxStage = comparisonActualSummary
     ? getSharedMaxStage(
         getMaxStageFromMatches(actualSummary.matches),
         getMaxStageFromMatches(simulatedSummary.matches),
-        getMaxStageFromMatches(comparisonProjectedSummary.matches),
+        getMaxStageFromMatches(comparisonActualSummary.matches),
       )
     : null;
 
@@ -250,8 +240,8 @@ export async function getSimulationAnalysis(
       simulatedSummary,
       pathChartMaxStage,
     ),
-    comparisonPathChart: comparisonProjectedSummary
-      ? buildPathChartDataFromSummary(comparisonProjectedSummary, pathChartMaxStage)
+    comparisonPathChart: comparisonActualSummary
+      ? buildPathChartDataFromSummary(comparisonActualSummary, pathChartMaxStage)
       : null,
   };
 }

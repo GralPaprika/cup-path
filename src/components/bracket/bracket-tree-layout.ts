@@ -24,6 +24,28 @@ const RIGHT_SF = [102];
 const FINAL = 104;
 const THIRD_PLACE = 103;
 
+export const FINAL_MATCH_NUM = FINAL;
+export const THIRD_PLACE_MATCH_NUM = THIRD_PLACE;
+
+/**
+ * Final and third-place share the center column. Show third place only when
+ * the focus team plays it; otherwise show the Final and hide third place.
+ */
+export function exclusiveCenterMatchNums(
+  matchNums: Iterable<number>,
+  focusPathMatchNums: Iterable<number>,
+): Set<number> {
+  const focusPath = new Set(focusPathMatchNums);
+  const showThirdPlace = focusPath.has(THIRD_PLACE);
+  const result = new Set(matchNums);
+  if (showThirdPlace) {
+    result.delete(FINAL);
+  } else {
+    result.delete(THIRD_PLACE);
+  }
+  return result;
+}
+
 export interface BracketColumn {
   key: string;
   roundKey: RoundDisplayKey;

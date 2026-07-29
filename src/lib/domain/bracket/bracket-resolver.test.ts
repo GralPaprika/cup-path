@@ -9,11 +9,84 @@ import {
   getCuratedBracketMatchNums,
   getDownstreamMatchNums,
   getFocusPathFeederMatchNums,
+  getFocusTeamMatchNums,
   isKnockoutWinnerOverride,
   resolveBracket,
   sanitizeKnockoutWinners,
 } from "@/lib/domain/bracket/bracket-resolver";
 import { bundledTestContext } from "@/lib/domain/core/test-fixtures";
+
+describe("getFocusTeamMatchNums", () => {
+  it("extends a SF winner into the Final, not third place", () => {
+    const bracket = [
+      {
+        num: 101,
+        round: "Semi-final",
+        home: { teamId: "ESP", sourceMatchNum: 97, slotKind: "winner" },
+        away: { teamId: "FRA", sourceMatchNum: 98, slotKind: "winner" },
+        winnerTeamId: "ESP",
+      },
+      {
+        num: 102,
+        round: "Semi-final",
+        home: { teamId: "ARG", sourceMatchNum: 99, slotKind: "winner" },
+        away: { teamId: "ENG", sourceMatchNum: 100, slotKind: "winner" },
+        winnerTeamId: "ARG",
+      },
+      {
+        num: 103,
+        round: "Match for third place",
+        home: { teamId: null, sourceMatchNum: 101, slotKind: "loser" },
+        away: { teamId: null, sourceMatchNum: 102, slotKind: "loser" },
+        winnerTeamId: null,
+      },
+      {
+        num: 104,
+        round: "Final",
+        home: { teamId: null, sourceMatchNum: 101, slotKind: "winner" },
+        away: { teamId: null, sourceMatchNum: 102, slotKind: "winner" },
+        winnerTeamId: null,
+      },
+    ] as ResolvedBracketMatch[];
+
+    assert.deepEqual(getFocusTeamMatchNums(bracket, "ESP"), [101, 104]);
+  });
+
+  it("extends a SF loser into third place, not the Final", () => {
+    const bracket = [
+      {
+        num: 101,
+        round: "Semi-final",
+        home: { teamId: "ESP", sourceMatchNum: 97, slotKind: "winner" },
+        away: { teamId: "FRA", sourceMatchNum: 98, slotKind: "winner" },
+        winnerTeamId: "ESP",
+      },
+      {
+        num: 102,
+        round: "Semi-final",
+        home: { teamId: "ARG", sourceMatchNum: 99, slotKind: "winner" },
+        away: { teamId: "ENG", sourceMatchNum: 100, slotKind: "winner" },
+        winnerTeamId: "ARG",
+      },
+      {
+        num: 103,
+        round: "Match for third place",
+        home: { teamId: null, sourceMatchNum: 101, slotKind: "loser" },
+        away: { teamId: null, sourceMatchNum: 102, slotKind: "loser" },
+        winnerTeamId: null,
+      },
+      {
+        num: 104,
+        round: "Final",
+        home: { teamId: null, sourceMatchNum: 101, slotKind: "winner" },
+        away: { teamId: null, sourceMatchNum: 102, slotKind: "winner" },
+        winnerTeamId: null,
+      },
+    ] as ResolvedBracketMatch[];
+
+    assert.deepEqual(getFocusTeamMatchNums(bracket, "FRA"), [101, 103]);
+  });
+});
 
 describe("isKnockoutWinnerOverride", () => {
   it("is false when there is no selected winner", () => {

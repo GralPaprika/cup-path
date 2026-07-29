@@ -82,8 +82,6 @@ function PathSummaryCard({
   deltaTone,
   basis,
   accentClassName,
-  banner,
-  bannerTone,
 }: {
   title: string;
   team: Team;
@@ -94,8 +92,6 @@ function PathSummaryCard({
   deltaTone?: "positive" | "negative" | "neutral";
   basis?: string;
   accentClassName?: string;
-  banner?: string | null;
-  bannerTone?: "positive" | "negative" | "neutral";
 }) {
   const summary = useTranslations("summary");
   const teamNames = useTranslations("teams");
@@ -118,20 +114,6 @@ function PathSummaryCard({
           </p>
         </div>
       </div>
-      {banner && (
-        <p
-          className={cn(
-            "rounded-lg border px-3 py-2 text-xs font-medium sm:text-sm",
-            bannerTone === "negative"
-              ? "border-wc-orange/35 bg-wc-orange/10 text-wc-orange"
-              : bannerTone === "positive"
-                ? "border-wc-sky/35 bg-wc-sky/10 text-wc-sky"
-                : "border-white/10 bg-white/5 text-muted-foreground",
-          )}
-        >
-          {banner}
-        </p>
-      )}
       <div className="grid grid-cols-2 gap-2">
         <StatTile
           label={summary("avgDifficulty")}
@@ -329,15 +311,6 @@ export function TeamPathImpactPanel({
     simulatedChart.opponents.length > 0 ||
     (comparisonChart?.opponents.length ?? 0) > 0;
 
-  const verdict =
-    pointsDelta !== null && hasOverrides
-      ? pointsDelta > 0
-        ? t("harderBy", { gap: formatFifaPoints(Math.abs(pointsDelta)) })
-        : pointsDelta < 0
-          ? t("easierBy", { gap: formatFifaPoints(Math.abs(pointsDelta)) })
-          : t("pathUnchanged")
-      : null;
-
   return (
     <div className={cn("space-y-5", !embedded && "glass-panel p-5 sm:p-6")}>
       {!embedded && (
@@ -395,8 +368,6 @@ export function TeamPathImpactPanel({
           deltaTone={deltaToneFromPoints(pointsDelta)}
           basis={t("summaryCardSimulatedBasis")}
           accentClassName={hasOverrides ? "border-wc-orange/30" : undefined}
-          banner={verdict}
-          bannerTone={deltaToneFromPoints(pointsDelta)}
         />
         {showComparison && comparisonSummary ? (
           <PathSummaryCard

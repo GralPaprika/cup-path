@@ -97,25 +97,24 @@ export const GROUPS_CAROUSEL_SLIDING_SLOTS = 3;
 export const GROUPS_CAROUSEL_TOTAL_SLOTS = 4;
 
 /** Accumulated wheel delta needed to advance one carousel step. */
-export const CAROUSEL_WHEEL_STEP_THRESHOLD = 80;
+export const CAROUSEL_WHEEL_STEP_THRESHOLD = 240;
 /** Idle gap (ms) after which a new wheel gesture resets the accumulator. */
 export const CAROUSEL_WHEEL_IDLE_MS = 250;
 
 /**
- * Picks the dominant wheel axis and scales by `deltaMode`
+ * Scales horizontal wheel delta by `deltaMode`
  * (0 = pixels, 1 = lines ×16, 2 = pages ×100).
- * Negative = previous (up/left), positive = next (down/right).
+ * Vertical deltas are ignored so trackpad scroll does not hijack the carousel.
+ * Negative = previous (left), positive = next (right).
  */
 export function normalizeWheelDelta(
   deltaX: number,
-  deltaY: number,
   deltaMode: number,
 ): number {
-  const raw = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
-  if (raw === 0) return 0;
-  if (deltaMode === 1) return raw * 16;
-  if (deltaMode === 2) return raw * 100;
-  return raw;
+  if (deltaX === 0) return 0;
+  if (deltaMode === 1) return deltaX * 16;
+  if (deltaMode === 2) return deltaX * 100;
+  return deltaX;
 }
 
 /**

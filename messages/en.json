@@ -861,6 +861,7 @@
     "pathChartMatchLabel": "M",
     "pathChartAria": "Opponent FIFA points along actual and simulated paths for {team}",
     "pathChartAriaWithComparison": "Opponent FIFA points along actual, simulated, and comparison paths for {team}",
+    "pathChartChangedHaloFootnote": "A purple outline marks simulated opponents that differ from the actual path.",
     "pathChangeRound": "Round",
     "pathChangeActual": "Actual opponent",
     "pathChangeSimulated": "Simulated opponent",

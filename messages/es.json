@@ -861,6 +861,7 @@
     "pathChartMatchLabel": "P",
     "pathChartAria": "Puntos FIFA del rival en caminos actual y simulado de {team}",
     "pathChartAriaWithComparison": "Puntos FIFA del rival en caminos actual, simulado y de comparación de {team}",
+    "pathChartChangedHaloFootnote": "El contorno púrpura marca rivales simulados que difieren del camino real.",
     "pathChangeRound": "Fase",
     "pathChangeActual": "Rival actual",
     "pathChangeSimulated": "Rival simulado",

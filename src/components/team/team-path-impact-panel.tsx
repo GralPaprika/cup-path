@@ -538,16 +538,18 @@ export function TeamPathImpactPanel({
         />
       )}
 
-      <p className="text-xs text-muted-foreground">
-        {showComparison ? t("pathCompareFootnoteWithComparison") : t("pathCompareFootnote")}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {t("averagesIncludeScheduled")}
-      </p>
-
-      {(actualAvgPointsContext ||
-        simulatedAvgPointsContext ||
-        comparisonAvgPointsContext) && <AvgPointsContextFootnote />}
+      <div className="space-y-1.5 text-xs leading-snug text-muted-foreground">
+        {showPathChart && <p>{t("pathChartChangedHaloFootnote")}</p>}
+        <p>
+          {showComparison
+            ? t("pathCompareFootnoteWithComparison")
+            : t("pathCompareFootnote")}
+        </p>
+        <p>{t("averagesIncludeScheduled")}</p>
+        {(actualAvgPointsContext ||
+          simulatedAvgPointsContext ||
+          comparisonAvgPointsContext) && <AvgPointsContextFootnote />}
+      </div>
 
       {changedRows.length > 0 && (
         <section className="space-y-3">

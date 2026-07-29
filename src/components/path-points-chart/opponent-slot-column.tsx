@@ -38,7 +38,10 @@ export function OpponentSlotColumn({
         gap: 2,
         minWidth: OPPONENT_SLOT_MIN_WIDTH,
         borderRadius: changed ? 6 : undefined,
-        boxShadow: changed ? "inset 0 0 0 1px rgba(251, 146, 60, 0.4)" : undefined,
+        padding: changed ? "2px 3px" : undefined,
+        boxShadow: changed
+          ? "inset 0 0 0 2px color-mix(in srgb, var(--color-wc-purple) 55%, transparent)"
+          : undefined,
       }}
     >
       <TeamFlag

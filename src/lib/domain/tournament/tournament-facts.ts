@@ -25,6 +25,7 @@ import {
   getTeamMaxStageReached,
   getTeamsAtStage,
 } from "@/lib/domain/team/team-stage-logic";
+import { CLOSE_GAP_MAX_POINTS } from "@/lib/domain/match/paper-favorite";
 
 const TEAM_COUNT = 48;
 
@@ -182,7 +183,11 @@ function scanUpsetMatches(summaries: TeamPathSummary[]): {
     for (const match of summary.matches) {
       if (!match.isPlayed || match.pointsGap === null) continue;
 
-      if (match.result === "W" && match.pointsGap > 0) {
+      // Clear-gap only (> 100): close edges are slight favorites, not giant-killings / upsets.
+      if (
+        match.result === "W" &&
+        match.pointsGap > CLOSE_GAP_MAX_POINTS
+      ) {
         const total =
           (giantKillerTotals.get(summary.team.id) ?? 0) + match.pointsGap;
         giantKillerTotals.set(summary.team.id, total);
@@ -201,7 +206,10 @@ function scanUpsetMatches(summaries: TeamPathSummary[]): {
         }
       }
 
-      if (match.result === "L" && match.pointsGap < 0) {
+      if (
+        match.result === "L" &&
+        match.pointsGap < -CLOSE_GAP_MAX_POINTS
+      ) {
         if (
           !biggestFavoriteUpset ||
           match.pointsGap < biggestFavoriteUpset.pointsGap

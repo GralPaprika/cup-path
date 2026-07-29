@@ -25,3 +25,25 @@ export const CHART_COLORS = {
   /** Third-party comparison path on Simulate (another team's actual path). */
   pathComparisonTeam: "var(--color-wc-green)",
 } as const;
+
+/**
+ * Kit-inspired fills for late-round path histograms (SF/Final).
+ * Falls back to null so callers can use the default A/B palette.
+ */
+const TEAM_CHART_COLORS: Record<string, string> = {
+  ARG: "#74ACDF", // celeste
+  ENG: "#F8FAFC", // white
+  FRA: "#002654", // darker blue
+  ESP: "var(--color-wc-red)",
+};
+
+export function getTeamChartColor(teamId: string): string | null {
+  return TEAM_CHART_COLORS[teamId] ?? null;
+}
+
+/** Dashed avg-rival line: same hue, softer so it stays distinct from bars. */
+export function getTeamChartAvgColor(teamId: string): string | null {
+  const base = getTeamChartColor(teamId);
+  if (!base) return null;
+  return `color-mix(in srgb, ${base} 70%, transparent)`;
+}

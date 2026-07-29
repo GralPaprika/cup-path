@@ -10,7 +10,7 @@ interface MatchOutcomeGapBinTooltipProps {
   matchesLabel: string;
   favoriteWinLabel: string;
   drawLabel: string;
-  upsetLabel: string;
+  favoriteLostLabel: string;
 }
 
 const OUTCOME_ROWS: Array<{
@@ -48,11 +48,11 @@ function outcomeLabel(
   labels: {
     favoriteWinLabel: string;
     drawLabel: string;
-    upsetLabel: string;
+    favoriteLostLabel: string;
   },
 ) {
   if (result === "W") return labels.favoriteWinLabel;
-  if (result === "L") return labels.upsetLabel;
+  if (result === "L") return labels.favoriteLostLabel;
   return labels.drawLabel;
 }
 
@@ -62,24 +62,24 @@ export function MatchOutcomeGapBinTooltip({
   matchesLabel,
   favoriteWinLabel,
   drawLabel,
-  upsetLabel,
+  favoriteLostLabel,
 }: MatchOutcomeGapBinTooltipProps) {
-  const labels = { favoriteWinLabel, drawLabel, upsetLabel };
+  const labels = { favoriteWinLabel, drawLabel, favoriteLostLabel };
   const segments = OUTCOME_ROWS.filter((row) => bin[row.pctKey] > 0);
 
   return (
-    <div className="relative min-w-[220px] max-w-[280px] rounded-xl border border-white/15 bg-[#070b14]/95 p-3 shadow-2xl shadow-black/40 backdrop-blur-md">
-      <div className="flex items-start justify-between gap-3">
+    <div className="relative min-w-[240px] max-w-[300px] rounded-xl border border-white/15 bg-[#070b14]/95 p-3 shadow-2xl shadow-black/40 backdrop-blur-md">
+      <div className="flex items-baseline justify-between gap-3">
         <p className="font-mono text-sm font-semibold tabular-nums text-white">
           {gapRangeLabel}
         </p>
-        <p className="shrink-0 text-[11px] font-medium text-muted-foreground">
+        <p className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           {matchesLabel}
         </p>
       </div>
 
       {segments.length > 0 ? (
-        <div className="mt-3 flex h-2 overflow-hidden rounded-sm">
+        <div className="mt-3 flex h-1.5 overflow-hidden rounded-sm bg-white/5">
           {segments.map((row) => (
             <div
               key={row.result}
@@ -90,7 +90,7 @@ export function MatchOutcomeGapBinTooltip({
         </div>
       ) : null}
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-3 space-y-2 border-t border-white/8 pt-3">
         {OUTCOME_ROWS.map((row) => {
           const count = bin[row.countKey];
           const pct = Math.round(bin[row.pctKey]);
@@ -103,7 +103,7 @@ export function MatchOutcomeGapBinTooltip({
               <div className="flex min-w-0 items-center gap-2">
                 <span
                   className={cn(
-                    "inline-block h-2.5 w-5 shrink-0 rounded-sm",
+                    "inline-block h-2 w-2 shrink-0 rounded-sm",
                     row.swatchClass,
                   )}
                 />

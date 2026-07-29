@@ -41,7 +41,7 @@ export function useMatchOutcomeGapLegend(): ReactNode {
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-5 rounded-sm bg-wc-red/80" />
-          {t("upset")}
+          {t("favoriteLost")}
         </span>
         <span className="flex items-center gap-1.5 text-wc-orange">
           <span className="inline-flex h-3 w-3 items-center justify-center rounded-full border-2 border-wc-orange" />
@@ -104,7 +104,7 @@ export function useMatchOutcomeGapChartProps(
           matchesLabel={t("binTooltipMatches", { count: bin.total })}
           favoriteWinLabel={t("favoriteWin")}
           drawLabel={t("draw")}
-          upsetLabel={t("upset")}
+          favoriteLostLabel={t("favoriteLost")}
         />
       ),
       renderMatchTooltip: (entry: MatchOutcomeGapEntry) => (
@@ -114,8 +114,14 @@ export function useMatchOutcomeGapChartProps(
           favoriteWinLabel={t("favoriteWin")}
           drawLabel={t("draw")}
           upsetLabel={t("upset")}
+          slightFavoriteLostLabel={t("slightFavoriteLost")}
           gapLabel={t("tooltipGap")}
-          favoriteLabel={t("tooltipFavorite")}
+          favoriteLine={t("tooltipFavoriteLine", {
+            team: entry.favoriteTeamId ?? "",
+          })}
+          slightFavoriteLine={t("tooltipSlightFavoriteLine", {
+            team: entry.favoriteTeamId ?? "",
+          })}
           evenlyMatchedLabel={t("tooltipEvenlyMatched")}
           outlierLabel={t("outlier")}
           groupLabel={

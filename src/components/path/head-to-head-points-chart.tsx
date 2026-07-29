@@ -5,6 +5,7 @@ import type { OpponentPointsObservation } from "@/lib/domain/path/path-opponent-
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CHART_COLORS } from "@/lib/chart-colors";
+import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
 import { PATH_CHART_HEIGHT, PATH_CHART_WIDTH } from "@/components/path-points-chart/constants";
 import {
   buildPathChartScale,
@@ -18,12 +19,17 @@ import {
 } from "@/components/path-points-chart/legend-items";
 import { MatchSlotLabelGrid } from "@/components/path-points-chart/match-slot-label-grid";
 import { OpponentBar } from "@/components/path-points-chart/opponent-bar";
+import { useTranslations } from "next-intl";
 
 export interface HeadToHeadPathSeries {
   team: Pick<Team, "id" | "displayName" | "flagUrl">;
   teamPoints: number | null;
   avgOpponentPoints: number | null;
   opponents: OpponentPointsObservation[];
+  /** Optional bar / team-points line color; defaults to A/B chart palette. */
+  color?: string;
+  /** Optional avg-rivals line color; defaults to mean / comparisonAvg. */
+  avgColor?: string;
 }
 
 interface HeadToHeadPointsChartProps {
@@ -49,6 +55,12 @@ export function HeadToHeadPointsChart({
   ariaLabel,
   className = "",
 }: HeadToHeadPointsChartProps) {
+  const teamNames = useTranslations("teams");
+  const colorA = seriesA.color ?? CHART_COLORS.selectedTeam;
+  const colorB = seriesB.color ?? CHART_COLORS.comparisonTeam;
+  const avgColorA = seriesA.avgColor ?? CHART_COLORS.mean;
+  const avgColorB = seriesB.avgColor ?? CHART_COLORS.comparisonAvg;
+
   const slotCount = opponentSlotCount(seriesA.opponents, seriesB.opponents);
   const scale = buildPathChartScale(
     collectNumericValues([
@@ -67,17 +79,23 @@ export function HeadToHeadPointsChart({
   const barSeries: PathChartBarSeries[] = [
     {
       opponents: seriesA.opponents,
-      color: CHART_COLORS.selectedTeam,
+      color: colorA,
       legendLabel: seriesA.team.id,
       barTitle: (opponent) =>
-        `${seriesA.team.id} vs ${opponent.displayName}: ${formatFifaPoints(opponent.points)}`,
+        `${seriesA.team.id} vs ${getTeamDisplayName(teamNames, {
+          id: opponent.teamId,
+          displayName: opponent.displayName,
+        })}: ${formatFifaPoints(opponent.points)}`,
     },
     {
       opponents: seriesB.opponents,
-      color: CHART_COLORS.comparisonTeam,
+      color: colorB,
       legendLabel: seriesB.team.id,
       barTitle: (opponent) =>
-        `${seriesB.team.id} vs ${opponent.displayName}: ${formatFifaPoints(opponent.points)}`,
+        `${seriesB.team.id} vs ${getTeamDisplayName(teamNames, {
+          id: opponent.teamId,
+          displayName: opponent.displayName,
+        })}: ${formatFifaPoints(opponent.points)}`,
     },
   ];
   const { barWidth, getBarShift } = computeBarGeometry(scale.slotWidth, barSeries.length);
@@ -93,23 +111,23 @@ export function HeadToHeadPointsChart({
         <span className="text-sm font-semibold text-white">{title}</span>
         <span className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
           <PathChartLegendLineItem
-            color={CHART_COLORS.selectedTeam}
+            color={colorA}
             team={seriesA.team}
             label={teamPointsLegend}
           />
           <PathChartLegendLineItem
-            color={CHART_COLORS.mean}
+            color={avgColorA}
             dashed
             team={seriesA.team}
             label={avgOpponentLegend}
           />
           <PathChartLegendLineItem
-            color={CHART_COLORS.comparisonTeam}
+            color={colorB}
             team={seriesB.team}
             label={teamPointsLegend}
           />
           <PathChartLegendLineItem
-            color={CHART_COLORS.comparisonAvg}
+            color={avgColorB}
             dashed
             team={seriesB.team}
             label={avgOpponentLegend}
@@ -118,11 +136,11 @@ export function HeadToHeadPointsChart({
             <span className="inline-flex w-5 items-center -space-x-1.5" aria-hidden>
               <span
                 className="inline-block h-2.5 w-3 rounded-sm"
-                style={{ backgroundColor: CHART_COLORS.selectedTeam }}
+                style={{ backgroundColor: colorA }}
               />
               <span
                 className="inline-block h-2.5 w-3 rounded-sm"
-                style={{ backgroundColor: CHART_COLORS.comparisonTeam }}
+                style={{ backgroundColor: colorB }}
               />
             </span>
             <span className="text-[10px]">{opponentPathLegend}</span>
@@ -163,7 +181,7 @@ export function HeadToHeadPointsChart({
               x2={PATH_CHART_WIDTH - scale.margin.right}
               y1={scale.y(seriesA.teamPoints)}
               y2={scale.y(seriesA.teamPoints)}
-              stroke={CHART_COLORS.selectedTeam}
+              stroke={colorA}
               strokeWidth={1}
             />
           )}
@@ -173,7 +191,7 @@ export function HeadToHeadPointsChart({
               x2={PATH_CHART_WIDTH - scale.margin.right}
               y1={scale.y(seriesB.teamPoints)}
               y2={scale.y(seriesB.teamPoints)}
-              stroke={CHART_COLORS.comparisonTeam}
+              stroke={colorB}
               strokeWidth={1}
             />
           )}
@@ -183,7 +201,7 @@ export function HeadToHeadPointsChart({
               x2={PATH_CHART_WIDTH - scale.margin.right}
               y1={scale.y(seriesA.avgOpponentPoints)}
               y2={scale.y(seriesA.avgOpponentPoints)}
-              stroke={CHART_COLORS.mean}
+              stroke={avgColorA}
               strokeWidth={1}
               strokeDasharray="7 5"
             />
@@ -194,7 +212,7 @@ export function HeadToHeadPointsChart({
               x2={PATH_CHART_WIDTH - scale.margin.right}
               y1={scale.y(seriesB.avgOpponentPoints)}
               y2={scale.y(seriesB.avgOpponentPoints)}
-              stroke={CHART_COLORS.comparisonAvg}
+              stroke={avgColorB}
               strokeWidth={1}
               strokeDasharray="7 5"
             />
@@ -217,7 +235,10 @@ export function HeadToHeadPointsChart({
                   barBottom={scale.barBottom}
                   title={
                     series.barTitle?.(opponent) ??
-                    `${opponent.displayName}: ${formatFifaPoints(opponent.points)}`
+                    `${getTeamDisplayName(teamNames, {
+                      id: opponent.teamId,
+                      displayName: opponent.displayName,
+                    })}: ${formatFifaPoints(opponent.points)}`
                   }
                 />
               );

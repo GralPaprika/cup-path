@@ -73,6 +73,35 @@ describe("buildGroupExpectedAnalysis", () => {
     assert.equal(upset.upsetWin, true);
   });
 
+  it("does not mark close-gap underdog wins as upsets", () => {
+    const ctx = createTestContext([
+      playedGroupMatch("Mexico", "South Africa", 0, 2, {
+        round: "Matchday 1",
+        date: "2026-06-11",
+      }),
+      ...groupAMatchesComplete().slice(1),
+    ]);
+
+    const rankings = rankingsMap([
+      { id: "MEX", rank: 14, points: 1650 },
+      { id: "CZE", rank: 22, points: 1600 },
+      { id: "KOR", rank: 23, points: 1500 },
+      { id: "RSA", rank: 55, points: 1580 },
+    ]);
+    const analysis = buildGroupExpectedAnalysis(ctx, rankings);
+
+    assert.ok(analysis);
+    const close = analysis.matchLedger.find(
+      (entry) => entry.team1.id === "MEX" && entry.team2.id === "RSA",
+    );
+    assert.ok(close);
+    assert.equal(close.gapPoints, 70);
+    assert.equal(close.favoriteTeamId, "MEX");
+    assert.equal(close.expectedWinMissed, true);
+    assert.equal(close.unexpectedDefeat, false);
+    assert.equal(close.upsetWin, false);
+  });
+
   it("expects a draw when FIFA points are equal", () => {
     const ctx = createTestContext([
         playedGroupMatch("Mexico", "Czechia", 1, 1, {

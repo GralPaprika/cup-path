@@ -39,7 +39,19 @@ function getOpponent(
   return null;
 }
 
-function getTeamGoals(
+/**
+ * Goals that count toward GF/GA: ET score when the match ended in ET
+ * without pens; otherwise full-time. Penalty shoot-outs never add goals.
+ */
+export function getMatchScorePairForGoals(
+  match: OpenFootballMatch,
+): [number, number] | null {
+  if (!match.score?.ft) return null;
+  const hasPens = Boolean(match.score.p);
+  return !hasPens && match.score.et ? match.score.et : match.score.ft;
+}
+
+export function getTeamGoals(
   ctx: TournamentContext,
   match: OpenFootballMatch,
   teamId: string,
@@ -82,9 +94,8 @@ function formatScore(
 ): FormattedPathScore | null {
   if (!match.score?.ft) return null;
 
-  const hasPens = Boolean(match.score.p);
-  const pair =
-    !hasPens && match.score.et ? match.score.et : match.score.ft;
+  const pair = getMatchScorePairForGoals(match);
+  if (!pair) return null;
   const goals = getTeamGoals(ctx, match, teamId, pair);
   if (!goals) return null;
 
@@ -92,7 +103,7 @@ function formatScore(
   let scoreLabel = `${forGoals}-${againstGoals}`;
   let scorePensLabel: string | null = null;
 
-  if (hasPens && match.score.p) {
+  if (match.score.p) {
     const [homePens, awayPens] = match.score.p;
     scorePensLabel = `(${homePens}-${awayPens} pens)`;
   } else if (match.score.et) {

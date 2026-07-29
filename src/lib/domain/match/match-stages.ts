@@ -49,6 +49,20 @@ export function stagesThrough(maxStage: PathStage): Set<PathStage> {
   );
 }
 
+/** Stage immediately before `stage`, or null when `stage` is group. */
+export function previousPathStage(stage: PathStage): PathStage | null {
+  const idx = stageIndex(stage);
+  if (idx <= 0) return null;
+  return PATH_STAGES[idx - 1] ?? null;
+}
+
+/** All stages strictly before `stage` (empty for group). */
+export function stagesBefore(stage: PathStage): Set<PathStage> {
+  const previous = previousPathStage(stage);
+  if (!previous) return new Set();
+  return stagesThrough(previous);
+}
+
 export function getMatchStage(round: string): PathStage | null {
   if (round.startsWith("Matchday")) return "group";
   if (round === "Round of 32") return "r32";

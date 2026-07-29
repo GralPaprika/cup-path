@@ -9,6 +9,10 @@ import type {
 } from "@/lib/types";
 import type { TournamentContext } from "@/lib/domain/tournament/tournament-context";
 import { isMatchPlayed } from "@/lib/domain/match/match-result";
+import {
+  hasClearFavorite,
+  resolvePaperFavorite,
+} from "@/lib/domain/match/paper-favorite";
 import { computeGroupStandings, isTeamEliminatedFromGroup } from "@/lib/domain/group/group-standings";
 import { computeMean, computeNumericStats } from "@/lib/domain/group/group-stats";
 import { getGroupNames } from "@/lib/domain/path/path-builder";
@@ -170,21 +174,16 @@ function buildMatchEntry(
   const team1Actual = actualResult(homeGoals, awayGoals, true);
   const team2Actual = actualResult(homeGoals, awayGoals, false);
 
-  let pointsGap: number | null = null;
-  let favoriteTeamId: string | null = null;
-  let underdogTeamId: string | null = null;
-
-  if (homePoints !== null && awayPoints !== null) {
-    if (homePoints > awayPoints) {
-      favoriteTeamId = home.id;
-      underdogTeamId = away.id;
-      pointsGap = homePoints - awayPoints;
-    } else if (awayPoints > homePoints) {
-      favoriteTeamId = away.id;
-      underdogTeamId = home.id;
-      pointsGap = awayPoints - homePoints;
-    }
-  }
+  const paper = resolvePaperFavorite(
+    home.id,
+    away.id,
+    homePoints,
+    awayPoints,
+  );
+  const favoriteTeamId = paper.favoriteTeamId;
+  const underdogTeamId = paper.underdogTeamId;
+  const pointsGap =
+    favoriteTeamId !== null ? paper.gapPoints : null;
 
   let expectedWinLanded = false;
   let expectedWinMissed = false;
@@ -198,24 +197,18 @@ function buildMatchEntry(
       expectedWinLanded = true;
     } else {
       expectedWinMissed = true;
-      if (favoriteActual === "L") {
+      if (favoriteActual === "L" && hasClearFavorite(paper.gapPoints)) {
         unexpectedDefeat = true;
         upsetWin = true;
       }
     }
-  } else if (homePoints !== null && awayPoints !== null && homePoints === awayPoints) {
+  } else if (paper.isEqualRating) {
     if (team1Actual === "D" && team2Actual === "D") {
       expectedWinLanded = true;
     } else {
       expectedWinMissed = true;
     }
   }
-
-  const isEqualRating =
-    homePoints !== null &&
-    awayPoints !== null &&
-    homePoints === awayPoints;
-  const gapPoints = isEqualRating ? 0 : (pointsGap ?? 0);
 
   return {
     team1: home,
@@ -225,11 +218,11 @@ function buildMatchEntry(
     team1FifaPoints: homePoints,
     team2FifaPoints: awayPoints,
     pointsGap,
-    gapPoints,
+    gapPoints: paper.gapPoints,
     paperDrawNote: null,
     isDrawGapOutlier: false,
     isWinLossGapOutlier: false,
-    isEqualRating,
+    isEqualRating: paper.isEqualRating,
     favoriteTeamId,
     underdogTeamId,
     team1Expected,

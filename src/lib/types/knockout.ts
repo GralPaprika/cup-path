@@ -1,5 +1,9 @@
 import type { GroupStageDifficultyCohort } from "./group";
-import type { AvgPointsContext, Team } from "./path";
+import type {
+  AvgPointsContext,
+  OpponentPointsObservation,
+  Team,
+} from "./path";
 
 export interface KnockoutOpponentDifficultyEntry {
   team: Team;
@@ -52,6 +56,8 @@ export interface KnockoutFixtureEntry {
   scoreEt: string | null;
   scorePens: string | null;
   winnerTeamId: string;
+  favoriteTeamId: string | null;
+  isEqualRating: boolean;
   upsetWin: boolean;
   isGapOutlier: boolean;
 }
@@ -62,6 +68,27 @@ export interface KnockoutQualifierSpotlight {
   fifaPoints: number | null;
   gapPoints: number;
   opponent: Team;
+}
+
+/** Path-to-match metrics for one side of a late-round (SF/Final) fixture. */
+export interface LateKnockoutPathSide {
+  team: Team;
+  teamFifaPoints: number | null;
+  avgOpponentPoints: number | null;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDiff: number;
+  opponents: OpponentPointsObservation[];
+}
+
+/**
+ * Per-fixture spotlight for rounds with too few ties for distributional
+ * gap stats (semi-finals and the final).
+ */
+export interface LateKnockoutMatchSpotlight {
+  fixture: KnockoutFixtureEntry;
+  team1Path: LateKnockoutPathSide;
+  team2Path: LateKnockoutPathSide;
 }
 
 export interface KnockoutStageAnalysis {
@@ -82,6 +109,8 @@ export interface KnockoutStageAnalysis {
   lowestRankedQualifier: KnockoutQualifierSpotlight | null;
   fixtures: KnockoutFixtureEntry[];
   opponentDifficulty: KnockoutOpponentDifficultyStrip | null;
+  /** Populated when matchCount < 4 (SF/Final); otherwise null. */
+  lateMatchSpotlights: LateKnockoutMatchSpotlight[] | null;
 }
 
 export type KnockoutFactsRoundId = "r32" | "r16" | "qf" | "sf" | "final";

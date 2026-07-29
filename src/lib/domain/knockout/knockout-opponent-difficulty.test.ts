@@ -61,6 +61,8 @@ describe("buildKnockoutOpponentDifficultyStrip", () => {
         scoreEt: null,
         scorePens: null,
         winnerTeamId: "A",
+        favoriteTeamId: "A",
+        isEqualRating: false,
         upsetWin: false,
         isGapOutlier: false,
       },

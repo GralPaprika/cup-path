@@ -3,7 +3,9 @@ import { describe, it } from "node:test";
 import {
   clampPathStages,
   parsePathStages,
+  previousPathStage,
   serializePathStages,
+  stagesBefore,
   stagesThrough,
   syncTeamRoundToStages,
 } from "@/lib/domain/match/match-stages";
@@ -29,6 +31,20 @@ describe("match stages", () => {
 
   it("builds all stages through a round", () => {
     assert.deepEqual([...stagesThrough("qf")], ["group", "r32", "r16", "qf"]);
+  });
+
+  it("builds stages strictly before a round", () => {
+    assert.deepEqual([...stagesBefore("sf")], ["group", "r32", "r16", "qf"]);
+    assert.deepEqual([...stagesBefore("final")], [
+      "group",
+      "r32",
+      "r16",
+      "qf",
+      "sf",
+    ]);
+    assert.deepEqual([...stagesBefore("group")], []);
+    assert.equal(previousPathStage("sf"), "qf");
+    assert.equal(previousPathStage("group"), null);
   });
 
   it("keeps the selected team round aligned to selected stages", () => {

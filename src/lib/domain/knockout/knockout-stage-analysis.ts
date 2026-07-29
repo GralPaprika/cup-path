@@ -12,6 +12,7 @@ import {
 import { computeNumericStats } from "@/lib/domain/group/group-stats";
 import { buildMatchScoreBreakdown } from "@/lib/domain/match/match-score";
 import { buildKnockoutOpponentDifficultyStrip } from "@/lib/domain/knockout/knockout-opponent-difficulty";
+import { buildLateKnockoutMatchSpotlights } from "@/lib/domain/knockout/late-knockout-spotlights";
 import {
   buildParticipantPoolStats,
   findLowestRankedKnockoutQualifier,
@@ -20,14 +21,10 @@ import {
   findExtremeValue,
   isMeanPlusStdDevOutlier,
 } from "@/lib/domain/core/stats-helpers";
-
-function gapPointsForTeams(
-  team1Points: number | null,
-  team2Points: number | null,
-): number {
-  if (team1Points === null || team2Points === null) return 0;
-  return Math.abs(team1Points - team2Points);
-}
+import {
+  isClearUpsetWin,
+  resolvePaperFavorite,
+} from "@/lib/domain/match/paper-favorite";
 
 function buildKnockoutFixture(
   ctx: TournamentContext,
@@ -49,18 +46,18 @@ function buildKnockoutFixture(
 
   const team1FifaPoints = rankings.get(team1.id)?.points ?? null;
   const team2FifaPoints = rankings.get(team2.id)?.points ?? null;
-  const gapPoints = gapPointsForTeams(team1FifaPoints, team2FifaPoints);
-
-  let upsetWin = false;
-  if (
-    team1FifaPoints !== null &&
-    team2FifaPoints !== null &&
-    team1FifaPoints !== team2FifaPoints
-  ) {
-    const favoriteId =
-      team1FifaPoints > team2FifaPoints ? team1.id : team2.id;
-    upsetWin = winner.id !== favoriteId;
-  }
+  const paper = resolvePaperFavorite(
+    team1.id,
+    team2.id,
+    team1FifaPoints,
+    team2FifaPoints,
+  );
+  // Upset / Sorpresa only when the gap is clear (> 100).
+  const upsetWin = isClearUpsetWin(
+    paper.favoriteTeamId,
+    winner.id,
+    paper.gapPoints,
+  );
 
   return {
     matchNum: match.num ?? null,
@@ -69,11 +66,13 @@ function buildKnockoutFixture(
     team2,
     team1FifaPoints,
     team2FifaPoints,
-    gapPoints,
+    gapPoints: paper.gapPoints,
     scoreFt: score.ft,
     scoreEt: score.et,
     scorePens: score.pens,
     winnerTeamId: winner.id,
+    favoriteTeamId: paper.favoriteTeamId,
+    isEqualRating: paper.isEqualRating,
     upsetWin,
     isGapOutlier: false,
   };
@@ -140,5 +139,11 @@ export function buildKnockoutStageAnalysis(
     }),
     fixtures,
     opponentDifficulty: buildKnockoutOpponentDifficultyStrip(fixtures),
+    lateMatchSpotlights: buildLateKnockoutMatchSpotlights(
+      ctx,
+      roundName,
+      fixtures,
+      rankings,
+    ),
   };
 }

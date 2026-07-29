@@ -12,25 +12,21 @@ import { StatTile } from "@/components/shared/stat-tile";
 import { KnockoutStageTable } from "@/components/knockout/knockout-stage-table";
 import { KnockoutStageGapChart } from "@/components/knockout/knockout-stage-gap-chart";
 import { KnockoutStageOpponentDifficultyChart } from "@/components/knockout/knockout-stage-opponent-difficulty-chart";
+import { LateKnockoutMatchSpotlightCard } from "@/components/knockout/late-knockout-match-spotlight";
+import { LateKnockoutPathComparison } from "@/components/knockout/late-knockout-path-comparison";
 import {
   overviewCollapseKnockoutKey,
   overviewSortKnockoutKey,
 } from "@/lib/client/overview-ui-preference";
 import { formatFifaPoints } from "@/lib/format";
 import { homeFactsRoundNamespace } from "@/lib/i18n/stage-keys";
+import { MIN_TIES_FOR_DISTRIBUTIONAL_ANALYSIS } from "@/lib/domain/knockout/late-knockout-spotlights";
 import { useTranslations } from "next-intl";
 
 interface KnockoutStagePanelProps {
   round: KnockoutFactsRoundDefinition;
   analysis: KnockoutStageAnalysis;
 }
-
-/**
- * Below this many ties a mean ± SD distribution is statistically
- * meaningless (semi-finals and the final), so the gap chart is hidden
- * and the fixtures table tells the story on its own.
- */
-const MIN_TIES_FOR_GAP_CHART = 4;
 
 function AtGlanceStatTile({
   label,
@@ -59,12 +55,178 @@ function AtGlanceStatTile({
   );
 }
 
+function LateKnockoutDeepDive({
+  round,
+  analysis,
+}: {
+  round: KnockoutFactsRoundDefinition;
+  analysis: KnockoutStageAnalysis;
+}) {
+  const shared = useTranslations("home.knockoutStage");
+  const stage = useTranslations(homeFactsRoundNamespace(round.id));
+  const spotlights = analysis.lateMatchSpotlights;
+
+  if (!spotlights || spotlights.length === 0) return null;
+
+  return (
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-white">
+            {stage("lateStoryTitle")}
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {stage("lateStorySummary", {
+              count: analysis.matchCount,
+              qualified: analysis.qualifiedCount,
+            })}
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {spotlights.map((spotlight) => (
+            <LateKnockoutMatchSpotlightCard
+              key={
+                spotlight.fixture.matchNum ??
+                `${spotlight.fixture.team1.id}-${spotlight.fixture.team2.id}`
+              }
+              spotlight={spotlight}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-6 border-t border-white/8 pt-6">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {shared("latePathSectionTitle")}
+        </p>
+        {spotlights.map((spotlight) => (
+          <LateKnockoutPathComparison
+            key={`path-${
+              spotlight.fixture.matchNum ??
+              `${spotlight.fixture.team1.id}-${spotlight.fixture.team2.id}`
+            }`}
+            spotlight={spotlight}
+            chartTitle={stage("latePathChartTitle", {
+              teamA: spotlight.team1Path.team.id,
+              teamB: spotlight.team2Path.team.id,
+            })}
+            chartCaption={stage("latePathChartCaption")}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DistributionalDeepDive({
+  round,
+  analysis,
+}: {
+  round: KnockoutFactsRoundDefinition;
+  analysis: KnockoutStageAnalysis;
+}) {
+  const shared = useTranslations("home.knockoutStage");
+  const stage = useTranslations(homeFactsRoundNamespace(round.id));
+
+  return (
+    <>
+      <div className="space-y-4">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {shared("atGlanceTitle")}
+        </p>
+
+        <div>
+          <p className="mb-2 text-xs font-medium text-muted-foreground">
+            {shared("qualifiedRow")}
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <AtGlanceStatTile
+              label={shared("avgGapQualified")}
+              value={formatFifaPoints(analysis.meanGap)}
+              secondaryLabel={shared("stdGapQualified")}
+              secondaryValue={formatFifaPoints(analysis.stdDevGap)}
+              hint={shared("tieCountHint", { count: analysis.matchCount })}
+            />
+            <AtGlanceStatTile
+              label={shared("highestGapQualified")}
+              value={formatFifaPoints(analysis.maxGap)}
+              fixture={analysis.highestGapMatch}
+            />
+            <AtGlanceStatTile
+              label={shared("lowestGapQualified")}
+              value={formatFifaPoints(analysis.minGap)}
+              fixture={analysis.lowestGapMatch}
+            />
+            <AtGlanceStatTile
+              label={shared("biggestUnderdogQualified")}
+              value={formatFifaPoints(
+                analysis.biggestUnderdogWin?.gapPoints ?? null,
+              )}
+              fixture={analysis.biggestUnderdogWin}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4 border-t border-white/8 pt-6">
+        <div>
+          <h3 className="text-sm font-semibold text-white">
+            {stage("storyTitle")}
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {stage("distributionSummary", {
+              count: analysis.matchCount,
+              qualified: analysis.qualifiedCount,
+              mean: formatFifaPoints(analysis.meanGap),
+              stdDev: formatFifaPoints(analysis.stdDevGap),
+              min: formatFifaPoints(analysis.minGap),
+              max: formatFifaPoints(analysis.maxGap),
+            })}
+          </p>
+        </div>
+
+        <KnockoutStageTable
+          fixtures={analysis.fixtures}
+          sortPersistKey={overviewSortKnockoutKey(round.id)}
+        />
+
+        {analysis.matchCount >= MIN_TIES_FOR_DISTRIBUTIONAL_ANALYSIS && (
+          <KnockoutStageGapChart
+            fixtures={analysis.fixtures}
+            mean={analysis.meanGap}
+            stdDev={analysis.stdDevGap}
+            gapChartCaption={stage("gapChartCaption")}
+          />
+        )}
+      </div>
+
+      {analysis.opponentDifficulty && (
+        <div className="space-y-4 border-t border-white/8 pt-6">
+          <KnockoutStageOpponentDifficultyChart
+            strip={analysis.opponentDifficulty}
+            opponentDifficultyTitle={stage("opponentDifficultyTitle")}
+            opponentDifficultySubtitle={(count) =>
+              stage("opponentDifficultySubtitle", { count })
+            }
+            opponentDifficultyCaption={stage("opponentDifficultyCaption")}
+            opponentDifficultyFootnote={stage("opponentDifficultyFootnote")}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
 export function KnockoutStagePanel({
   round,
   analysis,
 }: KnockoutStagePanelProps) {
   const shared = useTranslations("home.knockoutStage");
   const stage = useTranslations(homeFactsRoundNamespace(round.id));
+  const useLateDeepDive =
+    analysis.lateMatchSpotlights !== null &&
+    analysis.lateMatchSpotlights.length > 0;
 
   return (
     <div className="glass-panel space-y-6 p-5 sm:p-6">
@@ -103,88 +265,10 @@ export function KnockoutStagePanel({
         contentClassName="space-y-6"
         persistKey={overviewCollapseKnockoutKey(round.id)}
       >
-        <div className="space-y-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {shared("atGlanceTitle")}
-          </p>
-
-          <div>
-            <p className="mb-2 text-xs font-medium text-muted-foreground">
-              {shared("qualifiedRow")}
-            </p>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <AtGlanceStatTile
-                label={shared("avgGapQualified")}
-                value={formatFifaPoints(analysis.meanGap)}
-                secondaryLabel={shared("stdGapQualified")}
-                secondaryValue={formatFifaPoints(analysis.stdDevGap)}
-                hint={shared("tieCountHint", { count: analysis.matchCount })}
-              />
-              <AtGlanceStatTile
-                label={shared("highestGapQualified")}
-                value={formatFifaPoints(analysis.maxGap)}
-                fixture={analysis.highestGapMatch}
-              />
-              <AtGlanceStatTile
-                label={shared("lowestGapQualified")}
-                value={formatFifaPoints(analysis.minGap)}
-                fixture={analysis.lowestGapMatch}
-              />
-              <AtGlanceStatTile
-                label={shared("biggestUnderdogQualified")}
-                value={formatFifaPoints(
-                  analysis.biggestUnderdogWin?.gapPoints ?? null,
-                )}
-                fixture={analysis.biggestUnderdogWin}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4 border-t border-white/8 pt-6">
-          <div>
-            <h3 className="text-sm font-semibold text-white">
-              {stage("storyTitle")}
-            </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {stage("distributionSummary", {
-                count: analysis.matchCount,
-                qualified: analysis.qualifiedCount,
-                mean: formatFifaPoints(analysis.meanGap),
-                stdDev: formatFifaPoints(analysis.stdDevGap),
-                min: formatFifaPoints(analysis.minGap),
-                max: formatFifaPoints(analysis.maxGap),
-              })}
-            </p>
-          </div>
-
-          <KnockoutStageTable
-            fixtures={analysis.fixtures}
-            sortPersistKey={overviewSortKnockoutKey(round.id)}
-          />
-
-          {analysis.matchCount >= MIN_TIES_FOR_GAP_CHART && (
-            <KnockoutStageGapChart
-              fixtures={analysis.fixtures}
-              mean={analysis.meanGap}
-              stdDev={analysis.stdDevGap}
-              gapChartCaption={stage("gapChartCaption")}
-            />
-          )}
-        </div>
-
-        {analysis.opponentDifficulty && (
-          <div className="space-y-4 border-t border-white/8 pt-6">
-            <KnockoutStageOpponentDifficultyChart
-              strip={analysis.opponentDifficulty}
-              opponentDifficultyTitle={stage("opponentDifficultyTitle")}
-              opponentDifficultySubtitle={(count) =>
-                stage("opponentDifficultySubtitle", { count })
-              }
-              opponentDifficultyCaption={stage("opponentDifficultyCaption")}
-              opponentDifficultyFootnote={stage("opponentDifficultyFootnote")}
-            />
-          </div>
+        {useLateDeepDive ? (
+          <LateKnockoutDeepDive round={round} analysis={analysis} />
+        ) : (
+          <DistributionalDeepDive round={round} analysis={analysis} />
         )}
       </CollapsibleSection>
     </div>

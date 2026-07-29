@@ -65,11 +65,16 @@ describe("buildKnockoutStageAnalysis", () => {
     const fixture = analysis.fixtures[0];
     assert.ok(fixture);
     assert.equal(fixture.winnerTeamId, "NED");
+    // Gap NED–MAR is 43 pts — slight favorite, not a clear upset label.
+    assert.equal(fixture.favoriteTeamId, "NED");
+    assert.equal(fixture.isEqualRating, false);
     assert.equal(fixture.upsetWin, false);
+    assert.equal(fixture.gapPoints, 43);
     assert.equal(fixture.scoreFt, "1-1");
     assert.equal(fixture.scorePens, "4-3");
     assert.equal(fixture.team1.id, "NED");
     assert.equal(fixture.team2.id, "MAR");
+    assert.equal(analysis.lateMatchSpotlights, null);
   });
 
   it("returns null when no Round of 16 matches have been played", () => {

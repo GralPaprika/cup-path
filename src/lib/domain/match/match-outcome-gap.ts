@@ -12,6 +12,7 @@ import { isMeanPlusStdDevOutlier } from "@/lib/domain/core/stats-helpers";
 import { computeNumericStats } from "@/lib/domain/group/group-stats";
 import { buildMatchScoreBreakdown } from "@/lib/domain/match/match-score";
 import { getMatchStage } from "@/lib/domain/match/match-stages";
+import { resolvePaperFavorite } from "@/lib/domain/match/paper-favorite";
 
 type MatchSideOutcome = "home_win" | "away_win" | "draw";
 
@@ -56,18 +57,6 @@ function getAnalyticsOutcome(
     return getKnockoutAnalyticsOutcome(homeGoals, awayGoals, match);
   }
   return getGroupAnalyticsOutcome(homeGoals, awayGoals);
-}
-
-function resolveFavoriteTeamId(
-  homeId: string,
-  awayId: string,
-  homePoints: number | null,
-  awayPoints: number | null,
-): string | null {
-  if (homePoints === null || awayPoints === null) return null;
-  if (homePoints > awayPoints) return homeId;
-  if (awayPoints > homePoints) return awayId;
-  return null;
 }
 
 function toFavoriteResult(
@@ -118,29 +107,19 @@ function buildMatchEntry(
   const [homeGoals, awayGoals] = match.score.ft;
   const outcome = getAnalyticsOutcome(match, homeGoals, awayGoals);
 
-  const isEqualRating =
-    homePoints !== null &&
-    awayPoints !== null &&
-    homePoints === awayPoints;
-
-  const favoriteTeamId = resolveFavoriteTeamId(
+  const paper = resolvePaperFavorite(
     home.id,
     away.id,
     homePoints,
     awayPoints,
   );
 
-  if (outcome !== "draw" && !favoriteTeamId) return null;
+  if (outcome !== "draw" && !paper.favoriteTeamId) return null;
 
   const favoriteResult =
     outcome === "draw"
       ? "D"
-      : toFavoriteResult(outcome, favoriteTeamId!, home.id);
-  const gapPoints = isEqualRating
-    ? 0
-    : homePoints !== null && awayPoints !== null
-      ? Math.abs(homePoints - awayPoints)
-      : 0;
+      : toFavoriteResult(outcome, paper.favoriteTeamId!, home.id);
 
   return {
     id: `${match.num ?? match.round}-${home.id}-${away.id}`,
@@ -152,10 +131,10 @@ function buildMatchEntry(
     team2: away,
     team1FifaPoints: homePoints,
     team2FifaPoints: awayPoints,
-    gapPoints,
-    favoriteTeamId,
+    gapPoints: paper.gapPoints,
+    favoriteTeamId: paper.favoriteTeamId,
     favoriteResult,
-    isEqualRating,
+    isEqualRating: paper.isEqualRating,
     scoreLabel: formatScoreLabel(match),
     isOutlier: false,
     outlierKind: null,

@@ -46,8 +46,14 @@ export function useGroupGapMatchTooltip(
           favoriteWinLabel={outcome("favoriteWin")}
           drawLabel={outcome("draw")}
           upsetLabel={outcome("upset")}
+          slightFavoriteLostLabel={outcome("slightFavoriteLost")}
           gapLabel={outcome("tooltipGap")}
-          favoriteLabel={outcome("tooltipFavorite")}
+          favoriteLine={outcome("tooltipFavoriteLine", {
+            team: entry.favoriteTeamId ?? "",
+          })}
+          slightFavoriteLine={outcome("tooltipSlightFavoriteLine", {
+            team: entry.favoriteTeamId ?? "",
+          })}
           evenlyMatchedLabel={outcome("tooltipEvenlyMatched")}
           outlierLabel={outcome("outlier")}
         />

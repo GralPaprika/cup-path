@@ -5,10 +5,7 @@ import {
   HeadToHeadPointsChart,
   type HeadToHeadPathSeries,
 } from "@/components/path/head-to-head-points-chart";
-import {
-  getTeamChartAvgColor,
-  getTeamChartColor,
-} from "@/lib/chart-colors";
+import { resolveHeadToHeadKitColors } from "@/lib/chart-colors";
 import { formatFifaPoints } from "@/lib/format";
 import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
 import { useTranslations } from "next-intl";
@@ -21,17 +18,22 @@ interface LateKnockoutPathComparisonProps {
 
 function toSeries(
   side: LateKnockoutMatchSpotlight["team1Path"],
+  colors: {
+    color: string;
+    avgColor: string;
+    accent?: string;
+    outline?: string | null;
+  },
 ): HeadToHeadPathSeries {
-  const color = getTeamChartColor(side.team.id) ?? undefined;
-  const avgColor = getTeamChartAvgColor(side.team.id) ?? undefined;
-
   return {
     team: side.team,
     teamPoints: side.teamFifaPoints,
     avgOpponentPoints: side.avgOpponentPoints,
     opponents: side.opponents,
-    color,
-    avgColor,
+    color: colors.color,
+    avgColor: colors.avgColor,
+    accent: colors.accent,
+    outline: colors.outline,
   };
 }
 
@@ -42,8 +44,22 @@ export function LateKnockoutPathComparison({
 }: LateKnockoutPathComparisonProps) {
   const shared = useTranslations("home.knockoutStage");
   const teamNames = useTranslations("teams");
-  const seriesA = toSeries(spotlight.team1Path);
-  const seriesB = toSeries(spotlight.team2Path);
+  const kit = resolveHeadToHeadKitColors(
+    spotlight.team1Path.team.id,
+    spotlight.team2Path.team.id,
+  );
+  const seriesA = toSeries(spotlight.team1Path, {
+    color: kit.colorA,
+    avgColor: kit.avgColorA,
+    accent: kit.accentA,
+    outline: kit.outlineA,
+  });
+  const seriesB = toSeries(spotlight.team2Path, {
+    color: kit.colorB,
+    avgColor: kit.avgColorB,
+    accent: kit.accentB,
+    outline: kit.outlineB,
+  });
 
   if (seriesA.opponents.length === 0 && seriesB.opponents.length === 0) {
     return null;

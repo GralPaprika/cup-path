@@ -1,11 +1,7 @@
 "use client";
 
 import type { PathStage } from "@/lib/types";
-import {
-  isStageWithinReach,
-  PATH_STAGES,
-  stageIndex,
-} from "@/lib/domain/match/match-stages";
+import { PATH_STAGES } from "@/lib/domain/match/match-stages";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +9,6 @@ interface TeamRoundSelectorProps {
   value: PathStage;
   onChange: (stage: PathStage) => void;
   teamCount?: number;
-  minStage?: PathStage;
 }
 
 const SHORT_LABEL_KEYS: Record<PathStage, string> = {
@@ -29,7 +24,6 @@ export function TeamRoundSelector({
   value,
   onChange,
   teamCount,
-  minStage = "group",
 }: TeamRoundSelectorProps) {
   const t = useTranslations("compare.teamRound");
 
@@ -50,27 +44,19 @@ export function TeamRoundSelector({
       </div>
 
       <div className="relative flex rounded-xl border border-white/10 bg-white/5 p-1">
-        {PATH_STAGES.map((stage, index) => {
+        {PATH_STAGES.map((stage) => {
           const active = value === stage;
-          const isPast = stageIndex(value) >= index;
-          const disabled = !isStageWithinReach(stage, minStage);
 
           return (
             <button
               key={stage}
               type="button"
-              disabled={disabled}
               onClick={() => onChange(stage)}
               className={cn(
-                "relative z-10 flex-1 rounded-lg px-1.5 py-2.5 text-center text-[11px] font-semibold transition-all sm:px-2 sm:text-xs",
-                disabled &&
-                  "cursor-not-allowed text-muted-foreground/40 opacity-50",
-                !disabled &&
-                  (active
-                    ? "bg-wc-sky/20 text-wc-sky shadow-sm ring-1 ring-wc-sky/30"
-                    : isPast
-                      ? "text-white/70 hover:bg-white/6"
-                      : "text-muted-foreground hover:bg-white/6"),
+                "relative z-10 flex flex-1 flex-col items-center gap-0.5 rounded-lg px-1.5 py-2 text-center text-[11px] font-semibold transition-all sm:px-2 sm:text-xs",
+                active
+                  ? "bg-wc-sky/20 text-wc-sky shadow-sm ring-1 ring-wc-sky/30"
+                  : "text-muted-foreground hover:bg-white/6 hover:text-white/80",
               )}
             >
               {t(SHORT_LABEL_KEYS[stage])}

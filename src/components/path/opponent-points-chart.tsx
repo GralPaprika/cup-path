@@ -5,7 +5,11 @@ import type { NumericStats, Team } from "@/lib/types";
 import type { OpponentPointsObservation } from "@/lib/domain/path/path-opponent-stats";
 import { FifaPointsBarChart } from "@/components/path/fifa-points-bar-chart";
 import { formatFifaPoints } from "@/lib/format";
-import { CHART_COLORS } from "@/lib/chart-colors";
+import {
+  CHART_COLORS,
+  getTeamKitColor,
+  styleFromFill,
+} from "@/lib/chart-colors";
 
 interface OpponentPointsChartProps {
   observations: OpponentPointsObservation[];
@@ -28,6 +32,9 @@ export function OpponentPointsChart({
 
   const lowerDeviation = Math.max(0, stats.mean - stats.stdDev);
   const upperDeviation = stats.mean + stats.stdDev;
+  const home =
+    getTeamKitColor(selectedTeam.id, "home") ?? CHART_COLORS.selectedTeam;
+  const kit = styleFromFill(selectedTeam.id, home);
 
   return (
     <FifaPointsBarChart
@@ -48,6 +55,10 @@ export function OpponentPointsChart({
       })}
       selectedTeam={selectedTeam}
       selectedTeamPoints={selectedTeamPoints}
+      selectedTeamFill={kit.fill}
+      selectedTeamAccent={kit.accent}
+      selectedTeamOutline={kit.outline}
+      useSelectedKitForBars
       barColor={CHART_COLORS.opponentBar}
       selectedTeamLegend={
         selectedTeamPoints !== null

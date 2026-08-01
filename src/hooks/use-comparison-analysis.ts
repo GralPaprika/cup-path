@@ -3,13 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ComparisonEntry, PathStage } from "@/lib/types";
 import {
-  clampPathStages,
-  getFurthestStage,
-  isStageWithinReach,
   parseTeamRound,
   serializePathStages,
-  stagesThrough,
-  syncTeamRoundToStages,
+  stagesAlignedToTeamRound,
+  stagesForTeamRoundChange,
+  visibleCountStages,
 } from "@/lib/domain/match/match-stages";
 import { useRankingMode } from "@/components/layout/ranking-mode-provider";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -44,7 +42,9 @@ export function useComparisonAnalysis() {
     if (!stagesHydrated) return;
     // Hydrate team round once after stage preferences load from localStorage.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- preference hydration
-    setTeamRound(syncTeamRoundToStages(readInitialTeamRound("compare"), stages));
+    const hydratedRound = readInitialTeamRound("compare");
+    setTeamRound(hydratedRound);
+    setStages((current) => stagesAlignedToTeamRound(hydratedRound, current));
     setFiltersHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stagesHydrated]);
@@ -90,64 +90,24 @@ export function useComparisonAnalysis() {
   useEffect(() => {
     if (!rawComparison) return;
 
-    if (
-      rawComparison.maxStageReached &&
-      [...stages].some(
-        (stage) => !isStageWithinReach(stage, rawComparison.maxStageReached!),
-      )
-    ) {
-      setStages(clampPathStages(stages, rawComparison.maxStageReached));
-      return;
-    }
-
-    const syncedTeamRound = syncTeamRoundToStages(
-      rawComparison.teamRound,
-      stages,
-    );
-    if (syncedTeamRound !== teamRound || rawComparison.teamRound !== syncedTeamRound) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync round to response/stages
-      setTeamRound(syncedTeamRound);
-      return;
-    }
-
     setEntries(rawComparison.comparison);
     setTeamCounts(rawComparison.teamCounts);
     setCohortStage(rawComparison.cohortStage);
     setCohortSize(rawComparison.cohortSize);
     setMaxStageReached(rawComparison.maxStageReached);
-  }, [rawComparison, stages, teamRound, setStages]);
+  }, [rawComparison]);
 
   function handleStagesChange(next: Set<PathStage>) {
     setStages(next);
-    setTeamRound((current) => {
-      const resolved = syncTeamRoundToStages(current, next);
-      writeTeamRoundPreference("compare", resolved);
-      return resolved;
-    });
   }
 
   function handleTeamRoundChange(next: PathStage) {
-    setTeamRound((current) => {
-      const resolved = syncTeamRoundToStages(next, stages);
-      if (resolved === current) return current;
-      writeTeamRoundPreference("compare", resolved);
-      return resolved;
-    });
+    setStages((currentStages) =>
+      stagesForTeamRoundChange(teamRound, next, currentStages),
+    );
+    setTeamRound(next);
+    writeTeamRoundPreference("compare", next);
   }
-
-  const minTeamRound = getFurthestStage(stages);
-
-  useEffect(() => {
-    if (!bothTeamsSelected || !maxStageReached) return;
-    const sharedStages = stagesThrough(maxStageReached);
-    setStages(sharedStages);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- align round to shared path
-    setTeamRound((current) => {
-      const resolved = syncTeamRoundToStages(current, sharedStages);
-      writeTeamRoundPreference("compare", resolved);
-      return resolved;
-    });
-  }, [bothTeamsSelected, maxStageReached, setStages]);
 
   return {
     mode,
@@ -159,7 +119,7 @@ export function useComparisonAnalysis() {
     handleStagesChange,
     teamRound,
     handleTeamRoundChange,
-    minTeamRound,
+    visibleCountStages: visibleCountStages(teamRound),
     teamList,
     entries,
     teamCounts,

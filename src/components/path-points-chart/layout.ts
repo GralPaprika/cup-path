@@ -94,6 +94,8 @@ export function collectNumericValues(
 export interface PathChartBarSeries {
   opponents: OpponentPointsObservation[];
   color: string;
+  /** Opposite-kit outline for black / dark-blue fills. */
+  outline?: string | null;
   legendLabel: string;
   barTitle?: (opponent: OpponentPointsObservation) => string;
 }

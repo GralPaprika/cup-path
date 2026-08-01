@@ -18,6 +18,8 @@ interface PathStageFiltersProps {
   onChange: (stages: Set<PathStage>) => void;
   labelKey?: "label" | "includeLabel";
   maxStageReached?: PathStage;
+  /** When set, only these stages are shown (compare Show-teams coupling). Empty hides the control. */
+  visibleStages?: PathStage[];
   variant?: "chips" | "picker" | "toggles";
   compact?: boolean;
   align?: "start" | "end";
@@ -39,6 +41,7 @@ export function PathStageFilters({
   onChange,
   labelKey = "includeLabel",
   maxStageReached,
+  visibleStages,
   variant = "chips",
   compact = false,
   align = "start",
@@ -47,12 +50,22 @@ export function PathStageFilters({
 }: PathStageFiltersProps) {
   const t = useTranslations("compare.stages");
 
-  const enabledStages = maxStageReached
-    ? PATH_STAGES.filter((stage) => isStageWithinReach(stage, maxStageReached))
-    : PATH_STAGES;
+  if (visibleStages && visibleStages.length === 0) {
+    return null;
+  }
+
+  const enabledStages =
+    visibleStages ??
+    (maxStageReached
+      ? PATH_STAGES.filter((stage) => isStageWithinReach(stage, maxStageReached))
+      : PATH_STAGES);
+
+  function isStageEnabled(stage: PathStage) {
+    return enabledStages.includes(stage);
+  }
 
   function toggleStage(stage: PathStage) {
-    if (maxStageReached && !isStageWithinReach(stage, maxStageReached)) return;
+    if (!isStageEnabled(stage)) return;
 
     const next = new Set(value);
     if (next.has(stage)) {
@@ -108,29 +121,22 @@ export function PathStageFilters({
       <div className="space-y-3">
         {header}
         <PickerList>
-          {PATH_STAGES.map((stage) => {
+          {enabledStages.map((stage) => {
             const checked = value.has(stage);
-            const disabled =
-              maxStageReached !== undefined &&
-              !isStageWithinReach(stage, maxStageReached);
 
             return (
               <PickerItem
                 key={stage}
                 active={checked}
-                disabled={disabled}
                 onClick={() => toggleStage(stage)}
-                className={cn(checked && !disabled && "text-white")}
+                className={cn(checked && "text-white")}
               >
                 <span
                   className={cn(
                     "flex size-4 shrink-0 items-center justify-center rounded border",
-                    disabled && "border-white/10 bg-transparent",
-                    !disabled &&
-                      checked &&
+                    checked &&
                       "border-wc-green/50 bg-wc-green/20 text-wc-green",
-                    !disabled &&
-                      !checked &&
+                    !checked &&
                       "border-white/20 bg-white/5 text-transparent",
                   )}
                 >
@@ -159,52 +165,40 @@ export function PathStageFilters({
         <div
           className={cn(
             "flex flex-wrap",
-            compact ? "gap-1" : "gap-1.5",
+            compact ? "gap-1.5" : "gap-2",
             align === "end" && "justify-end",
           )}
         >
-          {PATH_STAGES.map((stage) => {
+          {enabledStages.map((stage) => {
             const checked = value.has(stage);
-            const disabled =
-              maxStageReached !== undefined &&
-              !isStageWithinReach(stage, maxStageReached);
 
             return (
-              <div
+              <label
                 key={stage}
                 title={t(COMPARE_STAGE_I18N_KEYS[stage])}
                 className={cn(
-                  "inline-flex items-center transition-colors",
-                  compact
-                    ? "gap-1 rounded-full border px-1.5 py-0.5"
-                    : "gap-1.5 rounded-md border px-2 py-1",
-                  disabled
-                    ? "border-white/5 bg-white/[0.02] text-muted-foreground/40"
-                    : checked
-                      ? "border-wc-sky/30 bg-wc-sky/15 text-wc-sky"
-                      : "border-white/10 bg-white/5 text-muted-foreground",
+                  "inline-flex cursor-pointer items-center gap-2 rounded-full border transition-colors",
+                  compact ? "px-2 py-1" : "px-2.5 py-1.5",
+                  checked
+                    ? "border-wc-sky/40 bg-wc-sky/10 text-wc-sky"
+                    : "border-white/10 bg-white/5 text-muted-foreground hover:border-white/15 hover:bg-white/8",
                 )}
               >
-                <label
-                  htmlFor={`stage-toggle-${stage}`}
+                <span
                   className={cn(
-                    "cursor-pointer font-semibold tracking-wide",
+                    "font-semibold tracking-wide",
                     compact ? "text-[10px]" : "text-[11px]",
-                    disabled && "cursor-not-allowed",
-                    checked && !disabled && "text-wc-sky",
                   )}
                 >
                   {t(STAGE_SHORT_LABEL_KEYS[stage])}
-                </label>
+                </span>
                 <Switch
-                  id={`stage-toggle-${stage}`}
                   checked={checked}
-                  disabled={disabled}
+                  onChange={() => toggleStage(stage)}
                   size="sm"
                   accent="sky"
-                  onChange={() => toggleStage(stage)}
                 />
-              </div>
+              </label>
             );
           })}
         </div>
@@ -216,32 +210,24 @@ export function PathStageFilters({
     <div className="space-y-3">
       {header}
       <div className="flex flex-wrap gap-2">
-        {PATH_STAGES.map((stage) => {
+        {enabledStages.map((stage) => {
           const checked = value.has(stage);
-          const disabled =
-            maxStageReached !== undefined &&
-            !isStageWithinReach(stage, maxStageReached);
 
           return (
             <label
               key={stage}
               className={cn(
-                "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
-                disabled
-                  ? "cursor-not-allowed border-white/5 bg-white/[0.02] text-muted-foreground/40"
-                  : "cursor-pointer",
-                !disabled &&
-                  (checked
-                    ? "border-wc-green/30 bg-wc-green/10 text-wc-green"
-                    : "border-white/10 bg-white/5 text-muted-foreground hover:border-white/15 hover:bg-white/8"),
+                "inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
+                checked
+                  ? "border-wc-green/30 bg-wc-green/10 text-wc-green"
+                  : "border-white/10 bg-white/5 text-muted-foreground hover:border-white/15 hover:bg-white/8",
               )}
             >
               <input
                 type="checkbox"
                 checked={checked}
-                disabled={disabled}
                 onChange={() => toggleStage(stage)}
-                className="size-4 rounded border-white/20 bg-white/5 text-wc-green focus:ring-wc-green/40 disabled:cursor-not-allowed disabled:opacity-50"
+                className="size-4 rounded border-white/20 bg-white/5 text-wc-green focus:ring-wc-green/40"
               />
               {t(COMPARE_STAGE_I18N_KEYS[stage])}
             </label>

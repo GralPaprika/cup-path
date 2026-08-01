@@ -21,13 +21,12 @@ export function ComparePageClient() {
     handleStagesChange,
     teamRound,
     handleTeamRoundChange,
-    minTeamRound,
+    visibleCountStages,
     teamList,
     entries,
     teamCounts,
     cohortStage,
     cohortSize,
-    maxStageReached,
     loading,
     error,
   } = useComparisonAnalysis();
@@ -52,14 +51,13 @@ export function ComparePageClient() {
               value={teamRound}
               onChange={handleTeamRoundChange}
               teamCount={teamCounts?.[teamRound]}
-              minStage={minTeamRound}
             />
           </section>
           <section>
             <PathStageFilters
               value={stages}
               onChange={handleStagesChange}
-              maxStageReached={maxStageReached}
+              visibleStages={visibleCountStages}
               variant="toggles"
             />
           </section>

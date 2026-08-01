@@ -17,7 +17,15 @@ import {
 } from "@/components/path/head-to-head-points-chart";
 import { serializePathStages } from "@/components/path/path-stage-filters";
 import { Badge } from "@/components/ui/badge";
+import {
+  ACTIVE_BADGE_STYLE,
+  ELIMINATED_BADGE_STYLE,
+  PODIUM_BADGE_STYLES,
+  PODIUM_LABEL_KEYS,
+} from "@/components/shared/path-outcome-styles";
+import { resolveHeadToHeadKitColors } from "@/lib/chart-colors";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
+import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
 import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
 import { cn } from "@/lib/utils";
 
@@ -34,12 +42,24 @@ interface TeamHeadToHeadPanelProps {
   stages: Set<PathStage>;
 }
 
-function buildPathSeries(analysis: TeamAnalysisResult): HeadToHeadPathSeries {
+function buildPathSeries(
+  analysis: TeamAnalysisResult,
+  colors?: {
+    color: string;
+    avgColor: string;
+    accent?: string;
+    outline?: string | null;
+  },
+): HeadToHeadPathSeries {
   return {
     team: analysis.summary.team,
     teamPoints: analysis.summary.teamPoints,
     avgOpponentPoints: analysis.summary.avgOpponentPoints,
     opponents: analysis.advanced.pathStats.opponentPointsObservations,
+    color: colors?.color,
+    avgColor: colors?.avgColor,
+    accent: colors?.accent,
+    outline: colors?.outline,
   };
 }
 
@@ -65,6 +85,34 @@ function formatRankDelta(a: number | null, b: number | null): string | null {
   if (delta === 0) return "0";
   const sign = delta > 0 ? "+" : "-";
   return `${sign}${formatStatValue(Math.abs(delta), 1)}`;
+}
+
+function FurthestRoundBadge({
+  entry,
+  stageLabels,
+  summaryLabels,
+}: {
+  entry: ComparisonEntry;
+  stageLabels: ReturnType<typeof useTranslations<"compare.stages">>;
+  summaryLabels: ReturnType<typeof useTranslations<"summary">>;
+}) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "min-w-[5.5rem] justify-center",
+        entry.podiumFinish
+          ? PODIUM_BADGE_STYLES[entry.podiumFinish]
+          : entry.isEliminated
+            ? ELIMINATED_BADGE_STYLE
+            : ACTIVE_BADGE_STYLE,
+      )}
+    >
+      {entry.podiumFinish
+        ? summaryLabels(PODIUM_LABEL_KEYS[entry.podiumFinish])
+        : stageLabels(COMPARE_STAGE_I18N_KEYS[entry.maxStageReached])}
+    </Badge>
+  );
 }
 
 function StatRow({
@@ -131,6 +179,7 @@ export function TeamHeadToHeadPanel({
   const t = useTranslations("compare.headToHead");
   const summary = useTranslations("summary");
   const stageLabels = useTranslations("compare.stages");
+  const teamNames = useTranslations("teams");
   const [analysisA, setAnalysisA] = useState<TeamAnalysisResult | null>(null);
   const [analysisB, setAnalysisB] = useState<TeamAnalysisResult | null>(null);
   const [chartLoading, setChartLoading] = useState(false);
@@ -203,6 +252,9 @@ export function TeamHeadToHeadPanel({
           ? entryB.team
           : null
       : null;
+  /** Frame the summary from Team A (URL `team=`) so it always names the selected side. */
+  const teamAPathIsHarder =
+    Boolean(harderTeam && entryA && harderTeam.id === entryA.team.id);
 
   const pointsGap =
     entryA?.avgOpponentPoints !== null &&
@@ -210,6 +262,11 @@ export function TeamHeadToHeadPanel({
     entryA &&
     entryB
       ? Math.abs(entryA.avgOpponentPoints - entryB.avgOpponentPoints)
+      : null;
+
+  const kitColors =
+    showComparison && teamAId && teamBId
+      ? resolveHeadToHeadKitColors(teamAId, teamBId)
       : null;
 
   return (
@@ -309,36 +366,20 @@ export function TeamHeadToHeadPanel({
             }
           />
           <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)] items-center gap-3 px-4 py-3">
-            <p className="text-sm text-muted-foreground">{t("status")}</p>
+            <p className="text-sm text-muted-foreground">{t("furthestRound")}</p>
             <div className="flex justify-end">
-              <Badge
-                variant="outline"
-                className={cn(
-                  "min-w-[5.5rem] justify-center",
-                  entryA.isEliminated
-                    ? "border-wc-red/30 bg-wc-red/20 text-wc-red"
-                    : "border-wc-green/30 bg-wc-green/20 text-wc-green",
-                )}
-              >
-                {entryA.isEliminated
-                  ? summary("eliminated")
-                  : summary("active")}
-              </Badge>
+              <FurthestRoundBadge
+                entry={entryA}
+                stageLabels={stageLabels}
+                summaryLabels={summary}
+              />
             </div>
             <div className="flex justify-end">
-              <Badge
-                variant="outline"
-                className={cn(
-                  "min-w-[5.5rem] justify-center",
-                  entryB.isEliminated
-                    ? "border-wc-red/30 bg-wc-red/20 text-wc-red"
-                    : "border-wc-green/30 bg-wc-green/20 text-wc-green",
-                )}
-              >
-                {entryB.isEliminated
-                  ? summary("eliminated")
-                  : summary("active")}
-              </Badge>
+              <FurthestRoundBadge
+                entry={entryB}
+                stageLabels={stageLabels}
+                summaryLabels={summary}
+              />
             </div>
             <span />
           </div>
@@ -355,11 +396,22 @@ export function TeamHeadToHeadPanel({
         !chartLoading &&
         analysisA &&
         analysisB &&
+        kitColors &&
         (analysisA.advanced.pathStats.opponentPointsObservations.length > 0 ||
           analysisB.advanced.pathStats.opponentPointsObservations.length > 0) && (
           <HeadToHeadPointsChart
-            seriesA={buildPathSeries(analysisA)}
-            seriesB={buildPathSeries(analysisB)}
+            seriesA={buildPathSeries(analysisA, {
+              color: kitColors.colorA,
+              avgColor: kitColors.avgColorA,
+              accent: kitColors.accentA,
+              outline: kitColors.outlineA,
+            })}
+            seriesB={buildPathSeries(analysisB, {
+              color: kitColors.colorB,
+              avgColor: kitColors.avgColorB,
+              accent: kitColors.accentB,
+              outline: kitColors.outlineB,
+            })}
             title={t("chartTitle")}
             teamPointsLegend={t("teamPointsLegend")}
             avgOpponentLegend={t("avgOpponentLegend")}
@@ -372,10 +424,14 @@ export function TeamHeadToHeadPanel({
           />
         )}
 
-      {showComparison && harderTeam && pointsGap !== null && pointsGap > 0 && (
+      {showComparison &&
+        harderTeam &&
+        entryA &&
+        pointsGap !== null &&
+        pointsGap > 0 && (
         <p className="text-sm text-muted-foreground">
-          {t("harderPathSummary", {
-            team: harderTeam.displayName,
+          {t(teamAPathIsHarder ? "harderPathSummary" : "easierPathSummary", {
+            team: getTeamDisplayName(teamNames, entryA.team),
             gap: formatFifaPoints(pointsGap),
           })}
         </p>

@@ -114,8 +114,57 @@ export function syncTeamRoundToStages(
   stages: Set<PathStage>,
 ): PathStage {
   const furthest = getFurthestStage(stages);
-  if (stageIndex(teamRound) > stageIndex(furthest)) {
-    return furthest;
-  }
+  // Show-teams filter must be at least the furthest stage included in averages,
+  // but may go further (e.g. Final when averages only run through SF).
   return ensureTeamRoundAtLeast(teamRound, furthest);
+}
+
+/** Stages shown in COUNT MATCHES FROM for a SHOW TEAMS selection. Empty when All. */
+export function visibleCountStages(teamRound: PathStage): PathStage[] {
+  if (teamRound === "group") return [];
+  return PATH_STAGES.filter((stage) => isStageWithinReach(stage, teamRound));
+}
+
+/**
+ * Next average-stage set when SHOW TEAMS changes.
+ * All → every stage (UI hidden). Otherwise: keep still-visible toggles,
+ * turn newly visible stages on, drop out-of-range stages.
+ */
+export function stagesForTeamRoundChange(
+  prevRound: PathStage,
+  nextRound: PathStage,
+  currentStages: Set<PathStage>,
+): Set<PathStage> {
+  if (nextRound === "group") {
+    return new Set(PATH_STAGES);
+  }
+
+  const visible = stagesThrough(nextRound);
+  if (prevRound === "group") {
+    return visible;
+  }
+
+  const prevVisible = stagesThrough(prevRound);
+  const next = new Set<PathStage>();
+  for (const stage of visible) {
+    if (currentStages.has(stage) || !prevVisible.has(stage)) {
+      next.add(stage);
+    }
+  }
+  return next.size > 0 ? next : visible;
+}
+
+/** Align persisted stages to a hydrated SHOW TEAMS selection. */
+export function stagesAlignedToTeamRound(
+  teamRound: PathStage,
+  currentStages: Set<PathStage>,
+): Set<PathStage> {
+  if (teamRound === "group") {
+    return new Set(PATH_STAGES);
+  }
+  const visible = stagesThrough(teamRound);
+  const clamped = new Set(
+    [...currentStages].filter((stage) => visible.has(stage)),
+  );
+  return clamped.size > 0 ? clamped : visible;
 }

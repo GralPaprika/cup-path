@@ -105,7 +105,7 @@ describe("comparison API handler", () => {
     assert.deepEqual(await response.json(), { error: "Invalid JSON body" });
   });
 
-  it("normalizes teams and constrains the round to selected stages", async () => {
+  it("normalizes teams and accepts team round independently of average stages", async () => {
     let received:
       | {
           mode: RankingMode;
@@ -142,16 +142,33 @@ describe("comparison API handler", () => {
       mode: "june11",
       selectedTeamId: "ALG",
       stages: ["group", "r32"],
-      teamRound: "r32",
+      teamRound: "final",
       compareTeamId: "AUS",
     });
     assert.deepEqual(await response.json(), {
       ...result,
       mode: "june11",
-      teamRound: "r32",
+      teamRound: "final",
     });
   });
 
+  it("does not raise team round to the furthest average stage", async () => {
+    let receivedTeamRound: PathStage | undefined;
+
+    const response = await handleComparisonRequest(
+      jsonRequest({
+        stages: "group,r32,r16,qf",
+        teamRound: "r32",
+      }),
+      async (_mode, _selectedTeamId, _stages, teamRound) => {
+        receivedTeamRound = teamRound;
+        return { comparison: [] };
+      },
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(receivedTeamRound, "r32");
+  });
   it("uses API defaults for omitted filters", async () => {
     let received:
       | { mode: RankingMode; stages: PathStage[]; teamRound: PathStage }

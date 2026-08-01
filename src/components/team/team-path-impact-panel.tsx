@@ -19,7 +19,7 @@ import { StatTile } from "@/components/shared/stat-tile";
 import { TeamSelector } from "@/components/team/team-selector";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { CHART_COLORS } from "@/lib/chart-colors";
+import { resolveSimulateKitColors } from "@/lib/chart-colors";
 import { SimulatedPathPointsChart } from "@/components/path/simulated-path-points-chart";
 
 interface TeamPathImpactPanelProps {
@@ -310,6 +310,10 @@ export function TeamPathImpactPanel({
     actualChart.opponents.length > 0 ||
     simulatedChart.opponents.length > 0 ||
     (comparisonChart?.opponents.length ?? 0) > 0;
+  const kitColors = resolveSimulateKitColors(
+    teamId,
+    showComparison ? comparisonTeamId : null,
+  );
 
   return (
     <div className={cn("space-y-5", !embedded && "glass-panel p-5 sm:p-6")}>
@@ -501,15 +505,19 @@ export function TeamPathImpactPanel({
           actual={{
             opponents: actualChart.opponents,
             avgOpponentPoints: actualChart.avgOpponentPoints,
-            barColor: CHART_COLORS.selectedTeam,
-            avgColor: CHART_COLORS.selectedTeam,
+            barColor: kitColors.actual.fill,
+            avgColor: kitColors.actualAvg,
+            accent: kitColors.actual.accent,
+            outline: kitColors.actual.outline,
             legendLabel: t("actualPath"),
           }}
           simulated={{
             opponents: simulatedChart.opponents,
             avgOpponentPoints: simulatedChart.avgOpponentPoints,
-            barColor: CHART_COLORS.simulatedPath,
-            avgColor: CHART_COLORS.simulatedPath,
+            barColor: kitColors.simulated.fill,
+            avgColor: kitColors.simulatedAvg,
+            accent: kitColors.simulated.accent,
+            outline: kitColors.simulated.outline,
             legendLabel: t("simulatedPath"),
           }}
           comparison={
@@ -518,14 +526,20 @@ export function TeamPathImpactPanel({
                   team: comparisonSummary.team,
                   opponents: comparisonChart.opponents,
                   avgOpponentPoints: comparisonChart.avgOpponentPoints,
-                  barColor: CHART_COLORS.pathComparisonTeam,
-                  avgColor: CHART_COLORS.pathComparisonTeam,
+                  barColor:
+                    kitColors.comparison?.fill ?? kitColors.actual.fill,
+                  avgColor:
+                    kitColors.comparisonAvg ?? kitColors.actualAvg,
+                  accent:
+                    kitColors.comparison?.accent ?? kitColors.actual.accent,
+                  outline: kitColors.comparison?.outline ?? null,
                   legendLabel: t("pathChartComparisonLegend", {
                     team: comparisonTeamName,
                   }),
                 }
               : undefined
           }
+          teamPointsLineColor={kitColors.teamPointsLine}
           title={t("pathChartTitle")}
           teamPointsLegend={t("pathChartTeamPointsLegend")}
           opponentPathLegend={t("pathChartOpponentLegend")}

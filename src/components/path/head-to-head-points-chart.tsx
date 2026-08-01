@@ -4,7 +4,7 @@ import type { Team } from "@/lib/types";
 import type { OpponentPointsObservation } from "@/lib/domain/path/path-opponent-observations";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { CHART_COLORS } from "@/lib/chart-colors";
+import { CHART_COLORS, chartStrokeForFill } from "@/lib/chart-colors";
 import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
 import { PATH_CHART_HEIGHT, PATH_CHART_WIDTH } from "@/components/path-points-chart/constants";
 import {
@@ -26,10 +26,14 @@ export interface HeadToHeadPathSeries {
   teamPoints: number | null;
   avgOpponentPoints: number | null;
   opponents: OpponentPointsObservation[];
-  /** Optional bar / team-points line color; defaults to A/B chart palette. */
+  /** Bar / solid team-points line color. */
   color?: string;
-  /** Optional avg-rivals line color; defaults to mean / comparisonAvg. */
+  /** Dotted avg line color (defaults to soft accent). */
   avgColor?: string;
+  /** Legend accent for avg line labels. */
+  accent?: string;
+  /** Bar stroke for dark fills. */
+  outline?: string | null;
 }
 
 interface HeadToHeadPointsChartProps {
@@ -42,6 +46,49 @@ interface HeadToHeadPointsChartProps {
   matchLabel: string;
   ariaLabel: string;
   className?: string;
+}
+
+function ReferenceLine({
+  y,
+  color,
+  outline,
+  dashed,
+  x1,
+  x2,
+}: {
+  y: number;
+  color: string;
+  outline?: string | null;
+  dashed?: boolean;
+  x1: number;
+  x2: number;
+}) {
+  const dash = dashed ? "7 5" : undefined;
+  const stroke = outline ? chartStrokeForFill(color, outline) : null;
+  return (
+    <g>
+      {stroke && outline && !dashed ? (
+        <line
+          x1={x1}
+          x2={x2}
+          y1={y}
+          y2={y}
+          stroke={outline}
+          strokeWidth={1.25}
+          strokeDasharray={dash}
+        />
+      ) : null}
+      <line
+        x1={x1}
+        x2={x2}
+        y1={y}
+        y2={y}
+        stroke={color}
+        strokeWidth={1}
+        strokeDasharray={dash}
+      />
+    </g>
+  );
 }
 
 export function HeadToHeadPointsChart({
@@ -58,8 +105,12 @@ export function HeadToHeadPointsChart({
   const teamNames = useTranslations("teams");
   const colorA = seriesA.color ?? CHART_COLORS.selectedTeam;
   const colorB = seriesB.color ?? CHART_COLORS.comparisonTeam;
-  const avgColorA = seriesA.avgColor ?? CHART_COLORS.mean;
-  const avgColorB = seriesB.avgColor ?? CHART_COLORS.comparisonAvg;
+  const accentA = seriesA.accent ?? colorA;
+  const accentB = seriesB.accent ?? colorB;
+  const avgColorA = seriesA.avgColor ?? accentA;
+  const avgColorB = seriesB.avgColor ?? accentB;
+  const outlineA = seriesA.outline ?? null;
+  const outlineB = seriesB.outline ?? null;
 
   const slotCount = opponentSlotCount(seriesA.opponents, seriesB.opponents);
   const scale = buildPathChartScale(
@@ -80,6 +131,7 @@ export function HeadToHeadPointsChart({
     {
       opponents: seriesA.opponents,
       color: colorA,
+      outline: outlineA,
       legendLabel: seriesA.team.id,
       barTitle: (opponent) =>
         `${seriesA.team.id} vs ${getTeamDisplayName(teamNames, {
@@ -90,6 +142,7 @@ export function HeadToHeadPointsChart({
     {
       opponents: seriesB.opponents,
       color: colorB,
+      outline: outlineB,
       legendLabel: seriesB.team.id,
       barTitle: (opponent) =>
         `${seriesB.team.id} vs ${getTeamDisplayName(teamNames, {
@@ -99,6 +152,8 @@ export function HeadToHeadPointsChart({
     },
   ];
   const { barWidth, getBarShift } = computeBarGeometry(scale.slotWidth, barSeries.length);
+  const strokeA = chartStrokeForFill(colorA, outlineA);
+  const strokeB = chartStrokeForFill(colorB, outlineB);
 
   return (
     <figure
@@ -111,23 +166,23 @@ export function HeadToHeadPointsChart({
         <span className="text-sm font-semibold text-white">{title}</span>
         <span className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
           <PathChartLegendLineItem
-            color={colorA}
+            color={accentA}
             team={seriesA.team}
             label={teamPointsLegend}
           />
           <PathChartLegendLineItem
-            color={avgColorA}
+            color={accentA}
             dashed
             team={seriesA.team}
             label={avgOpponentLegend}
           />
           <PathChartLegendLineItem
-            color={colorB}
+            color={accentB}
             team={seriesB.team}
             label={teamPointsLegend}
           />
           <PathChartLegendLineItem
-            color={avgColorB}
+            color={accentB}
             dashed
             team={seriesB.team}
             label={avgOpponentLegend}
@@ -136,11 +191,21 @@ export function HeadToHeadPointsChart({
             <span className="inline-flex w-5 items-center -space-x-1.5" aria-hidden>
               <span
                 className="inline-block h-2.5 w-3 rounded-sm"
-                style={{ backgroundColor: colorA }}
+                style={{
+                  backgroundColor: colorA,
+                  boxShadow: strokeA
+                    ? `inset 0 0 0 0.5px ${strokeA.stroke}`
+                    : undefined,
+                }}
               />
               <span
                 className="inline-block h-2.5 w-3 rounded-sm"
-                style={{ backgroundColor: colorB }}
+                style={{
+                  backgroundColor: colorB,
+                  boxShadow: strokeB
+                    ? `inset 0 0 0 0.5px ${strokeB.stroke}`
+                    : undefined,
+                }}
               />
             </span>
             <span className="text-[10px]">{opponentPathLegend}</span>
@@ -176,45 +241,37 @@ export function HeadToHeadPointsChart({
           ))}
 
           {seriesA.teamPoints !== null && (
-            <line
+            <ReferenceLine
+              y={scale.y(seriesA.teamPoints)}
+              color={accentA}
               x1={scale.margin.left}
               x2={PATH_CHART_WIDTH - scale.margin.right}
-              y1={scale.y(seriesA.teamPoints)}
-              y2={scale.y(seriesA.teamPoints)}
-              stroke={colorA}
-              strokeWidth={1}
             />
           )}
           {seriesB.teamPoints !== null && (
-            <line
+            <ReferenceLine
+              y={scale.y(seriesB.teamPoints)}
+              color={accentB}
               x1={scale.margin.left}
               x2={PATH_CHART_WIDTH - scale.margin.right}
-              y1={scale.y(seriesB.teamPoints)}
-              y2={scale.y(seriesB.teamPoints)}
-              stroke={colorB}
-              strokeWidth={1}
             />
           )}
           {seriesA.avgOpponentPoints !== null && (
-            <line
+            <ReferenceLine
+              y={scale.y(seriesA.avgOpponentPoints)}
+              color={avgColorA}
+              dashed
               x1={scale.margin.left}
               x2={PATH_CHART_WIDTH - scale.margin.right}
-              y1={scale.y(seriesA.avgOpponentPoints)}
-              y2={scale.y(seriesA.avgOpponentPoints)}
-              stroke={avgColorA}
-              strokeWidth={1}
-              strokeDasharray="7 5"
             />
           )}
           {seriesB.avgOpponentPoints !== null && (
-            <line
+            <ReferenceLine
+              y={scale.y(seriesB.avgOpponentPoints)}
+              color={avgColorB}
+              dashed
               x1={scale.margin.left}
               x2={PATH_CHART_WIDTH - scale.margin.right}
-              y1={scale.y(seriesB.avgOpponentPoints)}
-              y2={scale.y(seriesB.avgOpponentPoints)}
-              stroke={avgColorB}
-              strokeWidth={1}
-              strokeDasharray="7 5"
             />
           )}
 
@@ -229,6 +286,7 @@ export function HeadToHeadPointsChart({
                   barKey={`bar-${seriesIndex}-${opponent.teamId}-${slotIndex}`}
                   opponent={opponent}
                   fill={series.color}
+                  outline={series.outline}
                   barWidth={barWidth}
                   x={scale.slotCenter(slotIndex) - barWidth / 2 + getBarShift(seriesIndex)}
                   barTop={scale.y(opponent.points)}

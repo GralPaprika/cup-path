@@ -4,7 +4,7 @@ import type { NumericStats, Team } from "@/lib/types";
 import { TeamFlag } from "@/components/team/team-flag";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { CHART_COLORS } from "@/lib/chart-colors";
+import { CHART_COLORS, chartStrokeForFill } from "@/lib/chart-colors";
 
 export interface FifaPointsObservation {
   teamId: string;
@@ -34,6 +34,14 @@ interface FifaPointsBarChartProps {
   selectedTeam?: Pick<Team, "id" | "flagUrl" | "displayName"> | null;
   selectedTeamPoints?: number | null;
   selectedTeamLegend?: string | null;
+  /** Kit fill for selected-team bars / solid FIFA-points line. */
+  selectedTeamFill?: string;
+  /** Kit accent for selected-team legend. */
+  selectedTeamAccent?: string;
+  /** Kit outline for selected-team bars (black / dark navy). */
+  selectedTeamOutline?: string | null;
+  /** When true, every bar uses selectedTeamFill (Team Analysis path chart). */
+  useSelectedKitForBars?: boolean;
   barColor?: string;
   className?: string;
 }
@@ -54,6 +62,10 @@ export function FifaPointsBarChart({
   selectedTeam = null,
   selectedTeamPoints = null,
   selectedTeamLegend = null,
+  selectedTeamFill = CHART_COLORS.selectedTeam,
+  selectedTeamAccent = CHART_COLORS.selectedTeam,
+  selectedTeamOutline = null,
+  useSelectedKitForBars = false,
   barColor = CHART_COLORS.bar,
   className = "mt-4",
 }: FifaPointsBarChartProps) {
@@ -131,8 +143,14 @@ export function FifaPointsBarChart({
             </span>
           ))}
           {selectedTeam && selectedTeamPoints !== null && selectedTeamLegend && (
-            <span className="flex items-center gap-1.5 text-wc-sky">
-              <span className="inline-block w-5 border-t border-wc-sky" />
+            <span
+              className="flex items-center gap-1.5"
+              style={{ color: selectedTeamAccent }}
+            >
+              <span
+                className="inline-block w-5 border-t"
+                style={{ borderColor: selectedTeamAccent }}
+              />
               <TeamFlag team={selectedTeam} size="sm" />
               <span className="font-mono font-semibold">{selectedTeamLegend}</span>
             </span>
@@ -179,12 +197,22 @@ export function FifaPointsBarChart({
           ))}
 
           {observations.map((observation, index) => {
-            const x = MARGIN.left + slotWidth * index + (slotWidth - barWidth) / 2;
+            const x =
+              MARGIN.left + slotWidth * index + (slotWidth - barWidth) / 2;
             const barTop = y(observation.points);
             const barBottom = y(0);
             const labelY = barBottom - 12;
             const isSelectedTeam =
               selectedTeam !== null && observation.teamId === selectedTeam.id;
+            const fill = useSelectedKitForBars
+              ? selectedTeamFill
+              : isSelectedTeam
+                ? selectedTeamFill
+                : barColor;
+            const stroke =
+              useSelectedKitForBars || isSelectedTeam
+                ? chartStrokeForFill(selectedTeamFill, selectedTeamOutline)
+                : null;
 
             return (
               <g key={`${observation.teamId}-${index}`}>
@@ -194,15 +222,14 @@ export function FifaPointsBarChart({
                   width={barWidth}
                   height={barBottom - barTop}
                   rx={5}
-                  fill={
-                    isSelectedTeam
-                      ? CHART_COLORS.selectedTeam
-                      : barColor
-                  }
+                  fill={fill}
                   fillOpacity={0.82}
+                  stroke={stroke?.stroke}
+                  strokeWidth={stroke?.strokeWidth}
                 >
                   <title>
-                    {observation.displayName}: {formatFifaPoints(observation.points)}
+                    {observation.displayName}:{" "}
+                    {formatFifaPoints(observation.points)}
                   </title>
                 </rect>
                 <text
@@ -240,14 +267,27 @@ export function FifaPointsBarChart({
             />
           ))}
           {selectedTeamPoints !== null && (
-            <line
-              x1={MARGIN.left}
-              x2={WIDTH - MARGIN.right}
-              y1={y(selectedTeamPoints)}
-              y2={y(selectedTeamPoints)}
-              stroke={CHART_COLORS.selectedTeam}
-              strokeWidth={1.5}
-            />
+            <g>
+              {selectedTeamOutline &&
+              selectedTeamAccent === selectedTeamFill ? (
+                <line
+                  x1={MARGIN.left}
+                  x2={WIDTH - MARGIN.right}
+                  y1={y(selectedTeamPoints)}
+                  y2={y(selectedTeamPoints)}
+                  stroke={selectedTeamOutline}
+                  strokeWidth={1.25}
+                />
+              ) : null}
+              <line
+                x1={MARGIN.left}
+                x2={WIDTH - MARGIN.right}
+                y1={y(selectedTeamPoints)}
+                y2={y(selectedTeamPoints)}
+                stroke={selectedTeamAccent}
+                strokeWidth={1.5}
+              />
+            </g>
           )}
         </svg>
 

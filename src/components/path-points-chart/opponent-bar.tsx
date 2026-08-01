@@ -1,9 +1,12 @@
 import type { OpponentPointsObservation } from "@/lib/domain/path/path-opponent-observations";
 import { formatFifaPoints } from "@/lib/format";
+import { chartStrokeForFill } from "@/lib/chart-colors";
 
 interface OpponentBarProps {
   opponent: OpponentPointsObservation;
   fill: string;
+  /** Opposite-kit outline for black / dark-blue fills. */
+  outline?: string | null;
   barWidth: number;
   x: number;
   barTop: number;
@@ -15,6 +18,7 @@ interface OpponentBarProps {
 export function OpponentBar({
   opponent,
   fill,
+  outline,
   barWidth,
   x,
   barTop,
@@ -22,6 +26,7 @@ export function OpponentBar({
   title,
   barKey,
 }: OpponentBarProps) {
+  const stroke = chartStrokeForFill(fill, outline);
   return (
     <g key={barKey}>
       <rect
@@ -32,6 +37,8 @@ export function OpponentBar({
         rx={5}
         fill={fill}
         fillOpacity={0.82}
+        stroke={stroke?.stroke}
+        strokeWidth={stroke?.strokeWidth}
       >
         <title>
           {title || `${opponent.displayName}: ${formatFifaPoints(opponent.points)}`}

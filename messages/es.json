@@ -4,7 +4,7 @@
     "tagline": "El camino al título"
   },
   "nav": {
-    "teamAnalysis": "Camino",
+    "teamAnalysis": "Camino del equipo",
     "overview": "Resumen del torneo",
     "groups": "Grupos",
     "compare": "Comparar",
@@ -168,9 +168,10 @@
       "avgOpponentPoints": "Pts. promedio riv.",
       "avgOpponentRank": "Ranking prom. riv.",
       "pathRank": "Camino #",
-      "status": "Estado",
+      "furthestRound": "Fase más alta",
       "delta": "Δ (A − B)",
       "harderPathSummary": "El camino de {team} es {gap} más duro por el promedio de puntos del rival.",
+      "easierPathSummary": "El camino de {team} es {gap} más fácil por el promedio de puntos del rival.",
       "rankUnavailable": "Camino # no está disponible cuando ningún equipo pertenece al grupo comparable de tu filtro de fases.",
       "rankCohortNote": "Camino # ordena equipos en {stage} o más usando el promedio de puntos del rival.",
       "simulateWhatIf": "Probar este enfrentamiento en Simular",
@@ -184,7 +185,7 @@
     },
     "teamRound": {
       "label": "Mostrar equipos",
-      "hint": "No se pueden mostrar equipos eliminados antes de la fase más avanzada en los promedios",
+      "hint": "Filtra la tabla por la fase más alta alcanzada. Si eliges una fase anterior, también se limitan los partidos que entran en los promedios.",
       "teamCount": "{count} equipos",
       "loadingCount": "…",
       "groupShort": "Todos",

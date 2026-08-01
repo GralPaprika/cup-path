@@ -4,7 +4,6 @@ import type { Team } from "@/lib/types";
 import type { OpponentPointsObservation } from "@/lib/domain/path/path-opponent-observations";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { CHART_COLORS } from "@/lib/chart-colors";
 import { PATH_CHART_HEIGHT, PATH_CHART_WIDTH } from "@/components/path-points-chart/constants";
 import {
   buildPathChartScale,
@@ -25,6 +24,9 @@ export interface SimulatedPathSeries {
   avgOpponentPoints: number | null;
   barColor: string;
   avgColor: string;
+  /** Legend + dotted avg accent (may differ from bar fill for black kits). */
+  accent?: string;
+  outline?: string | null;
   legendLabel: string;
 }
 
@@ -36,6 +38,8 @@ interface SimulatedPathPointsChartProps {
   comparison?: SimulatedPathSeries & {
     team: Pick<Team, "id" | "displayName" | "flagUrl">;
   };
+  /** Focus-team FIFA points line; defaults to actual bar color. */
+  teamPointsLineColor?: string;
   title: string;
   teamPointsLegend: string;
   opponentPathLegend: string;
@@ -44,12 +48,39 @@ interface SimulatedPathPointsChartProps {
   className?: string;
 }
 
+function ReferenceLine({
+  y,
+  color,
+  dashed,
+  x1,
+  x2,
+}: {
+  y: number;
+  color: string;
+  dashed?: boolean;
+  x1: number;
+  x2: number;
+}) {
+  return (
+    <line
+      x1={x1}
+      x2={x2}
+      y1={y}
+      y2={y}
+      stroke={color}
+      strokeWidth={1}
+      strokeDasharray={dashed ? "7 5" : undefined}
+    />
+  );
+}
+
 export function SimulatedPathPointsChart({
   focusTeam,
   teamPoints,
   actual,
   simulated,
   comparison,
+  teamPointsLineColor,
   title,
   teamPointsLegend,
   opponentPathLegend,
@@ -57,6 +88,7 @@ export function SimulatedPathPointsChart({
   ariaLabel,
   className = "",
 }: SimulatedPathPointsChartProps) {
+  const pointsLineColor = teamPointsLineColor ?? actual.barColor;
   const slotCount = opponentSlotCount(
     actual.opponents,
     simulated.opponents,
@@ -81,12 +113,14 @@ export function SimulatedPathPointsChart({
     {
       opponents: actual.opponents,
       color: actual.barColor,
+      outline: actual.outline,
       legendLabel: actual.legendLabel,
       barTitle: defaultBarTitle,
     },
     {
       opponents: simulated.opponents,
       color: simulated.barColor,
+      outline: simulated.outline,
       legendLabel: simulated.legendLabel,
       barTitle: defaultBarTitle,
     },
@@ -95,6 +129,7 @@ export function SimulatedPathPointsChart({
           {
             opponents: comparison.opponents,
             color: comparison.barColor,
+            outline: comparison.outline,
             legendLabel: comparison.legendLabel,
             barTitle: defaultBarTitle,
           },
@@ -110,11 +145,13 @@ export function SimulatedPathPointsChart({
     {
       value: actual.avgOpponentPoints,
       color: actual.avgColor,
+      accent: actual.accent ?? actual.avgColor,
       legendLabel: actual.legendLabel,
     },
     {
       value: simulated.avgOpponentPoints,
       color: simulated.avgColor,
+      accent: simulated.accent ?? simulated.avgColor,
       legendLabel: simulated.legendLabel,
     },
     ...(comparison
@@ -122,6 +159,7 @@ export function SimulatedPathPointsChart({
           {
             value: comparison.avgOpponentPoints,
             color: comparison.avgColor,
+            accent: comparison.accent ?? comparison.avgColor,
             legendLabel: comparison.legendLabel,
           },
         ]
@@ -149,7 +187,7 @@ export function SimulatedPathPointsChart({
         <span className="text-sm font-semibold text-white">{title}</span>
         <span className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
           <PathChartLegendLineItem
-            color={CHART_COLORS.selectedTeam}
+            color={pointsLineColor}
             team={focusTeam}
             label={teamPointsLegend}
           />
@@ -157,7 +195,7 @@ export function SimulatedPathPointsChart({
             line.value !== null ? (
               <PathChartLegendLineItem
                 key={`avg-${line.legendLabel}`}
-                color={line.color}
+                color={line.accent}
                 dashed
                 label={line.legendLabel}
               />
@@ -168,6 +206,7 @@ export function SimulatedPathPointsChart({
               <PathChartLegendBarItem
                 key={`bar-legend-${series.legendLabel}`}
                 color={series.color}
+                outline={series.outline}
                 label={series.legendLabel}
               />
             ))}
@@ -204,28 +243,24 @@ export function SimulatedPathPointsChart({
           ))}
 
           {teamPoints !== null && (
-            <line
+            <ReferenceLine
+              y={scale.y(teamPoints)}
+              color={pointsLineColor}
               x1={scale.margin.left}
               x2={PATH_CHART_WIDTH - scale.margin.right}
-              y1={scale.y(teamPoints)}
-              y2={scale.y(teamPoints)}
-              stroke={CHART_COLORS.selectedTeam}
-              strokeWidth={1}
             />
           )}
 
           {avgLines.map(
             (line) =>
               line.value !== null && (
-                <line
+                <ReferenceLine
                   key={`avg-line-${line.legendLabel}`}
+                  y={scale.y(line.value)}
+                  color={line.color}
+                  dashed
                   x1={scale.margin.left}
                   x2={PATH_CHART_WIDTH - scale.margin.right}
-                  y1={scale.y(line.value)}
-                  y2={scale.y(line.value)}
-                  stroke={line.color}
-                  strokeWidth={1}
-                  strokeDasharray="7 5"
                 />
               ),
           )}
@@ -241,6 +276,7 @@ export function SimulatedPathPointsChart({
                   barKey={`bar-${seriesIndex}-${opponent.teamId}-${slotIndex}`}
                   opponent={opponent}
                   fill={series.color}
+                  outline={series.outline}
                   barWidth={barWidth}
                   x={scale.slotCenter(slotIndex) - barWidth / 2 + getBarShift(seriesIndex)}
                   barTop={scale.y(opponent.points)}

@@ -2,7 +2,6 @@ import { resolveRankingMode } from "@/lib/api/ranking-mode";
 import {
   parsePathStages,
   parseTeamRound,
-  syncTeamRoundToStages,
 } from "@/lib/domain/match/match-stages";
 import type { PathStage, RankingMode } from "@/lib/types";
 
@@ -97,9 +96,9 @@ export async function handleComparisonRequest(
   const stages = parsePathStages(
     typeof body.stages === "string" ? body.stages : null,
   );
-  const teamRound = syncTeamRoundToStages(
-    parseTeamRound(typeof body.teamRound === "string" ? body.teamRound : null),
-    stages,
+  // Client owns Show-teams vs Count-matches coupling; accept teamRound as sent.
+  const teamRound = parseTeamRound(
+    typeof body.teamRound === "string" ? body.teamRound : null,
   );
   const result = await getComparisonAnalysis(
     mode,

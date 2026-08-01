@@ -41,9 +41,6 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground sm:text-base">
           {analysis("originStory")}
         </p>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground/90">
-          {analysis("subtitle")}
-        </p>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">

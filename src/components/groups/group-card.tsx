@@ -93,19 +93,25 @@ export function GroupCard({
         </div>
         {(strengthRank.byPoints !== null || strengthRank.byAvgRank !== null) && (
           <p className="mt-2 text-right text-[10px] text-muted-foreground">
-            {strengthRank.byPoints !== null &&
-              t("groupStrengthRankOf", {
-                rank: strengthRank.byPoints,
-                total: strengthOrdering.groupCount,
-              })}
+            {strengthRank.byPoints !== null && (
+              <span className="font-semibold text-white/85">
+                {t("groupStrengthRankOf", {
+                  rank: strengthRank.byPoints,
+                  total: strengthOrdering.groupCount,
+                })}
+              </span>
+            )}
             {strengthRank.byPoints !== null &&
               strengthRank.byAvgRank !== null &&
               " · "}
-            {strengthRank.byAvgRank !== null &&
-              t("groupStrengthRankAlt", {
-                rank: strengthRank.byAvgRank,
-                total: strengthOrdering.groupCount,
-              })}
+            {strengthRank.byAvgRank !== null && (
+              <span className="text-muted-foreground/80">
+                {t("groupStrengthRankAlt", {
+                  rank: strengthRank.byAvgRank,
+                  total: strengthOrdering.groupCount,
+                })}
+              </span>
+            )}
           </p>
         )}
       </button>

@@ -93,6 +93,24 @@ function getOverviewHrefForOutcome(outcome: PathOutcome): string | null {
   return null;
 }
 
+function getOverviewRoundPrompt(
+  outcome: PathOutcome,
+  overviewRound: (key: string) => string,
+): string | null {
+  if (outcome.kind === "champion" || outcome.kind === "runnerUp") {
+    return overviewRound("final");
+  }
+  if (outcome.kind === "thirdPlace") {
+    return overviewRound("semiFinal");
+  }
+  if (outcome.kind === "eliminated") {
+    const stage = getMatchStage(outcome.round);
+    if (stage === null) return null;
+    return overviewRound(COMPARE_STAGE_I18N_KEYS[stage]);
+  }
+  return null;
+}
+
 export function SummaryCard({
   summary,
   avgPointsContext,
@@ -104,6 +122,7 @@ export function SummaryCard({
 }: SummaryCardProps) {
   const t = useTranslations("summary");
   const stages = useTranslations("compare.stages");
+  const overviewRound = useTranslations("summary.overviewRound");
   const common = useTranslations("common");
 
   const includedMatches = includedStages
@@ -152,14 +171,7 @@ export function SummaryCard({
         : PODIUM_BADGE_HOVER_STYLES[outcome.kind];
 
   const overviewHref = getOverviewHrefForOutcome(outcome);
-  const overviewRoundPrompt =
-    outcome.kind === "eliminated"
-      ? eliminatedRoundLabel
-      : outcome.kind === "champion" || outcome.kind === "runnerUp"
-        ? getRoundDisplayName(stages, "Final")
-        : outcome.kind === "thirdPlace"
-          ? getRoundDisplayName(stages, "Semi-final")
-          : null;
+  const overviewRoundPrompt = getOverviewRoundPrompt(outcome, overviewRound);
   const overviewLinkLabel =
     overviewRoundPrompt != null
       ? t("outcomeSeeRoundOnOverview", { round: overviewRoundPrompt })

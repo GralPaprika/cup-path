@@ -78,7 +78,15 @@
     "outcomeThirdPlace": "Third place",
     "outcomeGroupStage": "group stage",
     "outcomeEliminatedIn": "Eliminated in {round}",
-    "outcomeSeeRoundOnOverview": "See how {round} played out",
+    "outcomeSeeRoundOnOverview": "See data for {round}",
+    "overviewRound": {
+      "groupStage": "the group stage",
+      "round32": "the round of 32",
+      "round16": "the round of 16",
+      "quarterFinal": "the quarter-finals",
+      "semiFinal": "the semi-finals",
+      "final": "the final"
+    },
     "points": "pts",
     "matchesPlayed": "Matches",
     "averagesFrom": "averages from {count} matches",
@@ -86,15 +94,14 @@
   },
   "teamAnalysis": {
     "title": "Team path analysis",
-    "originStory": "A friend once argued Argentina had been handed the easy road to the final. CupPath asks that question for every side: using FIFA ranking points, how hard does each path look on paper?",
-    "subtitle": "Pick a team to see path difficulty from the FIFA ranking points of every opponent they faced.",
+    "originStory": "Right after the round of 16 finished, a friend said Argentina had been given the easiest path to the final. That made me wonder: had Argentina really drawn the softest opponents? With CupPath I try to answer that question, using FIFA ranking points.",
     "seeFullRanking": "See full ranking",
     "advanced": {
       "title": "Advanced statistics",
       "subtitle": "Deeper opponent distribution and cohort ordering metrics for statistical comparison.",
       "opponentDistributionTitle": "Opponent distribution",
-      "opponentPointsStats": "Opponent FIFA points",
-      "opponentRankStats": "Opponent FIFA rank",
+      "opponentPointsStats": "Opponents' FIFA points",
+      "opponentRankStats": "Opponents' FIFA rank",
       "pointsChartTitle": "Opponent points by team",
       "standardDeviationBand": "Mean ± 1 SD",
       "meanLabel": "Mean",
@@ -131,7 +138,7 @@
   },
   "compare": {
     "title": "Path difficulty comparison",
-    "subtitle": "Rank teams by opponent strength. # ranks peers at the furthest round included in averages.",
+    "subtitle": "Ranking of national teams by round, ordered from who faced the hardest opponents to who faced the easiest, on average.",
     "subtitleByPoints": "Sorted by average opponent FIFA points (higher = harder path)",
     "subtitleByRank": "Sorted by average opponent FIFA rank (lower = harder path)",
     "rankCohortHint": "# ranks among {count} teams at {stage} or beyond",
@@ -814,8 +821,8 @@
     }
   },
   "simulate": {
-    "title": "Path simulation",
-    "subtitle": "Pick alternate knockout winners to see how a team's path difficulty would change. Each side shows its bracket slot (e.g. 1J · Argentina vs 2H · Cape Verde).",
+    "title": "Simulate opponents",
+    "subtitle": "Pick alternate knockout winners to see how the path difficulty of the selected nation would change.",
     "pathComparison": "Path difficulty comparison",
     "actualPath": "Actual path",
     "simulatedPath": "Simulated path",

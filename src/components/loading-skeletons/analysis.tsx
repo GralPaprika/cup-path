@@ -20,17 +20,17 @@ function StatBlockSkeleton({ className }: { className?: string }) {
 
 export function SummaryCardSkeleton() {
   return (
-    <div className="glass-panel">
-      <div className="border-b border-white/8 px-5 py-5 sm:px-6">
-        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
+    <div className="glass-panel min-w-0 overflow-hidden">
+      <div className="border-b border-white/8 px-4 py-4 sm:px-6 sm:py-5">
+        <div className="grid items-center gap-5 md:grid-cols-[minmax(0,280px)_1fr] md:gap-8 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
           <div className="flex min-w-0 flex-col items-center justify-center">
-            <Skeleton className="aspect-[300/168] w-full max-w-[300px] bg-white/10" />
+            <Skeleton className="aspect-[300/168] w-full max-w-[240px] bg-white/10 sm:max-w-[300px]" />
             <Skeleton className="mt-2 h-3 w-28 bg-white/10" />
           </div>
           <div className="flex min-w-0 flex-col gap-4">
             <div className="flex flex-wrap items-center gap-3">
               <Skeleton className="size-9 rounded-full bg-white/10" />
-              <Skeleton className="h-7 w-44 bg-white/10" />
+              <Skeleton className="h-7 w-44 max-w-full bg-white/10" />
               <Skeleton className="h-6 w-20 rounded-full bg-white/10" />
               <Skeleton className="h-6 w-24 rounded-full bg-white/10" />
               <Skeleton className="h-6 w-16 rounded-full bg-white/10" />
@@ -40,13 +40,13 @@ export function SummaryCardSkeleton() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3 p-5 sm:p-6 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 p-4 sm:p-6 md:grid-cols-4">
         <StatBlockSkeleton />
         <StatBlockSkeleton />
         <StatBlockSkeleton />
         <StatBlockSkeleton />
       </div>
-      <div className="border-t border-white/8 px-5 py-4 sm:px-6">
+      <div className="border-t border-white/8 px-4 py-4 sm:px-6">
         <Skeleton className="h-3 w-64 max-w-full bg-white/10" />
       </div>
     </div>
@@ -57,11 +57,31 @@ const PATH_TABLE_COLS = 7;
 
 export function PathTableSkeleton({ rows = 7 }: { rows?: number }) {
   return (
-    <div className="glass-panel overflow-hidden">
-      <div className="border-b border-white/8 px-5 py-4">
+    <div className="glass-panel min-w-0 overflow-hidden">
+      <div className="border-b border-white/8 px-4 py-4 sm:px-5">
         <Skeleton className="h-6 w-40 bg-white/10" />
       </div>
-      <div className="overflow-x-auto">
+
+      <ul className="divide-y divide-white/6 md:hidden">
+        {Array.from({ length: rows }).map((_, row) => (
+          <li key={row} className="space-y-2 px-4 py-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <Skeleton className="h-4 w-24 bg-white/10" />
+                <Skeleton className="h-3 w-16 bg-white/10" />
+              </div>
+              <Skeleton className="h-6 w-16 rounded-full bg-white/10" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="size-6 rounded-full bg-white/10" />
+              <Skeleton className="h-4 w-28 bg-white/10" />
+            </div>
+            <Skeleton className="ml-auto h-4 w-14 bg-white/10" />
+          </li>
+        ))}
+      </ul>
+
+      <div className="hidden min-w-0 overflow-x-auto md:block">
         <Table>
           <TableHeader>
             <TableRow className="border-white/8 hover:bg-transparent">

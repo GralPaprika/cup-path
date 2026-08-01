@@ -66,12 +66,15 @@ export function DifficultyGauge({
 
   return (
     <div
-      className={cn("relative mx-auto w-full max-w-[300px]", className)}
+      className={cn(
+        "relative mx-auto w-full max-w-[240px] overflow-hidden sm:max-w-[300px]",
+        className,
+      )}
       style={{ aspectRatio: `${width} / ${height}` }}
     >
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="absolute inset-0 h-full w-full overflow-visible"
+        className="absolute inset-0 h-full w-full"
         aria-hidden
       >
         <defs>
@@ -110,20 +113,20 @@ export function DifficultyGauge({
         />
       </svg>
 
-      <div className="absolute inset-x-[16%] top-[30%] bottom-[14%] flex flex-col items-center justify-between text-center">
+      <div className="absolute inset-x-[8%] top-[28%] bottom-[12%] flex flex-col items-center justify-between text-center sm:inset-x-[12%]">
         <div className="space-y-0.5">
-          <p className="text-[9px] font-semibold uppercase leading-tight tracking-[0.13em] text-white/80 sm:text-[10px]">
+          <p className="text-[9px] font-semibold uppercase leading-tight tracking-[0.08em] text-white/80 sm:text-[10px] sm:tracking-[0.12em]">
             {labelLine1}
           </p>
           {labelLine2 && (
-            <p className="text-[9px] font-semibold uppercase leading-tight tracking-[0.13em] text-white/80 sm:text-[10px]">
+            <p className="text-[9px] font-semibold uppercase leading-tight tracking-[0.08em] text-white/80 sm:text-[10px] sm:tracking-[0.12em]">
               {labelLine2}
             </p>
           )}
         </div>
 
         <p
-          className="bg-gradient-to-b from-[#ffb366] via-[#ff6b00] to-[#c4181f] bg-clip-text text-[1.65rem] font-bold leading-none tabular-nums text-transparent sm:text-[1.85rem]"
+          className="bg-gradient-to-b from-[#ffb366] via-[#ff6b00] to-[#c4181f] bg-clip-text text-[1.4rem] font-bold leading-none tabular-nums text-transparent sm:text-[1.85rem]"
           style={{ WebkitBackgroundClip: "text" }}
         >
           {value !== null ? formatFifaPoints(value) : "—"}

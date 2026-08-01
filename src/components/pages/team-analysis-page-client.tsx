@@ -34,22 +34,32 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-      <header className="mb-6">
+      <header className="mb-6 min-w-0">
         <h1 className="text-2xl font-bold text-white sm:text-3xl">
           {analysis("title")}
         </h1>
-        <p className="mt-1 max-w-3xl text-sm text-muted-foreground sm:text-base">
+        <p className="mt-1 max-w-3xl text-pretty text-sm text-muted-foreground sm:text-base">
           {analysis("originStory")}
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <aside className="glass-panel h-fit space-y-6 p-5 lg:sticky lg:top-[var(--shell-sticky-top)]">
+      <div className="grid gap-6 md:grid-cols-[260px_minmax(0,1fr)] lg:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="glass-panel h-fit space-y-4 p-4 md:sticky md:top-[var(--shell-sticky-top)] md:space-y-6 md:p-5">
           <section>
             <TeamSelector teams={teamList} value={teamId} onChange={setTeamId} />
           </section>
 
-          <section>
+          <section className="md:hidden">
+            <PathStageFilters
+              value={stages}
+              onChange={setStages}
+              maxStageReached={maxStageReached}
+              variant="chips"
+              compact
+            />
+          </section>
+
+          <section className="hidden md:block">
             <PathStageFilters
               value={stages}
               onChange={setStages}
@@ -59,7 +69,7 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
           </section>
         </aside>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {loading && !data && !error && (
             <>
               <SummaryCardSkeleton />

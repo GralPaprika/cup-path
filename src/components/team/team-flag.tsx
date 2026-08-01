@@ -56,10 +56,7 @@ export function TeamLabel({
       ? "shrink-0 font-mono text-base font-semibold tracking-wide text-muted-foreground"
       : "shrink-0 font-mono text-xs font-semibold tracking-wide text-muted-foreground";
 
-  const nameClasses =
-    flagSize === "xl"
-      ? `min-w-0 leading-snug ${nameClassName}`
-      : `min-w-0 truncate leading-snug ${nameClassName}`;
+  const nameClasses = `min-w-0 truncate leading-snug ${nameClassName}`;
 
   const content = (
     <>

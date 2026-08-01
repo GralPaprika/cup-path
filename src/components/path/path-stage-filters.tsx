@@ -207,9 +207,9 @@ export function PathStageFilters({
   }
 
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-3", compact && "space-y-2")}>
       {header}
-      <div className="flex flex-wrap gap-2">
+      <div className={cn("flex flex-wrap", compact ? "gap-1.5" : "gap-2")}>
         {enabledStages.map((stage) => {
           const checked = value.has(stage);
 
@@ -217,7 +217,8 @@ export function PathStageFilters({
             <label
               key={stage}
               className={cn(
-                "inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
+                "inline-flex cursor-pointer items-center gap-2 rounded-lg border transition-colors",
+                compact ? "px-2.5 py-1.5 text-xs" : "px-3 py-2 text-sm",
                 checked
                   ? "border-wc-green/30 bg-wc-green/10 text-wc-green"
                   : "border-white/10 bg-white/5 text-muted-foreground hover:border-white/15 hover:bg-white/8",
@@ -227,9 +228,14 @@ export function PathStageFilters({
                 type="checkbox"
                 checked={checked}
                 onChange={() => toggleStage(stage)}
-                className="size-4 rounded border-white/20 bg-white/5 text-wc-green focus:ring-wc-green/40"
+                className={cn(
+                  "rounded border-white/20 bg-white/5 text-wc-green focus:ring-wc-green/40",
+                  compact ? "size-3.5" : "size-4",
+                )}
               />
-              {t(COMPARE_STAGE_I18N_KEYS[stage])}
+              {compact
+                ? t(STAGE_SHORT_LABEL_KEYS[stage])
+                : t(COMPARE_STAGE_I18N_KEYS[stage])}
             </label>
           );
         })}

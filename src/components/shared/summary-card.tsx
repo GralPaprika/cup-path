@@ -183,15 +183,15 @@ export function SummaryCard({
         href={overviewHref}
         aria-label={overviewLinkLabel}
         className={cn(
-          "inline-flex w-fit max-w-full shrink-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5 self-start rounded-2xl border px-3.5 py-2 transition-colors",
+          "inline-flex w-fit max-w-full flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5 self-start rounded-2xl border px-3.5 py-2 transition-colors",
           outcomeClassName,
           outcomeChipHoverClassName,
         )}
       >
-        <span className="whitespace-nowrap text-sm font-semibold leading-tight">
+        <span className="text-sm font-semibold leading-tight">
           {outcomeLabel}
         </span>
-        <span className="whitespace-nowrap text-xs font-medium leading-tight opacity-80">
+        <span className="text-xs font-medium leading-tight opacity-80">
           {overviewLinkLabel} →
         </span>
       </Link>
@@ -202,9 +202,9 @@ export function SummaryCard({
     );
 
   return (
-    <div className="glass-panel">
-      <div className="border-b border-white/8 px-5 py-5 sm:px-6">
-        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
+    <div className="glass-panel min-w-0 overflow-hidden">
+      <div className="border-b border-white/8 px-4 py-4 sm:px-6 sm:py-5">
+        <div className="grid items-center gap-5 md:grid-cols-[minmax(0,280px)_1fr] md:gap-8 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
           <div className="flex min-w-0 flex-col items-center justify-center">
             <DifficultyGauge
               value={summary.avgOpponentPoints}
@@ -242,13 +242,14 @@ export function SummaryCard({
             )}
           </div>
 
-          <div className="flex min-w-0 flex-col gap-5">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex min-w-0 flex-col gap-4 md:gap-5">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-4">
               <TeamLabel
                 team={summary.team}
                 showCode
                 flagSize="xl"
-                nameClassName="text-3xl font-bold leading-snug text-white sm:text-4xl"
+                className="min-w-0 max-w-full"
+                nameClassName="text-2xl font-bold leading-snug text-white sm:text-3xl md:text-4xl"
               />
               <div className="flex flex-wrap items-center gap-2">
                 {summary.teamPoints !== null ? (
@@ -289,7 +290,7 @@ export function SummaryCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 p-5 sm:p-6 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 p-4 sm:p-6 md:grid-cols-4">
         <StatTile
           label={t("fifaPoints")}
           value={formatFifaPoints(summary.teamPoints)}

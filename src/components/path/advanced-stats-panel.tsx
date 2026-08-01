@@ -64,14 +64,14 @@ export function AdvancedStatsPanel({
 
   return (
     <details
-      className="glass-panel group overflow-hidden"
+      className="glass-panel group min-w-0 overflow-hidden"
       open={open}
       onToggle={(event) => {
         onOpenChange(event.currentTarget.open);
       }}
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-5 py-4 marker:content-none [&::-webkit-details-marker]:hidden">
-        <div>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-white/8 bg-white/[0.03] px-4 py-4 marker:content-none sm:px-5 [&::-webkit-details-marker]:hidden">
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
@@ -83,8 +83,8 @@ export function AdvancedStatsPanel({
         />
       </summary>
 
-      <div className="space-y-6 px-5 py-5">
-        <section>
+      <div className="min-w-0 space-y-6 px-4 py-5 sm:px-5">
+        <section className="min-w-0">
           <OpponentPointsChart
             observations={pathStats.opponentPointsObservations}
             stats={pathStats.opponentPointsStats}

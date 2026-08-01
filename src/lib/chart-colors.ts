@@ -43,6 +43,12 @@ export const KIT_SITE_PURPLE = "#7b2cbf";
 export const KIT_FALLBACK_WHITE = "#F8FAFC";
 export const KIT_FALLBACK_BLACK = "#111111";
 
+/**
+ * Same hue family only clashes when lightness is also close
+ * (Haiti navy ≠ Argentina sky; Norway red ≈ Spain red).
+ */
+export const KIT_CLASH_LIGHTNESS_DELTA = 0.25;
+
 export type SeriesKitStyle = {
   /** Bar fill. */
   fill: string;
@@ -143,7 +149,11 @@ export function getTeamChartAvgColor(teamId: string): string | null {
 }
 
 function familiesClash(a: string, b: string): boolean {
-  return colorFamily(a) === colorFamily(b);
+  if (colorFamily(a) !== colorFamily(b)) return false;
+  const la = fillLightness(a);
+  const lb = fillLightness(b);
+  if (la === null || lb === null) return true;
+  return Math.abs(la - lb) < KIT_CLASH_LIGHTNESS_DELTA;
 }
 
 function clashesWithAny(color: string, used: string[]): boolean {

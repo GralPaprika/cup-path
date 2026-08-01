@@ -185,7 +185,7 @@
     },
     "teamRound": {
       "label": "Mostrar equipos",
-      "hint": "Filtra la tabla por la fase más alta alcanzada. Si eliges una fase anterior, también se limitan los partidos que entran en los promedios.",
+      "hint": "Filtra la tabla por la fase más alta alcanzada. Cambiar la fase limpia los equipos seleccionados; si eliges equipos que no llegaron, el filtro baja a la fase más avanzada que ambos alcanzaron.",
       "teamCount": "{count} equipos",
       "loadingCount": "…",
       "groupShort": "Todos",

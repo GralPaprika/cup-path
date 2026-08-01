@@ -27,6 +27,10 @@ import { resolveHeadToHeadKitColors } from "@/lib/chart-colors";
 import { formatFifaPoints, formatStatValue } from "@/lib/format";
 import { getTeamDisplayName } from "@/lib/i18n/team-display-name";
 import { COMPARE_STAGE_I18N_KEYS } from "@/lib/i18n/stage-keys";
+import {
+  buildPathChartDataFromSummary,
+  getSharedMaxStage,
+} from "@/lib/domain/path/path-opponent-observations";
 import { cn } from "@/lib/utils";
 
 interface TeamHeadToHeadPanelProps {
@@ -44,6 +48,10 @@ interface TeamHeadToHeadPanelProps {
 
 function buildPathSeries(
   analysis: TeamAnalysisResult,
+  chart: {
+    opponents: HeadToHeadPathSeries["opponents"];
+    avgOpponentPoints: number | null;
+  },
   colors?: {
     color: string;
     avgColor: string;
@@ -54,8 +62,8 @@ function buildPathSeries(
   return {
     team: analysis.summary.team,
     teamPoints: analysis.summary.teamPoints,
-    avgOpponentPoints: analysis.summary.avgOpponentPoints,
-    opponents: analysis.advanced.pathStats.opponentPointsObservations,
+    avgOpponentPoints: chart.avgOpponentPoints,
+    opponents: chart.opponents,
     color: colors?.color,
     avgColor: colors?.avgColor,
     accent: colors?.accent,
@@ -269,6 +277,26 @@ export function TeamHeadToHeadPanel({
       ? resolveHeadToHeadKitColors(teamAId, teamBId)
       : null;
 
+  const sharedChartMax =
+    analysisA && analysisB
+      ? getSharedMaxStage(analysisA.maxStageReached, analysisB.maxStageReached)
+      : null;
+  const chartDataA = analysisA
+    ? buildPathChartDataFromSummary(analysisA.summary, sharedChartMax)
+    : null;
+  const chartDataB = analysisB
+    ? buildPathChartDataFromSummary(analysisB.summary, sharedChartMax)
+    : null;
+  const showChart =
+    showComparison &&
+    !chartLoading &&
+    analysisA &&
+    analysisB &&
+    kitColors &&
+    chartDataA &&
+    chartDataB &&
+    (chartDataA.opponents.length > 0 || chartDataB.opponents.length > 0);
+
   return (
     <section className="mb-6 space-y-5 rounded-xl border border-white/10 bg-white/[0.03] p-5">
       <div>
@@ -392,37 +420,31 @@ export function TeamHeadToHeadPanel({
         </div>
       )}
 
-      {showComparison &&
-        !chartLoading &&
-        analysisA &&
-        analysisB &&
-        kitColors &&
-        (analysisA.advanced.pathStats.opponentPointsObservations.length > 0 ||
-          analysisB.advanced.pathStats.opponentPointsObservations.length > 0) && (
-          <HeadToHeadPointsChart
-            seriesA={buildPathSeries(analysisA, {
-              color: kitColors.colorA,
-              avgColor: kitColors.avgColorA,
-              accent: kitColors.accentA,
-              outline: kitColors.outlineA,
-            })}
-            seriesB={buildPathSeries(analysisB, {
-              color: kitColors.colorB,
-              avgColor: kitColors.avgColorB,
-              accent: kitColors.accentB,
-              outline: kitColors.outlineB,
-            })}
-            title={t("chartTitle")}
-            teamPointsLegend={t("teamPointsLegend")}
-            avgOpponentLegend={t("avgOpponentLegend")}
-            opponentPathLegend={t("opponentPathLegend")}
-            matchLabel={t("matchLabel")}
-            ariaLabel={t("chartAria", {
-              teamA: analysisA.summary.team.id,
-              teamB: analysisB.summary.team.id,
-            })}
-          />
-        )}
+      {showChart && analysisA && analysisB && kitColors && chartDataA && chartDataB && (
+        <HeadToHeadPointsChart
+          seriesA={buildPathSeries(analysisA, chartDataA, {
+            color: kitColors.colorA,
+            avgColor: kitColors.avgColorA,
+            accent: kitColors.accentA,
+            outline: kitColors.outlineA,
+          })}
+          seriesB={buildPathSeries(analysisB, chartDataB, {
+            color: kitColors.colorB,
+            avgColor: kitColors.avgColorB,
+            accent: kitColors.accentB,
+            outline: kitColors.outlineB,
+          })}
+          title={t("chartTitle")}
+          teamPointsLegend={t("teamPointsLegend")}
+          avgOpponentLegend={t("avgOpponentLegend")}
+          opponentPathLegend={t("opponentPathLegend")}
+          matchLabel={t("matchLabel")}
+          ariaLabel={t("chartAria", {
+            teamA: analysisA.summary.team.id,
+            teamB: analysisB.summary.team.id,
+          })}
+        />
+      )}
 
       {showComparison &&
         harderTeam &&

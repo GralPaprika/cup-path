@@ -51,6 +51,20 @@ describe("team kit chart colors", () => {
     assert.equal(colorFamily(kit.colorB), "white");
   });
 
+  it("keeps Argentina home sky against Haiti navy (light vs dark blue)", () => {
+    const kit = resolveHeadToHeadKitColors("HAI", "ARG");
+    assert.equal(kit.colorA, getTeamKitColor("HAI", "home"));
+    assert.equal(kit.colorB, getTeamKitColor("ARG", "home"));
+    assert.equal(colorFamily(kit.colorA), "blue");
+    assert.equal(colorFamily(kit.colorB), "blue");
+  });
+
+  it("forces Uruguay off home when Argentina occupies the same light blue", () => {
+    const kit = resolveHeadToHeadKitColors("ARG", "URU");
+    assert.equal(kit.colorA, getTeamKitColor("ARG", "home"));
+    assert.notEqual(kit.colorB, getTeamKitColor("URU", "home"));
+  });
+
   it("inverts white↔black: cream side becomes black, black side purple chrome", () => {
     // ESP away cream vs NOR away black when Spain selected vs Norway
     const kit = resolveHeadToHeadKitColors("ESP", "NOR");

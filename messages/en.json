@@ -185,7 +185,7 @@
     },
     "teamRound": {
       "label": "Show teams",
-      "hint": "Filter the table by furthest round reached. Choosing an earlier round also limits which matches count toward averages.",
+      "hint": "Filter the table by furthest round reached. Changing the round clears selected teams; picking teams that fell short moves this filter down to their shared furthest round.",
       "teamCount": "{count} teams",
       "loadingCount": "…",
       "groupShort": "All",

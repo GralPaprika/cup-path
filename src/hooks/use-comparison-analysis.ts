@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComparisonEntry, PathStage } from "@/lib/types";
 import {
   parseTeamRound,
   serializePathStages,
+  stageIndex,
   stagesAlignedToTeamRound,
   stagesForTeamRoundChange,
   visibleCountStages,
@@ -25,9 +26,16 @@ export function useComparisonAnalysis() {
   const { mode } = useRankingMode();
   const [stages, setStages, stagesHydrated] = usePersistedPathStages("compare");
   const [teamRound, setTeamRound] = useState<PathStage>(() => parseTeamRound(null));
+  const teamRoundRef = useRef(teamRound);
+  teamRoundRef.current = teamRound;
   const [filtersHydrated, setFiltersHydrated] = useState(false);
-  const [teamAId, setTeamAId] = useUrlParamState("/compare", "team");
-  const [teamBId, setTeamBId] = useUrlParamState("/compare", "vs");
+  const [urlTeamAId, setUrlTeamAId] = useUrlParamState("/compare", "team");
+  const [urlTeamBId, setUrlTeamBId] = useUrlParamState("/compare", "vs");
+  // replaceState does not always update useSearchParams; ignore URL teams after a
+  // user-driven Show-teams change until they pick teams again.
+  const [ignoreUrlTeams, setIgnoreUrlTeams] = useState(false);
+  const teamAId = ignoreUrlTeams ? "" : urlTeamAId;
+  const teamBId = ignoreUrlTeams ? "" : urlTeamBId;
   const [entries, setEntries] = useState<ComparisonEntry[]>([]);
   const [cohortStage, setCohortStage] = useState<PathStage>("group");
   const [cohortSize, setCohortSize] = useState(48);
@@ -37,6 +45,16 @@ export function useComparisonAnalysis() {
   );
   const { data: teamsData } = useApiQuery<TeamsResponse>("/api/teams", [mode]);
   const teamList = teamsData?.teams ?? [];
+
+  function setTeamAId(next: string) {
+    setIgnoreUrlTeams(false);
+    setUrlTeamAId(next);
+  }
+
+  function setTeamBId(next: string) {
+    setIgnoreUrlTeams(false);
+    setUrlTeamBId(next);
+  }
 
   useEffect(() => {
     if (!stagesHydrated) return;
@@ -87,6 +105,29 @@ export function useComparisonAnalysis() {
     },
   );
 
+  function applyTeamRound(next: PathStage, fromRound: PathStage) {
+    if (fromRound === next) return;
+    setStages((currentStages) =>
+      stagesForTeamRoundChange(fromRound, next, currentStages),
+    );
+    setTeamRound(next);
+    writeTeamRoundPreference("compare", next);
+  }
+
+  function handleTeamRoundChange(next: PathStage) {
+    if (next === teamRound) return;
+    setIgnoreUrlTeams(true);
+    setUrlTeamAId("");
+    setUrlTeamBId("");
+    setMaxStageReached(undefined);
+    applyTeamRound(next, teamRound);
+  }
+
+  const teamAIdRef = useRef(teamAId);
+  const teamBIdRef = useRef(teamBId);
+  teamAIdRef.current = teamAId;
+  teamBIdRef.current = teamBId;
+
   useEffect(() => {
     if (!rawComparison) return;
 
@@ -95,18 +136,24 @@ export function useComparisonAnalysis() {
     setCohortStage(rawComparison.cohortStage);
     setCohortSize(rawComparison.cohortSize);
     setMaxStageReached(rawComparison.maxStageReached);
+
+    // Only clamp from a fresh response — never re-clamp when teamRound alone
+    // changes against stale data that still reflects the previous pair.
+    const reached = rawComparison.maxStageReached;
+    const currentRound = teamRoundRef.current;
+    const hasTeam = Boolean(teamAIdRef.current || teamBIdRef.current);
+    if (
+      hasTeam &&
+      reached &&
+      stageIndex(currentRound) > stageIndex(reached)
+    ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync round to team reach
+      applyTeamRound(reached, currentRound);
+    }
   }, [rawComparison]);
 
   function handleStagesChange(next: Set<PathStage>) {
     setStages(next);
-  }
-
-  function handleTeamRoundChange(next: PathStage) {
-    setStages((currentStages) =>
-      stagesForTeamRoundChange(teamRound, next, currentStages),
-    );
-    setTeamRound(next);
-    writeTeamRoundPreference("compare", next);
   }
 
   return {

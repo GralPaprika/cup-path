@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import type { ComparisonEntry, PathStage } from "@/lib/types";
 import {
   parseTeamRound,
@@ -26,8 +26,6 @@ export function useComparisonAnalysis() {
   const { mode } = useRankingMode();
   const [stages, setStages, stagesHydrated] = usePersistedPathStages("compare");
   const [teamRound, setTeamRound] = useState<PathStage>(() => parseTeamRound(null));
-  const teamRoundRef = useRef(teamRound);
-  teamRoundRef.current = teamRound;
   const [filtersHydrated, setFiltersHydrated] = useState(false);
   const [urlTeamAId, setUrlTeamAId] = useUrlParamState("/compare", "team");
   const [urlTeamBId, setUrlTeamBId] = useUrlParamState("/compare", "vs");
@@ -58,9 +56,8 @@ export function useComparisonAnalysis() {
 
   useEffect(() => {
     if (!stagesHydrated) return;
-    // Hydrate team round once after stage preferences load from localStorage.
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- preference hydration
     const hydratedRound = readInitialTeamRound("compare");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- preference hydration
     setTeamRound(hydratedRound);
     setStages((current) => stagesAlignedToTeamRound(hydratedRound, current));
     setFiltersHydrated(true);
@@ -123,33 +120,31 @@ export function useComparisonAnalysis() {
     applyTeamRound(next, teamRound);
   }
 
-  const teamAIdRef = useRef(teamAId);
-  const teamBIdRef = useRef(teamBId);
-  teamAIdRef.current = teamAId;
-  teamBIdRef.current = teamBId;
+  // Read latest teamRound / team ids when a fresh response arrives without
+  // re-running on those values alone (avoids clamping against stale data).
+  const syncComparisonResult = useEffectEvent(
+    (raw: ComparisonAnalysisResult & { teamRound: PathStage }) => {
+      setEntries(raw.comparison);
+      setTeamCounts(raw.teamCounts);
+      setCohortStage(raw.cohortStage);
+      setCohortSize(raw.cohortSize);
+      setMaxStageReached(raw.maxStageReached);
+
+      const reached = raw.maxStageReached;
+      if (
+        Boolean(teamAId || teamBId) &&
+        reached &&
+        stageIndex(teamRound) > stageIndex(reached)
+      ) {
+        applyTeamRound(reached, teamRound);
+      }
+    },
+  );
 
   useEffect(() => {
     if (!rawComparison) return;
-
-    setEntries(rawComparison.comparison);
-    setTeamCounts(rawComparison.teamCounts);
-    setCohortStage(rawComparison.cohortStage);
-    setCohortSize(rawComparison.cohortSize);
-    setMaxStageReached(rawComparison.maxStageReached);
-
-    // Only clamp from a fresh response — never re-clamp when teamRound alone
-    // changes against stale data that still reflects the previous pair.
-    const reached = rawComparison.maxStageReached;
-    const currentRound = teamRoundRef.current;
-    const hasTeam = Boolean(teamAIdRef.current || teamBIdRef.current);
-    if (
-      hasTeam &&
-      reached &&
-      stageIndex(currentRound) > stageIndex(reached)
-    ) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync round to team reach
-      applyTeamRound(reached, currentRound);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync local view to comparison response
+    syncComparisonResult(rawComparison);
   }, [rawComparison]);
 
   function handleStagesChange(next: Set<PathStage>) {

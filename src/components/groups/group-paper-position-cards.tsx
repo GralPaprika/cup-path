@@ -195,7 +195,7 @@ export function GroupPaperPositionCards({
           })}
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
         {merged.map(({ entry, eliminated }) => (
           <PositionMissCard
             key={entry.team.id}

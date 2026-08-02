@@ -143,7 +143,7 @@ export function GroupExpectedFinishesPanel({
       </div>
 
       {analysis.winLossMatches.length > 0 && (
-        <StorySection title={t("storyWinLossTitle")} lead={t("storyWinLossLead")}>
+        <StorySection title={t("storyWinLossTitle")}>
           <p className="text-sm text-muted-foreground">
             {t("winLossDistributionSummary", {
               count: analysis.actualWinLossCount,

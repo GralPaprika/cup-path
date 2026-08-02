@@ -7,6 +7,7 @@ import {
   usePaginatedRows,
 } from "@/components/tables/use-paginated-rows";
 import { FactsTablePagination } from "@/components/tables/facts-table-pagination";
+import { GroupGapMatchMobileRow } from "@/components/groups/group-gap-match-mobile-row";
 import { FactsMatchCell } from "@/components/tables/facts-match-cell";
 import { SortButton, type SortDirection } from "@/components/tables/sort-button";
 import { TableSearchInput } from "@/components/tables/table-search-input";
@@ -113,60 +114,28 @@ export function GroupWinLossTable({
         <>
           <ul className="divide-y divide-white/6 rounded-xl border border-white/8 md:hidden">
             {visibleMatches.map((entry) => (
-              <li
+              <GroupGapMatchMobileRow
                 key={entryKey(entry)}
-                className={cn(
-                  "space-y-1 px-2 py-1.5",
-                  entry.upsetWin && "bg-wc-orange/10",
-                )}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {entry.groupLetter}
-                  </span>
-                  {entry.isWinLossGapOutlier ? (
+                team1={entry.team1}
+                team2={entry.team2}
+                scoreLabel={entry.scoreLabel}
+                team1FifaPoints={entry.team1FifaPoints}
+                team2FifaPoints={entry.team2FifaPoints}
+                gapPoints={entry.gapPoints}
+                groupLetter={entry.groupLetter}
+                vsLabel={t("vs")}
+                gapLabel={t("drawsColumnGap")}
+                highlightClassName={
+                  entry.upsetWin ? "bg-wc-orange/10" : undefined
+                }
+                badge={
+                  entry.isWinLossGapOutlier ? (
                     <span className="inline-flex rounded-md border border-wc-orange/40 bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
                       {t("upsetWinBadge")}
                     </span>
-                  ) : null}
-                </div>
-                <FactsMatchCell
-                  team1={entry.team1}
-                  team2={entry.team2}
-                  vsLabel={t("vs")}
-                  score={
-                    <span className="font-mono tabular-nums text-muted-foreground">
-                      {entry.scoreLabel}
-                    </span>
-                  }
-                />
-                <dl className="grid grid-cols-3 gap-1.5 text-[11px]">
-                  <div>
-                    <dt className="text-muted-foreground">
-                      {entry.team1.id}
-                    </dt>
-                    <dd className="font-mono tabular-nums text-muted-foreground">
-                      {formatFifaPoints(entry.team1FifaPoints)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-muted-foreground">
-                      {entry.team2.id}
-                    </dt>
-                    <dd className="font-mono tabular-nums text-muted-foreground">
-                      {formatFifaPoints(entry.team2FifaPoints)}
-                    </dd>
-                  </div>
-                  <div className="text-right">
-                    <dt className="text-muted-foreground">
-                      {t("drawsColumnGap")}
-                    </dt>
-                    <dd className="font-mono tabular-nums text-wc-orange">
-                      {formatFifaPoints(entry.gapPoints)}
-                    </dd>
-                  </div>
-                </dl>
-              </li>
+                  ) : null
+                }
+              />
             ))}
           </ul>
 
@@ -234,44 +203,48 @@ export function GroupWinLossTable({
             </table>
           </div>
 
-          <div className="space-y-1">
-            {filteredRows.some((entry) => entry.upsetWin) && (
+          <div className="flex flex-col gap-3">
+            <div className="order-2 space-y-1 md:order-1">
+              {filteredRows.some((entry) => entry.upsetWin) && (
+                <p className="text-xs text-muted-foreground">
+                  {t("winLossTableUnderdogHint")}
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">
-                {t("winLossTableUnderdogHint")}
+                {t("winLossTableUpsetHint")}
               </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              {t("winLossTableUpsetHint")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("winLossTableGapHint")}
-            </p>
-          </div>
+              <p className="text-xs text-muted-foreground">
+                {t("winLossTableGapHint")}
+              </p>
+            </div>
 
-          {showPagination && (
-            <FactsTablePagination
-              pageSize={FACTS_TABLE_PAGE_SIZE}
-              totalItems={sortedMatches.length}
-              safePage={safePage}
-              totalPages={totalPages}
-              onPrev={prevPage}
-              onNext={nextPage}
-              pageInfo={t("drawsTablePageInfo", {
-                start: pageStart + 1,
-                end: Math.min(
-                  pageStart + FACTS_TABLE_PAGE_SIZE,
-                  sortedMatches.length,
-                ),
-                total: sortedMatches.length,
-              })}
-              pageCount={t("drawsTablePageCount", {
-                page: safePage + 1,
-                totalPages,
-              })}
-              prevLabel={t("drawsTablePrev")}
-              nextLabel={t("drawsTableNext")}
-            />
-          )}
+            {showPagination && (
+              <div className="order-1 md:order-2">
+                <FactsTablePagination
+                  pageSize={FACTS_TABLE_PAGE_SIZE}
+                  totalItems={sortedMatches.length}
+                  safePage={safePage}
+                  totalPages={totalPages}
+                  onPrev={prevPage}
+                  onNext={nextPage}
+                  pageInfo={t("drawsTablePageInfo", {
+                    start: pageStart + 1,
+                    end: Math.min(
+                      pageStart + FACTS_TABLE_PAGE_SIZE,
+                      sortedMatches.length,
+                    ),
+                    total: sortedMatches.length,
+                  })}
+                  pageCount={t("drawsTablePageCount", {
+                    page: safePage + 1,
+                    totalPages,
+                  })}
+                  prevLabel={t("drawsTablePrev")}
+                  nextLabel={t("drawsTableNext")}
+                />
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

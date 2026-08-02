@@ -31,12 +31,17 @@ export interface GapDistributionChartProps {
 
 const WIDTH = 640;
 const HEIGHT = 120;
-const HEIGHT_PHONE = 96;
+const HEIGHT_PHONE = 200;
 const MARGIN = { top: 16, right: 16, bottom: 28, left: 16 };
-const MARGIN_PHONE = { top: 12, right: 12, bottom: 22, left: 12 };
+const MARGIN_PHONE = { top: 16, right: 12, bottom: 26, left: 12 };
 const DOT_RADIUS = 5;
 const DOT_RADIUS_HOVERED = 6.5;
 const HIT_RADIUS = 10;
+const DOT_RADIUS_PHONE = 8.5;
+const DOT_RADIUS_HOVERED_PHONE = 10;
+const HIT_RADIUS_PHONE = 14;
+const OUTLIER_RING_RADIUS = 8;
+const OUTLIER_RING_RADIUS_PHONE = 12.5;
 
 function svgCoordsToScreen(
   svg: SVGSVGElement,
@@ -65,6 +70,14 @@ export function GapDistributionChart({
   const isMdUp = useMinWidthMd();
   const height = isMdUp ? HEIGHT : HEIGHT_PHONE;
   const margin = isMdUp ? MARGIN : MARGIN_PHONE;
+  const dotRadius = isMdUp ? DOT_RADIUS : DOT_RADIUS_PHONE;
+  const dotRadiusHovered = isMdUp
+    ? DOT_RADIUS_HOVERED
+    : DOT_RADIUS_HOVERED_PHONE;
+  const hitRadius = isMdUp ? HIT_RADIUS : HIT_RADIUS_PHONE;
+  const outlierRingRadius = isMdUp
+    ? OUTLIER_RING_RADIUS
+    : OUTLIER_RING_RADIUS_PHONE;
   const [hoveredPoint, setHoveredPoint] = useState<{
     point: GapChartPoint;
     x: number;
@@ -215,7 +228,7 @@ export function GapDistributionChart({
                   <circle
                     cx={cx}
                     cy={cy}
-                    r={8}
+                    r={outlierRingRadius}
                     fill="none"
                     className={cn(
                       "stroke-wc-orange transition-opacity",
@@ -228,14 +241,14 @@ export function GapDistributionChart({
                   <circle
                     cx={cx}
                     cy={cy}
-                    r={HIT_RADIUS}
+                    r={hitRadius}
                     fill="transparent"
                   />
                 ) : null}
                 <circle
                   cx={cx}
                   cy={cy}
-                  r={isHovered ? DOT_RADIUS_HOVERED : DOT_RADIUS}
+                  r={isHovered ? dotRadiusHovered : dotRadius}
                   className={cn(
                     point.dotClassName,
                     "transition-all duration-150",

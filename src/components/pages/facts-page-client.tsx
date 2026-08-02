@@ -21,8 +21,8 @@ import type { KnockoutFactsRoundId } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
-/** Extra offset below sticky chip nav on small screens. */
-const SECTION_SCROLL_MT = "scroll-mt-20 lg:scroll-mt-4";
+/** Clear fixed mobile header; on lg clear sticky top section nav. */
+const SECTION_SCROLL_MT = "scroll-mt-16 lg:scroll-mt-20";
 
 function availableKnockoutRoundsFromFacts(
   facts: TournamentFacts,
@@ -80,110 +80,108 @@ export function FactsPageClient() {
       )}
 
       {facts && (
-        <div className="grid min-w-0 gap-4 sm:gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <div className="min-w-0 w-full space-y-4 sm:space-y-6">
           <FactsSectionNav
             availableKnockoutRounds={availableKnockoutRoundsFromFacts(facts)}
           />
 
-          <div className="min-w-0 w-full space-y-4 sm:space-y-6">
-            <section
-              id="introduction"
-              className={`${SECTION_SCROLL_MT} glass-panel min-w-0 max-w-full overflow-hidden p-3 sm:p-5 md:p-6`}
-            >
-              <IntroductionSection teamTiers={facts.teamTiers} />
-            </section>
+          <section
+            id="introduction"
+            className={`${SECTION_SCROLL_MT} glass-panel min-w-0 max-w-full overflow-hidden p-3 sm:p-5 md:p-6`}
+          >
+            <IntroductionSection teamTiers={facts.teamTiers} />
+          </section>
 
-            <section id="tournament-snapshot" className={SECTION_SCROLL_MT}>
-              {facts.matchOutcomeGap &&
-              facts.matchOutcomeGap.matches.length > 0 ? (
-                <MatchOutcomeGapPanel dataset={facts.matchOutcomeGap} />
-              ) : (
-                <div className="glass-panel p-3 text-sm text-muted-foreground sm:p-5 md:p-6">
-                  {t("sectionNav.snapshotEmpty")}
-                </div>
-              )}
-            </section>
-
-            <section
-              id="group-round"
-              className={`${SECTION_SCROLL_MT} glass-panel space-y-4 p-3 sm:space-y-6 sm:p-5 md:p-6`}
-            >
-              <div>
-                <h2 className="text-lg font-semibold text-white">
-                  {t("groupStagePool.title")}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t("groupStagePool.subtitle", {
-                    count: facts.groupStagePool.teamCount,
-                  })}
-                </p>
+          <section id="tournament-snapshot" className={SECTION_SCROLL_MT}>
+            {facts.matchOutcomeGap &&
+            facts.matchOutcomeGap.matches.length > 0 ? (
+              <MatchOutcomeGapPanel dataset={facts.matchOutcomeGap} />
+            ) : (
+              <div className="glass-panel p-3 text-sm text-muted-foreground sm:p-5 md:p-6">
+                {t("sectionNav.snapshotEmpty")}
               </div>
+            )}
+          </section>
 
-              <ParticipantPoolSection
-                embedded
-                avgFifaPointsLabel={t("groupStagePool.avgFifaPoints")}
-                medianFifaRankLabel={t("groupStagePool.medianFifaRank")}
-                lowestRankedQualifierLabel={t(
-                  "groupStagePool.lowestRankedQualifier",
-                )}
-                avgFifaPoints={facts.groupStagePool.avgFifaPoints}
-                avgFifaPointsContext={facts.groupStagePool.avgFifaPointsContext}
-                medianFifaRank={facts.groupStagePool.medianFifaRank}
-                lowestRankedQualifier={
-                  facts.groupStagePool.lowestRankedQualifier
-                    ? {
-                        team: facts.groupStagePool.lowestRankedQualifier.team,
-                        fifaRank:
-                          facts.groupStagePool.lowestRankedQualifier.fifaRank,
-                        fifaPoints:
-                          facts.groupStagePool.lowestRankedQualifier.fifaPoints,
-                        hint: t("groupStagePool.lowestRankedQualifierHint", {
-                          group:
-                            facts.groupStagePool.lowestRankedQualifier
-                              .groupLetter,
-                        }),
-                      }
-                    : null
-                }
-              />
+          <section
+            id="group-round"
+            className={`${SECTION_SCROLL_MT} glass-panel space-y-4 p-3 sm:space-y-6 sm:p-5 md:p-6`}
+          >
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                {t("groupStagePool.title")}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("groupStagePool.subtitle", {
+                  count: facts.groupStagePool.teamCount,
+                })}
+              </p>
+            </div>
 
-              {facts.groupExpectedAnalysis && (
-                <GroupExpectedFinishesPanel
-                  embedded
-                  analysis={facts.groupExpectedAnalysis}
-                  groupStageDifficulty={facts.groupStageDifficulty}
-                />
+            <ParticipantPoolSection
+              embedded
+              avgFifaPointsLabel={t("groupStagePool.avgFifaPoints")}
+              medianFifaRankLabel={t("groupStagePool.medianFifaRank")}
+              lowestRankedQualifierLabel={t(
+                "groupStagePool.lowestRankedQualifier",
               )}
-            </section>
+              avgFifaPoints={facts.groupStagePool.avgFifaPoints}
+              avgFifaPointsContext={facts.groupStagePool.avgFifaPointsContext}
+              medianFifaRank={facts.groupStagePool.medianFifaRank}
+              lowestRankedQualifier={
+                facts.groupStagePool.lowestRankedQualifier
+                  ? {
+                      team: facts.groupStagePool.lowestRankedQualifier.team,
+                      fifaRank:
+                        facts.groupStagePool.lowestRankedQualifier.fifaRank,
+                      fifaPoints:
+                        facts.groupStagePool.lowestRankedQualifier.fifaPoints,
+                      hint: t("groupStagePool.lowestRankedQualifierHint", {
+                        group:
+                          facts.groupStagePool.lowestRankedQualifier
+                            .groupLetter,
+                      }),
+                    }
+                  : null
+              }
+            />
 
-            {KNOCKOUT_FACTS_ROUNDS.map((round) => {
-              const analysis = facts.knockoutAnalyses[round.id];
-              if (!analysis) return null;
-              return (
-                <section
-                  key={round.id}
-                  id={KNOCKOUT_SECTION_IDS[round.id]}
-                  className={SECTION_SCROLL_MT}
-                >
-                  <KnockoutStagePanel
-                    round={round}
-                    analysis={analysis}
-                  />
-                </section>
-              );
-            })}
+            {facts.groupExpectedAnalysis && (
+              <GroupExpectedFinishesPanel
+                embedded
+                analysis={facts.groupExpectedAnalysis}
+                groupStageDifficulty={facts.groupStageDifficulty}
+              />
+            )}
+          </section>
 
-            <p className="text-xs text-muted-foreground">
-              {t("methodologyNote")}{" "}
-              <Link href="/about" className="text-wc-sky hover:underline">
-                {t("methodologyLink")}
-              </Link>
-              {" · "}
-              <Link href="/compare" className="text-wc-sky hover:underline">
-                {t("compareAllPaths")}
-              </Link>
-            </p>
-          </div>
+          {KNOCKOUT_FACTS_ROUNDS.map((round) => {
+            const analysis = facts.knockoutAnalyses[round.id];
+            if (!analysis) return null;
+            return (
+              <section
+                key={round.id}
+                id={KNOCKOUT_SECTION_IDS[round.id]}
+                className={SECTION_SCROLL_MT}
+              >
+                <KnockoutStagePanel
+                  round={round}
+                  analysis={analysis}
+                />
+              </section>
+            );
+          })}
+
+          <p className="text-xs text-muted-foreground">
+            {t("methodologyNote")}{" "}
+            <Link href="/about" className="text-wc-sky hover:underline">
+              {t("methodologyLink")}
+            </Link>
+            {" · "}
+            <Link href="/compare" className="text-wc-sky hover:underline">
+              {t("compareAllPaths")}
+            </Link>
+          </p>
         </div>
       )}
     </div>

@@ -26,63 +26,66 @@ export function FactsPageSkeleton() {
         <Skeleton className="mt-1 h-4 w-full max-w-3xl bg-white/10 sm:h-5" />
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-        <aside className="glass-panel h-fit space-y-6 p-5">
-          {Array.from({ length: 2 }).map((_, groupIndex) => (
-            <div key={groupIndex} className="space-y-3">
-              <Skeleton className="h-2.5 w-20 bg-white/10" />
-              {Array.from({ length: groupIndex === 0 ? 3 : 4 }).map(
-                (__, itemIndex) => (
-                  <Skeleton
-                    key={itemIndex}
-                    className="h-7 w-full rounded-lg bg-white/10"
-                  />
-                ),
-              )}
-            </div>
-          ))}
-        </aside>
-
-        <div className="space-y-6">
-          <div className="glass-panel space-y-4 p-5 sm:p-6">
-            <Skeleton className="h-6 w-40 bg-white/10" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full bg-white/10" />
-              <Skeleton className="h-4 w-[92%] bg-white/10" />
-              <Skeleton className="h-4 w-full bg-white/10" />
-              <Skeleton className="h-4 w-[80%] bg-white/10" />
-            </div>
-            <Skeleton className="h-40 w-full rounded-xl bg-white/10" />
-          </div>
-
-          <div className="glass-panel overflow-hidden">
-            <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
-              <Skeleton className="h-6 w-56 bg-white/10" />
-              <Skeleton className="mt-1 h-4 w-80 max-w-full bg-white/10" />
-            </div>
-            <div className="space-y-4 p-5 sm:p-6">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <Skeleton key={index} className="h-16 rounded-lg bg-white/10" />
-                ))}
+      <div className="space-y-6">
+        <div className="-mx-4 hidden border-b border-white/10 bg-wc-navy/95 px-4 py-2.5 sm:-mx-6 sm:px-6 lg:block">
+          <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-2">
+            {Array.from({ length: 2 }).map((_, groupIndex) => (
+              <div
+                key={groupIndex}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1.5"
+              >
+                <Skeleton className="h-2.5 w-16 bg-white/10" />
+                {Array.from({ length: groupIndex === 0 ? 3 : 4 }).map(
+                  (__, itemIndex) => (
+                    <Skeleton
+                      key={itemIndex}
+                      className="h-7 w-24 rounded-lg bg-white/10"
+                    />
+                  ),
+                )}
               </div>
-              <Skeleton className="h-52 w-full rounded-xl bg-white/10" />
-            </div>
+            ))}
           </div>
-
-          <div className="glass-panel space-y-6 p-5 sm:p-6">
-            <div>
-              <Skeleton className="h-6 w-48 bg-white/10" />
-              <Skeleton className="mt-1 h-4 w-72 max-w-full bg-white/10" />
-            </div>
-            <ParticipantPoolSectionSkeleton embedded />
-            <CollapsibleSectionSkeleton embedded />
-          </div>
-
-          {KNOCKOUT_FACTS_ROUNDS.map((round) => (
-            <KnockoutRoundSkeleton key={round.id} />
-          ))}
         </div>
+
+        <div className="glass-panel space-y-4 p-5 sm:p-6">
+          <Skeleton className="h-6 w-40 bg-white/10" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full bg-white/10" />
+            <Skeleton className="h-4 w-[92%] bg-white/10" />
+            <Skeleton className="h-4 w-full bg-white/10" />
+            <Skeleton className="h-4 w-[80%] bg-white/10" />
+          </div>
+          <Skeleton className="h-40 w-full rounded-xl bg-white/10" />
+        </div>
+
+        <div className="glass-panel overflow-hidden">
+          <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
+            <Skeleton className="h-6 w-56 bg-white/10" />
+            <Skeleton className="mt-1 h-4 w-80 max-w-full bg-white/10" />
+          </div>
+          <div className="space-y-4 p-5 sm:p-6">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton key={index} className="h-16 rounded-lg bg-white/10" />
+              ))}
+            </div>
+            <Skeleton className="h-52 w-full rounded-xl bg-white/10" />
+          </div>
+        </div>
+
+        <div className="glass-panel space-y-6 p-5 sm:p-6">
+          <div>
+            <Skeleton className="h-6 w-48 bg-white/10" />
+            <Skeleton className="mt-1 h-4 w-72 max-w-full bg-white/10" />
+          </div>
+          <ParticipantPoolSectionSkeleton embedded />
+          <CollapsibleSectionSkeleton embedded />
+        </div>
+
+        {KNOCKOUT_FACTS_ROUNDS.map((round) => (
+          <KnockoutRoundSkeleton key={round.id} />
+        ))}
       </div>
     </div>
   );

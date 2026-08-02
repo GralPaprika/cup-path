@@ -75,28 +75,36 @@ export function FactsSectionNav({
     <nav
       aria-label={t("sectionNav.label")}
       className={cn(
-        "glass-panel hidden h-fit p-5 lg:sticky lg:top-[var(--shell-sticky-top)] lg:block",
+        "sticky top-0 z-20 -mx-3 hidden border-b border-white/10 bg-wc-navy/95 px-3 py-2.5 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:block",
         className,
       )}
     >
-      <div className="space-y-6">
-        {groups.map((group) => (
-          <div key={group.heading}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              {group.heading}
-            </p>
-            <ul className="mt-3 space-y-1">
-              {group.items.map((item) => (
-                <li key={item.id}>
-                  <a
-                    href={`#${item.id}`}
-                    className="block rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-white/6 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wc-sky"
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+      <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2">
+        {groups.map((group, groupIndex) => (
+          <div key={group.heading} className="contents">
+            {groupIndex > 0 && (
+              <span
+                aria-hidden
+                className="size-1 shrink-0 rounded-full bg-white/35"
+              />
+            )}
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
+              <p className="shrink-0 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                {group.heading}
+              </p>
+              <ul className="flex min-w-0 flex-wrap items-center gap-1">
+                {group.items.map((item) => (
+                  <li key={item.id}>
+                    <a
+                      href={`#${item.id}`}
+                      className="block rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-white/6 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wc-sky"
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         ))}
       </div>

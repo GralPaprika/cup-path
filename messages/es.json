@@ -198,7 +198,7 @@
     },
     "stages": {
       "label": "Incluir fases",
-      "includeLabel": "Contar partidos desde",
+      "includeLabel": "Contar partidos de las rondas",
       "includeHint": "Qué fases aportan a los promedios",
       "selectAll": "Seleccionar todo",
       "groupStage": "Grupos",

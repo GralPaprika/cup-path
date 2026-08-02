@@ -19,10 +19,10 @@ function dotClassName(fixture: KnockoutFixtureEntry): string {
 }
 
 function fixtureScoreLabel(fixture: KnockoutFixtureEntry): string {
-  const parts = [fixture.scoreFt];
-  if (fixture.scoreEt) parts.push(`ET ${fixture.scoreEt}`);
-  if (fixture.scorePens) parts.push(`Pens ${fixture.scorePens}`);
-  return parts.join(" · ");
+  const finalScore = fixture.scoreEt ?? fixture.scoreFt;
+  if (fixture.scorePens) return `${finalScore} (${fixture.scorePens})`;
+  if (fixture.scoreEt) return `${finalScore} ET`;
+  return finalScore;
 }
 
 export function KnockoutStageGapChart({

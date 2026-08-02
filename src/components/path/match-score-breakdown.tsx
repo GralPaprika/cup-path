@@ -10,6 +10,14 @@ interface MatchScoreBreakdownProps {
   ftClassName?: string;
 }
 
+/** Prefer ET (final after 120') when present; otherwise full-time. */
+export function resolveFinalScoreLabel(
+  ft: string,
+  et?: string | null,
+): string {
+  return et ?? ft;
+}
+
 export function MatchScoreBreakdown({
   ft,
   et,
@@ -19,26 +27,22 @@ export function MatchScoreBreakdown({
   ftClassName = "text-muted-foreground",
 }: MatchScoreBreakdownProps) {
   const t = useTranslations("common");
+  const finalScore = resolveFinalScoreLabel(ft, et);
+  const wentToEt = Boolean(et);
 
   return (
     <div
       className={cn(
-        "flex flex-col gap-0.5 font-mono tabular-nums leading-tight",
+        "flex font-mono tabular-nums leading-tight",
         align === "center" ? "items-center text-center" : "items-start",
         className,
       )}
     >
-      <span className={ftClassName}>{ft}</span>
-      {et ? (
-        <span className="text-[10px] text-muted-foreground/85">
-          {t("scoreEt")} {et}
-        </span>
-      ) : null}
-      {pens ? (
-        <span className="text-[10px] text-muted-foreground/85">
-          {t("scorePens")} {pens}
-        </span>
-      ) : null}
+      <span className={ftClassName}>
+        {finalScore}
+        {wentToEt && !pens ? ` ${t("scoreEt")}` : null}
+        {pens ? ` (${pens})` : null}
+      </span>
     </div>
   );
 }

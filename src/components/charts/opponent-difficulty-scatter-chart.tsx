@@ -10,8 +10,8 @@ import { createPortal } from "react-dom";
 import { OpponentDifficultyScatterFifaLabels } from "@/components/charts/opponent-difficulty-scatter-fifa-labels";
 import { TableSearchInput } from "@/components/tables/table-search-input";
 import { Switch } from "@/components/ui/switch";
-import { useMinWidthLg } from "@/hooks/use-min-width-lg";
-import { useMinWidthMd } from "@/hooks/use-min-width-md";
+import { useMinWidthLg, useMinWidthMd } from "@/hooks/use-min-width";
+import { svgCoordsToScreen } from "@/lib/client/svg-coords";
 import { formatWholeNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -109,21 +109,6 @@ function generateTicks(min: number, max: number): number[] {
   }
 
   return ticks;
-}
-
-function svgCoordsToScreen(
-  svg: SVGSVGElement,
-  x: number,
-  y: number,
-): { x: number; y: number } | null {
-  const ctm = svg.getScreenCTM();
-  if (!ctm) return null;
-
-  const point = svg.createSVGPoint();
-  point.x = x;
-  point.y = y;
-  const screen = point.matrixTransform(ctm);
-  return { x: screen.x, y: screen.y };
 }
 
 export function OpponentDifficultyScatterChart<TTooltip>({

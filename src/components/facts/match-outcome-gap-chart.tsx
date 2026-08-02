@@ -17,7 +17,8 @@ import {
   MATCH_OUTCOME_GAP_BINS,
   type MatchOutcomeGapBinId,
 } from "@/lib/domain/match/match-outcome-gap";
-import { useMinWidthMd } from "@/hooks/use-min-width-md";
+import { useMinWidthMd } from "@/hooks/use-min-width";
+import { svgCoordsToScreen } from "@/lib/client/svg-coords";
 import { cn } from "@/lib/utils";
 
 export interface MatchOutcomeGapBinStats {
@@ -242,21 +243,6 @@ function buildBinStats(
       lossPct: total > 0 ? (losses / total) * 100 : 0,
     };
   });
-}
-
-function svgCoordsToScreen(
-  svg: SVGSVGElement,
-  x: number,
-  y: number,
-): { x: number; y: number } | null {
-  const ctm = svg.getScreenCTM();
-  if (!ctm) return null;
-
-  const point = svg.createSVGPoint();
-  point.x = x;
-  point.y = y;
-  const screen = point.matrixTransform(ctm);
-  return { x: screen.x, y: screen.y };
 }
 
 function applyDotTransform(

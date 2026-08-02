@@ -19,7 +19,7 @@ import {
 } from "@/components/path-points-chart/legend-items";
 import { MatchSlotLabelGrid } from "@/components/path-points-chart/match-slot-label-grid";
 import { OpponentBar } from "@/components/path-points-chart/opponent-bar";
-import { useMinWidthLg } from "@/hooks/use-min-width-lg";
+import { useMinWidthLg } from "@/hooks/use-min-width";
 import { useTranslations } from "next-intl";
 
 const PATH_CHART_HEIGHT_NARROW = 380;

@@ -1,47 +1,19 @@
 "use client";
 
-import type { KnockoutFixtureEntry, Team } from "@/lib/types";
-import { TeamFlag } from "@/components/team/team-flag";
+import type { KnockoutFixtureEntry } from "@/lib/types";
+import {
+  FixturePreviewTeamRow,
+  splitScoreLabel,
+} from "@/components/shared/fixture-preview-teams";
 import { resolveFinalScoreLabel } from "@/components/path/match-score-breakdown";
-import { formatFifaPoints } from "@/lib/format";
 import { useTranslations } from "next-intl";
 
 interface KnockoutFixturePreviewProps {
   fixture: KnockoutFixtureEntry;
 }
 
-function splitScoreLabel(scoreLabel: string): [string, string] {
-  const [home = "—", away = "—"] = scoreLabel.split("-");
-  return [home, away];
-}
-
 function formatTeamGoals(goals: string, pensGoals: string | null): string {
   return pensGoals ? `${goals} (${pensGoals})` : goals;
-}
-
-function TeamRow({
-  team,
-  fifaPoints,
-  goals,
-}: {
-  team: Team;
-  fifaPoints: number | null;
-  goals: string;
-}) {
-  return (
-    <div className="flex min-w-0 items-center gap-1.5">
-      <TeamFlag team={team} size="sm" />
-      <p className="min-w-0 truncate font-mono text-[11px] font-semibold text-white">
-        {team.id}
-      </p>
-      <p className="shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">
-        {formatFifaPoints(fifaPoints)}
-      </p>
-      <span className="ml-auto shrink-0 font-mono text-[11px] font-semibold tabular-nums text-white">
-        {goals}
-      </span>
-    </div>
-  );
 }
 
 export function KnockoutFixturePreview({ fixture }: KnockoutFixturePreviewProps) {
@@ -75,12 +47,12 @@ export function KnockoutFixturePreview({ fixture }: KnockoutFixturePreviewProps)
           </p>
         ) : null}
       </div>
-      <TeamRow
+      <FixturePreviewTeamRow
         team={fixture.team1}
         fifaPoints={fixture.team1FifaPoints}
         goals={formatTeamGoals(team1Goals, team1Pens)}
       />
-      <TeamRow
+      <FixturePreviewTeamRow
         team={fixture.team2}
         fifaPoints={fixture.team2FifaPoints}
         goals={formatTeamGoals(team2Goals, team2Pens)}

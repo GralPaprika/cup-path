@@ -7,7 +7,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { CHART_COLORS } from "@/lib/chart-colors";
-import { useMinWidthMd } from "@/hooks/use-min-width-md";
+import { useMinWidthMd } from "@/hooks/use-min-width";
+import { svgCoordsToScreen } from "@/lib/client/svg-coords";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -42,21 +43,6 @@ const DOT_RADIUS_HOVERED_PHONE = 10;
 const HIT_RADIUS_PHONE = 14;
 const OUTLIER_RING_RADIUS = 8;
 const OUTLIER_RING_RADIUS_PHONE = 12.5;
-
-function svgCoordsToScreen(
-  svg: SVGSVGElement,
-  x: number,
-  y: number,
-): { x: number; y: number } | null {
-  const ctm = svg.getScreenCTM();
-  if (!ctm) return null;
-
-  const point = svg.createSVGPoint();
-  point.x = x;
-  point.y = y;
-  const screen = point.matrixTransform(ctm);
-  return { x: screen.x, y: screen.y };
-}
 
 export function GapDistributionChart({
   points,

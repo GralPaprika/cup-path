@@ -149,7 +149,7 @@ export function GroupDrawsTable({
             })}
           </ul>
 
-          <div className="hidden overflow-x-auto md:block">
+          <div className="scrollbar-subtle hidden overflow-x-auto md:block">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead>
                 <tr className="border-b border-white/8 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">

@@ -2,7 +2,6 @@
 
 import type { LateKnockoutMatchSpotlight, LateKnockoutPathSide } from "@/lib/types";
 import { TeamFlag } from "@/components/team/team-flag";
-import { MatchResultLabel } from "@/components/shared/match-result-label";
 import { MatchScoreBreakdown } from "@/components/path/match-score-breakdown";
 import {
   resolveLateFavoriteOutcome,
@@ -200,30 +199,12 @@ export function LateKnockoutMatchSpotlightCard({
         />
 
         <div className="flex flex-col items-center gap-2 px-2 text-center">
-          <div className="flex items-center gap-2 font-mono text-sm">
-            <MatchResultLabel
-              result={team1Won ? "W" : "L"}
-              label={
-                team1Won
-                  ? shared("outcomeQualified")
-                  : shared("outcomeEliminated")
-              }
-            />
-            <MatchScoreBreakdown
-              ft={fixture.scoreFt}
-              et={fixture.scoreEt}
-              pens={fixture.scorePens}
-              ftClassName="text-white"
-            />
-            <MatchResultLabel
-              result={team2Won ? "W" : "L"}
-              label={
-                team2Won
-                  ? shared("outcomeQualified")
-                  : shared("outcomeEliminated")
-              }
-            />
-          </div>
+          <MatchScoreBreakdown
+            ft={fixture.scoreFt}
+            et={fixture.scoreEt}
+            pens={fixture.scorePens}
+            ftClassName="text-sm text-white"
+          />
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
               {shared("latePointsGap")}

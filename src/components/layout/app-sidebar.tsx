@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -98,20 +99,22 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
         className={cn("group min-w-0", collapsed ? "shrink-0" : "flex-1")}
       >
         {collapsed ? (
-          <img
+          <Image
             src="/brand/cuppath-mark.svg"
             alt="CupPath"
             width={40}
             height={40}
             className="size-9"
+            priority
           />
         ) : (
-          <img
+          <Image
             src="/brand/cuppath-lockup.svg"
             alt="CupPath"
             width={225}
             height={60}
             className="h-auto max-h-14 w-auto max-w-full"
+            priority
           />
         )}
       </Link>
@@ -184,12 +187,13 @@ export function AppSidebar() {
             <Menu />
           </Button>
           <Link href="/" aria-label="CupPath" className="min-w-0">
-            <img
+            <Image
               src="/brand/cuppath-lockup.svg"
               alt="CupPath"
               width={225}
               height={60}
               className="h-7 w-auto"
+              priority
             />
           </Link>
         </header>
@@ -208,7 +212,7 @@ export function AppSidebar() {
                   onClick={() => setMobileOpen(false)}
                   className="min-w-0"
                 >
-                  <img
+                  <Image
                     src="/brand/cuppath-lockup.svg"
                     alt="CupPath"
                     width={225}

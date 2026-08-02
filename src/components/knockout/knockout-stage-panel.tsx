@@ -140,7 +140,7 @@ function DistributionalDeepDive({
           <p className="mb-2 text-xs font-medium text-muted-foreground">
             {shared("qualifiedRow")}
           </p>
-          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2 md:gap-3 lg:grid-cols-4">
             <AtGlanceStatTile
               label={shared("avgGapQualified")}
               value={formatFifaPoints(analysis.meanGap)}

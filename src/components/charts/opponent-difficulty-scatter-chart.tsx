@@ -11,6 +11,7 @@ import { OpponentDifficultyScatterFifaLabels } from "@/components/charts/opponen
 import { TableSearchInput } from "@/components/tables/table-search-input";
 import { Switch } from "@/components/ui/switch";
 import { useMinWidthLg } from "@/hooks/use-min-width-lg";
+import { useMinWidthMd } from "@/hooks/use-min-width-md";
 import { formatWholeNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -66,9 +67,14 @@ export interface OpponentDifficultyScatterChartProps<TTooltip = unknown> {
 const WIDTH = 600;
 const HEIGHT = 280;
 const HEIGHT_NARROW = 340;
+const HEIGHT_PHONE = 420;
 const MARGIN = { top: 20, right: 16, bottom: 44, left: 58 };
 const MARGIN_NARROW = { top: 16, right: 12, bottom: 48, left: 48 };
+const MARGIN_PHONE = { top: 18, right: 12, bottom: 58, left: 58 };
 const DOT_RADIUS = 6;
+const DOT_RADIUS_PHONE = 9.5;
+const FIFA_LABEL_OFFSET_Y = 12;
+const FIFA_LABEL_OFFSET_Y_PHONE = 16;
 const TOOLTIP_OFFSET_X = 14;
 
 function fifaPointsDomain(values: number[]): { min: number; max: number } {
@@ -147,8 +153,20 @@ export function OpponentDifficultyScatterChart<TTooltip>({
   emptyFilteredMessage,
 }: OpponentDifficultyScatterChartProps<TTooltip>) {
   const isDesktop = useMinWidthLg();
-  const height = isDesktop ? HEIGHT : HEIGHT_NARROW;
-  const margin = isDesktop ? MARGIN : MARGIN_NARROW;
+  const isMdUp = useMinWidthMd();
+  const isPhone = !isMdUp;
+  const height = isDesktop ? HEIGHT : isPhone ? HEIGHT_PHONE : HEIGHT_NARROW;
+  const margin = isDesktop ? MARGIN : isPhone ? MARGIN_PHONE : MARGIN_NARROW;
+  const dotRadius = isPhone ? DOT_RADIUS_PHONE : DOT_RADIUS;
+  const fifaLabelOffsetY = isPhone
+    ? FIFA_LABEL_OFFSET_Y_PHONE
+    : FIFA_LABEL_OFFSET_Y;
+  const tickLabelClass = isPhone
+    ? "fill-muted-foreground text-[14px]"
+    : "fill-muted-foreground text-[9px]";
+  const axisLabelClass = isPhone
+    ? "fill-muted-foreground text-[12px] uppercase tracking-wide"
+    : "fill-muted-foreground text-[6px] uppercase tracking-wide";
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoveredPoint, setHoveredPoint] = useState<{
     point: OpponentDifficultyScatterPoint<TTooltip>;
@@ -311,7 +329,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
                 x={xScale(tick)}
                 y={baselineY + 16}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px]"
+                className={tickLabelClass}
               >
                 {formatWholeNumber(tick)}
               </text>
@@ -331,7 +349,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
                 x={baselineX - 8}
                 y={yScale(tick) + 3}
                 textAnchor="end"
-                className="fill-muted-foreground text-[9px]"
+                className={tickLabelClass}
               >
                 {formatWholeNumber(tick)}
               </text>
@@ -375,7 +393,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
                 <circle
                   cx={cx}
                   cy={cy}
-                  r={DOT_RADIUS}
+                  r={dotRadius}
                   className={
                     point.won
                       ? "fill-wc-green/85 transition-opacity hover:opacity-90"
@@ -413,6 +431,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
                 cx: xScale(point.teamFifaPoints),
                 cy: yScale(point.rivalDifficultyPoints),
               }))}
+              offsetY={fifaLabelOffsetY}
             />
           ) : null}
 
@@ -420,7 +439,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
             x={baselineX + chartWidth / 2}
             y={height - 6}
             textAnchor="middle"
-            className="fill-muted-foreground text-[6px] uppercase tracking-wide"
+            className={axisLabelClass}
           >
             {xAxisLabel}
           </text>
@@ -429,7 +448,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
             y={margin.top + chartHeight / 2}
             textAnchor="middle"
             transform={`rotate(-90, 8, ${margin.top + chartHeight / 2})`}
-            className="fill-muted-foreground text-[6px] uppercase tracking-wide"
+            className={axisLabelClass}
           >
             {yAxisLabel}
           </text>

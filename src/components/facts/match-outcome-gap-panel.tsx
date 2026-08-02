@@ -90,7 +90,7 @@ export function MatchOutcomeGapPanel({
           </>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-2 md:gap-3 lg:grid-cols-4">
               <SummaryTile
                 label={t("summaryMatches")}
                 value={String(shares.total)}

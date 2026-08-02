@@ -17,6 +17,10 @@ import { Button } from "@/components/ui/button";
 
 const FIFA_RANKING_METHODOLOGY_URL =
   "https://digitalhub.fifa.com/m/f99da4f73212220/original/edbm045h0udbwkqew35a-pdf.pdf";
+const OPENFOOTBALL_WORLDCUP_JSON_URL =
+  "https://github.com/openfootball/worldcup.json";
+const RAPIDAPI_WORLD_FOOTBALL_RANKING_URL =
+  "https://rapidapi.com/sharmadhirajnp2/api/world-football-ranking";
 const CONTACT_EMAIL = "dev@carlosrdgz.space";
 const REPO_URL = "https://github.com/GralPaprika/cup-path";
 const REPO_NAME = "GralPaprika/cup-path";
@@ -50,7 +54,6 @@ function LinkedinIcon({ className }: { className?: string }) {
 }
 
 type DetailId =
-  | "origin"
   | "metric"
   | "pathDifficulty"
   | "pointsVsRank"
@@ -71,10 +74,6 @@ interface DetailConfig {
 }
 
 const DETAIL_CONFIG: Record<DetailId, DetailConfig> = {
-  origin: {
-    titleKey: "groupOrigin",
-    bodyKey: "originDetail",
-  },
   metric: {
     titleKey: "metricTitle",
     bodyKey: "metricDetail",
@@ -132,16 +131,16 @@ const FEATURES: Array<{
   summaryKey: string;
 }> = [
   {
-    id: "overview",
-    icon: ChartColumn,
-    titleKey: "overviewTitle",
-    summaryKey: "overviewSummary",
-  },
-  {
     id: "advancedStats",
     icon: Route,
     titleKey: "advancedStatsTitle",
     summaryKey: "advancedStatsSummary",
+  },
+  {
+    id: "overview",
+    icon: ChartColumn,
+    titleKey: "overviewTitle",
+    summaryKey: "overviewSummary",
   },
   {
     id: "headToHead",
@@ -218,14 +217,6 @@ export function AboutPageClient() {
           <p className="max-w-3xl leading-7 text-muted-foreground">
             {t("originSummary")}
           </p>
-          <Button
-            type="button"
-            variant="link"
-            className="h-auto px-0 text-wc-sky"
-            onClick={() => setActiveDetail("origin")}
-          >
-            {t("exploreStory")}
-          </Button>
         </section>
 
         <section id="methodology" className="glass-panel space-y-6 p-5 sm:p-6">
@@ -298,7 +289,28 @@ export function AboutPageClient() {
                 {t("dataTitle")}
               </h3>
               <p className="text-sm leading-6 text-muted-foreground">
-                {t("dataSummary")}
+                {t.rich("dataSummary", {
+                  openfootball: (chunks) => (
+                    <a
+                      href={OPENFOOTBALL_WORLDCUP_JSON_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-wc-sky hover:underline"
+                    >
+                      {chunks}
+                    </a>
+                  ),
+                  rapidapi: (chunks) => (
+                    <a
+                      href={RAPIDAPI_WORLD_FOOTBALL_RANKING_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-wc-sky hover:underline"
+                    >
+                      {chunks}
+                    </a>
+                  ),
+                })}
               </p>
             </div>
           </div>

@@ -49,7 +49,8 @@
     "outsiders": "Outsider",
     "outsidersNote": "Uphill battle",
     "makeweights": "Makeweight",
-    "makeweightsNote": "Just happy to be here 😁"
+    "makeweightsNote": "Just happy to be here 😁",
+    "linkAria": "{tier}, open Overview introduction"
   },
   "pointsAnchor": {
     "harderThan": "Harder than {percent}% of teams",

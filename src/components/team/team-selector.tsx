@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, Search } from "lucide-react";
 import type { Team } from "@/lib/types";
@@ -31,6 +38,10 @@ interface TeamSelectorProps {
   triggerClassName?: string;
 }
 
+type SelectableOption =
+  | { kind: "none"; id: string }
+  | { kind: "team"; id: string; team: Team; name: string };
+
 export function TeamSelector({
   teams,
   value,
@@ -46,12 +57,15 @@ export function TeamSelector({
 }: TeamSelectorProps) {
   const t = useTranslations("teamSelector");
   const teamNames = useTranslations("teams");
+  const listboxId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const optionRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [menuPosition, setMenuPosition] = useState<{
     top: number;
     left: number;
@@ -79,6 +93,29 @@ export function TeamSelector({
     );
     return sorted.filter(({ team, name }) => teamMatchesQuery(team, name, query));
   }, [localizedTeams, query]);
+
+  const selectableOptions = useMemo<SelectableOption[]>(() => {
+    const options: SelectableOption[] = [];
+    if (showNoneOption) {
+      options.push({ kind: "none", id: "" });
+    }
+    for (const { team, name } of filteredTeams) {
+      options.push({ kind: "team", id: team.id, team, name });
+    }
+    return options;
+  }, [showNoneOption, filteredTeams]);
+
+  useEffect(() => {
+    if (!open) return;
+    setHighlightedIndex(selectableOptions.length > 0 ? 0 : -1);
+  }, [open, query, selectableOptions.length]);
+
+  useEffect(() => {
+    if (!open || highlightedIndex < 0) return;
+    optionRefs.current
+      .get(highlightedIndex)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [open, highlightedIndex]);
 
   useEffect(() => {
     if (!open) return;
@@ -131,17 +168,23 @@ export function TeamSelector({
     }
   }, [open]);
 
-  function selectTeam(teamId: string) {
-    onChange(teamId);
+  function closeMenu() {
     setOpen(false);
     setQuery("");
     setMenuPosition(null);
+    setHighlightedIndex(-1);
+  }
+
+  function selectTeam(teamId: string) {
+    onChange(teamId);
+    closeMenu();
   }
 
   function toggleOpen() {
     setOpen((current) => {
       if (current) {
         setMenuPosition(null);
+        setHighlightedIndex(-1);
         return false;
       }
       const rect = triggerRef.current?.getBoundingClientRect();
@@ -158,9 +201,60 @@ export function TeamSelector({
     });
   }
 
+  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    const optionCount = selectableOptions.length;
+
+    switch (event.key) {
+      case "ArrowDown": {
+        event.preventDefault();
+        if (optionCount === 0) return;
+        setHighlightedIndex((current) =>
+          current < 0 ? 0 : (current + 1) % optionCount,
+        );
+        break;
+      }
+      case "ArrowUp": {
+        event.preventDefault();
+        if (optionCount === 0) return;
+        setHighlightedIndex((current) =>
+          current < 0
+            ? optionCount - 1
+            : (current - 1 + optionCount) % optionCount,
+        );
+        break;
+      }
+      case "Enter": {
+        event.preventDefault();
+        if (highlightedIndex < 0 || highlightedIndex >= optionCount) return;
+        selectTeam(selectableOptions[highlightedIndex].id);
+        break;
+      }
+      case "Escape": {
+        event.preventDefault();
+        closeMenu();
+        triggerRef.current?.focus();
+        break;
+      }
+    }
+  }
+
+  function optionClassName(selected: boolean, highlighted: boolean) {
+    return cn(
+      "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
+      selected && "bg-white/12 text-white",
+      !selected && highlighted && "bg-white/8 text-white",
+      !selected && !highlighted && "text-white/80 hover:bg-white/6",
+    );
+  }
+
   const selectedName = selected
     ? getTeamDisplayName(teamNames, selected)
     : null;
+
+  const activeOptionId =
+    highlightedIndex >= 0
+      ? `${listboxId}-option-${highlightedIndex}`
+      : undefined;
 
   const menu = open && menuPosition && (
     <div
@@ -178,8 +272,14 @@ export function TeamSelector({
           <input
             ref={inputRef}
             type="text"
+            role="combobox"
+            aria-expanded={open}
+            aria-controls={listboxId}
+            aria-autocomplete="list"
+            aria-activedescendant={activeOptionId}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={handleSearchKeyDown}
             placeholder={t("searchPlaceholder")}
             className="h-9 w-full rounded-lg border border-white/10 bg-white/5 pr-3 pl-8 text-sm text-white outline-none placeholder:text-muted-foreground focus:border-wc-sky/40 focus:ring-1 focus:ring-wc-sky/30"
           />
@@ -187,57 +287,65 @@ export function TeamSelector({
       </div>
 
       <ul
+        id={listboxId}
         role="listbox"
         className="scrollbar-subtle max-h-64 overflow-y-auto p-1"
         aria-label={fieldLabel}
       >
-        {showNoneOption && (
-          <li>
-            <button
-              type="button"
-              role="option"
-              aria-selected={!value}
-              onClick={() => selectTeam("")}
-              className={cn(
-                "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
-                !value
-                  ? "bg-white/12 text-white"
-                  : "text-white/80 hover:bg-white/6",
-              )}
-            >
-              <span className="truncate font-medium text-muted-foreground">
-                {emptyLabel}
-              </span>
-            </button>
-          </li>
-        )}
-        {filteredTeams.length === 0 && !showNoneOption ? (
+        {selectableOptions.length === 0 ? (
           <li className="px-3 py-6 text-center text-sm text-muted-foreground">
             {t("noResults")}
           </li>
         ) : (
-          filteredTeams.map(({ team, name }) => {
-            const active = team.id === value;
+          selectableOptions.map((option, index) => {
+            const isSelected = option.id === value;
+            const isHighlighted = index === highlightedIndex;
+            const optionId = `${listboxId}-option-${index}`;
+
+            if (option.kind === "none") {
+              return (
+                <li key="none">
+                  <button
+                    ref={(node) => {
+                      if (node) optionRefs.current.set(index, node);
+                      else optionRefs.current.delete(index);
+                    }}
+                    id={optionId}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => selectTeam("")}
+                    onMouseEnter={() => setHighlightedIndex(index)}
+                    className={optionClassName(isSelected, isHighlighted)}
+                  >
+                    <span className="truncate font-medium text-muted-foreground">
+                      {emptyLabel}
+                    </span>
+                  </button>
+                </li>
+              );
+            }
 
             return (
-              <li key={team.id}>
+              <li key={option.team.id}>
                 <button
+                  ref={(node) => {
+                    if (node) optionRefs.current.set(index, node);
+                    else optionRefs.current.delete(index);
+                  }}
+                  id={optionId}
                   type="button"
                   role="option"
-                  aria-selected={active}
-                  onClick={() => selectTeam(team.id)}
-                  className={cn(
-                    "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
-                    active
-                      ? "bg-white/12 text-white"
-                      : "text-white/80 hover:bg-white/6",
-                  )}
+                  aria-selected={isSelected}
+                  onClick={() => selectTeam(option.team.id)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                  className={optionClassName(isSelected, isHighlighted)}
                 >
-                  <TeamFlag team={team} size="sm" />
+                  <TeamFlag team={option.team} size="sm" />
                   <span className="w-9 shrink-0 font-mono text-xs font-semibold tracking-wide text-muted-foreground">
-                    {team.id}
+                    {option.team.id}
                   </span>
-                  <span className="truncate font-medium">{name}</span>
+                  <span className="truncate font-medium">{option.name}</span>
                 </button>
               </li>
             );

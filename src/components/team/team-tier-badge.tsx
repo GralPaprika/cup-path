@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { classifyTeamTier } from "@/lib/domain/team/team-tiers";
 import type { TeamTierId } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -31,14 +32,17 @@ export function TeamTierBadge(props: TeamTierBadgeProps) {
   const { size = "md", className } = props;
   const t = useTranslations("teamTiers");
   const tier = "points" in props ? classifyTeamTier(props.points) : props.tier;
+  const tierLabel = t(tier);
   const noteKey = `${tier}Note` as const;
   const note = t.has(noteKey) ? t(noteKey) : "";
 
   return (
-    <span
+    <Link
+      href="/overview#introduction"
       title={note || undefined}
+      aria-label={t("linkAria", { tier: tierLabel })}
       className={cn(
-        "inline-flex shrink-0 items-center rounded-full border font-medium tracking-wide",
+        "inline-flex shrink-0 items-center rounded-full border font-medium tracking-wide transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wc-sky/40",
         size === "sm"
           ? "px-1.5 py-0.5 text-[9px] uppercase"
           : "px-2 py-0.5 text-[10px] uppercase",
@@ -46,7 +50,7 @@ export function TeamTierBadge(props: TeamTierBadgeProps) {
         className,
       )}
     >
-      {t(tier)}
-    </span>
+      {tierLabel}
+    </Link>
   );
 }

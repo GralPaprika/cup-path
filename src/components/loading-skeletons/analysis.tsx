@@ -22,12 +22,12 @@ export function SummaryCardSkeleton() {
   return (
     <div className="glass-panel min-w-0 overflow-hidden">
       <div className="border-b border-white/8 px-4 py-4 sm:px-6 sm:py-5">
-        <div className="grid items-center gap-5 md:grid-cols-[minmax(0,280px)_1fr] md:gap-8 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
-          <div className="flex min-w-0 flex-col items-center justify-center">
+        <div className="flex flex-col items-center gap-5 md:flex-row md:justify-center md:gap-8 lg:gap-10">
+          <div className="flex w-full max-w-[280px] shrink-0 flex-col items-center justify-center lg:max-w-[320px]">
             <Skeleton className="aspect-[300/168] w-full max-w-[240px] bg-white/10 sm:max-w-[300px]" />
             <Skeleton className="mt-2 h-3 w-28 bg-white/10" />
           </div>
-          <div className="flex min-w-0 flex-col gap-4">
+          <div className="flex min-w-0 max-w-xl flex-col gap-4">
             <div className="flex flex-wrap items-center gap-3">
               <Skeleton className="size-9 rounded-full bg-white/10" />
               <Skeleton className="h-7 w-44 max-w-full bg-white/10" />

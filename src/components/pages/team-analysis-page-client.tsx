@@ -43,74 +43,79 @@ export function TeamAnalysisPageClient({ teams }: { teams: Team[] }) {
         </p>
       </header>
 
-      <div className="grid gap-6 md:grid-cols-[260px_minmax(0,1fr)] lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="glass-panel h-fit space-y-4 p-4 md:sticky md:top-[var(--shell-sticky-top)] md:space-y-6 md:p-5">
-          <section>
-            <TeamSelector teams={teamList} value={teamId} onChange={setTeamId} />
-          </section>
+      <div className="glass-panel mb-6 space-y-4 p-4 md:hidden">
+        <TeamSelector teams={teamList} value={teamId} onChange={setTeamId} />
+        <PathStageFilters
+          value={stages}
+          onChange={setStages}
+          maxStageReached={maxStageReached}
+          variant="toggles"
+          compact
+        />
+      </div>
 
-          <section className="md:hidden">
-            <PathStageFilters
-              value={stages}
-              onChange={setStages}
-              maxStageReached={maxStageReached}
-              variant="chips"
-              compact
-            />
-          </section>
-
-          <section className="hidden md:block">
-            <PathStageFilters
-              value={stages}
-              onChange={setStages}
-              maxStageReached={maxStageReached}
-              variant="picker"
-            />
-          </section>
-        </aside>
-
-        <div className="min-w-0 space-y-6">
-          {loading && !data && !error && (
-            <>
-              <SummaryCardSkeleton />
-              <PathTableSkeleton />
-            </>
-          )}
-          {error && (
-            <div className="glass-panel border-wc-red/30 p-6 text-wc-red">
-              {error}
-            </div>
-          )}
-          {data && (
-            <>
-              <SummaryCard
-                summary={data.summary}
-                avgPointsContext={data.avgPointsContext}
-                hardestPathRank={data.hardestPathRank}
-                hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
-                cohortSize={data.cohortSize}
-                cohortStage={data.cohortStage}
-                includedStages={stages}
-              />
-              <PathTable
-                matches={data.summary.matches}
-                includedStages={stages}
-              />
-              <AdvancedStatsPanel
-                pathStats={data.advanced.pathStats}
-                cohortCorrelation={data.advanced.cohortCorrelation}
-                hardestPathRank={data.hardestPathRank}
-                hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
-                cohortSize={data.cohortSize}
-                cohortStage={data.cohortStage}
-                selectedTeam={data.summary.team}
-                selectedTeamPoints={data.summary.teamPoints}
-                open={advancedOpen}
-                onOpenChange={setAdvancedOpen}
-              />
-            </>
-          )}
+      <div className="sticky top-0 z-20 -mx-4 mb-6 hidden border-b border-white/10 bg-wc-navy/95 px-4 py-2.5 backdrop-blur-xl sm:-mx-6 sm:px-6 md:block">
+        <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
+          <TeamSelector
+            teams={teamList}
+            value={teamId}
+            onChange={setTeamId}
+            size="compact"
+            className="shrink-0"
+          />
+          <PathStageFilters
+            value={stages}
+            onChange={setStages}
+            maxStageReached={maxStageReached}
+            variant="toggles"
+            compact
+            align="end"
+            className="min-w-0 flex-1"
+          />
         </div>
+      </div>
+
+      <div className="min-w-0 space-y-6">
+        {loading && !data && !error && (
+          <>
+            <SummaryCardSkeleton />
+            <PathTableSkeleton />
+          </>
+        )}
+        {error && (
+          <div className="glass-panel border-wc-red/30 p-6 text-wc-red">
+            {error}
+          </div>
+        )}
+        {data && (
+          <>
+            <SummaryCard
+              summary={data.summary}
+              avgPointsContext={data.avgPointsContext}
+              hardestPathRank={data.hardestPathRank}
+              hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
+              cohortSize={data.cohortSize}
+              cohortStage={data.cohortStage}
+              includedStages={stages}
+            />
+            <PathTable
+              matches={data.summary.matches}
+              includedStages={stages}
+            />
+            <AdvancedStatsPanel
+              pathStats={data.advanced.pathStats}
+              cohortCorrelation={data.advanced.cohortCorrelation}
+              hardestPathRank={data.hardestPathRank}
+              hardestPathRankByAvgRank={data.hardestPathRankByAvgRank}
+              cohortSize={data.cohortSize}
+              cohortStage={data.cohortStage}
+              selectedTeam={data.summary.team}
+              selectedTeamPoints={data.summary.teamPoints}
+              open={advancedOpen}
+              onOpenChange={setAdvancedOpen}
+            />
+          </>
+        )}
       </div>
     </div>
   );

@@ -204,8 +204,8 @@ export function SummaryCard({
   return (
     <div className="glass-panel min-w-0 overflow-hidden">
       <div className="border-b border-white/8 px-4 py-4 sm:px-6 sm:py-5">
-        <div className="grid items-center gap-5 md:grid-cols-[minmax(0,280px)_1fr] md:gap-8 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
-          <div className="flex min-w-0 flex-col items-center justify-center">
+        <div className="flex flex-col items-center gap-5 md:flex-row md:justify-center md:gap-8 lg:gap-10">
+          <div className="flex w-full max-w-[280px] shrink-0 flex-col items-center justify-center lg:max-w-[320px]">
             <DifficultyGauge
               value={summary.avgOpponentPoints}
               hardestPathRank={hardestPathRank}
@@ -242,7 +242,7 @@ export function SummaryCard({
             )}
           </div>
 
-          <div className="flex min-w-0 flex-col gap-4 md:gap-5">
+          <div className="flex min-w-0 max-w-xl flex-col gap-4 md:gap-5">
             <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-4">
               <TeamLabel
                 team={summary.team}

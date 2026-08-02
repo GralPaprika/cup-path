@@ -172,16 +172,27 @@ export function AppSidebar() {
       </aside>
 
       <div className="lg:hidden">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="fixed top-3 left-3 z-[60] text-muted-foreground hover:text-white"
-          onClick={() => setMobileOpen(true)}
-          aria-label={t("openMenu")}
-        >
-          <Menu />
-        </Button>
+        <header className="fixed inset-x-0 top-0 z-40 flex h-12 items-center gap-2 border-b border-white/8 bg-wc-navy/90 px-3 backdrop-blur-xl">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="shrink-0 text-muted-foreground hover:text-white"
+            onClick={() => setMobileOpen(true)}
+            aria-label={t("openMenu")}
+          >
+            <Menu />
+          </Button>
+          <Link href="/" aria-label="CupPath" className="min-w-0">
+            <img
+              src="/brand/cuppath-lockup.svg"
+              alt="CupPath"
+              width={225}
+              height={60}
+              className="h-7 w-auto"
+            />
+          </Link>
+        </header>
 
         <DialogPrimitive.Root open={mobileOpen} onOpenChange={setMobileOpen}>
           <DialogPrimitive.Portal>

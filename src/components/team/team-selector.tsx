@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ChangeEvent,
   type KeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
@@ -105,17 +106,19 @@ export function TeamSelector({
     return options;
   }, [showNoneOption, filteredTeams]);
 
-  useEffect(() => {
-    if (!open) return;
-    setHighlightedIndex(selectableOptions.length > 0 ? 0 : -1);
-  }, [open, query, selectableOptions.length]);
+  const activeHighlight =
+    selectableOptions.length === 0
+      ? -1
+      : highlightedIndex < 0
+        ? 0
+        : Math.min(highlightedIndex, selectableOptions.length - 1);
 
   useEffect(() => {
-    if (!open || highlightedIndex < 0) return;
+    if (!open || activeHighlight < 0) return;
     optionRefs.current
-      .get(highlightedIndex)
+      .get(activeHighlight)
       ?.scrollIntoView({ block: "nearest" });
-  }, [open, highlightedIndex]);
+  }, [open, activeHighlight]);
 
   useEffect(() => {
     if (!open) return;
@@ -156,6 +159,7 @@ export function TeamSelector({
       setOpen(false);
       setQuery("");
       setMenuPosition(null);
+      setHighlightedIndex(-1);
     }
 
     document.addEventListener("mousedown", handlePointerDown);
@@ -181,24 +185,28 @@ export function TeamSelector({
   }
 
   function toggleOpen() {
-    setOpen((current) => {
-      if (current) {
-        setMenuPosition(null);
-        setHighlightedIndex(-1);
-        return false;
-      }
-      const rect = triggerRef.current?.getBoundingClientRect();
-      if (rect) {
-        const width = Math.max(rect.width, compact ? 260 : rect.width);
-        const left = Math.min(rect.left, window.innerWidth - width - 8);
-        setMenuPosition({
-          top: rect.bottom + 8,
-          left: Math.max(8, left),
-          width,
-        });
-      }
-      return true;
-    });
+    if (open) {
+      closeMenu();
+      return;
+    }
+
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const width = Math.max(rect.width, compact ? 260 : rect.width);
+      const left = Math.min(rect.left, window.innerWidth - width - 8);
+      setMenuPosition({
+        top: rect.bottom + 8,
+        left: Math.max(8, left),
+        width,
+      });
+    }
+    setHighlightedIndex(0);
+    setOpen(true);
+  }
+
+  function handleQueryChange(event: ChangeEvent<HTMLInputElement>) {
+    setQuery(event.target.value);
+    setHighlightedIndex(0);
   }
 
   function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -208,25 +216,26 @@ export function TeamSelector({
       case "ArrowDown": {
         event.preventDefault();
         if (optionCount === 0) return;
-        setHighlightedIndex((current) =>
-          current < 0 ? 0 : (current + 1) % optionCount,
-        );
+        setHighlightedIndex((current) => {
+          const from = current < 0 ? 0 : Math.min(current, optionCount - 1);
+          return (from + 1) % optionCount;
+        });
         break;
       }
       case "ArrowUp": {
         event.preventDefault();
         if (optionCount === 0) return;
-        setHighlightedIndex((current) =>
-          current < 0
-            ? optionCount - 1
-            : (current - 1 + optionCount) % optionCount,
-        );
+        setHighlightedIndex((current) => {
+          const from =
+            current < 0 ? 0 : Math.min(current, optionCount - 1);
+          return (from - 1 + optionCount) % optionCount;
+        });
         break;
       }
       case "Enter": {
         event.preventDefault();
-        if (highlightedIndex < 0 || highlightedIndex >= optionCount) return;
-        selectTeam(selectableOptions[highlightedIndex].id);
+        if (activeHighlight < 0 || activeHighlight >= optionCount) return;
+        selectTeam(selectableOptions[activeHighlight].id);
         break;
       }
       case "Escape": {
@@ -252,8 +261,8 @@ export function TeamSelector({
     : null;
 
   const activeOptionId =
-    highlightedIndex >= 0
-      ? `${listboxId}-option-${highlightedIndex}`
+    activeHighlight >= 0
+      ? `${listboxId}-option-${activeHighlight}`
       : undefined;
 
   const menu = open && menuPosition && (
@@ -278,7 +287,7 @@ export function TeamSelector({
             aria-autocomplete="list"
             aria-activedescendant={activeOptionId}
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={handleQueryChange}
             onKeyDown={handleSearchKeyDown}
             placeholder={t("searchPlaceholder")}
             className="h-9 w-full rounded-lg border border-white/10 bg-white/5 pr-3 pl-8 text-sm text-white outline-none placeholder:text-muted-foreground focus:border-wc-sky/40 focus:ring-1 focus:ring-wc-sky/30"
@@ -299,7 +308,7 @@ export function TeamSelector({
         ) : (
           selectableOptions.map((option, index) => {
             const isSelected = option.id === value;
-            const isHighlighted = index === highlightedIndex;
+            const isHighlighted = index === activeHighlight;
             const optionId = `${listboxId}-option-${index}`;
 
             if (option.kind === "none") {

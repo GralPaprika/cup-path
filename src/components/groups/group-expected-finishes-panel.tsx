@@ -68,7 +68,6 @@ export function GroupExpectedFinishesPanel({
     <CollapsibleSection
       embedded={embedded}
       title={t("title")}
-      subtitle={t("subtitle")}
       persistKey={OVERVIEW_COLLAPSE_GROUP_EXPECTED_FINISHES_KEY}
     >
       <div className="space-y-4">
@@ -80,7 +79,7 @@ export function GroupExpectedFinishesPanel({
           <p className="mb-2 text-xs font-medium text-muted-foreground">
             {t("winLossRow")}
           </p>
-          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2 md:gap-3 lg:grid-cols-4">
             <AtGlanceStatTile
               label={t("avgGapOnWinLoss")}
               value={formatFifaPoints(analysis.meanPointsGapOnWinLoss)}
@@ -114,7 +113,7 @@ export function GroupExpectedFinishesPanel({
           <p className="mb-2 text-xs font-medium text-muted-foreground">
             {t("drawsRow")}
           </p>
-          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2 md:gap-3 lg:grid-cols-4">
             <AtGlanceStatTile
               label={t("avgGapOnDraw")}
               value={formatFifaPoints(analysis.meanPointsGapOnDraws)}

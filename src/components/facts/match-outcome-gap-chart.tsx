@@ -17,6 +17,7 @@ import {
   MATCH_OUTCOME_GAP_BINS,
   type MatchOutcomeGapBinId,
 } from "@/lib/domain/match/match-outcome-gap";
+import { useMinWidthMd } from "@/hooks/use-min-width-md";
 import { cn } from "@/lib/utils";
 
 export interface MatchOutcomeGapBinStats {
@@ -117,6 +118,15 @@ const CHART_LAYOUTS: Record<MatchOutcomeGapChartLayout, ChartLayoutConfig> = {
     hitRadius: 18,
     outlierRadius: 13.5,
   },
+};
+
+/** Shorter compact geometry for phone viewports below Tailwind `md`. */
+const COMPACT_PHONE_LAYOUT: ChartLayoutConfig = {
+  ...CHART_LAYOUTS.compact,
+  height: 210,
+  barAreaHeight: 115,
+  maxRowStep: 11,
+  margin: { top: 12, right: 10, bottom: 18, left: 36 },
 };
 
 const MIN_DOT_SCALE = 1;
@@ -409,7 +419,13 @@ export const MatchOutcomeGapChart = forwardRef<
   },
   ref,
 ) {
-  const layoutConfig = CHART_LAYOUTS[layout];
+  const isMdUp = useMinWidthMd();
+  const layoutConfig = useMemo(() => {
+    if (layout === "compact" && !isMdUp) {
+      return COMPACT_PHONE_LAYOUT;
+    }
+    return CHART_LAYOUTS[layout];
+  }, [layout, isMdUp]);
   const { width, height, margin, barAreaHeight, barGap, maxRowStep } =
     layoutConfig;
   const showBars = !hideBars && barAreaHeight > 0;

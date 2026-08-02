@@ -36,6 +36,10 @@ function toSearchFields(fixture: KnockoutFixtureEntry): MatchSearchFields {
   };
 }
 
+function fixtureKey(fixture: KnockoutFixtureEntry): string {
+  return `${fixture.matchNum ?? fixture.date}-${fixture.team1.id}-${fixture.team2.id}-${fixture.scoreFt}-${fixture.scoreEt ?? ""}-${fixture.scorePens ?? ""}`;
+}
+
 export function KnockoutStageTable({
   fixtures,
   sortPersistKey,
@@ -88,14 +92,21 @@ export function KnockoutStageTable({
           placeholder={tables("searchPlaceholderKnockout")}
           label={tables("searchLabel")}
         />
-        {hasActiveQuery && (
-          <p className="text-xs text-muted-foreground sm:text-right">
-            {tables("searchShowing", {
-              shown: filteredRows.length,
-              total: fixtures.length,
-            })}
-          </p>
-        )}
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <div className="md:hidden">
+            <SortButton active direction={gapSort} onClick={toggleGapSort}>
+              {tables("columnGap")}
+            </SortButton>
+          </div>
+          {hasActiveQuery && (
+            <p className="text-xs text-muted-foreground sm:text-right">
+              {tables("searchShowing", {
+                shown: filteredRows.length,
+                total: fixtures.length,
+              })}
+            </p>
+          )}
+        </div>
       </div>
 
       {filteredRows.length === 0 ? (
@@ -104,7 +115,87 @@ export function KnockoutStageTable({
         </p>
       ) : (
         <>
-          <div className="scrollbar-subtle max-w-full overflow-x-auto overscroll-x-contain pb-1">
+          <ul className="divide-y divide-white/6 rounded-xl border border-white/8 md:hidden">
+            {visibleFixtures.map((fixture) => {
+              const winner =
+                fixture.winnerTeamId === fixture.team1.id
+                  ? fixture.team1
+                  : fixture.team2;
+
+              return (
+                <li
+                  key={fixtureKey(fixture)}
+                  className={cn(
+                    "space-y-1 px-2 py-1.5",
+                    fixture.upsetWin && "bg-wc-orange/10",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="font-mono text-xs text-muted-foreground">
+                      {fixture.matchNum !== null ? `#${fixture.matchNum}` : "—"}
+                      <span className="ml-2 text-[10px]">{fixture.date}</span>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-end gap-1.5">
+                      {fixture.isGapOutlier ? (
+                        <span className="inline-flex rounded-md border border-wc-orange/40 bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
+                          {tables("upsetBadge")}
+                        </span>
+                      ) : null}
+                      <Link
+                        href={`/?team=${winner.id}`}
+                        className="inline-flex items-center gap-1.5 transition-colors hover:text-wc-sky"
+                      >
+                        <TeamFlag team={winner} size="sm" />
+                        <span className="font-mono text-xs font-semibold text-wc-green">
+                          {winner.id}
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
+                  <FactsMatchCell
+                    team1={fixture.team1}
+                    team2={fixture.team2}
+                    vsLabel={tables("vs")}
+                    score={
+                      <MatchScoreBreakdown
+                        ft={fixture.scoreFt}
+                        et={fixture.scoreEt}
+                        pens={fixture.scorePens}
+                      />
+                    }
+                  />
+                  <dl className="grid grid-cols-3 gap-1.5 text-[11px]">
+                    <div>
+                      <dt className="text-muted-foreground">
+                        {fixture.team1.id}
+                      </dt>
+                      <dd className="font-mono tabular-nums text-muted-foreground">
+                        {formatFifaPoints(fixture.team1FifaPoints)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">
+                        {fixture.team2.id}
+                      </dt>
+                      <dd className="font-mono tabular-nums text-muted-foreground">
+                        {formatFifaPoints(fixture.team2FifaPoints)}
+                      </dd>
+                    </div>
+                    <div className="text-right">
+                      <dt className="text-muted-foreground">
+                        {tables("columnGap")}
+                      </dt>
+                      <dd className="font-mono tabular-nums text-wc-orange">
+                        {formatFifaPoints(fixture.gapPoints)}
+                      </dd>
+                    </div>
+                  </dl>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="scrollbar-subtle hidden max-w-full overflow-x-auto overscroll-x-contain pb-1 md:block">
             <table className="w-full min-w-[800px] text-left text-sm">
               <thead>
                 <tr className="border-b border-white/8 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -130,7 +221,7 @@ export function KnockoutStageTable({
 
                   return (
                     <tr
-                      key={`${fixture.matchNum ?? fixture.date}-${fixture.team1.id}-${fixture.team2.id}-${fixture.scoreFt}-${fixture.scoreEt ?? ""}-${fixture.scorePens ?? ""}`}
+                      key={fixtureKey(fixture)}
                       className={cn(
                         "border-b border-white/6 last:border-b-0",
                         fixture.upsetWin && "bg-wc-orange/10",

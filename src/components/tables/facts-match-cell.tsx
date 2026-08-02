@@ -16,10 +16,10 @@ function TeamLink({ team }: { team: Team }) {
   return (
     <Link
       href={`/?team=${team.id}`}
-      className="inline-flex items-center gap-1 transition-colors hover:text-wc-sky"
+      className="inline-flex min-w-0 items-center gap-1 transition-colors hover:text-wc-sky"
     >
       <TeamFlag team={team} size="sm" />
-      <span className="font-mono font-semibold">{team.id}</span>
+      <span className="truncate font-mono font-semibold">{team.id}</span>
     </Link>
   );
 }
@@ -31,9 +31,9 @@ export function FactsMatchCell({
   vsLabel,
 }: FactsMatchCellProps) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex min-w-0 flex-nowrap items-center gap-1 md:gap-1.5">
       <TeamLink team={team1} />
-      {score}
+      <span className="shrink-0">{score}</span>
       <TeamLink team={team2} />
       <span className="sr-only">{vsLabel}</span>
     </div>

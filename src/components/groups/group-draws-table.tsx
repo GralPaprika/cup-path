@@ -38,6 +38,10 @@ function toSearchFields(entry: GroupExpectedMatchEntry): MatchSearchFields {
   };
 }
 
+function entryKey(entry: GroupExpectedMatchEntry): string {
+  return `${entry.groupLetter}-${entry.team1.id}-${entry.team2.id}-${entry.scoreLabel}`;
+}
+
 export function GroupDrawsTable({
   drawMatches,
   meanGap,
@@ -90,14 +94,21 @@ export function GroupDrawsTable({
           placeholder={tables("searchPlaceholder")}
           label={tables("searchLabel")}
         />
-        {hasActiveQuery && (
-          <p className="text-xs text-muted-foreground sm:text-right">
-            {tables("searchShowing", {
-              shown: filteredRows.length,
-              total: drawMatches.length,
-            })}
-          </p>
-        )}
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <div className="md:hidden">
+            <SortButton active direction={gapSort} onClick={toggleGapSort}>
+              {t("drawsColumnGap")}
+            </SortButton>
+          </div>
+          {hasActiveQuery && (
+            <p className="text-xs text-muted-foreground sm:text-right">
+              {tables("searchShowing", {
+                shown: filteredRows.length,
+                total: drawMatches.length,
+              })}
+            </p>
+          )}
+        </div>
       </div>
 
       {filteredRows.length === 0 ? (
@@ -106,7 +117,70 @@ export function GroupDrawsTable({
         </p>
       ) : (
         <>
-          <div className="overflow-x-auto">
+          <ul className="divide-y divide-white/6 rounded-xl border border-white/8 md:hidden">
+            {visibleMatches.map((entry) => {
+              const aboveMean = isAboveMeanGap(entry.gapPoints, meanGap);
+
+              return (
+                <li
+                  key={entryKey(entry)}
+                  className={cn(
+                    "space-y-1 px-2 py-1.5",
+                    aboveMean && "bg-wc-turquoise/10",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {entry.groupLetter}
+                    </span>
+                    {entry.isDrawGapOutlier ? (
+                      <span className="inline-flex rounded-md border border-wc-orange/40 bg-wc-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wc-orange">
+                        {t("outlierDraw")}
+                      </span>
+                    ) : null}
+                  </div>
+                  <FactsMatchCell
+                    team1={entry.team1}
+                    team2={entry.team2}
+                    vsLabel={t("vs")}
+                    score={
+                      <span className="font-mono tabular-nums text-muted-foreground">
+                        {entry.scoreLabel}
+                      </span>
+                    }
+                  />
+                  <dl className="grid grid-cols-3 gap-1.5 text-[11px]">
+                    <div>
+                      <dt className="text-muted-foreground">
+                        {entry.team1.id}
+                      </dt>
+                      <dd className="font-mono tabular-nums text-muted-foreground">
+                        {formatFifaPoints(entry.team1FifaPoints)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">
+                        {entry.team2.id}
+                      </dt>
+                      <dd className="font-mono tabular-nums text-muted-foreground">
+                        {formatFifaPoints(entry.team2FifaPoints)}
+                      </dd>
+                    </div>
+                    <div className="text-right">
+                      <dt className="text-muted-foreground">
+                        {t("drawsColumnGap")}
+                      </dt>
+                      <dd className="font-mono tabular-nums text-wc-orange">
+                        {formatFifaPoints(entry.gapPoints)}
+                      </dd>
+                    </div>
+                  </dl>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead>
                 <tr className="border-b border-white/8 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -128,7 +202,7 @@ export function GroupDrawsTable({
 
                   return (
                     <tr
-                      key={`${entry.groupLetter}-${entry.team1.id}-${entry.team2.id}-${entry.scoreLabel}`}
+                      key={entryKey(entry)}
                       className={cn(
                         "border-b border-white/6 last:border-b-0",
                         aboveMean && "bg-wc-turquoise/10",

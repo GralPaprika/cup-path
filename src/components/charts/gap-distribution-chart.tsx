@@ -7,6 +7,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { CHART_COLORS } from "@/lib/chart-colors";
+import { useMinWidthMd } from "@/hooks/use-min-width-md";
 import { formatFifaPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +31,9 @@ export interface GapDistributionChartProps {
 
 const WIDTH = 640;
 const HEIGHT = 120;
+const HEIGHT_PHONE = 96;
 const MARGIN = { top: 16, right: 16, bottom: 28, left: 16 };
+const MARGIN_PHONE = { top: 12, right: 12, bottom: 22, left: 12 };
 const DOT_RADIUS = 5;
 const DOT_RADIUS_HOVERED = 6.5;
 const HIT_RADIUS = 10;
@@ -59,6 +62,9 @@ export function GapDistributionChart({
   footnotes,
   renderPointTooltip,
 }: GapDistributionChartProps) {
+  const isMdUp = useMinWidthMd();
+  const height = isMdUp ? HEIGHT : HEIGHT_PHONE;
+  const margin = isMdUp ? MARGIN : MARGIN_PHONE;
   const [hoveredPoint, setHoveredPoint] = useState<{
     point: GapChartPoint;
     x: number;
@@ -96,11 +102,11 @@ export function GapDistributionChart({
   const bandHigh = mean !== null && stdDev !== null ? mean + stdDev : maxGap;
   const domainMax = Math.max(maxGap, bandHigh, 1);
   const padding = Math.max(20, domainMax * 0.08);
-  const chartWidth = WIDTH - MARGIN.left - MARGIN.right;
-  const baselineY = HEIGHT - MARGIN.bottom;
+  const chartWidth = WIDTH - margin.left - margin.right;
+  const baselineY = height - margin.bottom;
 
   const x = (gap: number) =>
-    MARGIN.left + (gap / (domainMax + padding)) * chartWidth;
+    margin.left + (gap / (domainMax + padding)) * chartWidth;
 
   const gapCounts = new Map<number, number>();
   const dotRows = points.map((point) => {
@@ -112,7 +118,7 @@ export function GapDistributionChart({
   const rowCount = Math.max(...[...gapCounts.values()], 1);
   const rowStep = Math.min(
     14,
-    (HEIGHT - MARGIN.top - MARGIN.bottom - 16) / rowCount,
+    (height - margin.top - margin.bottom - 16) / rowCount,
   );
 
   const yForDot = (row: number) => baselineY - 12 - row * rowStep;
@@ -123,22 +129,22 @@ export function GapDistributionChart({
     mean !== null && stdDev !== null ? mean + stdDev : null;
 
   return (
-    <figure className="space-y-2">
-      <figcaption className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+    <figure className="space-y-1.5 md:space-y-2">
+      <figcaption className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground md:gap-x-4">
         {legend}
       </figcaption>
 
       <div className="relative" onMouseLeave={hideTooltip}>
         <svg
           className="h-auto w-full"
-          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          viewBox={`0 0 ${WIDTH} ${height}`}
           role="img"
           aria-label={ariaLabel}
           onMouseLeave={hideTooltip}
         >
           <line
-            x1={MARGIN.left}
-            x2={WIDTH - MARGIN.right}
+            x1={margin.left}
+            x2={WIDTH - margin.right}
             y1={baselineY}
             y2={baselineY}
             className="stroke-white/15"
@@ -147,9 +153,9 @@ export function GapDistributionChart({
           {bandLow !== null && bandHighValue !== null && (
             <rect
               x={x(bandLow)}
-              y={MARGIN.top}
+              y={margin.top}
               width={Math.max(x(bandHighValue) - x(bandLow), 1)}
-              height={baselineY - MARGIN.top}
+              height={baselineY - margin.top}
               fill={CHART_COLORS.stdDevBand}
               fillOpacity={0.18}
             />
@@ -159,7 +165,7 @@ export function GapDistributionChart({
             <line
               x1={x(mean)}
               x2={x(mean)}
-              y1={MARGIN.top}
+              y1={margin.top}
               y2={baselineY}
               stroke={CHART_COLORS.mean}
               strokeWidth={1}
@@ -246,15 +252,15 @@ export function GapDistributionChart({
           })}
 
           <text
-            x={MARGIN.left}
-            y={HEIGHT - 6}
+            x={margin.left}
+            y={height - 6}
             className="fill-muted-foreground text-[10px]"
           >
             0
           </text>
           <text
-            x={WIDTH - MARGIN.right}
-            y={HEIGHT - 6}
+            x={WIDTH - margin.right}
+            y={height - 6}
             textAnchor="end"
             className="fill-muted-foreground text-[10px]"
           >

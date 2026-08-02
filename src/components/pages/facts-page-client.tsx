@@ -21,8 +21,8 @@ import type { KnockoutFactsRoundId } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
-const SECTION_SCROLL_MT =
-  "scroll-mt-4";
+/** Extra offset below sticky chip nav on small screens. */
+const SECTION_SCROLL_MT = "scroll-mt-20 lg:scroll-mt-4";
 
 function availableKnockoutRoundsFromFacts(
   facts: TournamentFacts,
@@ -65,8 +65,8 @@ export function FactsPageClient() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-      <header className="mb-6">
+    <div className="mx-auto w-full max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
+      <header className="mb-4 sm:mb-6">
         <h1 className="text-2xl font-bold text-white sm:text-3xl">{t("title")}</h1>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground sm:text-base">
           {t("subtitle")}
@@ -80,15 +80,15 @@ export function FactsPageClient() {
       )}
 
       {facts && (
-        <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+        <div className="grid min-w-0 gap-4 sm:gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
           <FactsSectionNav
             availableKnockoutRounds={availableKnockoutRoundsFromFacts(facts)}
           />
 
-          <div className="space-y-6">
+          <div className="min-w-0 w-full space-y-4 sm:space-y-6">
             <section
               id="introduction"
-              className={`${SECTION_SCROLL_MT} glass-panel p-5 sm:p-6`}
+              className={`${SECTION_SCROLL_MT} glass-panel min-w-0 max-w-full overflow-hidden p-3 sm:p-5 md:p-6`}
             >
               <IntroductionSection teamTiers={facts.teamTiers} />
             </section>
@@ -98,7 +98,7 @@ export function FactsPageClient() {
               facts.matchOutcomeGap.matches.length > 0 ? (
                 <MatchOutcomeGapPanel dataset={facts.matchOutcomeGap} />
               ) : (
-                <div className="glass-panel p-5 text-sm text-muted-foreground sm:p-6">
+                <div className="glass-panel p-3 text-sm text-muted-foreground sm:p-5 md:p-6">
                   {t("sectionNav.snapshotEmpty")}
                 </div>
               )}
@@ -106,7 +106,7 @@ export function FactsPageClient() {
 
             <section
               id="group-round"
-              className={`${SECTION_SCROLL_MT} glass-panel space-y-6 p-5 sm:p-6`}
+              className={`${SECTION_SCROLL_MT} glass-panel space-y-4 p-3 sm:space-y-6 sm:p-5 md:p-6`}
             >
               <div>
                 <h2 className="text-lg font-semibold text-white">

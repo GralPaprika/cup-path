@@ -19,7 +19,10 @@ import {
 } from "@/components/path-points-chart/legend-items";
 import { MatchSlotLabelGrid } from "@/components/path-points-chart/match-slot-label-grid";
 import { OpponentBar } from "@/components/path-points-chart/opponent-bar";
+import { useMinWidthLg } from "@/hooks/use-min-width-lg";
 import { useTranslations } from "next-intl";
+
+const PATH_CHART_HEIGHT_NARROW = 380;
 
 export interface HeadToHeadPathSeries {
   team: Pick<Team, "id" | "displayName" | "flagUrl">;
@@ -103,6 +106,8 @@ export function HeadToHeadPointsChart({
   className = "",
 }: HeadToHeadPointsChartProps) {
   const teamNames = useTranslations("teams");
+  const isDesktop = useMinWidthLg();
+  const chartHeight = isDesktop ? PATH_CHART_HEIGHT : PATH_CHART_HEIGHT_NARROW;
   const colorA = seriesA.color ?? CHART_COLORS.selectedTeam;
   const colorB = seriesB.color ?? CHART_COLORS.comparisonTeam;
   const accentA = seriesA.accent ?? colorA;
@@ -123,6 +128,7 @@ export function HeadToHeadPointsChart({
       seriesB.avgOpponentPoints,
     ]),
     slotCount,
+    { height: chartHeight },
   );
 
   if (!scale) return null;
@@ -162,9 +168,9 @@ export function HeadToHeadPointsChart({
         className,
       )}
     >
-      <figcaption className="mb-2 flex flex-wrap items-center justify-between gap-2 px-1">
+      <figcaption className="mb-2 flex flex-col gap-2 px-1 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
         <span className="text-sm font-semibold text-white">{title}</span>
-        <span className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+        <span className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
           <PathChartLegendLineItem
             color={accentA}
             team={seriesA.team}
@@ -216,7 +222,7 @@ export function HeadToHeadPointsChart({
       <div>
         <svg
           className="h-auto w-full"
-          viewBox={`0 0 ${PATH_CHART_WIDTH} ${PATH_CHART_HEIGHT}`}
+          viewBox={`0 0 ${PATH_CHART_WIDTH} ${chartHeight}`}
           role="img"
           aria-label={ariaLabel}
         >

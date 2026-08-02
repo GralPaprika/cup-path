@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { OpponentDifficultyScatterFifaLabels } from "@/components/charts/opponent-difficulty-scatter-fifa-labels";
 import { TableSearchInput } from "@/components/tables/table-search-input";
 import { Switch } from "@/components/ui/switch";
+import { useMinWidthLg } from "@/hooks/use-min-width-lg";
 import { formatWholeNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -64,7 +65,9 @@ export interface OpponentDifficultyScatterChartProps<TTooltip = unknown> {
 
 const WIDTH = 600;
 const HEIGHT = 280;
+const HEIGHT_NARROW = 340;
 const MARGIN = { top: 20, right: 16, bottom: 44, left: 58 };
+const MARGIN_NARROW = { top: 16, right: 12, bottom: 48, left: 48 };
 const DOT_RADIUS = 6;
 const TOOLTIP_OFFSET_X = 14;
 
@@ -143,6 +146,9 @@ export function OpponentDifficultyScatterChart<TTooltip>({
   fifaLabelsLabel,
   emptyFilteredMessage,
 }: OpponentDifficultyScatterChartProps<TTooltip>) {
+  const isDesktop = useMinWidthLg();
+  const height = isDesktop ? HEIGHT : HEIGHT_NARROW;
+  const margin = isDesktop ? MARGIN : MARGIN_NARROW;
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoveredPoint, setHoveredPoint] = useState<{
     point: OpponentDifficultyScatterPoint<TTooltip>;
@@ -187,10 +193,10 @@ export function OpponentDifficultyScatterChart<TTooltip>({
   ];
   const yDomain = fifaPointsDomain(yValues);
 
-  const chartWidth = WIDTH - MARGIN.left - MARGIN.right;
-  const chartHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
-  const baselineX = MARGIN.left;
-  const baselineY = HEIGHT - MARGIN.bottom;
+  const chartWidth = WIDTH - margin.left - margin.right;
+  const chartHeight = height - margin.top - margin.bottom;
+  const baselineX = margin.left;
+  const baselineY = height - margin.bottom;
 
   const xScale = (value: number) =>
     baselineX +
@@ -198,7 +204,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
       chartWidth;
 
   const yScale = (value: number) =>
-    MARGIN.top +
+    margin.top +
     chartHeight -
     ((value - yDomain.min) / Math.max(yDomain.max - yDomain.min, 1)) *
       chartHeight;
@@ -207,9 +213,9 @@ export function OpponentDifficultyScatterChart<TTooltip>({
   const yTicks = generateTicks(yDomain.min, yDomain.max);
 
   return (
-    <figure className="overflow-hidden rounded-xl border border-white/8 bg-black/10 p-3">
-      <figcaption className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-muted-foreground">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+    <figure className="min-w-0 overflow-hidden rounded-xl border border-white/8 bg-black/10 p-3">
+      <figcaption className="mb-3 flex flex-col gap-2 text-[11px] text-muted-foreground lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-x-3 lg:gap-y-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
           <button
             type="button"
             role="switch"
@@ -243,7 +249,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
           {referenceLegend}
         </div>
 
-        <div className="ml-auto flex flex-wrap items-center gap-2 sm:gap-3">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:ml-auto lg:gap-3">
           {/* Removable: FIFA label toggle — delete with scatter-fifa-labels.tsx */}
           <label className="flex cursor-pointer items-center gap-2 text-[11px] text-muted-foreground">
             <Switch
@@ -254,7 +260,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
             />
             <span>{fifaLabelsLabel}</span>
           </label>
-          <div className="w-40 max-w-full shrink-0">
+          <div className="w-full max-w-full sm:w-40 sm:shrink-0">
             <TableSearchInput
               value={query}
               onChange={onQueryChange}
@@ -266,12 +272,12 @@ export function OpponentDifficultyScatterChart<TTooltip>({
         </div>
       </figcaption>
 
-      <div className="relative">
+      <div className="relative min-w-0">
         <svg
           ref={svgRef}
           width={WIDTH}
-          height={HEIGHT}
-          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          height={height}
+          viewBox={`0 0 ${WIDTH} ${height}`}
           className="block h-auto w-full"
           role="img"
           aria-label={ariaLabel}
@@ -279,7 +285,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
         >
           <line
             x1={baselineX}
-            x2={WIDTH - MARGIN.right}
+            x2={WIDTH - margin.right}
             y1={baselineY}
             y2={baselineY}
             className="stroke-white/15"
@@ -287,7 +293,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
           <line
             x1={baselineX}
             x2={baselineX}
-            y1={MARGIN.top}
+            y1={margin.top}
             y2={baselineY}
             className="stroke-white/15"
           />
@@ -336,7 +342,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
             <g key={`h-${line.label}`}>
               <line
                 x1={baselineX}
-                x2={WIDTH - MARGIN.right}
+                x2={WIDTH - margin.right}
                 y1={yScale(line.value)}
                 y2={yScale(line.value)}
                 stroke={line.stroke}
@@ -351,7 +357,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
               <line
                 x1={xScale(line.value)}
                 x2={xScale(line.value)}
-                y1={MARGIN.top}
+                y1={margin.top}
                 y2={baselineY}
                 stroke={line.stroke}
                 strokeWidth={1}
@@ -412,7 +418,7 @@ export function OpponentDifficultyScatterChart<TTooltip>({
 
           <text
             x={baselineX + chartWidth / 2}
-            y={HEIGHT - 6}
+            y={height - 6}
             textAnchor="middle"
             className="fill-muted-foreground text-[6px] uppercase tracking-wide"
           >
@@ -420,9 +426,9 @@ export function OpponentDifficultyScatterChart<TTooltip>({
           </text>
           <text
             x={8}
-            y={MARGIN.top + chartHeight / 2}
+            y={margin.top + chartHeight / 2}
             textAnchor="middle"
-            transform={`rotate(-90, 8, ${MARGIN.top + chartHeight / 2})`}
+            transform={`rotate(-90, 8, ${margin.top + chartHeight / 2})`}
             className="fill-muted-foreground text-[6px] uppercase tracking-wide"
           >
             {yAxisLabel}

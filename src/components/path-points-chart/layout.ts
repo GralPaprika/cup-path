@@ -55,12 +55,15 @@ export function computeBarGeometry(
 export function buildPathChartScale(
   values: number[],
   slotCount: number,
+  options?: { height?: number; width?: number },
 ): PathChartScale | null {
   if (values.length === 0) return null;
 
   const margin = PATH_CHART_MARGIN;
-  const chartWidth = PATH_CHART_WIDTH - margin.left - margin.right;
-  const chartHeight = PATH_CHART_HEIGHT - margin.top - margin.bottom;
+  const totalWidth = options?.width ?? PATH_CHART_WIDTH;
+  const totalHeight = options?.height ?? PATH_CHART_HEIGHT;
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
   const slotWidth = chartWidth / Math.max(slotCount, 1);
   const scaleMax = Math.max(...values);
   const domainMax = Math.ceil(scaleMax / PATH_CHART_DOMAIN_STEP) * PATH_CHART_DOMAIN_STEP;
@@ -75,8 +78,8 @@ export function buildPathChartScale(
     y,
     slotCenter,
     ticks: [0, domainMax / 2, domainMax],
-    labelInsetLeft: `${(margin.left / PATH_CHART_WIDTH) * 100}%`,
-    labelInsetRight: `${(margin.right / PATH_CHART_WIDTH) * 100}%`,
+    labelInsetLeft: `${(margin.left / totalWidth) * 100}%`,
+    labelInsetRight: `${(margin.right / totalWidth) * 100}%`,
     barBottom: y(0),
     slotWidth,
     chartWidth,

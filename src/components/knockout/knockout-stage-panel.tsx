@@ -140,7 +140,7 @@ function DistributionalDeepDive({
           <p className="mb-2 text-xs font-medium text-muted-foreground">
             {shared("qualifiedRow")}
           </p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
             <AtGlanceStatTile
               label={shared("avgGapQualified")}
               value={formatFifaPoints(analysis.meanGap)}
@@ -229,7 +229,7 @@ export function KnockoutStagePanel({
     analysis.lateMatchSpotlights.length > 0;
 
   return (
-    <div className="glass-panel space-y-6 p-5 sm:p-6">
+    <div className="glass-panel min-w-0 space-y-4 p-3 sm:space-y-6 sm:p-5 md:p-6">
       <div>
         <h2 className="text-lg font-semibold text-white">{stage("title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">

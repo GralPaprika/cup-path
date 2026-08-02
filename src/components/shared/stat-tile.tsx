@@ -42,7 +42,7 @@ export function StatTile({
   return (
     <div
       className={cn(
-        "rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3",
+        "rounded-xl border border-white/8 bg-white/[0.03] px-2.5 py-2 md:px-4 md:py-3",
         className,
       )}
     >
@@ -51,17 +51,17 @@ export function StatTile({
       </p>
       <p
         className={cn(
-          "mt-1 font-semibold tabular-nums text-white",
-          size === "sm" && "font-mono text-lg",
-          size === "md" && "font-mono text-xl",
-          size === "lg" && "text-2xl font-bold leading-tight sm:text-3xl",
+          "mt-0.5 font-semibold tabular-nums text-white md:mt-1",
+          size === "sm" && "font-mono text-base md:text-lg",
+          size === "md" && "font-mono text-lg md:text-xl",
+          size === "lg" && "text-xl font-bold leading-tight md:text-2xl sm:text-3xl",
           valueClassName,
         )}
       >
         {value}
       </p>
       {(delta || basis) && (
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 md:mt-1.5">
           {delta ? (
             <span
               className={cn(
@@ -79,10 +79,10 @@ export function StatTile({
       )}
       {secondaryLabel && secondaryValue ? (
         <>
-          <p className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground md:mt-3">
             {secondaryLabel}
           </p>
-          <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-white">
+          <p className="mt-0.5 font-mono text-base font-semibold tabular-nums text-white md:mt-1 md:text-lg">
             {secondaryValue}
           </p>
         </>

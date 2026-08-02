@@ -164,8 +164,9 @@ export function PathStageFilters({
         {header}
         <div
           className={cn(
-            "flex flex-wrap",
-            compact ? "gap-1.5" : "gap-2",
+            compact
+              ? "scrollbar-subtle flex max-w-full flex-nowrap gap-1.5 overflow-x-auto overscroll-x-contain md:flex-wrap"
+              : "flex flex-wrap gap-2",
             align === "end" && "justify-end",
           )}
         >
@@ -177,7 +178,7 @@ export function PathStageFilters({
                 key={stage}
                 title={t(COMPARE_STAGE_I18N_KEYS[stage])}
                 className={cn(
-                  "inline-flex cursor-pointer items-center gap-2 rounded-full border transition-colors",
+                  "inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full border transition-colors",
                   compact ? "px-2 py-1" : "px-2.5 py-1.5",
                   checked
                     ? "border-wc-sky/40 bg-wc-sky/10 text-wc-sky"

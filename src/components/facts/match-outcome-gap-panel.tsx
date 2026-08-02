@@ -72,17 +72,17 @@ export function MatchOutcomeGapPanel({
       compact
       align="end"
       showLabel={false}
-      className="shrink-0"
+      className="min-w-0 lg:shrink-0"
     />
   ) : null;
 
   return (
-    <section className="glass-panel overflow-hidden">
-      <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
+    <section className="glass-panel min-w-0 overflow-hidden">
+      <div className="border-b border-white/8 bg-white/[0.03] px-3 py-3 sm:px-5 sm:py-4 md:px-6">
         <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
-      <div className="space-y-5 p-5 sm:p-6">
+      <div className="space-y-4 p-3 sm:space-y-5 sm:p-5 md:p-6">
         {!hydrated ? null : filteredMatches.length === 0 ? (
           <>
             {stageFilters}
@@ -90,7 +90,7 @@ export function MatchOutcomeGapPanel({
           </>
         ) : (
           <>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
               <SummaryTile
                 label={t("summaryMatches")}
                 value={String(shares.total)}
@@ -112,14 +112,16 @@ export function MatchOutcomeGapPanel({
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
               <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
                 {outcomeLegend}
               </div>
-              {stageFilters}
+              <div className="min-w-0 overflow-x-auto overscroll-x-contain">
+                {stageFilters}
+              </div>
             </div>
 
-            <div className="relative">
+            <div className="relative min-w-0">
               <Button
                 type="button"
                 variant="outline"
@@ -167,9 +169,11 @@ function SummaryTile({
   className?: string;
 }) {
   return (
-    <div className="rounded-lg border border-white/8 bg-white/[0.03] px-3 py-2.5">
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className={`mt-0.5 text-lg font-semibold text-white ${className ?? ""}`}>
+    <div className="rounded-lg border border-white/8 bg-white/[0.03] px-2 py-1.5 md:px-3 md:py-2.5">
+      <p className="text-[10px] text-muted-foreground md:text-[11px]">{label}</p>
+      <p
+        className={`mt-0.5 text-base font-semibold text-white md:text-lg ${className ?? ""}`}
+      >
         {value}
       </p>
     </div>

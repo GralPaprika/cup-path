@@ -20,6 +20,30 @@ interface IntroductionSectionProps {
   className?: string;
 }
 
+function TierTeamFlags({
+  members,
+}: {
+  members: TeamTiersDataset["tiers"][TeamTierId];
+}) {
+  return (
+    <div className="flex min-w-0 w-full flex-wrap gap-x-1.5 gap-y-1.5 md:gap-x-2.5 md:gap-y-2">
+      {members.map((member) => (
+        <Link
+          key={member.team.id}
+          href={`/?team=${member.team.id}`}
+          title={`#${member.fifaRank} · ${formatFifaPoints(member.fifaPoints)}`}
+          className="inline-flex flex-col items-center gap-0.5 transition-opacity hover:opacity-80"
+        >
+          <TeamFlag team={member.team} size="sm" />
+          <span className="font-mono text-[10px] font-semibold tracking-wide text-muted-foreground group-hover:text-wc-sky">
+            {member.team.id}
+          </span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export function IntroductionSection({
   teamTiers,
   className,
@@ -27,14 +51,40 @@ export function IntroductionSection({
   const t = useTranslations("home.intro");
 
   return (
-    <section className={className}>
+    <section className={`min-w-0 w-full ${className ?? ""}`}>
       <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
-      <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+      <div className="mt-3 space-y-2.5 text-sm leading-relaxed text-muted-foreground sm:mt-4 sm:space-y-3 sm:text-base">
         <p>{t("lead")}</p>
         <p>{t("terms")}</p>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-white/8">
+      <ul className="mt-3 min-w-0 w-full divide-y divide-white/6 rounded-xl border border-white/8 md:hidden">
+        {TIER_IDS.map((tier) => {
+          const note = t(`${tier}Note`);
+          const members = teamTiers.tiers[tier];
+
+          return (
+            <li key={tier} className="min-w-0 px-2 py-2">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <TeamTierBadge tier={tier} />
+                  <span className="tabular-nums text-xs text-muted-foreground">
+                    {t(`${tier}Points`)}
+                  </span>
+                </div>
+                {note ? (
+                  <p className="text-xs text-muted-foreground/70">{note}</p>
+                ) : null}
+              </div>
+              <div className="mt-3.5">
+                <TierTeamFlags members={members} />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="mt-4 hidden overflow-x-auto rounded-xl border border-white/8 md:block">
         <table className="w-full min-w-[420px] text-left text-sm">
           <thead>
             <tr className="border-b border-white/8 bg-white/[0.02]">
@@ -71,21 +121,7 @@ export function IntroductionSection({
                     {t(`${tier}Points`)}
                   </td>
                   <td className="align-top px-4 py-3">
-                    <div className="flex flex-wrap gap-x-2.5 gap-y-2">
-                      {members.map((member) => (
-                        <Link
-                          key={member.team.id}
-                          href={`/?team=${member.team.id}`}
-                          title={`#${member.fifaRank} · ${formatFifaPoints(member.fifaPoints)}`}
-                          className="inline-flex flex-col items-center gap-0.5 transition-opacity hover:opacity-80"
-                        >
-                          <TeamFlag team={member.team} size="sm" />
-                          <span className="font-mono text-[10px] font-semibold tracking-wide text-muted-foreground group-hover:text-wc-sky">
-                            {member.team.id}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
+                    <TierTeamFlags members={members} />
                   </td>
                 </tr>
               );

@@ -59,6 +59,7 @@ export function ComparePageClient() {
               onChange={handleStagesChange}
               visibleStages={visibleCountStages}
               variant="toggles"
+              align="end"
             />
           </section>
         </div>

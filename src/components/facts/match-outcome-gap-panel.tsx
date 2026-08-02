@@ -113,12 +113,10 @@ export function MatchOutcomeGapPanel({
             </div>
 
             <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-              <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+              <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 {outcomeLegend}
               </div>
-              <div className="min-w-0 overflow-x-auto overscroll-x-contain">
-                {stageFilters}
-              </div>
+              <div className="min-w-0">{stageFilters}</div>
             </div>
 
             <div className="relative min-w-0">
@@ -126,7 +124,7 @@ export function MatchOutcomeGapPanel({
                 type="button"
                 variant="outline"
                 size="icon-sm"
-                className="absolute right-0 top-0 z-10"
+                className="absolute right-0 top-0 z-10 hidden md:inline-flex"
                 aria-label={t("expandChart")}
                 onClick={() => setOverlayOpen(true)}
               >
@@ -170,7 +168,7 @@ function SummaryTile({
 }) {
   return (
     <div className="rounded-lg border border-white/8 bg-white/[0.03] px-2 py-1.5 md:px-3 md:py-2.5">
-      <p className="text-[10px] text-muted-foreground md:text-[11px]">{label}</p>
+      <p className="text-[11px] text-muted-foreground">{label}</p>
       <p
         className={`mt-0.5 text-base font-semibold text-white md:text-lg ${className ?? ""}`}
       >

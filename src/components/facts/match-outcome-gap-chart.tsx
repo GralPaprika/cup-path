@@ -120,13 +120,13 @@ const CHART_LAYOUTS: Record<MatchOutcomeGapChartLayout, ChartLayoutConfig> = {
   },
 };
 
-/** Shorter compact geometry for phone viewports below Tailwind `md`. */
+/** Taller compact geometry for phone viewports below Tailwind `md`. */
 const COMPACT_PHONE_LAYOUT: ChartLayoutConfig = {
   ...CHART_LAYOUTS.compact,
-  height: 210,
-  barAreaHeight: 115,
+  height: 340,
+  barAreaHeight: 185,
   maxRowStep: 11,
-  margin: { top: 12, right: 10, bottom: 18, left: 36 },
+  margin: { top: 12, right: 10, bottom: 28, left: 28 },
 };
 
 const MIN_DOT_SCALE = 1;
@@ -469,8 +469,19 @@ export const MatchOutcomeGapChart = forwardRef<
   const dotAreaTop = margin.top + effectiveBarHeight + effectiveBarGap;
   const chartWidth = width - margin.left - margin.right;
   const barBaselineY = margin.top + effectiveBarHeight;
-  const binLabelY = showBars ? barBaselineY + 18 : height - margin.bottom - 6;
-  const binCountY = showBars ? barBaselineY + 30 : height - margin.bottom + 8;
+  const isPhoneCompact = layout === "compact" && !isMdUp;
+  const binLabelClass = isPhoneCompact
+    ? "fill-muted-foreground text-[15px]"
+    : "fill-muted-foreground text-[10px]";
+  const binCountClass = isPhoneCompact
+    ? "fill-muted-foreground text-[14px]"
+    : "fill-muted-foreground text-[9px]";
+  const binLabelY = showBars
+    ? barBaselineY + (isPhoneCompact ? 22 : 18)
+    : height - margin.bottom - 6;
+  const binCountY = showBars
+    ? barBaselineY + (isPhoneCompact ? 38 : 30)
+    : height - margin.bottom + 8;
   const dotBaselineY = showBars
     ? height - margin.bottom
     : height - margin.bottom - 28;
@@ -1068,27 +1079,17 @@ export const MatchOutcomeGapChart = forwardRef<
             </clipPath>
           </defs>
 
-          {[25, 50, 75, 100].map((tick) =>
-            showBars ? (
-              <text
-                key={tick}
-                x={margin.left - 6}
-                y={barBaselineY - (tick / 100) * barAreaHeight + 3}
-                textAnchor="end"
-                className="fill-muted-foreground text-[9px]"
-              >
-                {tick}%
-              </text>
-            ) : null,
-          )}
-
           {showBars ? (
             <text
               x={12}
               y={margin.top + barAreaHeight / 2}
               textAnchor="middle"
               transform={`rotate(-90, 12, ${margin.top + barAreaHeight / 2})`}
-              className="fill-muted-foreground text-[6px] uppercase tracking-wide"
+              className={
+                isPhoneCompact
+                  ? "fill-muted-foreground text-[10px] uppercase tracking-wide"
+                  : "fill-muted-foreground text-[7px] uppercase tracking-wide"
+              }
             >
               {yAxisLabel}
             </text>
@@ -1118,7 +1119,7 @@ export const MatchOutcomeGapChart = forwardRef<
                     x={cx}
                     y={binLabelY}
                     textAnchor="middle"
-                    className="fill-muted-foreground text-[8px]"
+                    className={binLabelClass}
                   >
                     {bin.label}
                   </text>
@@ -1199,7 +1200,7 @@ export const MatchOutcomeGapChart = forwardRef<
                   x={cx}
                   y={binLabelY}
                   textAnchor="middle"
-                  className="fill-muted-foreground text-[8px]"
+                  className={binLabelClass}
                 >
                   {bin.label}
                 </text>
@@ -1207,7 +1208,7 @@ export const MatchOutcomeGapChart = forwardRef<
                   x={cx}
                   y={binCountY}
                   textAnchor="middle"
-                  className="fill-muted-foreground text-[7px]"
+                  className={binCountClass}
                 >
                   n={bin.total}
                 </text>
@@ -1243,7 +1244,11 @@ export const MatchOutcomeGapChart = forwardRef<
             x={margin.left + chartWidth / 2}
             y={showBars ? dotBaselineY + 12 : height - 6}
             textAnchor="middle"
-            className="fill-muted-foreground text-[6px] uppercase tracking-wide"
+            className={
+              isPhoneCompact
+                ? "fill-muted-foreground text-[10px] uppercase tracking-wide"
+                : "fill-muted-foreground text-[7px] uppercase tracking-wide"
+            }
           >
             {xAxisLabel}
           </text>

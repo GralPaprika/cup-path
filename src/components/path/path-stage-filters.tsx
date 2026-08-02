@@ -164,9 +164,7 @@ export function PathStageFilters({
         {header}
         <div
           className={cn(
-            compact
-              ? "scrollbar-subtle flex max-w-full flex-nowrap gap-1.5 overflow-x-auto overscroll-x-contain md:flex-wrap"
-              : "flex flex-wrap gap-2",
+            compact ? "flex flex-wrap gap-1.5" : "flex flex-wrap gap-2",
             align === "end" && "justify-end",
           )}
         >
